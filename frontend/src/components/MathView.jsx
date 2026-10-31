@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef, useMemo } from 'react';
 import { 
   LineChart, 
   CheckCircle2, 
@@ -10,15 +10,18 @@ import {
   Sparkles,
   Target,
   Maximize2,
-  Crosshair
+  Crosshair,
+  Sliders,
+  AlertTriangle,
+  Check
 } from 'lucide-react';
 import confetti from 'canvas-confetti';
 import { logStudyAttempt } from '../services/api';
 
 /**
- * Coordinate Plane SVG Plotter
+ * Coordinate Plane SVG Plotter with Live Interactive Expression Evaluator
  */
-function CoordinatePlane({ config }) {
+function CoordinatePlane({ config, activeFormula, isFormulaValid }) {
   const svgRef = useRef(null);
   const [hoverCoord, setHoverCoord] = useState(null);
 
@@ -42,17 +45,28 @@ function CoordinatePlane({ config }) {
   const toMathX = (svgX) => domain[0] + ((svgX - padding) / plotWidth) * (domain[1] - domain[0]);
   const toMathY = (svgY) => range[0] + ((height - padding - svgY) / plotHeight) * (range[1] - range[0]);
 
-  // Safe function evaluator
+  // Safe function evaluator with robust syntax handling
   const evalFn = (fnStr, x) => {
     try {
-      // support common syntax
+      if (!fnStr || typeof fnStr !== 'string' || !fnStr.trim()) return NaN;
+      // Normalize common algebraic shorthand
       const sanitized = fnStr
         .replace(/\^/g, '**')
         .replace(/Math\.abs/g, 'abs')
-        .replace(/abs\(([^)]+)\)/g, 'Math.abs($1)');
-      // safe eval with Math context
-      const f = new Function('x', 'Math', `with(Math) { return ${sanitized}; }`);
-      return f(x, Math);
+        .replace(/abs\(([^)]+)\)/g, 'Math.abs($1)')
+        .replace(/sqrt\(([^)]+)\)/g, 'Math.sqrt($1)')
+        .replace(/sin\(([^)]+)\)/g, 'Math.sin($1)')
+        .replace(/cos\(([^)]+)\)/g, 'Math.cos($1)')
+        .replace(/tan\(([^)]+)\)/g, 'Math.tan($1)');
+
+      // Security disallow unsafe browser identifiers
+      if (/(window|document|eval|Function|fetch|prototype|__proto__|import)/i.test(sanitized)) {
+        return NaN;
+      }
+
+      const f = new Function('x', 'Math', `with(Math) { return (${sanitized}); }`);
+      const val = f(x, Math);
+      return typeof val === 'number' && isFinite(val) ? val : NaN;
     } catch (e) {
       return NaN;
     }
@@ -60,12 +74,13 @@ function CoordinatePlane({ config }) {
 
   // Generate SVG path for a function string
   const generatePath = (fnStr) => {
+    if (!fnStr) return '';
     const points = [];
     const step = (domain[1] - domain[0]) / 250;
     for (let x = domain[0]; x <= domain[1]; x += step) {
       const y = evalFn(fnStr, x);
       if (!isNaN(y) && isFinite(y)) {
-        // Clamp slightly beyond range for smooth clipping
+        // Clamp slightly beyond range for clean edge clipping
         if (y >= range[0] - 2 && y <= range[1] + 2) {
           points.push(`${toSvgX(x)},${toSvgY(y)}`);
         }
@@ -95,7 +110,12 @@ function CoordinatePlane({ config }) {
     if (svgX >= padding && svgX <= width - padding && svgY >= padding && svgY <= height - padding) {
       const mathX = Number(toMathX(svgX).toFixed(1));
       const mathY = Number(toMathY(svgY).toFixed(1));
-      setHoverCoord({ svgX, svgY, mathX, mathY });
+      
+      // Calculate curve's corresponding Y value at this mathX
+      const curveY = activeFormula ? evalFn(activeFormula, mathX) : NaN;
+      const formattedCurveY = !isNaN(curveY) && isFinite(curveY) ? Number(curveY.toFixed(2)) : null;
+
+      setHoverCoord({ svgX, svgY, mathX, mathY, curveY: formattedCurveY });
     } else {
       setHoverCoord(null);
     }
@@ -113,7 +133,7 @@ function CoordinatePlane({ config }) {
       {/* Title & Legend Header */}
       <div className="flex items-center justify-between mb-2 px-1">
         <div className="flex items-center space-x-2">
-          <span className="w-2.5 h-2.5 rounded-full bg-sky-400 animate-pulse" />
+          <span className={`w-2.5 h-2.5 rounded-full ${isFormulaValid ? 'bg-sky-400 animate-pulse' : 'bg-amber-400'}`} />
           <span className="text-xs font-mono font-semibold text-sky-300">
             {config.displayEquation || 'Graph Visualization'}
           </span>
@@ -121,7 +141,9 @@ function CoordinatePlane({ config }) {
         <div className="text-[11px] font-mono text-slate-400 flex items-center space-x-2">
           <Crosshair className="w-3.5 h-3.5 text-slate-500" />
           <span>
-            {hoverCoord ? `Cursor: (${hoverCoord.mathX}, ${hoverCoord.mathY})` : 'Hover to inspect coordinates'}
+            {hoverCoord 
+              ? `Cursor: (${hoverCoord.mathX}, ${hoverCoord.mathY})${hoverCoord.curveY !== null ? ` · f(x)=${hoverCoord.curveY}` : ''}`
+              : 'Hover to inspect coordinates'}
           </span>
         </div>
       </div>
@@ -158,7 +180,6 @@ function CoordinatePlane({ config }) {
         />
 
         {/* Gridlines */}
-        {/* Vertical grid lines */}
         {xTicks.map((x) => (
           <line
             key={`grid-x-${x}`}
@@ -172,7 +193,6 @@ function CoordinatePlane({ config }) {
           />
         ))}
 
-        {/* Horizontal grid lines */}
         {yTicks.map((y) => (
           <line
             key={`grid-y-${y}`}
@@ -187,7 +207,6 @@ function CoordinatePlane({ config }) {
         ))}
 
         {/* Primary Axes: X and Y */}
-        {/* X-axis */}
         <line
           x1={padding - 10}
           y1={originY}
@@ -208,7 +227,6 @@ function CoordinatePlane({ config }) {
           x
         </text>
 
-        {/* Y-axis */}
         <line
           x1={originX}
           y1={height - padding + 10}
@@ -293,10 +311,10 @@ function CoordinatePlane({ config }) {
 
         {/* Curves & Functions (Clipped) */}
         <g clipPath="url(#plot-area)">
-          {/* Single Function */}
-          {config.type === 'function' && config.fn && (
+          {/* Active Formula Curve (Controlled in real-time by formula input) */}
+          {activeFormula && isFormulaValid && (
             <path
-              d={generatePath(config.fn)}
+              d={generatePath(activeFormula)}
               fill="none"
               stroke={config.color || '#38bdf8'}
               strokeWidth="2.5"
@@ -305,18 +323,17 @@ function CoordinatePlane({ config }) {
             />
           )}
 
-          {/* System of functions */}
-          {config.type === 'system' && config.lines && config.lines.map((line, idx) => (
+          {/* If system of equations, render second line if present */}
+          {config.type === 'system' && config.lines && config.lines.length > 1 && (
             <path
-              key={`system-line-${idx}`}
-              d={generatePath(line.fn)}
+              d={generatePath(config.lines[1].fn)}
               fill="none"
-              stroke={line.color || (idx === 0 ? '#38bdf8' : '#f43f5e')}
+              stroke={config.lines[1].color || '#f43f5e'}
               strokeWidth="2.5"
               strokeLinecap="round"
               strokeLinejoin="round"
             />
-          ))}
+          )}
 
           {/* Key Points */}
           {config.keyPoints && config.keyPoints.map((pt, idx) => {
@@ -325,11 +342,8 @@ function CoordinatePlane({ config }) {
             const ptColor = pt.color || '#10b981';
             return (
               <g key={`keypoint-${idx}`}>
-                {/* Glow ring */}
                 <circle cx={px} cy={py} r="8" fill={ptColor} opacity="0.25" className="animate-ping" />
-                {/* Point circle */}
                 <circle cx={px} cy={py} r="5" fill={ptColor} stroke="#ffffff" strokeWidth="1.5" />
-                {/* Label badge */}
                 {pt.label && (
                   <g>
                     <rect
@@ -407,6 +421,54 @@ export default function MathView({ questions, onAttemptLogged }) {
   const [startTime, setStartTime] = useState(Date.now());
 
   const currentQ = questions[currentIndex] || null;
+
+  // Extract the baseline formula from graph_config
+  const baselineFormula = useMemo(() => {
+    if (!currentQ?.graph_config) return '';
+    if (currentQ.graph_config.fn) return currentQ.graph_config.fn;
+    if (currentQ.graph_config.lines && currentQ.graph_config.lines.length > 0) {
+      return currentQ.graph_config.lines[0].fn;
+    }
+    return '';
+  }, [currentQ]);
+
+  // Interactive formula editor state
+  const [customFormula, setCustomFormula] = useState(baselineFormula);
+
+  // Sync formula when current question changes
+  useEffect(() => {
+    setCustomFormula(baselineFormula);
+  }, [baselineFormula, currentIndex]);
+
+  // Check validity of formula without throwing
+  const isFormulaValid = useMemo(() => {
+    if (!customFormula || !customFormula.trim()) return false;
+    try {
+      const sanitized = customFormula
+        .replace(/\^/g, '**')
+        .replace(/Math\.abs/g, 'abs')
+        .replace(/abs\(([^)]+)\)/g, 'Math.abs($1)')
+        .replace(/sqrt\(([^)]+)\)/g, 'Math.sqrt($1)')
+        .replace(/sin\(([^)]+)\)/g, 'Math.sin($1)')
+        .replace(/cos\(([^)]+)\)/g, 'Math.cos($1)');
+
+      if (/(window|document|eval|Function|fetch|prototype|__proto__|import)/i.test(sanitized)) {
+        return false;
+      }
+
+      const f = new Function('x', 'Math', `with(Math) { return (${sanitized}); }`);
+      const val = f(1, Math);
+      return typeof val === 'number' && !isNaN(val);
+    } catch (e) {
+      return false;
+    }
+  }, [customFormula]);
+
+  const isModified = customFormula.trim() !== baselineFormula.trim();
+
+  const handleResetFormula = () => {
+    setCustomFormula(baselineFormula);
+  };
 
   useEffect(() => {
     setSelectedChoice(null);
@@ -489,7 +551,7 @@ export default function MathView({ questions, onAttemptLogged }) {
             <h2 className="text-xl font-bold text-white tracking-tight">Math Coordinate & Function Lab</h2>
           </div>
           <p className="text-sm text-slate-400 mt-1">
-            Analyze curves, coordinate intercepts, and system intersections on the interactive plane.
+            Analyze curves, coordinate intercepts, and test dynamic coefficient shifts on the interactive plane.
           </p>
         </div>
 
@@ -546,7 +608,7 @@ export default function MathView({ questions, onAttemptLogged }) {
             {currentQ.graph_config?.displayEquation && (
               <div className="mb-4 inline-flex items-center space-x-2 px-3 py-1.5 rounded-lg bg-indigo-950/60 border border-indigo-500/30 text-indigo-200 text-sm font-mono font-medium">
                 <Sparkles className="w-3.5 h-3.5 text-indigo-400" />
-                <span>Equation: <strong>{currentQ.graph_config.displayEquation}</strong></span>
+                <span>Original Equation: <strong>{currentQ.graph_config.displayEquation}</strong></span>
               </div>
             )}
 
@@ -654,19 +716,95 @@ export default function MathView({ questions, onAttemptLogged }) {
           )}
         </div>
 
-        {/* Right Side: Coordinate Grid / Plotter */}
-        <div className="lg:col-span-6">
-          <CoordinatePlane config={currentQ.graph_config} />
+        {/* Right Side: Interactive Formula Bar + Coordinate Grid */}
+        <div className="lg:col-span-6 space-y-3">
+          {/* INTERACTIVE FORMULA CONTROL BAR */}
+          <div className="bg-slate-900/90 rounded-2xl p-4 border border-slate-800 shadow-xl">
+            <div className="flex items-center justify-between mb-2">
+              <div className="flex items-center space-x-2">
+                <Sliders className="w-4 h-4 text-sky-400" />
+                <span className="text-xs font-bold uppercase tracking-wider text-slate-200 font-mono">
+                  Live Function Expression
+                </span>
+              </div>
+              <div className="flex items-center space-x-2">
+                {isFormulaValid ? (
+                  <span className="inline-flex items-center space-x-1 text-[11px] font-mono text-emerald-400 bg-emerald-500/10 px-2 py-0.5 rounded border border-emerald-500/20">
+                    <Check className="w-3 h-3" />
+                    <span>Valid Curve</span>
+                  </span>
+                ) : (
+                  <span className="inline-flex items-center space-x-1 text-[11px] font-mono text-amber-400 bg-amber-500/10 px-2 py-0.5 rounded border border-amber-500/20">
+                    <AlertTriangle className="w-3 h-3" />
+                    <span>Syntax Error</span>
+                  </span>
+                )}
+              </div>
+            </div>
 
-          {/* Helpful Math Legend / Shortcuts */}
-          <div className="mt-4 p-4 rounded-xl bg-slate-900/60 border border-slate-800/80 text-xs text-slate-400 flex flex-wrap items-center justify-between gap-3">
+            {/* Input field & Reset button */}
+            <div className="flex items-center space-x-2">
+              <div className="relative flex-1 flex items-center">
+                <span className="absolute left-3 text-sm font-mono font-bold text-sky-400 select-none">
+                  f(x) =
+                </span>
+                <input
+                  type="text"
+                  value={customFormula}
+                  onChange={(e) => setCustomFormula(e.target.value)}
+                  placeholder="e.g. (x - 2)^2 - 4 or -0.5 * x + 3"
+                  className="w-full bg-slate-950 text-slate-100 font-mono text-sm pl-16 pr-3 py-2.5 rounded-xl border border-slate-700/80 focus:outline-none focus:ring-2 focus:ring-sky-500 focus:border-transparent transition"
+                  spellCheck="false"
+                />
+              </div>
+
+              {/* Reset to Original Equation Button */}
+              <button
+                type="button"
+                onClick={handleResetFormula}
+                disabled={!isModified}
+                className={`flex items-center space-x-1.5 px-3.5 py-2.5 rounded-xl text-xs font-semibold border transition ${
+                  isModified
+                    ? 'bg-amber-500/15 hover:bg-amber-500/25 text-amber-300 border-amber-500/40 shadow-sm'
+                    : 'bg-slate-800/60 text-slate-500 border-slate-700/50 cursor-not-allowed'
+                }`}
+                title="Reset to prompt's baseline equation"
+              >
+                <RotateCcw className={`w-3.5 h-3.5 ${isModified ? 'animate-spin-once' : ''}`} />
+                <span className="hidden sm:inline">Reset Baseline</span>
+              </button>
+            </div>
+
+            {/* Micro hint explaining student experimentation */}
+            <div className="mt-2 text-[11px] text-slate-400 flex items-center justify-between">
+              <span>
+                {isModified ? (
+                  <span className="text-amber-300">
+                    Exploring modified equation. Click <strong>Reset Baseline</strong> when ready to solve.
+                  </span>
+                ) : (
+                  <span>Edit coefficients above to observe geometric transformations in real time.</span>
+                )}
+              </span>
+            </div>
+          </div>
+
+          {/* Coordinate Plane Component */}
+          <CoordinatePlane 
+            config={currentQ.graph_config} 
+            activeFormula={customFormula}
+            isFormulaValid={isFormulaValid}
+          />
+
+          {/* Helpful Math Legend */}
+          <div className="p-4 rounded-xl bg-slate-900/60 border border-slate-800/80 text-xs text-slate-400 flex flex-wrap items-center justify-between gap-3">
             <div className="flex items-center space-x-2">
               <span className="w-3 h-0.5 bg-sky-400 rounded-full inline-block" />
-              <span>Primary Function Curve</span>
+              <span>Interactive Function Curve</span>
             </div>
             <div className="flex items-center space-x-2">
               <span className="w-2.5 h-2.5 rounded-full bg-emerald-500 inline-block ring-2 ring-emerald-500/30" />
-              <span>Critical Coordinate Points</span>
+              <span>Baseline Key Points</span>
             </div>
             <div className="flex items-center space-x-2">
               <span className="w-2.5 h-2.5 rounded-full bg-slate-600 inline-block" />
