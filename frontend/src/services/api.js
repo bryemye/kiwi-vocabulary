@@ -33,20 +33,39 @@ export async function fetchDashboardStats() {
   return res.json();
 }
 
-export async function logStudyAttempt({ item_type, word = null, question = null, is_correct, seconds_spent = 0 }) {
+export async function logStudyAttempt({ 
+  item_type, 
+  word_id = null, 
+  word = null, 
+  question_id = null, 
+  question = null, 
+  is_correct, 
+  seconds_spent = 0 
+}) {
+  const actualWordId = word_id ?? word;
+  const actualQuestionId = question_id ?? question;
+
+  const payload = {
+    item_type,
+    is_correct,
+    seconds_spent,
+  };
+
+  if (actualWordId != null) {
+    payload.word_id = actualWordId;
+  }
+  if (actualQuestionId != null) {
+    payload.question_id = actualQuestionId;
+  }
+
   const res = await fetch(`${API_BASE}/study-logs/`, {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
     },
-    body: JSON.stringify({
-      item_type,
-      word,
-      question,
-      is_correct,
-      seconds_spent,
-    }),
+    body: JSON.stringify(payload),
   });
+
   if (!res.ok) {
     const errorText = await res.text();
     console.error('Failed to log study attempt:', errorText);

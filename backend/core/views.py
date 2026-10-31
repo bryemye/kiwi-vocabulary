@@ -1,4 +1,4 @@
-from rest_framework import viewsets, status
+from rest_framework import viewsets, status, permissions
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from django.db.models import Count, Q, Avg, Sum
@@ -17,11 +17,13 @@ from .serializers import (
 class RootViewSet(viewsets.ReadOnlyModelViewSet):
     queryset = Root.objects.prefetch_related('words').all()
     serializer_class = RootSerializer
+    permission_classes = [permissions.AllowAny]
 
 
 class VocabularyWordViewSet(viewsets.ReadOnlyModelViewSet):
     queryset = VocabularyWord.objects.select_related('root').all()
     serializer_class = VocabularyWordSerializer
+    permission_classes = [permissions.AllowAny]
 
     def get_queryset(self):
         queryset = super().get_queryset()
@@ -37,6 +39,7 @@ class VocabularyWordViewSet(viewsets.ReadOnlyModelViewSet):
 class QuestionViewSet(viewsets.ReadOnlyModelViewSet):
     queryset = Question.objects.select_related('passage').all()
     serializer_class = QuestionSerializer
+    permission_classes = [permissions.AllowAny]
 
     def get_queryset(self):
         queryset = super().get_queryset()
@@ -49,14 +52,15 @@ class QuestionViewSet(viewsets.ReadOnlyModelViewSet):
 class ReadingPassageViewSet(viewsets.ReadOnlyModelViewSet):
     queryset = ReadingPassage.objects.prefetch_related('questions').all()
     serializer_class = ReadingPassageSerializer
+    permission_classes = [permissions.AllowAny]
 
 
 class StudyLogViewSet(viewsets.ModelViewSet):
     queryset = StudyLog.objects.select_related('word', 'question', 'word__root').all()
     serializer_class = StudyLogSerializer
+    permission_classes = [permissions.AllowAny]
 
     def get_queryset(self):
-        # Allow filtering by user or item_type
         queryset = super().get_queryset()
         item_type = self.request.query_params.get('item_type')
         if item_type:
@@ -64,17 +68,30 @@ class StudyLogViewSet(viewsets.ModelViewSet):
         return queryset
 
     def perform_create(self, serializer):
-        user = self.request.user if self.request.user.is_authenticated else None
+        user = self.request.user if (self.request.user and self.request.user.is_authenticated) else None
         if not user:
-            # Associate with default demo student if anonymous
-            user, _ = User.objects.get_or_create(username='demo_student', defaults={'first_name': 'SAT', 'last_name': 'Scholar'})
+            # Fallback to default/demo user so requests never fail with 401 or null constraint error
+            user = User.objects.first()
+            if not user:
+                user = User.objects.create_user(username='demo_student', email='scholar@example.com')
         serializer.save(user=user)
 
 
 class DashboardStatsView(APIView):
+    permission_classes = [permissions.AllowAny]
+
     def get(self, request):
-        # We compute stats over study logs
-        logs = StudyLog.objects.select_related('word', 'question', 'word__root').all()
+        user = request.user if (request.user and request.user.is_authenticated) else None
+        if not user:
+            user = User.objects.first()
+
+        # In single-user demo mode, query demo user logs or all records
+        if user:
+            logs = StudyLog.objects.filter(user=user).select_related('word', 'question', 'word__root').all()
+            if not logs.exists():
+                logs = StudyLog.objects.select_related('word', 'question', 'word__root').all()
+        else:
+            logs = StudyLog.objects.select_related('word', 'question', 'word__root').all()
 
         total_attempts = logs.count()
         total_correct = logs.filter(is_correct=True).count()
@@ -116,7 +133,7 @@ class DashboardStatsView(APIView):
             r_correct = root_logs.filter(is_correct=True).count()
             r_accuracy = round((r_correct / r_attempts * 100), 1) if r_attempts > 0 else 0.0
             
-            # Words in this root mastered (at least 1 correct attempt and latest attempt correct)
+            # Words in this root mastered (most recent attempt was correct)
             words_mastered_count = 0
             for w in root_words:
                 w_logs = root_logs.filter(word=w).order_by('-created_at')

@@ -81,7 +81,7 @@ export default function VocabView({ words, roots, onAttemptLogged, initialRootId
     try {
       await logStudyAttempt({
         item_type: 'WORD',
-        word: currentWord.id,
+        word_id: currentWord.id,
         is_correct: isCorrect,
         seconds_spent: secondsSpent,
       });

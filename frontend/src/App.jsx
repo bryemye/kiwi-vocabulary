@@ -71,6 +71,15 @@ export default function App() {
     }
   };
 
+  // Fetch fresh dashboard stats every time the user navigates to the dashboard view
+  useEffect(() => {
+    if (activeTab === 'dashboard') {
+      fetchDashboardStats()
+        .then((updatedStats) => setStats(updatedStats))
+        .catch((err) => console.error('Failed to refresh stats on navigating to dashboard:', err));
+    }
+  }, [activeTab]);
+
   const handleSelectRootForPractice = (rootId) => {
     setSelectedRootId(rootId);
     setActiveTab('vocab');

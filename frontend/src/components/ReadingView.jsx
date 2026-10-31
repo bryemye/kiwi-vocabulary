@@ -10,9 +10,7 @@ import {
   HelpCircle,
   Strikethrough,
   Sparkles,
-  Type,
-  BookOpen,
-  Trash2
+  BookOpen
 } from 'lucide-react';
 import confetti from 'canvas-confetti';
 import { logStudyAttempt } from '../services/api';
@@ -25,9 +23,9 @@ export default function ReadingView({ passages, onAttemptLogged }) {
   const questions = passage?.questions || [];
   const currentQ = questions[currentQuestionIndex] || null;
 
-  // Highlighting state: array of character offset objects: { id, start, end, text, color }
+  // Highlighting state: array of { id, start, end, text }
   const [highlights, setHighlights] = useState([]);
-  const [selectionTooltip, setSelectionTooltip] = useState(null); // { text, start, end, x, y }
+  const [selectionTooltip, setSelectionTooltip] = useState(null); // { start, end, text, x, y }
 
   // Question interaction state
   const [selectedChoice, setSelectedChoice] = useState(null);
@@ -38,13 +36,14 @@ export default function ReadingView({ passages, onAttemptLogged }) {
   const [startTime, setStartTime] = useState(Date.now());
   const [fontSize, setFontSize] = useState('base'); // 'sm' | 'base' | 'lg'
 
-  const passageRef = useRef(null);
+  const containerRef = useRef(null);
 
-  // Load highlights from localStorage keyed by passage ID on mount or passage switch
+  // Exact key required: passage_highlights_${passage.id}
+  // useEffect keyed on [passage?.id] to load persisted array on passage switch or refresh
   useEffect(() => {
     if (passage?.id) {
       try {
-        const storageKey = `highlights_passage_${passage.id}`;
+        const storageKey = `passage_highlights_${passage.id}`;
         const saved = localStorage.getItem(storageKey);
         if (saved) {
           const parsed = JSON.parse(saved);
@@ -60,22 +59,12 @@ export default function ReadingView({ passages, onAttemptLogged }) {
         console.error('Failed to load highlights from localStorage:', err);
         setHighlights([]);
       }
+    } else {
+      setHighlights([]);
     }
   }, [passage?.id]);
 
-  // Persist highlights to localStorage whenever they change
-  useEffect(() => {
-    if (passage?.id) {
-      try {
-        const storageKey = `highlights_passage_${passage.id}`;
-        localStorage.setItem(storageKey, JSON.stringify(highlights));
-      } catch (err) {
-        console.error('Failed to save highlights to localStorage:', err);
-      }
-    }
-  }, [highlights, passage?.id]);
-
-  // Reset question state ONLY on question or passage change (preserves highlights!)
+  // Reset question state ONLY on question or passage change (preserves highlights across questions)
   useEffect(() => {
     setSelectedChoice(null);
     setEliminatedChoices(new Set());
@@ -84,130 +73,93 @@ export default function ReadingView({ passages, onAttemptLogged }) {
     setStartTime(Date.now());
   }, [currentQuestionIndex, currentPassageIndex]);
 
-  // Pre-calculate paragraph offsets relative to clean passage text
-  const paragraphs = passage ? passage.body.split('\n\n') : [];
-  const paragraphOffsets = React.useMemo(() => {
-    const offsets = [];
-    let offset = 0;
-    for (let i = 0; i < paragraphs.length; i++) {
-      offsets.push(offset);
-      offset += paragraphs[i].length + 2; // +2 for '\n\n'
-    }
-    return offsets;
-  }, [passage?.body, paragraphs]);
-
-  // Handle text selection to calculate clean start and end indices
+  // Calculate absolute character offsets resilient to split DOM text nodes
   const handleMouseUp = () => {
     const selection = window.getSelection();
-    if (!selection || selection.isCollapsed || !passageRef.current || !passage) {
-      setSelectionTooltip(null);
-      return;
-    }
-
-    const selectedText = selection.toString().trim();
-    if (selectedText.length < 2) {
+    if (!selection || selection.isCollapsed || !containerRef.current || !passage) {
       setSelectionTooltip(null);
       return;
     }
 
     const range = selection.getRangeAt(0);
-    if (!passageRef.current.contains(range.commonAncestorContainer)) {
+
+    // Verify selection is within the passage container
+    if (!containerRef.current.contains(range.commonAncestorContainer)) {
       setSelectionTooltip(null);
       return;
     }
 
-    // Find the enclosing paragraph container with data-p-index
-    const startElem = range.startContainer.nodeType === Node.ELEMENT_NODE
-      ? range.startContainer
-      : range.startContainer.parentElement;
-    const pContainer = startElem.closest('[data-p-index]');
+    const preSelectionRange = range.cloneRange();
+    preSelectionRange.selectNodeContents(containerRef.current);
+    preSelectionRange.setEnd(range.startContainer, range.startOffset);
+    const start = preSelectionRange.toString().length;
+    const end = start + range.toString().length;
 
-    if (!pContainer) {
+    if (end <= start) {
       setSelectionTooltip(null);
       return;
     }
 
-    const pIndex = parseInt(pContainer.getAttribute('data-p-index'), 10);
-    const pStart = paragraphOffsets[pIndex] || 0;
-
-    // Traverse text nodes within pContainer to calculate character offset up to selection start
-    let localStart = 0;
-    let nodeFound = false;
-
-    function walkTextNodes(node) {
-      if (nodeFound) return;
-      if (node === range.startContainer) {
-        localStart += range.startOffset;
-        nodeFound = true;
-        return;
-      }
-      if (node.nodeType === Node.TEXT_NODE) {
-        localStart += node.textContent.length;
-      } else {
-        for (let child = node.firstChild; child; child = child.nextSibling) {
-          walkTextNodes(child);
-          if (nodeFound) return;
-        }
-      }
-    }
-
-    walkTextNodes(pContainer);
-
-    let calculatedStart = pStart + localStart;
-    let calculatedEnd = calculatedStart + selectedText.length;
-
-    // Verify against clean passage.body; perform local snap if slight whitespace disparity
-    if (passage.body.slice(calculatedStart, calculatedEnd) !== selectedText) {
-      const searchStart = Math.max(0, calculatedStart - 25);
-      const searchEnd = Math.min(passage.body.length, calculatedEnd + 25);
-      const slice = passage.body.slice(searchStart, searchEnd);
-      const foundOffset = slice.indexOf(selectedText);
-      if (foundOffset !== -1) {
-        calculatedStart = searchStart + foundOffset;
-        calculatedEnd = calculatedStart + selectedText.length;
-      }
+    const rawText = passage.body;
+    const selectedText = rawText.slice(start, end);
+    if (!selectedText.trim()) {
+      setSelectionTooltip(null);
+      return;
     }
 
     const rect = range.getBoundingClientRect();
-    const containerRect = passageRef.current.getBoundingClientRect();
+    const containerRect = containerRef.current.getBoundingClientRect();
 
     setSelectionTooltip({
+      start,
+      end,
       text: selectedText,
-      start: calculatedStart,
-      end: calculatedEnd,
       x: rect.left + rect.width / 2 - containerRect.left,
       y: rect.top - containerRect.top - 46,
     });
   };
 
   const applyHighlight = () => {
-    if (!selectionTooltip) return;
+    if (!selectionTooltip || !passage?.id) return;
 
     const newHighlight = {
-      id: `${Date.now()}_${Math.random().toString(36).substr(2, 6)}`,
+      id: `${Date.now()}_${selectionTooltip.start}`,
       start: selectionTooltip.start,
       end: selectionTooltip.end,
       text: selectionTooltip.text,
-      color: '#fde047', // Yellow SAT highlighter
     };
 
-    setHighlights((prev) => [...prev, newHighlight]);
-    setSelectionTooltip(null);
+    const nextHighlights = [...highlights, newHighlight];
+    setHighlights(nextHighlights);
 
+    try {
+      localStorage.setItem(`passage_highlights_${passage.id}`, JSON.stringify(nextHighlights));
+    } catch (err) {
+      console.error('Failed to save highlights:', err);
+    }
+
+    setSelectionTooltip(null);
     if (window.getSelection) {
       window.getSelection().removeAllRanges();
     }
   };
 
-  const handleRemoveHighlight = (id) => {
-    setHighlights((prev) => prev.filter((h) => h.id !== id));
+  const removeHighlight = (id) => {
+    if (!passage?.id) return;
+    const nextHighlights = highlights.filter((h) => h.id !== id);
+    setHighlights(nextHighlights);
+    try {
+      localStorage.setItem(`passage_highlights_${passage.id}`, JSON.stringify(nextHighlights));
+    } catch (err) {
+      console.error('Failed to update highlights:', err);
+    }
   };
 
   const clearHighlights = () => {
     setHighlights([]);
     setSelectionTooltip(null);
     if (passage?.id) {
-      localStorage.removeItem(`highlights_passage_${passage.id}`);
+      localStorage.removeItem(`passage_highlights_${passage.id}`);
     }
   };
 
@@ -241,7 +193,7 @@ export default function ReadingView({ passages, onAttemptLogged }) {
     try {
       await logStudyAttempt({
         item_type: 'QUESTION',
-        question: currentQ.id,
+        question_id: currentQ.id,
         is_correct: correct,
         seconds_spent: secondsSpent,
       });
@@ -282,92 +234,68 @@ export default function ReadingView({ passages, onAttemptLogged }) {
   };
 
   /**
-   * Declarative text segmenter:
-   * Splits paragraph into unhighlighted and highlighted spans based on character offsets
+   * Render text by sorting non-overlapping spans and mapping the raw passage string
+   * into alternating plain text and <mark className="bg-yellow-200"> components
    */
-  const renderDeclarativeParagraph = (pText, pIndex) => {
-    const pStart = paragraphOffsets[pIndex] || 0;
-    const pEnd = pStart + pText.length;
+  const renderPassageWithHighlights = () => {
+    if (!passage || !passage.body) return null;
+    const rawText = passage.body;
 
-    // Filter highlights that intersect with this paragraph
-    const pHighlights = highlights
-      .filter((hl) => hl.start < pEnd && hl.end > pStart)
-      .map((hl) => ({
-        id: hl.id,
-        color: hl.color || '#fde047',
-        start: Math.max(0, hl.start - pStart),
-        end: Math.min(pText.length, hl.end - pStart),
-      }))
-      .sort((a, b) => a.start - b.start);
+    // Filter valid character offset bounds and sort spans ascending
+    const validHighlights = highlights
+      .filter((h) => typeof h.start === 'number' && typeof h.end === 'number' && h.start < h.end && h.start >= 0 && h.end <= rawText.length)
+      .sort((a, b) => a.start - b.start || a.end - b.end);
 
-    if (pHighlights.length === 0) {
-      return <span>{pText}</span>;
-    }
-
-    // Merge overlapping or adjacent highlight spans
-    const mergedHighlights = [];
-    for (const hl of pHighlights) {
-      if (mergedHighlights.length === 0) {
-        mergedHighlights.push({ ...hl });
+    // Merge overlapping or contiguous spans
+    const mergedSpans = [];
+    for (const span of validHighlights) {
+      if (mergedSpans.length === 0) {
+        mergedSpans.push({ ...span });
       } else {
-        const last = mergedHighlights[mergedHighlights.length - 1];
-        if (hl.start <= last.end) {
-          last.end = Math.max(last.end, hl.end);
+        const prev = mergedSpans[mergedSpans.length - 1];
+        if (span.start <= prev.end) {
+          prev.end = Math.max(prev.end, span.end);
+          prev.text = rawText.slice(prev.start, prev.end);
         } else {
-          mergedHighlights.push({ ...hl });
+          mergedSpans.push({ ...span });
         }
       }
     }
 
-    // Build segments
-    const segments = [];
+    // Map into alternating plain text and <mark className="bg-yellow-200"> components
+    const elements = [];
     let cursor = 0;
 
-    mergedHighlights.forEach((hl, idx) => {
-      if (hl.start > cursor) {
-        segments.push({
-          type: 'text',
-          content: pText.slice(cursor, hl.start),
-          key: `txt-${idx}-${cursor}`,
-        });
+    mergedSpans.forEach((span, idx) => {
+      if (span.start > cursor) {
+        elements.push(
+          <React.Fragment key={`txt-${cursor}`}>
+            {rawText.slice(cursor, span.start)}
+          </React.Fragment>
+        );
       }
-      segments.push({
-        type: 'highlight',
-        id: hl.id,
-        color: hl.color,
-        content: pText.slice(hl.start, hl.end),
-        key: `hl-${hl.id || idx}`,
-      });
-      cursor = hl.end;
+      elements.push(
+        <mark
+          key={span.id || `mark-${span.start}-${idx}`}
+          className="bg-yellow-200 text-slate-900 rounded-sm px-0.5 cursor-pointer selection:bg-yellow-300 font-medium transition hover:bg-yellow-300"
+          onClick={() => removeHighlight(span.id)}
+          title="Click to remove highlight"
+        >
+          {rawText.slice(span.start, span.end)}
+        </mark>
+      );
+      cursor = span.end;
     });
 
-    if (cursor < pText.length) {
-      segments.push({
-        type: 'text',
-        content: pText.slice(cursor),
-        key: `txt-end-${cursor}`,
-      });
+    if (cursor < rawText.length) {
+      elements.push(
+        <React.Fragment key={`txt-end-${cursor}`}>
+          {rawText.slice(cursor)}
+        </React.Fragment>
+      );
     }
 
-    return (
-      <>
-        {segments.map((seg) => {
-          if (seg.type === 'text') {
-            return <span key={seg.key}>{seg.content}</span>;
-          }
-          return (
-            <mark
-              key={seg.key}
-              onClick={() => handleRemoveHighlight(seg.id)}
-              className="bg-amber-300 text-slate-950 font-medium px-0.5 rounded shadow-sm selection:bg-amber-400 cursor-pointer hover:bg-amber-400 transition"
-              title="Click highlight to remove"
-            >
-              {seg.content}
-            </mark>
-          );
-        })}
-      </>
-    );
+    return elements;
   };
 
   if (!passage) {
@@ -397,17 +325,17 @@ export default function ReadingView({ passages, onAttemptLogged }) {
             <h2 className="text-xl font-bold text-white tracking-tight">Reading & Text Annotation Lab</h2>
           </div>
           <p className="text-sm text-slate-400 mt-1">
-            Dual-pane Digital SAT simulation with declarative character-offset highlighter & option elimination.
+            Dual-pane Digital SAT simulation with offset-cloned persistent highlighting & choice elimination.
           </p>
         </div>
 
-        {/* Toolbar: Text Size & Clear Highlights */}
+        {/* Toolbar: Text Size & Clear Highlights Button */}
         <div className="flex items-center space-x-3">
           {highlights.length > 0 && (
             <button
               onClick={clearHighlights}
-              className="flex items-center space-x-1.5 px-3 py-1.5 rounded-lg bg-amber-500/10 hover:bg-amber-500/20 text-xs font-semibold text-amber-300 border border-amber-500/30 transition shadow-sm"
-              title="Remove all persistent highlights for this passage"
+              className="flex items-center space-x-1.5 px-3 py-1.5 rounded-lg bg-yellow-500/15 hover:bg-yellow-500/25 text-xs font-semibold text-yellow-300 border border-yellow-500/30 transition shadow-sm"
+              title="Clear all saved highlights for this passage"
             >
               <Eraser className="w-3.5 h-3.5" />
               <span>Clear Highlights ({highlights.length})</span>
@@ -440,13 +368,9 @@ export default function ReadingView({ passages, onAttemptLogged }) {
 
       {/* Two-Column Split Layout */}
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
-        {/* Left Pane: Reading Passage & Highlighting */}
+        {/* Left Pane: Reading Passage Container */}
         <div className="lg:col-span-7">
-          <div 
-            ref={passageRef}
-            onMouseUp={handleMouseUp}
-            className="relative bg-slate-900/90 rounded-2xl p-6 sm:p-8 border border-slate-800 shadow-xl overflow-y-auto max-h-[750px]"
-          >
+          <div className="relative bg-slate-900/90 rounded-2xl p-6 sm:p-8 border border-slate-800 shadow-xl overflow-y-auto max-h-[750px]">
             {/* Passage Header */}
             <div className="border-b border-slate-800 pb-4 mb-6">
               <span className="text-xs uppercase font-mono font-bold tracking-wider px-2.5 py-1 rounded-md bg-sky-500/10 text-sky-400 border border-sky-500/20 inline-block mb-2">
@@ -460,25 +384,16 @@ export default function ReadingView({ passages, onAttemptLogged }) {
               </p>
             </div>
 
-            {/* Passage Text with Declarative Highlighting */}
-            <div className={`space-y-5 text-slate-200 font-serif ${fontSizeClass}`}>
-              {paragraphs.map((pText, idx) => (
-                <div 
-                  key={idx} 
-                  data-p-index={idx}
-                  className="relative pl-7 group"
-                >
-                  <span className="absolute left-0 top-0 text-slate-500 group-hover:text-sky-400 text-xs font-mono select-none transition">
-                    [{idx + 1}]
-                  </span>
-                  <p className="select-text">
-                    {renderDeclarativeParagraph(pText, idx)}
-                  </p>
-                </div>
-              ))}
+            {/* Container Element with full text content and selection listener */}
+            <div 
+              ref={containerRef}
+              onMouseUp={handleMouseUp}
+              className={`relative whitespace-pre-wrap font-serif select-text text-slate-200 ${fontSizeClass}`}
+            >
+              {renderPassageWithHighlights()}
             </div>
 
-            {/* Floating Highlight Tooltip upon text selection */}
+            {/* Floating Highlight Action Tooltip upon selection */}
             {selectionTooltip && (
               <div
                 style={{
@@ -486,22 +401,22 @@ export default function ReadingView({ passages, onAttemptLogged }) {
                   left: `${Math.max(10, Math.min(selectionTooltip.x - 60, 480))}px`,
                   top: `${Math.max(10, selectionTooltip.y)}px`,
                 }}
-                className="z-30 flex items-center space-x-1.5 p-1 bg-slate-950 border border-amber-400/80 rounded-xl shadow-2xl animate-fade-in"
+                className="z-30 flex items-center space-x-1.5 p-1 bg-slate-950 border border-yellow-400 rounded-xl shadow-2xl animate-fade-in"
               >
                 <button
                   onClick={applyHighlight}
-                  className="flex items-center space-x-1.5 px-3 py-1.5 bg-amber-400 hover:bg-amber-300 text-slate-950 rounded-lg text-xs font-bold transition shadow"
+                  className="flex items-center space-x-1.5 px-3 py-1.5 bg-yellow-300 hover:bg-yellow-200 text-slate-950 rounded-lg text-xs font-bold transition shadow"
                 >
                   <Highlighter className="w-3.5 h-3.5" />
-                  <span>Highlight Text</span>
+                  <span>Highlight</span>
                 </button>
               </div>
             )}
           </div>
 
           <div className="mt-3 flex items-center justify-between text-xs text-slate-400 px-2">
-            <span>Tip: Select passage text to highlight. Click any highlight to remove.</span>
-            <span className="font-mono text-sky-400">{highlights.length} persistent annotations</span>
+            <span>Select any text to highlight. Click highlighted text to remove.</span>
+            <span className="font-mono text-yellow-400">{highlights.length} saved highlights</span>
           </div>
         </div>
 
