@@ -1,0 +1,1212 @@
+[
+  {
+    "root": {
+      "morpheme": "voc / vok",
+      "language": "Latin",
+      "core_meaning": "voice, to call",
+      "mnemonic": "Think 'vocal', 'provoke', or 'vocation'"
+    },
+    "words": [
+      {
+        "word": "equivocate",
+        "prefix": "equi- (equal)",
+        "suffix": "-ate (verb ending)",
+        "definition": "To use ambiguous language so as to conceal the truth or avoid committing oneself.",
+        "sat_sentence": "When pressed on whether he supported the tax hike, the mayor chose to equivocate rather than risk alienating voters.",
+        "connotation": "negative"
+      },
+      {
+        "word": "vociferous",
+        "prefix": "",
+        "suffix": "-ous (full of)",
+        "definition": "Vehement, clamorous, or loudly demanding attention.",
+        "sat_sentence": "The proposed zoning ordinance met with vociferous protests from historic district residents.",
+        "connotation": "negative"
+      },
+      {
+        "word": "evoke",
+        "prefix": "e- (out)",
+        "suffix": "",
+        "definition": "To bring or recall a feeling, memory, or image to the conscious mind.",
+        "sat_sentence": "The novelist's sensory descriptions evoke the bustling ambiance of nineteenth-century London.",
+        "connotation": "neutral"
+      },
+      {
+        "word": "irrevocable",
+        "prefix": "ir- (not) + re- (back)",
+        "suffix": "-able (capable of)",
+        "definition": "Not able to be altered, revoked, or undone; final.",
+        "sat_sentence": "Signing the treaty represented an irrevocable step toward continental economic unification.",
+        "connotation": "neutral"
+      },
+      {
+        "word": "advocate",
+        "prefix": "ad- (to/toward)",
+        "suffix": "-ate (verb ending)",
+        "definition": "To publicly recommend or support a particular cause or policy.",
+        "sat_sentence": "Public health researchers advocate for mandatory physical education throughout secondary curricula.",
+        "connotation": "positive"
+      }
+    ]
+  },
+  {
+    "root": {
+      "morpheme": "flu / flux",
+      "language": "Latin",
+      "core_meaning": "flow",
+      "mnemonic": "Fluids and influxes continuously flow"
+    },
+    "words": [
+      {
+        "word": "mellifluous",
+        "prefix": "melli- (honey)",
+        "suffix": "-ous (full of)",
+        "definition": "Sweet, musical, and pleasant to hear.",
+        "sat_sentence": "The cellist's mellifluous tone enchanted the auditorium from the opening measures.",
+        "connotation": "positive"
+      },
+      {
+        "word": "superfluous",
+        "prefix": "super- (above/over)",
+        "suffix": "-ous (full of)",
+        "definition": "Exceeding what is sufficient or necessary; redundant.",
+        "sat_sentence": "The editor excised three superfluous paragraphs to sharpen the argument's analytical thrust.",
+        "connotation": "negative"
+      },
+      {
+        "word": "confluence",
+        "prefix": "con- (together)",
+        "suffix": "-ence (state of)",
+        "definition": "An act or process of merging; the junction of two rivers or trends.",
+        "sat_sentence": "A rare confluence of demographic growth and venture capital transformed the region into a tech corridor.",
+        "connotation": "positive"
+      },
+      {
+        "word": "influx",
+        "prefix": "in- (into)",
+        "suffix": "",
+        "definition": "An arrival or entry of large numbers of people or things.",
+        "sat_sentence": "The sudden influx of tourists during autumn foliage season overwhelmed municipal infrastructure.",
+        "connotation": "neutral"
+      },
+      {
+        "word": "fluctuation",
+        "prefix": "",
+        "suffix": "-tion (state of)",
+        "definition": "An irregular rising and falling in number, quality, or level.",
+        "sat_sentence": "Supply chain instability caused severe price fluctuation across retail electronics.",
+        "connotation": "neutral"
+      }
+    ]
+  },
+  {
+    "root": {
+      "morpheme": "ced / cess",
+      "language": "Latin",
+      "core_meaning": "go, yield",
+      "mnemonic": "To concede or proceed means to yield or go forward"
+    },
+    "words": [
+      {
+        "word": "concede",
+        "prefix": "con- (completely)",
+        "suffix": "",
+        "definition": "To admit that something is true, valid, or acknowledged after first denying it.",
+        "sat_sentence": "Faced with incontrovertible econometric data, the defense was forced to concede the point.",
+        "connotation": "neutral"
+      },
+      {
+        "word": "incessant",
+        "prefix": "in- (not)",
+        "suffix": "-ant (state of)",
+        "definition": "Continuing without pause or interruption, especially unpleasantly.",
+        "sat_sentence": "Incessant rain triggered landslides along the coastal highway corridor.",
+        "connotation": "negative"
+      },
+      {
+        "word": "precedent",
+        "prefix": "pre- (before)",
+        "suffix": "-ent (thing which)",
+        "definition": "An earlier event or action that is regarded as an authoritative guide for subsequent cases.",
+        "sat_sentence": "The appellate court's landmark ruling established a binding precedent for digital privacy rights.",
+        "connotation": "neutral"
+      },
+      {
+        "word": "accede",
+        "prefix": "ac- (to/toward)",
+        "suffix": "",
+        "definition": "To agree to a demand, request, or treaty.",
+        "sat_sentence": "The board refused to accede to the activist hedge fund's demands for mass layoffs.",
+        "connotation": "neutral"
+      },
+      {
+        "word": "recede",
+        "prefix": "re- (back)",
+        "suffix": "",
+        "definition": "To move back or further away from a previous position; diminish.",
+        "sat_sentence": "As floodwaters began to recede, municipal engineers surveyed the structural integrity of bridges.",
+        "connotation": "neutral"
+      }
+    ]
+  },
+  {
+    "root": {
+      "morpheme": "plic / plex",
+      "language": "Latin",
+      "core_meaning": "fold, tangle",
+      "mnemonic": "Complex complications fold many layers together"
+    },
+    "words": [
+      {
+        "word": "duplicity",
+        "prefix": "du- (two)",
+        "suffix": "-ity (quality of)",
+        "definition": "Deceitfulness in speech or conduct; double-dealing.",
+        "sat_sentence": "The diplomat's duplicity was laid bare when encrypted cables contradicted his public assurances.",
+        "connotation": "negative"
+      },
+      {
+        "word": "explicate",
+        "prefix": "ex- (out)",
+        "suffix": "-ate (verb ending)",
+        "definition": "To analyze and explain a concept, literary work, or principle in meticulous detail.",
+        "sat_sentence": "The seminar challenged graduate fellows to explicate the ontological assumptions behind Kantian ethics.",
+        "connotation": "positive"
+      },
+      {
+        "word": "implicit",
+        "prefix": "im- (in)",
+        "suffix": "-it (adjective)",
+        "definition": "Implied though not plainly expressed; inherently contained within.",
+        "sat_sentence": "There was an implicit understanding between the roommates that dishes would be washed promptly.",
+        "connotation": "neutral"
+      },
+      {
+        "word": "complicit",
+        "prefix": "com- (together)",
+        "suffix": "-it (adjective)",
+        "definition": "Involved with others in an illegal activity, wrongdoing, or ethical transgression.",
+        "sat_sentence": "Regulators accused corporate auditors of being complicit in concealing the firm's balance-sheet deficits.",
+        "connotation": "negative"
+      },
+      {
+        "word": "perplexing",
+        "prefix": "per- (thoroughly)",
+        "suffix": "-ing (participial)",
+        "definition": "Completely baffling, complicated, or difficult to comprehend.",
+        "sat_sentence": "The particle accelerator detected a perplexing anomaly that confounded standard quantum mechanical models.",
+        "connotation": "negative"
+      }
+    ]
+  },
+  {
+    "root": {
+      "morpheme": "vert / vers",
+      "language": "Latin",
+      "core_meaning": "turn",
+      "mnemonic": "Convert and reverse turn in different directions"
+    },
+    "words": [
+      {
+        "word": "subvert",
+        "prefix": "sub- (under)",
+        "suffix": "",
+        "definition": "To undermine the power and authority of an established system, institution, or norm.",
+        "sat_sentence": "Satirical cartoonists sought to subvert authoritarian propaganda through covert humor.",
+        "connotation": "negative"
+      },
+      {
+        "word": "avert",
+        "prefix": "a- (away)",
+        "suffix": "",
+        "definition": "To turn away one's eyes or thoughts; to prevent an undesirable occurrence.",
+        "sat_sentence": "A last-minute diplomatic compromise averted a catastrophic trade tariff war.",
+        "connotation": "positive"
+      },
+      {
+        "word": "inadvertent",
+        "prefix": "in- (not) + ad- (to)",
+        "suffix": "-ent (adjective)",
+        "definition": "Not resulting from or achieved through deliberate planning; unintentional.",
+        "sat_sentence": "The software engineer made an inadvertent error that exposed cached session tokens to the web.",
+        "connotation": "neutral"
+      },
+      {
+        "word": "aversion",
+        "prefix": "a- (away from)",
+        "suffix": "-ion (noun ending)",
+        "definition": "A strong feeling of dislike, opposition, or antipathy toward something.",
+        "sat_sentence": "His acute aversion to public scrutiny led the reclusive novelist to decline all media interviews.",
+        "connotation": "negative"
+      },
+      {
+        "word": "versatile",
+        "prefix": "",
+        "suffix": "-ile (capable of)",
+        "definition": "Able to adapt or be adapted to many different functions or activities.",
+        "sat_sentence": "The decathlete proved remarkably versatile, excelling in both explosive sprints and technical throws.",
+        "connotation": "positive"
+      }
+    ]
+  },
+  {
+    "root": {
+      "morpheme": "pugn / pug",
+      "language": "Latin",
+      "core_meaning": "fight, fist",
+      "mnemonic": "Pugnacious pugilists fight with clenched fists"
+    },
+    "words": [
+      {
+        "word": "pugnacious",
+        "prefix": "",
+        "suffix": "-acious (inclined to)",
+        "definition": "Eager or quick to argue, quarrel, or fight.",
+        "sat_sentence": "The attorney's pugnacious cross-examination rattled the defense witness on the stand.",
+        "connotation": "negative"
+      },
+      {
+        "word": "repugnant",
+        "prefix": "re- (back/against)",
+        "suffix": "-ant (state of)",
+        "definition": "Extremely distasteful, offensive, or morally unacceptable.",
+        "sat_sentence": "The panel condemned the politician's xenophobic rhetoric as repugnant to democratic principles.",
+        "connotation": "negative"
+      },
+      {
+        "word": "impugn",
+        "prefix": "im- (against)",
+        "suffix": "",
+        "definition": "To dispute the truth, validity, or honesty of a statement or motive.",
+        "sat_sentence": "The editorial was careful not to impugn the judge's personal integrity while criticizing her ruling.",
+        "connotation": "negative"
+      },
+      {
+        "word": "inexpugnable",
+        "prefix": "in- (not) + ex- (out)",
+        "suffix": "-able (capable of)",
+        "definition": "Unable to be captured, breached, or defeated; impregnable.",
+        "sat_sentence": "Perched atop vertical granite cliffs, the ancient fortress had long been regarded as inexpugnable.",
+        "connotation": "positive"
+      }
+    ]
+  },
+  {
+    "root": {
+      "morpheme": "gen",
+      "language": "Latin",
+      "core_meaning": "birth, origin, kind",
+      "mnemonic": "Generation and genetics trace back to birth and origin"
+    },
+    "words": [
+      {
+        "word": "engender",
+        "prefix": "en- (cause to be)",
+        "suffix": "",
+        "definition": "To cause or give rise to a feeling, situation, or condition.",
+        "sat_sentence": "The CEO's transparent communication style helped engender trust across cross-functional departments.",
+        "connotation": "positive"
+      },
+      {
+        "word": "homogeneous",
+        "prefix": "homo- (same)",
+        "suffix": "-ous (composed of)",
+        "definition": "Of the same kind; alike in structure or composition throughout.",
+        "sat_sentence": "Historically isolated island communities often exhibited remarkably homogeneous cultural practices.",
+        "connotation": "neutral"
+      },
+      {
+        "word": "heterogeneous",
+        "prefix": "hetero- (different)",
+        "suffix": "-ous (composed of)",
+        "definition": "Diverse in character or content; composed of disparate parts.",
+        "sat_sentence": "Metropolitan schools encompass a heterogeneous student body hailing from dozens of linguistic traditions.",
+        "connotation": "neutral"
+      },
+      {
+        "word": "indigenous",
+        "prefix": "indi- (within)",
+        "suffix": "-ous (originating)",
+        "definition": "Originating or occurring naturally in a particular place; native.",
+        "sat_sentence": "Conservationists worked alongside indigenous communities to catalog native botanicals in the Amazon.",
+        "connotation": "positive"
+      },
+      {
+        "word": "genial",
+        "prefix": "",
+        "suffix": "-ial (characterized by)",
+        "definition": "Friendly, cheerful, and pleasantly warm in disposition.",
+        "sat_sentence": "The innkeeper's genial welcome immediately eased the weary travelers after their arduous mountain trek.",
+        "connotation": "positive"
+      }
+    ]
+  },
+  {
+    "root": {
+      "morpheme": "jur / jud",
+      "language": "Latin",
+      "core_meaning": "law, swear, judge",
+      "mnemonic": "A jury and judge swear by statutory law"
+    },
+    "words": [
+      {
+        "word": "abjure",
+        "prefix": "ab- (away)",
+        "suffix": "",
+        "definition": "To solemnly renounce or reject a belief, claim, or allegiance under oath.",
+        "sat_sentence": "Under pressure from inquisitors, Galileo was coerced to abjure his support for heliocentrism.",
+        "connotation": "negative"
+      },
+      {
+        "word": "judicious",
+        "prefix": "",
+        "suffix": "-ious (characterized by)",
+        "definition": "Having, showing, or done with good judgment, discernment, or prudence.",
+        "sat_sentence": "Thanks to judicious asset allocation during market volatility, the endowment preserved its principal capital.",
+        "connotation": "positive"
+      },
+      {
+        "word": "perjury",
+        "prefix": "per- (wrongfully)",
+        "suffix": "-y (act of)",
+        "definition": "The offense of willfully telling an untruth in a court after taking an oath.",
+        "sat_sentence": "Contradictory timestamps on bank ledgers resulted in the executive being indicted for perjury.",
+        "connotation": "negative"
+      },
+      {
+        "word": "adjure",
+        "prefix": "ad- (to/command)",
+        "suffix": "",
+        "definition": "To urge or request someone solemnly or earnestly to do something.",
+        "sat_sentence": "The governor adjured citizens to conserve electrical power as the winter blizzard stressed the grid.",
+        "connotation": "neutral"
+      },
+      {
+        "word": "jurisdiction",
+        "prefix": "",
+        "suffix": "-tion (state of)",
+        "definition": "The official power to make legal decisions and judgments over an area or domain.",
+        "sat_sentence": "Federal authorities asserted jurisdiction over the interstate cybersecurity breach.",
+        "connotation": "neutral"
+      }
+    ]
+  },
+  {
+    "root": {
+      "morpheme": "tract",
+      "language": "Latin",
+      "core_meaning": "pull, drag",
+      "mnemonic": "Tractors drag and abstract ideas pull from reality"
+    },
+    "words": [
+      {
+        "word": "intractable",
+        "prefix": "in- (not)",
+        "suffix": "-able (capable of)",
+        "definition": "Hard to control, manage, or solve; stubbornly resistant to guidance.",
+        "sat_sentence": "Chronic municipal gridlock proved intractable despite multi-million-dollar bypass investments.",
+        "connotation": "negative"
+      },
+      {
+        "word": "protracted",
+        "prefix": "pro- (forward)",
+        "suffix": "-ed (adjective)",
+        "definition": "Lasting for a long time or longer than expected or usual; prolonged.",
+        "sat_sentence": "A protracted legal battle over intellectual property rights drained both start-ups of liquid reserves.",
+        "connotation": "negative"
+      },
+      {
+        "word": "retract",
+        "prefix": "re- (back)",
+        "suffix": "",
+        "definition": "To withdraw or take back a statement, promise, or accusation.",
+        "sat_sentence": "When laboratory attempts failed to replicate the fusion reaction, the physicist was obliged to retract her paper.",
+        "connotation": "neutral"
+      },
+      {
+        "word": "detract",
+        "prefix": "de- (away from)",
+        "suffix": "",
+        "definition": "To diminish the worth, value, or quality of an achievement.",
+        "sat_sentence": "Minor typographical blemishes did not detract from the monograph's monumental scholarly value.",
+        "connotation": "negative"
+      },
+      {
+        "word": "tractable",
+        "prefix": "",
+        "suffix": "-able (capable of)",
+        "definition": "Easy to control or influence; docile and compliant.",
+        "sat_sentence": "The unruly lab dog became remarkably tractable after two weeks of consistent positive reinforcement training.",
+        "connotation": "positive"
+      }
+    ]
+  },
+  {
+    "root": {
+      "morpheme": "scrib / script",
+      "language": "Latin",
+      "core_meaning": "write",
+      "mnemonic": "Scribes write manuscripts and transcribe scripts"
+    },
+    "words": [
+      {
+        "word": "circumscribe",
+        "prefix": "circum- (around)",
+        "suffix": "",
+        "definition": "To restrict something within strict boundaries; draw a line around.",
+        "sat_sentence": "Strict budgetary constraints circumscribe the agency's ability to dispatch emergency aid overseas.",
+        "connotation": "neutral"
+      },
+      {
+        "word": "proscribe",
+        "prefix": "pro- (forth/public)",
+        "suffix": "",
+        "definition": "To forbid, denounce, or condemn by law as dangerous or illegal.",
+        "sat_sentence": "The international convention voted unanimously to proscribe the military deployment of chemical agents.",
+        "connotation": "negative"
+      },
+      {
+        "word": "ascribe",
+        "prefix": "a- (to/toward)",
+        "suffix": "",
+        "definition": "To attribute something to a specified cause, origin, or author.",
+        "sat_sentence": "Art historians ascribe the unsigned Renaissance portrait to the workshop of Sandro Botticelli.",
+        "connotation": "neutral"
+      },
+      {
+        "word": "transcribe",
+        "prefix": "trans- (across)",
+        "suffix": "",
+        "definition": "To put thoughts or recordings into written or printed form.",
+        "sat_sentence": "Archivists painstakingly transcribed handwritten nineteenth-century diaries to preserve fragile folios.",
+        "connotation": "neutral"
+      },
+      {
+        "word": "prescribe",
+        "prefix": "pre- (before)",
+        "suffix": "",
+        "definition": "To state authoritatively or lay down as an obligatory rule or course of action.",
+        "sat_sentence": "Aviation regulations strictly prescribe the maximum duty hours permitted for commercial pilots.",
+        "connotation": "neutral"
+      }
+    ]
+  },
+  {
+    "root": {
+      "morpheme": "loqu / loc",
+      "language": "Latin",
+      "core_meaning": "speak, talk",
+      "mnemonic": "Loquacious parrots lock into speaking all day"
+    },
+    "words": [
+      {
+        "word": "circumlocution",
+        "prefix": "circum- (around)",
+        "suffix": "-tion (state of)",
+        "definition": "The use of many words where fewer would do, especially to be vague or evasive.",
+        "sat_sentence": "The spokesperson's circumlocution baffled reporters seeking a direct confirmation of corporate mergers.",
+        "connotation": "negative"
+      },
+      {
+        "word": "colloquial",
+        "prefix": "col- (together)",
+        "suffix": "-ial (pertaining to)",
+        "definition": "Used in ordinary or familiar conversation; informal, conversational, not literary.",
+        "sat_sentence": "While colloquial idioms flourish in modern drama, legal treatises demand exact analytical prose.",
+        "connotation": "neutral"
+      },
+      {
+        "word": "eloquent",
+        "prefix": "e- (out)",
+        "suffix": "-ent (inclined to)",
+        "definition": "Fluent, persuasive, and vividly expressive in speaking or writing.",
+        "sat_sentence": "The human rights advocate delivered an eloquent plea that galvanized international humanitarian support.",
+        "connotation": "positive"
+      },
+      {
+        "word": "loquacious",
+        "prefix": "",
+        "suffix": "-acious (abounding in)",
+        "definition": "Tending to talk a great deal; talkative.",
+        "sat_sentence": "The normally loquacious host fell completely silent upon hearing the unforeseen contest results.",
+        "connotation": "neutral"
+      },
+      {
+        "word": "grandiloquent",
+        "prefix": "grandi- (grand)",
+        "suffix": "-ent (adjective)",
+        "definition": "Pompous or extravagant in language, style, or manner, intended to impress.",
+        "sat_sentence": "The candidate's grandiloquent claims of eliminating national debt in ninety days alienated pragmatic voters.",
+        "connotation": "negative"
+      }
+    ]
+  },
+  {
+    "root": {
+      "morpheme": "spec / spic",
+      "language": "Latin",
+      "core_meaning": "look, see",
+      "mnemonic": "Spectacles allow you to inspect what you see"
+    },
+    "words": [
+      {
+        "word": "conspicuous",
+        "prefix": "con- (thoroughly)",
+        "suffix": "-uous (characterized by)",
+        "definition": "Standing out so as to be clearly visible; attracting prominent notice.",
+        "sat_sentence": "The neon signage was conspicuous amidst the dark cobblestone alleys of the historic district.",
+        "connotation": "neutral"
+      },
+      {
+        "word": "circumspect",
+        "prefix": "circum- (around)",
+        "suffix": "",
+        "definition": "Wary and unwilling to take uncalculated risks; prudent and discreet.",
+        "sat_sentence": "Given commodity price volatility, the central bank took a circumspect approach toward rate adjustments.",
+        "connotation": "positive"
+      },
+      {
+        "word": "perspicacious",
+        "prefix": "per- (through)",
+        "suffix": "-acious (abounding in)",
+        "definition": "Having a ready insight into and clear understanding of complex matters; perceptive.",
+        "sat_sentence": "The perspicacious detective noticed tiny disparities in ledger entries that senior auditors overlooked.",
+        "connotation": "positive"
+      },
+      {
+        "word": "retrospective",
+        "prefix": "retro- (backward)",
+        "suffix": "-ive (inclined to)",
+        "definition": "Looking back on or dealing with past events or situations.",
+        "sat_sentence": "The art museum curated a retrospective exhibition honoring forty years of the sculptor's career.",
+        "connotation": "neutral"
+      },
+      {
+        "word": "auspicious",
+        "prefix": "au- (bird)",
+        "suffix": "-ious (full of)",
+        "definition": "Conducive to success; favorable; giving signs of future prosperity.",
+        "sat_sentence": "A robust influx of early pre-orders provided an auspicious start for the electric vehicle manufacturer.",
+        "connotation": "positive"
+      }
+    ]
+  },
+  {
+    "root": {
+      "morpheme": "bene",
+      "language": "Latin",
+      "core_meaning": "good, well",
+      "mnemonic": "A benevolent benefactor produces beneficial outcomes"
+    },
+    "words": [
+      {
+        "word": "beneficent",
+        "prefix": "",
+        "suffix": "-cent (doing)",
+        "definition": "Resulting in good; actively doing good or performing acts of kindness.",
+        "sat_sentence": "The foundation's beneficent endowments sustained inner-city orchestra programs during budget cuts.",
+        "connotation": "positive"
+      },
+      {
+        "word": "benevolent",
+        "prefix": "",
+        "suffix": "-lent (wishing)",
+        "definition": "Well-meaning, kindly, and motivated by a desire to promote general human welfare.",
+        "sat_sentence": "A benevolent physician waived clinical consultation fees for destitute migrant families.",
+        "connotation": "positive"
+      },
+      {
+        "word": "benign",
+        "prefix": "",
+        "suffix": "",
+        "definition": "Gentle, mild, and favorable; having no destructive or malignant consequence.",
+        "sat_sentence": "Biopsy results confirmed the ovarian mass was benign, prompting immense relief throughout the family.",
+        "connotation": "positive"
+      },
+      {
+        "word": "benediction",
+        "prefix": "",
+        "suffix": "-tion (act of)",
+        "definition": "The utterance of a good wish or ceremonial blessing.",
+        "sat_sentence": "The university chaplain delivered a moving benediction to conclude the commencement exercises.",
+        "connotation": "positive"
+      },
+      {
+        "word": "benefactor",
+        "prefix": "",
+        "suffix": "-or (one who)",
+        "definition": "A person who gives money or other help to a person or charitable institution.",
+        "sat_sentence": "An anonymous benefactor provided the matching grant that funded construction of the science center.",
+        "connotation": "positive"
+      }
+    ]
+  },
+  {
+    "root": {
+      "morpheme": "mal",
+      "language": "Latin",
+      "core_meaning": "bad, ill",
+      "mnemonic": "Malice and malfunction yield malevolent results"
+    },
+    "words": [
+      {
+        "word": "malevolent",
+        "prefix": "male- (bad)",
+        "suffix": "-ent (doing)",
+        "definition": "Having or exhibiting ill will; wishing harm or malice upon others.",
+        "sat_sentence": "The tyrant's malevolent intentions were concealed beneath counterfeit promises of economic reform.",
+        "connotation": "negative"
+      },
+      {
+        "word": "malignant",
+        "prefix": "",
+        "suffix": "-ant (state of)",
+        "definition": "Extremely harmful, hostile, or virulent; disposed to cause suffering or death.",
+        "sat_sentence": "Unchecked digital conspiracy theories exerted a malignant influence on public confidence in vaccines.",
+        "connotation": "negative"
+      },
+      {
+        "word": "maladroit",
+        "prefix": "",
+        "suffix": "-adroit (dexterous)",
+        "definition": "Lacking skill, tact, or grace; clumsy and inept in handling social or political affairs.",
+        "sat_sentence": "The press secretary's maladroit handling of sensitive inquiry leaks escalated the public relations crisis.",
+        "connotation": "negative"
+      },
+      {
+        "word": "malfeasance",
+        "prefix": "",
+        "suffix": "-ance (act of)",
+        "definition": "Wrongdoing or misconduct, especially by an elected official or public servant.",
+        "sat_sentence": "An independent prosecutor was appointed following credible allegations of municipal malfeasance.",
+        "connotation": "negative"
+      },
+      {
+        "word": "malady",
+        "prefix": "",
+        "suffix": "-y (condition)",
+        "definition": "A disease, disorder, or deep-seated ailment afflicting a society or body.",
+        "sat_sentence": "Widespread civic cynicism was identified as the primary malady eroding democratic civic participation.",
+        "connotation": "negative"
+      }
+    ]
+  },
+  {
+    "root": {
+      "morpheme": "tang / tact",
+      "language": "Latin",
+      "core_meaning": "touch",
+      "mnemonic": "Contact and tangible objects can be physically touched"
+    },
+    "words": [
+      {
+        "word": "tangible",
+        "prefix": "",
+        "suffix": "-ible (capable of)",
+        "definition": "Perceptible by touch; clear, definite, and real rather than imaginary.",
+        "sat_sentence": "The economic stimulus package produced tangible benefits for small manufacturing cooperatives.",
+        "connotation": "positive"
+      },
+      {
+        "word": "tactile",
+        "prefix": "",
+        "suffix": "-ile (relating to)",
+        "definition": "Connected with the sense of touch; designed to be stimulated through physical contact.",
+        "sat_sentence": "Sculptors often choose textured bronze for its rich tactile qualities and reflective patina.",
+        "connotation": "neutral"
+      },
+      {
+        "word": "contingent",
+        "prefix": "con- (together)",
+        "suffix": "-ent (adjective)",
+        "definition": "Subject to chance; dependent for existence on the occurrence of uncertain conditions.",
+        "sat_sentence": "Securing the enterprise contract remained contingent upon passing a rigorous penetration test.",
+        "connotation": "neutral"
+      },
+      {
+        "word": "tactful",
+        "prefix": "",
+        "suffix": "-ful (characterized by)",
+        "definition": "Showing sensitivity, diplomacy, and skill in dealing with others or difficult issues.",
+        "sat_sentence": "The mediator offered a tactful suggestion that allowed both polarized factions to save face.",
+        "connotation": "positive"
+      },
+      {
+        "word": "intangible",
+        "prefix": "in- (not)",
+        "suffix": "-ible (capable of)",
+        "definition": "Unable to be touched; not having physical presence, though having recognized value.",
+        "sat_sentence": "Brand reputation and employee morale are intangible assets crucial to long-term valuation.",
+        "connotation": "neutral"
+      }
+    ]
+  },
+  {
+    "root": {
+      "morpheme": "chron",
+      "language": "Greek",
+      "core_meaning": "time",
+      "mnemonic": "Chronometers measure chronological time"
+    },
+    "words": [
+      {
+        "word": "anachronism",
+        "prefix": "ana- (against/back)",
+        "suffix": "-ism (condition)",
+        "definition": "A thing belonging or appropriate to a period other than that in which it exists.",
+        "sat_sentence": "The appearance of modern electric streetlamps in the Victorian period film was a glaring anachronism.",
+        "connotation": "neutral"
+      },
+      {
+        "word": "synchronous",
+        "prefix": "syn- (together)",
+        "suffix": "-ous (full of)",
+        "definition": "Existing or occurring at the exact same moment; having coincident periods.",
+        "sat_sentence": "The data centers maintained synchronous replication to prevent information loss during outages.",
+        "connotation": "neutral"
+      },
+      {
+        "word": "chronic",
+        "prefix": "",
+        "suffix": "-ic (relating to)",
+        "definition": "Persisting for an extensive duration or constantly recurring; habitual.",
+        "sat_sentence": "Chronic absenteeism among urban transport operators led to severe commute bottlenecks.",
+        "connotation": "negative"
+      },
+      {
+        "word": "chronological",
+        "prefix": "",
+        "suffix": "-ical (pertaining to)",
+        "definition": "Arranged in the order of occurrence in time.",
+        "sat_sentence": "The biography organizes historical developments in strictly chronological sequence.",
+        "connotation": "neutral"
+      },
+      {
+        "word": "chronicle",
+        "prefix": "",
+        "suffix": "-le (noun ending)",
+        "definition": "A factual written account of important or historical events in chronological order.",
+        "sat_sentence": "The journalist published a searing chronicle documenting the collapse of regional financial institutions.",
+        "connotation": "neutral"
+      }
+    ]
+  },
+  {
+    "root": {
+      "morpheme": "path",
+      "language": "Greek",
+      "core_meaning": "feeling, suffering",
+      "mnemonic": "Empathy and sympathy share emotional pathways"
+    },
+    "words": [
+      {
+        "word": "apathy",
+        "prefix": "a- (without)",
+        "suffix": "-y (condition)",
+        "definition": "Lack of enthusiasm, concern, or emotion; complete indifference.",
+        "sat_sentence": "Voter apathy during local off-year municipal elections permitted unvetted ballot initiatives to pass.",
+        "connotation": "negative"
+      },
+      {
+        "word": "empathy",
+        "prefix": "em- (in/within)",
+        "suffix": "-y (condition)",
+        "definition": "The psychological capacity to understand and intimately share the feelings of another.",
+        "sat_sentence": "Effective leadership requires deep empathy when guiding a workforce through painful organizational restructurings.",
+        "connotation": "positive"
+      },
+      {
+        "word": "antipathy",
+        "prefix": "anti- (against)",
+        "suffix": "-y (condition)",
+        "definition": "A deep-seated, persistent feeling of aversion, hatred, or intense dislike.",
+        "sat_sentence": "Despite diplomatic smiles before television cameras, deep ideological antipathy divided the two delegates.",
+        "connotation": "negative"
+      },
+      {
+        "word": "pathology",
+        "prefix": "",
+        "suffix": "-ology (study of)",
+        "definition": "The scientific study of disease; an extreme or abnormal manifestation of a condition.",
+        "sat_sentence": "Sociologists examined the systemic pathology of corruption entrenched within the municipal contracting system.",
+        "connotation": "negative"
+      },
+      {
+        "word": "pathetic",
+        "prefix": "",
+        "suffix": "-ic (relating to)",
+        "definition": "Arousing pity, sorrow, or sympathy, especially through vulnerability or sadness.",
+        "sat_sentence": "The abandoned puppy huddled under the awning was a truly pathetic sight during the downpour.",
+        "connotation": "negative"
+      }
+    ]
+  },
+  {
+    "root": {
+      "morpheme": "phil",
+      "language": "Greek",
+      "core_meaning": "love, fondness",
+      "mnemonic": "Philanthropists show genuine love for mankind"
+    },
+    "words": [
+      {
+        "word": "philanthropy",
+        "prefix": "",
+        "suffix": "-y (practice of)",
+        "definition": "The desire to promote the welfare of others, expressed especially by the generous donation of wealth.",
+        "sat_sentence": "Through strategic philanthropy, the tech magnate established endowed chairs in genomic pathology.",
+        "connotation": "positive"
+      },
+      {
+        "word": "bibliophile",
+        "prefix": "biblio- (book)",
+        "suffix": "-phile (lover)",
+        "definition": "A person who loves, admires, or collects books passionately.",
+        "sat_sentence": "As a lifelong bibliophile, she spent weekends scouring dusty antiquarian bookshops for rare folios.",
+        "connotation": "positive"
+      },
+      {
+        "word": "philosophical",
+        "prefix": "",
+        "suffix": "-ical (pertaining to)",
+        "definition": "Having or showing a calm, rational, and reflective attitude when facing adversity.",
+        "sat_sentence": "Faced with unexpected venture capital rejections, the founder maintained a philosophical perspective.",
+        "connotation": "neutral"
+      },
+      {
+        "word": "philharmonic",
+        "prefix": "",
+        "suffix": "-ic (relating to)",
+        "definition": "Devoted to music; frequently used in the title of symphony orchestras.",
+        "sat_sentence": "The metropolitan philharmonic presented an electrifying interpretation of Stravinsky's masterwork.",
+        "connotation": "positive"
+      },
+      {
+        "word": "hydrophilic",
+        "prefix": "hydro- (water)",
+        "suffix": "-ic (relating to)",
+        "definition": "Having an affinity for water; readily absorbing or dissolving in water.",
+        "sat_sentence": "The cellular membrane incorporates hydrophilic exterior lipids that interact seamlessly with extracellular fluid.",
+        "connotation": "neutral"
+      }
+    ]
+  },
+  {
+    "root": {
+      "morpheme": "morph",
+      "language": "Greek",
+      "core_meaning": "form, shape",
+      "mnemonic": "Metamorphosis morphs one form into another"
+    },
+    "words": [
+      {
+        "word": "amorphous",
+        "prefix": "a- (without)",
+        "suffix": "-ous (having the quality of)",
+        "definition": "Without a clearly defined shape, structure, or form; vague and unorganized.",
+        "sat_sentence": "The reform campaign struggled to gain traction because its platform remained an amorphous list of grievances.",
+        "connotation": "negative"
+      },
+      {
+        "word": "metamorphosis",
+        "prefix": "meta- (change)",
+        "suffix": "-osis (process of)",
+        "definition": "A marked change in form, nature, or character, whether biological or metaphorical.",
+        "sat_sentence": "Over the decade, the gritty industrial waterfront underwent a breathtaking metamorphosis into a cultural hub.",
+        "connotation": "positive"
+      },
+      {
+        "word": "anthropomorphic",
+        "prefix": "anthropo- (human)",
+        "suffix": "-ic (relating to)",
+        "definition": "Attributing human characteristics, emotions, or behaviors to non-human entities.",
+        "sat_sentence": "Ancient mythology abounds in anthropomorphic deities who exhibit jealousy, wrath, and vanity.",
+        "connotation": "neutral"
+      },
+      {
+        "word": "morphology",
+        "prefix": "",
+        "suffix": "-ology (study of)",
+        "definition": "The branch of biology or linguistics dealing with form, structure, and internal rules.",
+        "sat_sentence": "Linguists analyze morpheme morphology to trace how romance languages evolved from vulgar Latin.",
+        "connotation": "neutral"
+      },
+      {
+        "word": "polymorphous",
+        "prefix": "poly- (many)",
+        "suffix": "-ous (full of)",
+        "definition": "Occurring in several distinct forms, stages, or structures.",
+        "sat_sentence": "The virus exhibited polymorphous strains that challenged pharmaceutical efforts to produce a single vaccine.",
+        "connotation": "neutral"
+      }
+    ]
+  },
+  {
+    "root": {
+      "morpheme": "hyper",
+      "language": "Greek",
+      "core_meaning": "over, excessive",
+      "mnemonic": "Hyperactive energy goes over the top"
+    },
+    "words": [
+      {
+        "word": "hyperbole",
+        "prefix": "",
+        "suffix": "",
+        "definition": "Deliberate and extravagant exaggeration used for emphasis or rhetorical effect.",
+        "sat_sentence": "The advertiser's claim that the energy drink could double IQ test scores was dismissive hyperbole.",
+        "connotation": "neutral"
+      },
+      {
+        "word": "hypercritical",
+        "prefix": "",
+        "suffix": "-ical (pertaining to)",
+        "definition": "Unreasonably or obsessively critical, especially about trivial shortcomings.",
+        "sat_sentence": "The hypercritical reviewer dissected minor musical phrasing flaws while ignoring the choir's emotional brilliance.",
+        "connotation": "negative"
+      },
+      {
+        "word": "hypertension",
+        "prefix": "",
+        "suffix": "-ion (condition)",
+        "definition": "Abnormally high blood pressure or emotional stress.",
+        "sat_sentence": "Sedentary work habits and chronic sleeplessness significantly elevate the risk of arterial hypertension.",
+        "connotation": "negative"
+      },
+      {
+        "word": "hypersensitive",
+        "prefix": "",
+        "suffix": "-ive (inclined to)",
+        "definition": "Abnormally or excessively sensitive, whether physically or emotionally.",
+        "sat_sentence": "The sensor was hypersensitive to atmospheric vibrations, registering distant seismic tremors.",
+        "connotation": "neutral"
+      }
+    ]
+  },
+  {
+    "root": {
+      "morpheme": "hypo",
+      "language": "Greek",
+      "core_meaning": "under, beneath",
+      "mnemonic": "A hypodermic needle goes under the skin"
+    },
+    "words": [
+      {
+        "word": "hypocritical",
+        "prefix": "",
+        "suffix": "-ical (pertaining to)",
+        "definition": "Behaving in a way that suggests one has higher moral standards than is the case.",
+        "sat_sentence": "It was blatant hypocrisy for the industrialist to advocate conservation while dumping refinery runoff.",
+        "connotation": "negative"
+      },
+      {
+        "word": "hypothesis",
+        "prefix": "",
+        "suffix": "-thesis (proposition)",
+        "definition": "A tentative proposition or explanation made as a basis for reasoning or empirical testing.",
+        "sat_sentence": "The astrophysicist formulated an audacious hypothesis predicting the presence of subatomic dark matter halos.",
+        "connotation": "neutral"
+      },
+      {
+        "word": "hypothetical",
+        "prefix": "",
+        "suffix": "-ical (pertaining to)",
+        "definition": "Based on or serving as a hypothesis; conjectural or assumed rather than real.",
+        "sat_sentence": "Ethics professors posed a hypothetical dilemma in which autonomous vehicles choose between colliding trajectories.",
+        "connotation": "neutral"
+      },
+      {
+        "word": "hypothermia",
+        "prefix": "",
+        "suffix": "-ia (medical state)",
+        "definition": "A medical emergency that occurs when the body loses heat faster than it can produce heat.",
+        "sat_sentence": "The stranded climbers were treated for acute hypothermia after enduring sub-zero blizzard winds.",
+        "connotation": "negative"
+      }
+    ]
+  },
+  {
+    "root": {
+      "morpheme": "auto",
+      "language": "Greek",
+      "core_meaning": "self, same",
+      "mnemonic": "Autonomy gives self-governance"
+    },
+    "words": [
+      {
+        "word": "autonomous",
+        "prefix": "",
+        "suffix": "-ous (having the power)",
+        "definition": "Acting independently or having the freedom to govern oneself without external control.",
+        "sat_sentence": "The remote province negotiated an autonomous regional parliament to manage educational curricula.",
+        "connotation": "positive"
+      },
+      {
+        "word": "autocrat",
+        "prefix": "",
+        "suffix": "-crat (ruler)",
+        "definition": "A ruler who has absolute power; an imperious and domineering individual.",
+        "sat_sentence": "The aging autocrat suppressed independent journalism to prevent investigative scrutiny of his wealth.",
+        "connotation": "negative"
+      },
+      {
+        "word": "autobiography",
+        "prefix": "",
+        "suffix": "-y (written account)",
+        "definition": "An account of a person's life written by that person.",
+        "sat_sentence": "Her candid autobiography chronicled her journey from an undocumented immigrant to a federal magistrate.",
+        "connotation": "neutral"
+      },
+      {
+        "word": "automaton",
+        "prefix": "",
+        "suffix": "-on (device)",
+        "definition": "A moving mechanical device made in imitation of a human; someone who acts in a robotic, unfeeling manner.",
+        "sat_sentence": "Exhausted by seventy-hour workweeks on the assembly line, the worker moved like a mechanical automaton.",
+        "connotation": "negative"
+      }
+    ]
+  },
+  {
+    "root": {
+      "morpheme": "anti",
+      "language": "Greek",
+      "core_meaning": "against, opposite",
+      "mnemonic": "Antidotes work against harmful toxins"
+    },
+    "words": [
+      {
+        "word": "antithesis",
+        "prefix": "",
+        "suffix": "-thesis (proposition)",
+        "definition": "A person or thing that is the direct opposite of someone or something else.",
+        "sat_sentence": "Her humble, understated demeanor was the exact antithesis of her predecessor's bombastic self-promotion.",
+        "connotation": "neutral"
+      },
+      {
+        "word": "antipathetic",
+        "prefix": "",
+        "suffix": "-etic (relating to)",
+        "definition": "Showing or feeling a strong aversion or resistance toward something.",
+        "sat_sentence": "Traditionalist faculty members remained antipathetic toward integrating algorithmic grading software.",
+        "connotation": "negative"
+      },
+      {
+        "word": "antidote",
+        "prefix": "",
+        "suffix": "-dote (given out)",
+        "definition": "A medicine taken or given to counteract a particular poison; something that counteracts an unpleasant feeling.",
+        "sat_sentence": "Disciplined critical thinking is the most potent antidote to algorithmic misinformation campaigns.",
+        "connotation": "positive"
+      },
+      {
+        "word": "antagonistic",
+        "prefix": "",
+        "suffix": "-ic (relating to)",
+        "definition": "Showing or feeling active opposition, hostility, or animosity toward someone or something.",
+        "sat_sentence": "The rival corporate factions maintained an antagonistic relationship throughout the hostile takeover.",
+        "connotation": "negative"
+      },
+      {
+        "word": "antiseptic",
+        "prefix": "",
+        "suffix": "-ic (relating to)",
+        "definition": "Scrupulously clean or sterile; preventing the growth of disease-causing microorganisms.",
+        "sat_sentence": "The hospital instituted rigorous antiseptic protocols to curb the spread of antibiotic-resistant bacteria.",
+        "connotation": "positive"
+      }
+    ]
+  },
+  {
+    "root": {
+      "morpheme": "syn / sym",
+      "language": "Greek",
+      "core_meaning": "together, with",
+      "mnemonic": "Symphonies and syntheses bring sounds together"
+    },
+    "words": [
+      {
+        "word": "synthesis",
+        "prefix": "syn- (together)",
+        "suffix": "-thesis (placing)",
+        "definition": "The combination of ideas, components, or elements to form a coherent, unified whole.",
+        "sat_sentence": "Her doctoral dissertation offered a brilliant synthesis of molecular biology and computational topology.",
+        "connotation": "positive"
+      },
+      {
+        "word": "symposium",
+        "prefix": "sym- (together)",
+        "suffix": "-ium (place)",
+        "definition": "A conference or meeting to discuss a particular subject, especially academic or scientific.",
+        "sat_sentence": "Leading climatologists convened for an international symposium on sea-level rise acceleration.",
+        "connotation": "neutral"
+      },
+      {
+        "word": "symbiotic",
+        "prefix": "sym- (together)",
+        "suffix": "-ic (relating to)",
+        "definition": "Involving interaction between two different organisms living in close physical association, often to mutual benefit.",
+        "sat_sentence": "Mycorrhizal fungi maintain a symbiotic relationship with pine tree roots, exchanging minerals for carbohydrates.",
+        "connotation": "positive"
+      },
+      {
+        "word": "symmetry",
+        "prefix": "sym- (together)",
+        "suffix": "-etry (measurement)",
+        "definition": "The quality of being made up of exactly similar parts facing each other or around an axis; balanced proportion.",
+        "sat_sentence": "Classical Greek architecture prized harmonic symmetry in the proportion of temple columns.",
+        "connotation": "positive"
+      },
+      {
+        "word": "synchronize",
+        "prefix": "syn- (together)",
+        "suffix": "-ize (verb ending)",
+        "definition": "To cause to occur or operate at the same time or rate.",
+        "sat_sentence": "Choreographers worked tirelessly to synchronize the dancers' rapid footwork with the polyrhythmic percussion.",
+        "connotation": "neutral"
+      }
+    ]
+  },
+  {
+    "root": {
+      "morpheme": "anthrop",
+      "language": "Greek",
+      "core_meaning": "human, mankind",
+      "mnemonic": "Anthropologists study human development"
+    },
+    "words": [
+      {
+        "word": "anthropology",
+        "prefix": "",
+        "suffix": "-ology (study of)",
+        "definition": "The comparative scientific study of human societies, cultures, and biological development.",
+        "sat_sentence": "Cultural anthropology investigates how communal rituals reinforce social cohesion across tribal lineages.",
+        "connotation": "neutral"
+      },
+      {
+        "word": "misanthrope",
+        "prefix": "mis- (hatred of)",
+        "suffix": "",
+        "definition": "A person who dislikes humankind and avoids human society.",
+        "sat_sentence": "Repulsed by corporate hypocrisy, the eccentric billionaire retreated to an isolated island as a bitter misanthrope.",
+        "connotation": "negative"
+      },
+      {
+        "word": "philanthropic",
+        "prefix": "phil- (love of)",
+        "suffix": "-ic (relating to)",
+        "definition": "Seeking to promote the welfare of others; generous and benevolent.",
+        "sat_sentence": "The non-profit trust launched a philanthropic initiative to provide clean drinking water in arid zones.",
+        "connotation": "positive"
+      },
+      {
+        "word": "anthropocentric",
+        "prefix": "",
+        "suffix": "-ic (relating to)",
+        "definition": "Regarding humankind as the central or most important element of existence, especially as opposed to animals.",
+        "sat_sentence": "Deep ecologists challenge the anthropocentric worldview that treats natural ecosystems solely as resource reserves.",
+        "connotation": "negative"
+      }
+    ]
+  }
+]
