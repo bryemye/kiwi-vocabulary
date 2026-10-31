@@ -137,6 +137,7 @@ export default function App() {
                 roots={roots}
                 initialRootId={selectedRootId}
                 onAttemptLogged={handleAttemptLogged}
+                onNavigateDashboard={() => setActiveTab('dashboard')}
               />
             )}
 

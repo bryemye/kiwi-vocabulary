@@ -14,6 +14,14 @@ export async function fetchWords(params = {}) {
   return res.json();
 }
 
+export async function fetchWordSession(params = {}) {
+  const query = new URLSearchParams(params).toString();
+  const url = `${API_BASE}/words/session/${query ? `?${query}` : ''}`;
+  const res = await fetch(url);
+  if (!res.ok) throw new Error('Failed to fetch vocabulary session');
+  return res.json();
+}
+
 export async function fetchQuestions(section = '') {
   const query = section ? `?section=${section}` : '';
   const res = await fetch(`${API_BASE}/questions/${query}`);

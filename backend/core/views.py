@@ -1,8 +1,10 @@
 from rest_framework import viewsets, status, permissions
+from rest_framework.decorators import action
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from django.db.models import Count, Q, Avg, Sum
 from django.contrib.auth.models import User
+import random
 
 from .models import Root, VocabularyWord, ReadingPassage, Question, StudyLog
 from .serializers import (
@@ -28,12 +30,92 @@ class VocabularyWordViewSet(viewsets.ReadOnlyModelViewSet):
     def get_queryset(self):
         queryset = super().get_queryset()
         root_id = self.request.query_params.get('root')
+        language = self.request.query_params.get('language')
+        search = self.request.query_params.get('search')
         connotation = self.request.query_params.get('connotation')
+
         if root_id:
             queryset = queryset.filter(root_id=root_id)
+        if language and language.upper() != 'ALL':
+            queryset = queryset.filter(root__language__iexact=language)
+        if search:
+            search = search.strip()
+            queryset = queryset.filter(
+                Q(word__icontains=search) | Q(definition__icontains=search)
+            )
         if connotation:
             queryset = queryset.filter(connotation=connotation)
+
         return queryset
+
+    def list(self, request, *args, **kwargs):
+        queryset = self.filter_queryset(self.get_queryset())
+        limit = request.query_params.get('limit')
+        offset = request.query_params.get('offset', 0)
+
+        if limit is not None:
+            try:
+                limit = max(1, int(limit))
+                offset = max(0, int(offset))
+                queryset = queryset[offset:offset + limit]
+            except ValueError:
+                pass
+
+        serializer = self.get_serializer(queryset, many=True)
+        return Response(serializer.data)
+
+    @action(detail=False, methods=['get'])
+    def session(self, request):
+        """
+        Return a balanced deck of words (default 15).
+        Prioritizes:
+        1. Unstudied words
+        2. Words with past incorrect StudyLog entries
+        3. Random selection to complete the count
+        """
+        try:
+            count = max(1, min(100, int(request.query_params.get('count', 15))))
+        except ValueError:
+            count = 15
+
+        base_qs = self.get_queryset()
+        user = request.user if (request.user and request.user.is_authenticated) else User.objects.first()
+
+        logs = StudyLog.objects.filter(item_type='WORD')
+        if user:
+            logs = logs.filter(user=user)
+
+        studied_word_ids = set(logs.values_list('word_id', flat=True))
+
+        # 1. Unstudied words
+        unstudied_qs = base_qs.exclude(id__in=studied_word_ids).order_by('?')
+        unstudied_words = list(unstudied_qs[:count])
+
+        deck = list(unstudied_words)
+
+        # 2. If deck has room, add words with incorrect attempts
+        if len(deck) < count:
+            remaining = count - len(deck)
+            deck_ids = {w.id for w in deck}
+            
+            incorrect_ids = set(logs.filter(is_correct=False).values_list('word_id', flat=True))
+            incorrect_qs = base_qs.filter(id__in=incorrect_ids).exclude(id__in=deck_ids).order_by('?')
+            incorrect_words = list(incorrect_qs[:remaining])
+            deck.extend(incorrect_words)
+
+        # 3. If deck still has room, fill with random words from base_qs
+        if len(deck) < count:
+            remaining = count - len(deck)
+            deck_ids = {w.id for w in deck}
+            fill_qs = base_qs.exclude(id__in=deck_ids).order_by('?')
+            fill_words = list(fill_qs[:remaining])
+            deck.extend(fill_words)
+
+        # Final shuffle for natural practice flow
+        random.shuffle(deck)
+
+        serializer = self.get_serializer(deck, many=True)
+        return Response(serializer.data)
 
 
 class QuestionViewSet(viewsets.ReadOnlyModelViewSet):
@@ -70,7 +152,6 @@ class StudyLogViewSet(viewsets.ModelViewSet):
     def perform_create(self, serializer):
         user = self.request.user if (self.request.user and self.request.user.is_authenticated) else None
         if not user:
-            # Fallback to default/demo user so requests never fail with 401 or null constraint error
             user = User.objects.first()
             if not user:
                 user = User.objects.create_user(username='demo_student', email='scholar@example.com')
