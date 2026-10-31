@@ -4,15 +4,13 @@ import {
   LineChart, 
   BookOpenCheck, 
   Clock, 
-  Award, 
-  TrendingUp, 
   ArrowRight, 
   CheckCircle2, 
   AlertCircle, 
   Layers, 
   Compass,
-  Zap,
-  Target
+  Target,
+  Zap
 } from 'lucide-react';
 
 export default function DashboardView({ stats, onSelectRoot, onNavigateMode }) {
@@ -20,8 +18,9 @@ export default function DashboardView({ stats, onSelectRoot, onNavigateMode }) {
 
   if (!stats) {
     return (
-      <div className="max-w-7xl mx-auto px-4 py-16 text-center text-slate-400">
-        Loading analytics...
+      <div className="max-w-7xl mx-auto px-4 py-16 text-center text-[#111410] font-mono">
+        <div className="w-8 h-8 mx-auto border-4 border-[#111410] border-t-[#7BB33B] animate-spin mb-4" />
+        <p className="uppercase text-xs font-bold">SYNCHRONIZING KIWI TELEMETRY...</p>
       </div>
     );
   }
@@ -29,13 +28,13 @@ export default function DashboardView({ stats, onSelectRoot, onNavigateMode }) {
   const { overall = {}, sections = {}, root_mastery = [], recommendations = [], recent_logs = [] } = stats;
 
   const formatSeconds = (totalSecs) => {
-    if (!totalSecs || totalSecs === 0) return '0 min';
+    if (!totalSecs || totalSecs === 0) return '0 MIN';
     const hrs = Math.floor(totalSecs / 3600);
     const mins = Math.floor((totalSecs % 3600) / 60);
     const secs = totalSecs % 60;
-    if (hrs > 0) return `${hrs}h ${mins}m`;
-    if (mins > 0) return `${mins}m ${secs}s`;
-    return `${secs}s`;
+    if (hrs > 0) return `${hrs}H ${mins}M`;
+    if (mins > 0) return `${mins}M ${secs}S`;
+    return `${secs}S`;
   };
 
   const filteredRoots = root_mastery.filter((r) => {
@@ -44,144 +43,143 @@ export default function DashboardView({ stats, onSelectRoot, onNavigateMode }) {
   });
 
   return (
-    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-10">
-      {/* Welcome Banner */}
-      <div className="relative overflow-hidden rounded-3xl bg-gradient-to-r from-sky-900/60 via-indigo-900/40 to-slate-900 border border-sky-500/20 p-6 sm:p-8 shadow-2xl">
-        <div className="relative z-10 flex flex-col md:flex-row md:items-center justify-between gap-6">
+    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-8">
+      {/* Neo-brutalist Bento Header Banner */}
+      <div className="bg-white border-2 border-[#111410] shadow-[5px_5px_0px_0px_#111410] p-6 sm:p-8">
+        <div className="flex flex-col md:flex-row md:items-center justify-between gap-6">
           <div>
-            <div className="inline-flex items-center space-x-2 px-3 py-1 rounded-full bg-sky-500/10 border border-sky-500/30 text-sky-400 text-xs font-semibold uppercase tracking-wider mb-3">
-              <Zap className="w-3.5 h-3.5" />
-              <span>Diagnostic Learning Engine Active</span>
+            <div className="inline-flex items-center space-x-2 px-2.5 py-1 bg-[#EDF5E5] border border-[#111410] text-[#2F441E] text-[10px] font-mono font-black uppercase tracking-wider mb-3">
+              <Zap className="w-3.5 h-3.5 text-[#7BB33B]" />
+              <span>Diagnostic Learning Engine Online</span>
             </div>
-            <h1 className="text-2xl sm:text-3xl font-extrabold text-white tracking-tight">
-              Welcome to Your SAT/ACT Command Center
+            <h1 className="text-2xl sm:text-4xl font-black text-[#111410] tracking-tight uppercase font-sans">
+              Kiwi Learning Command Grid
             </h1>
-            <p className="text-slate-300 text-sm sm:text-base mt-2 max-w-2xl leading-relaxed">
-              Track real-time progress across root morphemes, geometric functions, and analytical reading passages.
+            <p className="text-[#62685E] text-xs sm:text-sm mt-2 max-w-2xl font-mono uppercase">
+              Adaptive etymological decomposition, Swiss drafting plane & Digital SAT reading annotations.
             </p>
           </div>
 
           <div className="flex items-center space-x-3 shrink-0">
             <button
               onClick={() => onNavigateMode('vocab')}
-              className="flex items-center space-x-2 px-5 py-3 rounded-xl bg-sky-500 hover:bg-sky-400 text-white font-semibold text-sm shadow-lg shadow-sky-500/20 transition active:scale-95"
+              className="flex items-center space-x-2 px-5 py-3 bg-[#7BB33B] hover:bg-[#84C341] text-white border-2 border-[#111410] shadow-[3px_3px_0px_0px_#111410] font-mono font-black text-xs uppercase tracking-wider transition active:translate-x-[2px] active:translate-y-[2px]"
             >
               <Sparkles className="w-4 h-4" />
-              <span>Review Vocabulary</span>
+              <span>Review Lexicon</span>
             </button>
             <button
               onClick={() => onNavigateMode('math')}
-              className="flex items-center space-x-2 px-5 py-3 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700 font-semibold text-sm transition active:scale-95"
+              className="flex items-center space-x-2 px-5 py-3 bg-[#EFE8DF] hover:bg-white text-[#111410] border-2 border-[#111410] shadow-[3px_3px_0px_0px_#111410] font-mono font-black text-xs uppercase tracking-wider transition active:translate-x-[2px] active:translate-y-[2px]"
             >
-              <LineChart className="w-4 h-4" />
-              <span>Practice Math</span>
+              <LineChart className="w-4 h-4 text-[#42281D]" />
+              <span>Launch Math Lab</span>
             </button>
           </div>
         </div>
-
-        {/* Ambient background decoration */}
-        <div className="absolute -right-10 -bottom-10 w-64 h-64 bg-sky-500/10 rounded-full blur-3xl pointer-events-none" />
       </div>
 
-      {/* High-Level Metric Cards */}
+      {/* High-Level Metric Cards (Modular Bento Grid) */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
         {/* Metric 1: Total Words Reviewed */}
-        <div className="bg-slate-900/90 rounded-2xl p-5 border border-slate-800 shadow-xl flex flex-col justify-between">
+        <div className="bg-white border-2 border-[#111410] shadow-[4px_4px_0px_0px_#111410] p-5 flex flex-col justify-between relative overflow-hidden">
+          <div className="w-full h-1.5 bg-[#7BB33B] absolute top-0 left-0" />
           <div className="flex items-center justify-between">
-            <span className="text-xs font-semibold text-slate-400 uppercase tracking-wider">
-              Words Reviewed
+            <span className="text-[10px] font-mono font-black text-[#62685E] uppercase tracking-wider">
+              Words Mastered
             </span>
-            <div className="w-9 h-9 rounded-xl bg-sky-500/10 text-sky-400 flex items-center justify-center">
-              <Layers className="w-5 h-5" />
+            <div className="w-8 h-8 bg-[#EDF5E5] border border-[#111410] text-[#2F441E] flex items-center justify-center font-mono font-bold text-xs">
+              01
             </div>
           </div>
           <div className="mt-4">
-            <div className="text-3xl font-extrabold text-white">
+            <div className="text-4xl font-black font-mono text-[#111410]">
               {overall.unique_words_reviewed || 0}
             </div>
-            <div className="text-xs text-slate-400 mt-1 flex items-center space-x-1">
-              <span>{sections.vocab?.total || 0} flashcard attempts</span>
-              <span className="text-slate-600">·</span>
-              <span className="text-emerald-400 font-medium">{sections.vocab?.accuracy_percentage || 0}% acc</span>
+            <div className="text-xs font-mono text-[#62685E] mt-1 flex items-center space-x-1 uppercase">
+              <span>{sections.vocab?.total || 0} attempts</span>
+              <span>·</span>
+              <span className="text-[#2F441E] font-bold">{sections.vocab?.accuracy_percentage || 0}% ACC</span>
             </div>
           </div>
         </div>
 
         {/* Metric 2: Math Accuracy % */}
-        <div className="bg-slate-900/90 rounded-2xl p-5 border border-slate-800 shadow-xl flex flex-col justify-between">
+        <div className="bg-white border-2 border-[#111410] shadow-[4px_4px_0px_0px_#111410] p-5 flex flex-col justify-between relative overflow-hidden">
+          <div className="w-full h-1.5 bg-[#2F441E] absolute top-0 left-0" />
           <div className="flex items-center justify-between">
-            <span className="text-xs font-semibold text-slate-400 uppercase tracking-wider">
-              Math Accuracy
+            <span className="text-[10px] font-mono font-black text-[#62685E] uppercase tracking-wider">
+              Math Coordinate Acc
             </span>
-            <div className="w-9 h-9 rounded-xl bg-indigo-500/10 text-indigo-400 flex items-center justify-center">
-              <LineChart className="w-5 h-5" />
+            <div className="w-8 h-8 bg-[#EFE8DF] border border-[#111410] text-[#42281D] flex items-center justify-center font-mono font-bold text-xs">
+              02
             </div>
           </div>
           <div className="mt-4">
-            <div className="text-3xl font-extrabold text-white">
+            <div className="text-4xl font-black font-mono text-[#111410]">
               {sections.math?.accuracy_percentage || 0}%
             </div>
-            <div className="text-xs text-slate-400 mt-1">
-              {sections.math?.correct || 0} of {sections.math?.total || 0} graphing questions solved
+            <div className="text-xs font-mono text-[#62685E] mt-1 uppercase">
+              {sections.math?.correct || 0} OF {sections.math?.total || 0} GRAPH ITEMS SOLVED
             </div>
           </div>
         </div>
 
         {/* Metric 3: Reading Accuracy % */}
-        <div className="bg-slate-900/90 rounded-2xl p-5 border border-slate-800 shadow-xl flex flex-col justify-between">
+        <div className="bg-white border-2 border-[#111410] shadow-[4px_4px_0px_0px_#111410] p-5 flex flex-col justify-between relative overflow-hidden">
+          <div className="w-full h-1.5 bg-[#C29B78] absolute top-0 left-0" />
           <div className="flex items-center justify-between">
-            <span className="text-xs font-semibold text-slate-400 uppercase tracking-wider">
-              Reading Accuracy
+            <span className="text-[10px] font-mono font-black text-[#62685E] uppercase tracking-wider">
+              Reading Comprehension
             </span>
-            <div className="w-9 h-9 rounded-xl bg-emerald-500/10 text-emerald-400 flex items-center justify-center">
-              <BookOpenCheck className="w-5 h-5" />
+            <div className="w-8 h-8 bg-[#EDF5E5] border border-[#111410] text-[#2F441E] flex items-center justify-center font-mono font-bold text-xs">
+              03
             </div>
           </div>
           <div className="mt-4">
-            <div className="text-3xl font-extrabold text-white">
+            <div className="text-4xl font-black font-mono text-[#111410]">
               {sections.reading?.accuracy_percentage || 0}%
             </div>
-            <div className="text-xs text-slate-400 mt-1">
-              {sections.reading?.correct || 0} of {sections.reading?.total || 0} passage questions solved
+            <div className="text-xs font-mono text-[#62685E] mt-1 uppercase">
+              {sections.reading?.correct || 0} OF {sections.reading?.total || 0} PASSAGE ITEMS SOLVED
             </div>
           </div>
         </div>
 
         {/* Metric 4: Total Study Time */}
-        <div className="bg-slate-900/90 rounded-2xl p-5 border border-slate-800 shadow-xl flex flex-col justify-between">
+        <div className="bg-white border-2 border-[#111410] shadow-[4px_4px_0px_0px_#111410] p-5 flex flex-col justify-between relative overflow-hidden">
+          <div className="w-full h-1.5 bg-[#42281D] absolute top-0 left-0" />
           <div className="flex items-center justify-between">
-            <span className="text-xs font-semibold text-slate-400 uppercase tracking-wider">
-              Total Study Time
+            <span className="text-[10px] font-mono font-black text-[#62685E] uppercase tracking-wider">
+              Total Practice Time
             </span>
-            <div className="w-9 h-9 rounded-xl bg-amber-500/10 text-amber-400 flex items-center justify-center">
-              <Clock className="w-5 h-5" />
+            <div className="w-8 h-8 bg-[#FAFBF8] border border-[#111410] text-[#111410] flex items-center justify-center font-mono font-bold text-xs">
+              04
             </div>
           </div>
           <div className="mt-4">
-            <div className="text-3xl font-extrabold text-white">
+            <div className="text-4xl font-black font-mono text-[#111410]">
               {formatSeconds(overall.total_seconds_spent)}
             </div>
-            <div className="text-xs text-slate-400 mt-1">
-              Overall score: <strong className="text-sky-400">{overall.accuracy_percentage || 0}%</strong> ({overall.total_correct}/{overall.total_attempts})
+            <div className="text-xs font-mono text-[#62685E] mt-1 uppercase">
+              COMPOSITE: <strong className="text-[#2F441E]">{overall.accuracy_percentage || 0}%</strong> ({overall.total_correct}/{overall.total_attempts})
             </div>
           </div>
         </div>
       </div>
 
-      {/* Quick "Start Next Session" Recommendations */}
+      {/* Bento Section: "Start Next Session" Recommendations */}
       {recommendations && recommendations.length > 0 && (
-        <div className="bg-slate-900/90 rounded-2xl p-6 border border-slate-800 shadow-xl">
-          <div className="flex items-center justify-between mb-4">
+        <div className="bg-white border-2 border-[#111410] shadow-[4px_4px_0px_0px_#111410] p-6">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 mb-4 border-b-2 border-[#111410] pb-2 font-mono">
             <div className="flex items-center space-x-2">
-              <span className="p-1 rounded-md bg-amber-500/10 text-amber-400">
-                <Target className="w-4 h-4" />
-              </span>
-              <h2 className="text-base font-bold text-white tracking-tight">
-                Recommended for Your Next Study Session
+              <span className="w-3 h-3 bg-[#42281D]" />
+              <h2 className="text-xs font-black uppercase text-[#111410] tracking-wider">
+                Targeted Practice Recommendations
               </h2>
             </div>
-            <span className="text-xs text-slate-400 hidden sm:inline">
-              Targeting lowest mastery and unreinforced root families
+            <span className="text-[10px] font-bold text-[#62685E] uppercase">
+              AUTOMATICALLY IDENTIFIED LOW-MASTERY MORPHEME CLUSTERS
             </span>
           </div>
 
@@ -189,34 +187,34 @@ export default function DashboardView({ stats, onSelectRoot, onNavigateMode }) {
             {recommendations.map((root) => (
               <div
                 key={root.id}
-                className="p-4 rounded-xl bg-slate-950/70 border border-slate-800 hover:border-slate-700 transition flex flex-col justify-between space-y-3"
+                className="p-4 bg-[#FAFBF8] border-2 border-[#111410] shadow-[2px_2px_0px_0px_#111410] flex flex-col justify-between space-y-3"
               >
                 <div>
-                  <div className="flex items-center justify-between text-xs mb-1">
-                    <span className="font-mono text-sky-400 font-bold uppercase">
-                      {root.morpheme}
+                  <div className="flex items-center justify-between text-xs font-mono mb-1">
+                    <span className="text-[#42281D] font-black uppercase">
+                      [{root.morpheme}]
                     </span>
-                    <span className="px-2 py-0.5 rounded-full bg-slate-800 text-slate-400 font-mono text-[10px]">
+                    <span className="px-1.5 py-0.2 bg-[#EFE8DF] text-[#42281D] border border-[#111410] text-[9px] font-bold uppercase">
                       {root.language}
                     </span>
                   </div>
-                  <h4 className="text-sm font-semibold text-slate-100">
+                  <h4 className="text-sm font-black text-[#111410] font-sans">
                     "{root.core_meaning}"
                   </h4>
-                  <p className="text-xs text-slate-400 italic line-clamp-1 mt-1">
+                  <p className="text-xs text-[#62685E] italic font-serif line-clamp-1 mt-1">
                     {root.mnemonic}
                   </p>
                 </div>
 
-                <div className="pt-2 border-t border-slate-900 flex items-center justify-between">
-                  <div className="text-xs font-mono text-slate-400">
-                    Mastery: <span className="text-amber-400 font-bold">{root.mastery_percentage}%</span>
+                <div className="pt-2 border-t border-[#111410]/20 flex items-center justify-between font-mono">
+                  <div className="text-[10px] font-bold text-[#62685E]">
+                    MASTERY: <span className="text-[#2F441E] font-black">{root.mastery_percentage}%</span>
                   </div>
                   <button
                     onClick={() => onSelectRoot(root.id)}
-                    className="flex items-center space-x-1 text-xs font-semibold text-sky-400 hover:text-sky-300 transition"
+                    className="flex items-center space-x-1 text-xs font-black text-[#7BB33B] hover:text-[#84C341] uppercase transition"
                   >
-                    <span>Practice Root</span>
+                    <span>PRACTICE ROOT</span>
                     <ArrowRight className="w-3.5 h-3.5" />
                   </button>
                 </div>
@@ -226,100 +224,99 @@ export default function DashboardView({ stats, onSelectRoot, onNavigateMode }) {
         </div>
       )}
 
-      {/* Root Mastery Tree / Matrix */}
-      <div className="bg-slate-900/90 rounded-2xl p-6 sm:p-8 border border-slate-800 shadow-xl space-y-6">
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+      {/* Root Mastery Tree / Matrix (Greek vs. Latin Origin Blocks) */}
+      <div className="bg-white border-2 border-[#111410] shadow-[5px_5px_0px_0px_#111410] p-6 sm:p-8 space-y-6">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b-2 border-[#111410] pb-4">
           <div>
             <div className="flex items-center space-x-2">
-              <span className="p-1.5 rounded-lg bg-sky-500/10 text-sky-400 border border-sky-500/20">
-                <Compass className="w-4 h-4" />
+              <span className="w-6 h-6 bg-[#42281D] text-white flex items-center justify-center font-mono font-black text-xs">
+                M
               </span>
-              <h2 className="text-lg font-bold text-white tracking-tight">
-                Etymology Root Mastery Index
+              <h2 className="text-lg font-black text-[#111410] tracking-tight uppercase font-mono">
+                Etymology Root Mastery Matrix
               </h2>
             </div>
-            <p className="text-xs text-slate-400 mt-1">
-              Visual morpheme matrix grouped by Classical Greek and Latin origins.
+            <p className="text-xs font-mono text-[#62685E] mt-1 uppercase">
+              Morpheme families categorized by Classical Greek vs. Latin origin
             </p>
           </div>
 
           {/* Origin filter buttons */}
-          <div className="flex items-center space-x-1 p-1 bg-slate-800/80 rounded-xl border border-slate-700 text-xs">
+          <div className="flex items-center space-x-1 font-mono text-xs">
             {['ALL', 'Latin', 'Greek'].map((origin) => (
               <button
                 key={origin}
                 onClick={() => setOriginFilter(origin)}
-                className={`px-3 py-1.5 rounded-lg font-medium transition ${
+                className={`px-3 py-1 font-black uppercase border-2 border-[#111410] transition ${
                   originFilter === origin
-                    ? 'bg-sky-500 text-white shadow-sm'
-                    : 'text-slate-400 hover:text-slate-200'
+                    ? 'bg-[#7BB33B] text-white shadow-[2px_2px_0px_0px_#111410]'
+                    : 'bg-white text-[#111410] hover:bg-[#FAFBF8]'
                 }`}
               >
-                {origin === 'ALL' ? 'All Roots' : `${origin} (${root_mastery.filter(r => r.language.toLowerCase() === origin.toLowerCase()).length})`}
+                {origin === 'ALL' ? 'ALL ORIGINS' : `${origin.toUpperCase()}`}
               </button>
             ))}
           </div>
         </div>
 
-        {/* Matrix Grid */}
+        {/* Matrix Grid of Roots */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
           {filteredRoots.map((root) => {
             const isFullMastery = root.mastered_words === root.total_words && root.total_words > 0;
             return (
               <div
                 key={root.id}
-                className="bg-slate-950/80 rounded-2xl p-5 border border-slate-800/80 hover:border-slate-700 transition flex flex-col justify-between group"
+                className="bg-[#FAFBF8] border-2 border-[#111410] shadow-[3px_3px_0px_0px_#111410] p-5 flex flex-col justify-between"
               >
                 <div>
                   {/* Card Header */}
-                  <div className="flex items-center justify-between mb-2">
-                    <span className="px-2.5 py-0.5 rounded-md text-xs font-mono font-bold bg-sky-500/10 text-sky-300 border border-sky-500/20">
-                      {root.morpheme}
+                  <div className="flex items-center justify-between mb-2 font-mono">
+                    <span className="px-2 py-0.5 text-xs font-black bg-white text-[#111410] border border-[#111410]">
+                      [{root.morpheme.toUpperCase()}]
                     </span>
-                    <span className="text-[11px] font-mono text-slate-400">
+                    <span className="text-[10px] font-bold text-[#42281D] uppercase">
                       {root.language}
                     </span>
                   </div>
 
-                  <h3 className="text-base font-bold text-white">
-                    {root.core_meaning}
+                  <h3 className="text-base font-black text-[#111410] font-sans uppercase">
+                    "{root.core_meaning}"
                   </h3>
-                  <p className="text-xs text-slate-400 italic mt-1 leading-relaxed">
+                  <p className="text-xs text-[#62685E] italic font-serif mt-1">
                     "{root.mnemonic}"
                   </p>
 
-                  {/* Progress Bar & Stat */}
+                  {/* Progress Bar & Stat (Kiwi Green against Soft Cream Track) */}
                   <div className="mt-4 space-y-1.5">
-                    <div className="flex items-center justify-between text-xs font-mono">
-                      <span className="text-slate-400">Mastery Progress:</span>
-                      <span className={isFullMastery ? 'text-emerald-400 font-bold' : 'text-slate-200 font-bold'}>
-                        {root.mastered_words} / {root.total_words} words ({root.mastery_percentage}%)
+                    <div className="flex items-center justify-between text-[11px] font-mono font-bold uppercase">
+                      <span className="text-[#62685E]">Progress:</span>
+                      <span className={isFullMastery ? 'text-[#2F441E] font-black' : 'text-[#111410]'}>
+                        {root.mastered_words} / {root.total_words} WORDS ({root.mastery_percentage}%)
                       </span>
                     </div>
-                    <div className="w-full h-2 bg-slate-800 rounded-full overflow-hidden">
+                    {/* Linear Bar Meter in Kiwi Green against Cream Track */}
+                    <div className="w-full h-3 bg-[#EFE8DF] border-2 border-[#111410] overflow-hidden">
                       <div
-                        className={`h-full rounded-full transition-all duration-500 ${
-                          isFullMastery
-                            ? 'bg-gradient-to-r from-emerald-500 to-teal-400'
-                            : 'bg-gradient-to-r from-sky-500 to-indigo-500'
+                        className={`h-full transition-all duration-500 ${
+                          isFullMastery ? 'bg-[#7BB33B]' : 'bg-[#84C341]'
                         }`}
                         style={{ width: `${root.mastery_percentage}%` }}
                       />
                     </div>
                   </div>
 
-                  {/* Nested Words Pill List */}
-                  <div className="mt-4 pt-3 border-t border-slate-900 flex flex-wrap gap-1.5">
+                  {/* Words Pill List */}
+                  <div className="mt-4 pt-3 border-t border-[#111410]/20 flex flex-wrap gap-1.5">
                     {root.words && root.words.map((w) => (
                       <span
                         key={w.id}
-                        className={`text-[11px] font-mono px-2 py-0.5 rounded-md flex items-center space-x-1 ${
+                        className={`text-[10px] font-mono font-bold uppercase px-2 py-0.5 border border-[#111410] flex items-center space-x-1 ${
                           w.is_mastered
-                            ? 'bg-emerald-500/10 text-emerald-300 border border-emerald-500/20'
-                            : 'bg-slate-800/80 text-slate-400 border border-slate-700/60'
+                            ? 'bg-[#EDF5E5] text-[#2F441E]'
+                            : 'bg-white text-[#62685E]'
                         }`}
                       >
-                        {w.is_mastered ? <CheckCircle2 className="w-3 h-3 text-emerald-400" /> : <span className="w-1.5 h-1.5 rounded-full bg-slate-600" />}
+                        {w.is_mastered ? <CheckCircle2 className="w-3 h-3 text-[#7BB33B]" /> : <span className="w-1.5 h-1.5 bg-[#42281D]" />}
                         <span>{w.word}</span>
                       </span>
                     ))}
@@ -327,12 +324,12 @@ export default function DashboardView({ stats, onSelectRoot, onNavigateMode }) {
                 </div>
 
                 {/* Bottom Action */}
-                <div className="mt-5 pt-3 border-t border-slate-900">
+                <div className="mt-5 pt-3 border-t border-[#111410]/20">
                   <button
                     onClick={() => onSelectRoot(root.id)}
-                    className="w-full py-2 rounded-xl bg-slate-800 hover:bg-sky-500 hover:text-white text-slate-300 text-xs font-semibold flex items-center justify-center space-x-1.5 transition"
+                    className="w-full py-2 bg-white hover:bg-[#7BB33B] hover:text-white text-[#111410] border-2 border-[#111410] shadow-[2px_2px_0px_0px_#111410] text-xs font-mono font-black uppercase flex items-center justify-center space-x-1.5 transition active:translate-x-[1px] active:translate-y-[1px]"
                   >
-                    <span>Launch Root Flashcards</span>
+                    <span>Launch Root Cards</span>
                     <ArrowRight className="w-3.5 h-3.5" />
                   </button>
                 </div>
@@ -342,45 +339,51 @@ export default function DashboardView({ stats, onSelectRoot, onNavigateMode }) {
         </div>
       </div>
 
-      {/* Recent Activity Log */}
+      {/* Recent Activity Log (Bento Grid Style) */}
       {recent_logs && recent_logs.length > 0 && (
-        <div className="bg-slate-900/90 rounded-2xl p-6 border border-slate-800 shadow-xl">
-          <h3 className="text-base font-bold text-white mb-4">
-            Recent Practice Activity
-          </h3>
-          <div className="divide-y divide-slate-800/80">
+        <div className="bg-white border-2 border-[#111410] shadow-[4px_4px_0px_0px_#111410] p-6">
+          <div className="flex items-center justify-between mb-4 border-b-2 border-[#111410] pb-2 font-mono">
+            <h3 className="text-xs font-black uppercase text-[#111410] tracking-wider">
+              Recent Practice Telemetry Audit
+            </h3>
+            <span className="text-[10px] font-bold text-[#62685E] uppercase">
+              REAL-TIME LOG PERSISTENCE
+            </span>
+          </div>
+
+          <div className="divide-y-2 divide-[#111410]/15">
             {recent_logs.map((log) => {
               const isWord = log.item_type === 'WORD';
               const title = isWord
-                ? `Vocabulary: ${log.word_details?.word || 'Word'}`
-                : `Question: ${log.question_details?.section || 'Exam'} - ${log.question_details?.prompt?.slice(0, 50)}...`;
+                ? `VOCABULARY: ${log.word_details?.word?.toUpperCase() || 'WORD'}`
+                : `QUESTION: ${log.question_details?.section} — ${log.question_details?.prompt?.slice(0, 50)}...`;
 
               return (
-                <div key={log.id} className="py-3 flex items-center justify-between text-xs">
+                <div key={log.id} className="py-3 flex items-center justify-between text-xs font-mono">
                   <div className="flex items-center space-x-3">
                     <span
-                      className={`w-6 h-6 rounded-full flex items-center justify-center shrink-0 ${
-                        log.is_correct ? 'bg-emerald-500/20 text-emerald-400' : 'bg-amber-500/20 text-amber-400'
+                      className={`w-6 h-6 border border-[#111410] flex items-center justify-center shrink-0 ${
+                        log.is_correct ? 'bg-[#7BB33B] text-white' : 'bg-[#42281D] text-white'
                       }`}
                     >
                       {log.is_correct ? <CheckCircle2 className="w-3.5 h-3.5" /> : <AlertCircle className="w-3.5 h-3.5" />}
                     </span>
                     <div>
-                      <span className="font-medium text-slate-200">{title}</span>
-                      <div className="text-[11px] text-slate-400 mt-0.5">
-                        {log.seconds_spent}s elapsed · {new Date(log.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                      <span className="font-bold text-[#111410]">{title}</span>
+                      <div className="text-[10px] text-[#62685E] mt-0.5 uppercase">
+                        {log.seconds_spent}S ELAPSED · {new Date(log.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
                       </div>
                     </div>
                   </div>
 
                   <span
-                    className={`px-2.5 py-1 rounded-md font-semibold text-[11px] ${
+                    className={`px-2 py-0.5 font-bold uppercase text-[10px] border border-[#111410] ${
                       log.is_correct
-                        ? 'bg-emerald-500/10 text-emerald-400 border border-emerald-500/30'
-                        : 'bg-amber-500/10 text-amber-400 border border-amber-500/30'
+                        ? 'bg-[#EDF5E5] text-[#2F441E]'
+                        : 'bg-[#FDF2F2] text-[#991B1B]'
                     }`}
                   >
-                    {log.is_correct ? 'Correct' : 'Needs Review'}
+                    {log.is_correct ? 'MASTERED' : 'NEEDS REVIEW'}
                   </span>
                 </div>
               );

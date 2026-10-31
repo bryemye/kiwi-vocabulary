@@ -8,8 +8,6 @@ import {
   HelpCircle, 
   RotateCcw,
   Sparkles,
-  Target,
-  Maximize2,
   Crosshair,
   Sliders,
   AlertTriangle,
@@ -19,7 +17,7 @@ import confetti from 'canvas-confetti';
 import { logStudyAttempt } from '../services/api';
 
 /**
- * Coordinate Plane SVG Plotter with Live Interactive Expression Evaluator
+ * Coordinate Plane SVG Plotter with Swiss Drafting Grid Aesthetic
  */
 function CoordinatePlane({ config, activeFormula, isFormulaValid }) {
   const svgRef = useRef(null);
@@ -33,7 +31,7 @@ function CoordinatePlane({ config, activeFormula, isFormulaValid }) {
 
   const width = 500;
   const height = 450;
-  const padding = 36;
+  const padding = 38;
 
   const plotWidth = width - padding * 2;
   const plotHeight = height - padding * 2;
@@ -49,7 +47,6 @@ function CoordinatePlane({ config, activeFormula, isFormulaValid }) {
   const evalFn = (fnStr, x) => {
     try {
       if (!fnStr || typeof fnStr !== 'string' || !fnStr.trim()) return NaN;
-      // Normalize common algebraic shorthand
       const sanitized = fnStr
         .replace(/\^/g, '**')
         .replace(/Math\.abs/g, 'abs')
@@ -59,7 +56,6 @@ function CoordinatePlane({ config, activeFormula, isFormulaValid }) {
         .replace(/cos\(([^)]+)\)/g, 'Math.cos($1)')
         .replace(/tan\(([^)]+)\)/g, 'Math.tan($1)');
 
-      // Security disallow unsafe browser identifiers
       if (/(window|document|eval|Function|fetch|prototype|__proto__|import)/i.test(sanitized)) {
         return NaN;
       }
@@ -80,7 +76,6 @@ function CoordinatePlane({ config, activeFormula, isFormulaValid }) {
     for (let x = domain[0]; x <= domain[1]; x += step) {
       const y = evalFn(fnStr, x);
       if (!isNaN(y) && isFinite(y)) {
-        // Clamp slightly beyond range for clean edge clipping
         if (y >= range[0] - 2 && y <= range[1] + 2) {
           points.push(`${toSvgX(x)},${toSvgY(y)}`);
         }
@@ -111,7 +106,6 @@ function CoordinatePlane({ config, activeFormula, isFormulaValid }) {
       const mathX = Number(toMathX(svgX).toFixed(1));
       const mathY = Number(toMathY(svgY).toFixed(1));
       
-      // Calculate curve's corresponding Y value at this mathX
       const curveY = activeFormula ? evalFn(activeFormula, mathX) : NaN;
       const formattedCurveY = !isNaN(curveY) && isFinite(curveY) ? Number(curveY.toFixed(2)) : null;
 
@@ -129,21 +123,21 @@ function CoordinatePlane({ config, activeFormula, isFormulaValid }) {
   const originY = toSvgY(0);
 
   return (
-    <div className="relative w-full bg-slate-950 rounded-2xl p-4 border border-slate-800 shadow-xl overflow-hidden select-none">
+    <div className="relative w-full bg-white border-2 border-[#111410] shadow-[4px_4px_0px_0px_#111410] p-4 select-none">
       {/* Title & Legend Header */}
-      <div className="flex items-center justify-between mb-2 px-1">
+      <div className="flex items-center justify-between mb-3 px-1 border-b-2 border-[#111410] pb-2 font-mono">
         <div className="flex items-center space-x-2">
-          <span className={`w-2.5 h-2.5 rounded-full ${isFormulaValid ? 'bg-sky-400 animate-pulse' : 'bg-amber-400'}`} />
-          <span className="text-xs font-mono font-semibold text-sky-300">
-            {config.displayEquation || 'Graph Visualization'}
+          <span className={`w-3 h-3 border border-[#111410] ${isFormulaValid ? 'bg-[#7BB33B]' : 'bg-[#C29B78]'}`} />
+          <span className="text-xs font-bold uppercase text-[#111410]">
+            {config.displayEquation || 'Drafting Grid'}
           </span>
         </div>
-        <div className="text-[11px] font-mono text-slate-400 flex items-center space-x-2">
-          <Crosshair className="w-3.5 h-3.5 text-slate-500" />
+        <div className="text-[11px] font-mono font-bold uppercase text-[#42281D] flex items-center space-x-2">
+          <Crosshair className="w-3.5 h-3.5 text-[#111410]" />
           <span>
             {hoverCoord 
-              ? `Cursor: (${hoverCoord.mathX}, ${hoverCoord.mathY})${hoverCoord.curveY !== null ? ` · f(x)=${hoverCoord.curveY}` : ''}`
-              : 'Hover to inspect coordinates'}
+              ? `X: ${hoverCoord.mathX} · Y: ${hoverCoord.mathY}${hoverCoord.curveY !== null ? ` [f(x)=${hoverCoord.curveY}]` : ''}`
+              : 'HOVER TO PROBE GRID'}
           </span>
         </div>
       </div>
@@ -151,35 +145,23 @@ function CoordinatePlane({ config, activeFormula, isFormulaValid }) {
       <svg
         ref={svgRef}
         viewBox={`0 0 ${width} ${height}`}
-        className="w-full h-auto cursor-crosshair"
+        className="w-full h-auto cursor-crosshair bg-[#FAFBF8] border-2 border-[#111410]"
         onMouseMove={handleMouseMove}
         onMouseLeave={handleMouseLeave}
       >
         <defs>
-          {/* Arrowheads for axes */}
           <marker id="arrow-x" viewBox="0 0 10 10" refX="6" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
-            <path d="M 0 1.5 L 8 5 L 0 8.5 z" fill="#64748b" />
+            <path d="M 0 1.5 L 8 5 L 0 8.5 z" fill="#111410" />
           </marker>
           <marker id="arrow-y" viewBox="0 0 10 10" refX="5" refY="4" markerWidth="6" markerHeight="6" orient="auto">
-            <path d="M 1.5 8 L 5 0 L 8.5 8 z" fill="#64748b" />
+            <path d="M 1.5 8 L 5 0 L 8.5 8 z" fill="#111410" />
           </marker>
-          {/* Clip path to bound curves within grid */}
           <clipPath id="plot-area">
             <rect x={padding} y={padding} width={plotWidth} height={plotHeight} />
           </clipPath>
         </defs>
 
-        {/* Background plot rect */}
-        <rect
-          x={padding}
-          y={padding}
-          width={plotWidth}
-          height={plotHeight}
-          fill="#090d16"
-          rx="6"
-        />
-
-        {/* Gridlines */}
+        {/* Drafting Grid Lines */}
         {xTicks.map((x) => (
           <line
             key={`grid-x-${x}`}
@@ -187,9 +169,8 @@ function CoordinatePlane({ config, activeFormula, isFormulaValid }) {
             y1={padding}
             x2={toSvgX(x)}
             y2={height - padding}
-            stroke="#1e293b"
-            strokeWidth="1"
-            strokeDasharray={x % 2 === 0 ? "none" : "2,2"}
+            stroke="#EFE8DF"
+            strokeWidth={x % 2 === 0 ? "1.5" : "1"}
           />
         ))}
 
@@ -200,26 +181,25 @@ function CoordinatePlane({ config, activeFormula, isFormulaValid }) {
             y1={toSvgY(y)}
             x2={width - padding}
             y2={toSvgY(y)}
-            stroke="#1e293b"
-            strokeWidth="1"
-            strokeDasharray={y % 2 === 0 ? "none" : "2,2"}
+            stroke="#EFE8DF"
+            strokeWidth={y % 2 === 0 ? "1.5" : "1"}
           />
         ))}
 
-        {/* Primary Axes: X and Y */}
+        {/* Primary Axes: X and Y (Jet Black, Crisp 2.5px) */}
         <line
           x1={padding - 10}
           y1={originY}
           x2={width - padding + 14}
           y2={originY}
-          stroke="#64748b"
-          strokeWidth="2"
+          stroke="#111410"
+          strokeWidth="2.5"
           markerEnd="url(#arrow-x)"
         />
         <text
           x={width - padding + 16}
           y={originY + 4}
-          fill="#94a3b8"
+          fill="#111410"
           fontSize="11"
           fontFamily="monospace"
           fontWeight="bold"
@@ -232,14 +212,14 @@ function CoordinatePlane({ config, activeFormula, isFormulaValid }) {
           y1={height - padding + 10}
           x2={originX}
           y2={padding - 14}
-          stroke="#64748b"
-          strokeWidth="2"
+          stroke="#111410"
+          strokeWidth="2.5"
           markerEnd="url(#arrow-y)"
         />
         <text
           x={originX - 4}
           y={padding - 18}
-          fill="#94a3b8"
+          fill="#111410"
           fontSize="11"
           fontFamily="monospace"
           fontWeight="bold"
@@ -249,11 +229,12 @@ function CoordinatePlane({ config, activeFormula, isFormulaValid }) {
 
         {/* Origin '0' */}
         <text
-          x={originX - 10}
+          x={originX - 12}
           y={originY + 14}
-          fill="#64748b"
+          fill="#42281D"
           fontSize="10"
           fontFamily="monospace"
+          fontWeight="bold"
         >
           0
         </text>
@@ -266,16 +247,17 @@ function CoordinatePlane({ config, activeFormula, isFormulaValid }) {
               y1={originY - 3}
               x2={toSvgX(x)}
               y2={originY + 3}
-              stroke="#64748b"
-              strokeWidth="1.5"
+              stroke="#111410"
+              strokeWidth="2"
             />
             {x % 2 === 0 && (
               <text
                 x={toSvgX(x)}
                 y={originY + 14}
-                fill="#94a3b8"
+                fill="#111410"
                 fontSize="9"
                 fontFamily="monospace"
+                fontWeight="bold"
                 textAnchor="middle"
               >
                 {x}
@@ -291,16 +273,17 @@ function CoordinatePlane({ config, activeFormula, isFormulaValid }) {
               y1={toSvgY(y)}
               x2={originX + 3}
               y2={toSvgY(y)}
-              stroke="#64748b"
-              strokeWidth="1.5"
+              stroke="#111410"
+              strokeWidth="2"
             />
             {y % 2 === 0 && (
               <text
-                x={originX - 8}
+                x={originX - 7}
                 y={toSvgY(y) + 3}
-                fill="#94a3b8"
+                fill="#111410"
                 fontSize="9"
                 fontFamily="monospace"
+                fontWeight="bold"
                 textAnchor="end"
               >
                 {y}
@@ -311,56 +294,62 @@ function CoordinatePlane({ config, activeFormula, isFormulaValid }) {
 
         {/* Curves & Functions (Clipped) */}
         <g clipPath="url(#plot-area)">
-          {/* Active Formula Curve (Controlled in real-time by formula input) */}
+          {/* Active Formula Curve: Vivid Kiwi Green #7BB33B with 3px stroke */}
           {activeFormula && isFormulaValid && (
             <path
               d={generatePath(activeFormula)}
               fill="none"
-              stroke={config.color || '#38bdf8'}
-              strokeWidth="2.5"
-              strokeLinecap="round"
-              strokeLinejoin="round"
+              stroke="#7BB33B"
+              strokeWidth="3.5"
+              strokeLinecap="square"
+              strokeLinejoin="miter"
             />
           )}
 
-          {/* If system of equations, render second line if present */}
+          {/* System second line if present: Deep Bark Brown */}
           {config.type === 'system' && config.lines && config.lines.length > 1 && (
             <path
               d={generatePath(config.lines[1].fn)}
               fill="none"
-              stroke={config.lines[1].color || '#f43f5e'}
-              strokeWidth="2.5"
-              strokeLinecap="round"
-              strokeLinejoin="round"
+              stroke="#42281D"
+              strokeWidth="3"
+              strokeDasharray="4,2"
+              strokeLinecap="square"
             />
           )}
 
-          {/* Key Points */}
+          {/* Key Points: Solid square points with black borders */}
           {config.keyPoints && config.keyPoints.map((pt, idx) => {
             const px = toSvgX(pt.x);
             const py = toSvgY(pt.y);
-            const ptColor = pt.color || '#10b981';
             return (
               <g key={`keypoint-${idx}`}>
-                <circle cx={px} cy={py} r="8" fill={ptColor} opacity="0.25" className="animate-ping" />
-                <circle cx={px} cy={py} r="5" fill={ptColor} stroke="#ffffff" strokeWidth="1.5" />
+                {/* Solid Square Point */}
+                <rect
+                  x={px - 5}
+                  y={py - 5}
+                  width="10"
+                  height="10"
+                  fill="#84C341"
+                  stroke="#111410"
+                  strokeWidth="2"
+                />
+                {/* Geometric Label Callout */}
                 {pt.label && (
                   <g>
                     <rect
                       x={px + 8}
                       y={py - 18}
-                      width={pt.label.length * 6.5 + 8}
+                      width={pt.label.length * 6.5 + 10}
                       height="18"
-                      rx="4"
-                      fill="#0f172a"
-                      stroke={ptColor}
-                      strokeWidth="1"
-                      opacity="0.9"
+                      fill="#FFFFFF"
+                      stroke="#111410"
+                      strokeWidth="1.5"
                     />
                     <text
                       x={px + 12}
                       y={py - 5}
-                      fill="#f8fafc"
+                      fill="#111410"
                       fontSize="9.5"
                       fontFamily="monospace"
                       fontWeight="bold"
@@ -381,27 +370,26 @@ function CoordinatePlane({ config, activeFormula, isFormulaValid }) {
                 y1={padding}
                 x2={hoverCoord.svgX}
                 y2={height - padding}
-                stroke="#38bdf8"
+                stroke="#111410"
                 strokeWidth="1"
-                strokeDasharray="3,3"
-                opacity="0.7"
+                strokeDasharray="2,2"
               />
               <line
                 x1={padding}
                 y1={hoverCoord.svgY}
                 x2={width - padding}
                 y2={hoverCoord.svgY}
-                stroke="#38bdf8"
+                stroke="#111410"
                 strokeWidth="1"
-                strokeDasharray="3,3"
-                opacity="0.7"
+                strokeDasharray="2,2"
               />
-              <circle
-                cx={hoverCoord.svgX}
-                cy={hoverCoord.svgY}
-                r="4"
-                fill="#38bdf8"
-                stroke="#ffffff"
+              <rect
+                x={hoverCoord.svgX - 3}
+                y={hoverCoord.svgY - 3}
+                width="6"
+                height="6"
+                fill="#7BB33B"
+                stroke="#111410"
                 strokeWidth="1.5"
               />
             </g>
@@ -490,7 +478,7 @@ export default function MathView({ questions, onAttemptLogged }) {
     try {
       await logStudyAttempt({
         item_type: 'QUESTION',
-        question: currentQ.id,
+        question_id: currentQ.id,
         is_correct: correct,
         seconds_spent: secondsSpent,
       });
@@ -500,7 +488,7 @@ export default function MathView({ questions, onAttemptLogged }) {
           particleCount: 60,
           spread: 70,
           origin: { y: 0.6 },
-          colors: ['#38bdf8', '#10b981', '#a855f7']
+          colors: ['#7BB33B', '#84C341', '#42281D']
         });
       }
 
@@ -533,8 +521,8 @@ export default function MathView({ questions, onAttemptLogged }) {
   if (!questions || questions.length === 0) {
     return (
       <div className="max-w-4xl mx-auto px-4 py-16 text-center">
-        <LineChart className="w-16 h-16 mx-auto text-slate-600 mb-4" />
-        <h3 className="text-xl font-semibold text-slate-200">No Math Questions Loaded</h3>
+        <LineChart className="w-16 h-16 mx-auto text-[#42281D] mb-4" />
+        <h3 className="text-xl font-bold font-mono text-[#111410] uppercase">No Math Questions Loaded</h3>
       </div>
     );
   }
@@ -542,16 +530,18 @@ export default function MathView({ questions, onAttemptLogged }) {
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
       {/* Top Header */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6 pb-4 border-b-2 border-[#111410]">
         <div>
           <div className="flex items-center space-x-2">
-            <span className="p-1.5 rounded-lg bg-indigo-500/10 text-indigo-400 border border-indigo-500/20">
-              <LineChart className="w-4 h-4" />
+            <span className="w-6 h-6 bg-[#7BB33B] border-2 border-[#111410] flex items-center justify-center text-white text-xs font-mono font-bold">
+              02
             </span>
-            <h2 className="text-xl font-bold text-white tracking-tight">Math Coordinate & Function Lab</h2>
+            <h2 className="text-xl font-black text-[#111410] tracking-tight uppercase font-mono">
+              Math Coordinate Lab
+            </h2>
           </div>
-          <p className="text-sm text-slate-400 mt-1">
-            Analyze curves, coordinate intercepts, and test dynamic coefficient shifts on the interactive plane.
+          <p className="text-xs font-mono text-[#62685E] mt-1 uppercase">
+            Interactive Swiss Drafting Plane & Function Synthesizer
           </p>
         </div>
 
@@ -559,7 +549,7 @@ export default function MathView({ questions, onAttemptLogged }) {
         <div className="flex items-center space-x-2">
           <button
             onClick={handlePrev}
-            className="p-2 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 hover:text-white border border-slate-700 transition"
+            className="p-2 bg-white hover:bg-[#FAFBF8] text-[#111410] border-2 border-[#111410] shadow-[2px_2px_0px_0px_#111410] transition"
             title="Previous Question"
           >
             <ChevronLeft className="w-4 h-4" />
@@ -569,10 +559,10 @@ export default function MathView({ questions, onAttemptLogged }) {
               <button
                 key={q.id}
                 onClick={() => setCurrentIndex(idx)}
-                className={`w-7 h-7 rounded-lg text-xs font-mono font-semibold transition ${
+                className={`w-8 h-8 font-mono text-xs font-black uppercase border-2 border-[#111410] transition ${
                   currentIndex === idx
-                    ? 'bg-sky-500 text-white shadow-md shadow-sky-500/20'
-                    : 'bg-slate-800 text-slate-400 hover:bg-slate-700 hover:text-slate-200'
+                    ? 'bg-[#7BB33B] text-white shadow-[2px_2px_0px_0px_#111410] translate-x-[-1px] translate-y-[-1px]'
+                    : 'bg-white text-[#111410] hover:bg-[#FAFBF8]'
                 }`}
               >
                 {idx + 1}
@@ -581,7 +571,7 @@ export default function MathView({ questions, onAttemptLogged }) {
           </div>
           <button
             onClick={handleNext}
-            className="p-2 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 hover:text-white border border-slate-700 transition"
+            className="p-2 bg-white hover:bg-[#FAFBF8] text-[#111410] border-2 border-[#111410] shadow-[2px_2px_0px_0px_#111410] transition"
             title="Next Question"
           >
             <ChevronRight className="w-4 h-4" />
@@ -593,27 +583,26 @@ export default function MathView({ questions, onAttemptLogged }) {
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
         {/* Left Side: Question Prompt, Formula expression, Choices */}
         <div className="lg:col-span-6 space-y-6">
-          <div className="bg-slate-900/90 rounded-2xl p-6 border border-slate-800 shadow-xl">
-            {/* Section badge & question numbering */}
-            <div className="flex items-center justify-between mb-4">
-              <span className="text-xs uppercase font-mono font-bold tracking-wider px-2.5 py-1 rounded-md bg-sky-500/10 text-sky-400 border border-sky-500/20">
-                Digital SAT · Math Practice
+          <div className="bg-white border-2 border-[#111410] shadow-[4px_4px_0px_0px_#111410] p-6">
+            <div className="flex items-center justify-between mb-4 border-b-2 border-[#111410] pb-2">
+              <span className="text-[10px] font-mono font-black uppercase tracking-wider px-2 py-0.5 bg-[#EDF5E5] text-[#2F441E] border border-[#111410]">
+                Digital SAT · Math Spec
               </span>
-              <span className="text-xs font-mono text-slate-400">
-                Question {currentIndex + 1} of {questions.length}
+              <span className="text-xs font-mono font-bold text-[#42281D]">
+                QUESTION {currentIndex + 1} / {questions.length}
               </span>
             </div>
 
-            {/* Formula Expression Highlight Pill */}
+            {/* Baseline Formula Callout */}
             {currentQ.graph_config?.displayEquation && (
-              <div className="mb-4 inline-flex items-center space-x-2 px-3 py-1.5 rounded-lg bg-indigo-950/60 border border-indigo-500/30 text-indigo-200 text-sm font-mono font-medium">
-                <Sparkles className="w-3.5 h-3.5 text-indigo-400" />
-                <span>Original Equation: <strong>{currentQ.graph_config.displayEquation}</strong></span>
+              <div className="mb-4 inline-flex items-center space-x-2 px-3 py-1.5 bg-[#EFE8DF] border-2 border-[#111410] text-[#42281D] text-xs font-mono font-bold shadow-[2px_2px_0px_0px_#111410]">
+                <Sparkles className="w-3.5 h-3.5 text-[#7BB33B]" />
+                <span>EQ: <strong>{currentQ.graph_config.displayEquation}</strong></span>
               </div>
             )}
 
             {/* Prompt text */}
-            <h3 className="text-base sm:text-lg font-medium text-slate-100 leading-relaxed mb-6">
+            <h3 className="text-base sm:text-lg font-bold text-[#111410] leading-snug mb-6 font-sans">
               {currentQ.prompt}
             </h3>
 
@@ -621,43 +610,43 @@ export default function MathView({ questions, onAttemptLogged }) {
             <div className="space-y-3">
               {Object.entries(currentQ.choices || {}).map(([key, text]) => {
                 const isSelected = selectedChoice === key;
-                let choiceStyle = 'bg-slate-950/70 border-slate-800 text-slate-200 hover:border-slate-700 hover:bg-slate-800/40';
+                let choiceStyle = 'bg-white border-2 border-[#111410] text-[#111410] hover:bg-[#FAFBF8] shadow-[2px_2px_0px_0px_#111410]';
 
                 if (submitted) {
                   if (key === currentQ.correct_answer) {
-                    choiceStyle = 'bg-emerald-500/15 border-emerald-500 text-emerald-200 shadow-sm shadow-emerald-500/10';
+                    choiceStyle = 'bg-[#7BB33B] text-white border-2 border-[#111410] shadow-[4px_4px_0px_0px_#111410]';
                   } else if (isSelected && !isCorrect) {
-                    choiceStyle = 'bg-rose-500/15 border-rose-500 text-rose-200';
+                    choiceStyle = 'bg-[#FDF2F2] text-[#991B1B] border-2 border-[#111410] shadow-[2px_2px_0px_0px_#111410]';
                   } else {
-                    choiceStyle = 'bg-slate-950/40 border-slate-900 text-slate-400 opacity-60';
+                    choiceStyle = 'bg-[#FAFBF8] border-2 border-[#111410]/40 text-[#62685E] opacity-60';
                   }
                 } else if (isSelected) {
-                  choiceStyle = 'bg-sky-500/15 border-sky-500 text-sky-200 shadow-sm shadow-sky-500/10';
+                  choiceStyle = 'bg-[#EDF5E5] text-[#2F441E] border-2 border-[#111410] shadow-[4px_4px_0px_0px_#111410] translate-x-[-1px] translate-y-[-1px]';
                 }
 
                 return (
                   <div
                     key={key}
                     onClick={() => !submitted && setSelectedChoice(key)}
-                    className={`flex items-start space-x-3.5 p-4 rounded-xl border text-sm transition-all duration-150 ${
-                      !submitted ? 'cursor-pointer active:scale-[0.99]' : ''
+                    className={`flex items-start space-x-3.5 p-3.5 text-sm transition-all duration-150 ${
+                      !submitted ? 'cursor-pointer active:translate-x-[1px] active:translate-y-[1px]' : ''
                     } ${choiceStyle}`}
                   >
                     <div
-                      className={`w-7 h-7 rounded-lg flex items-center justify-center font-bold font-mono text-xs shrink-0 transition ${
+                      className={`w-7 h-7 flex items-center justify-center font-black font-mono text-xs shrink-0 border-2 border-[#111410] ${
                         isSelected || (submitted && key === currentQ.correct_answer)
-                          ? 'bg-sky-500 text-white'
-                          : 'bg-slate-800 text-slate-400'
+                          ? 'bg-[#111410] text-white'
+                          : 'bg-[#FAFBF8] text-[#111410]'
                       }`}
                     >
                       {key}
                     </div>
-                    <div className="flex-1 pt-0.5 font-medium">{text}</div>
+                    <div className="flex-1 pt-0.5 font-mono font-bold text-xs">{text}</div>
                     {submitted && key === currentQ.correct_answer && (
-                      <CheckCircle2 className="w-5 h-5 text-emerald-400 shrink-0 mt-0.5" />
+                      <CheckCircle2 className="w-5 h-5 text-white shrink-0" />
                     )}
                     {submitted && isSelected && !isCorrect && (
-                      <XCircle className="w-5 h-5 text-rose-400 shrink-0 mt-0.5" />
+                      <XCircle className="w-5 h-5 text-[#991B1B] shrink-0" />
                     )}
                   </div>
                 );
@@ -665,23 +654,23 @@ export default function MathView({ questions, onAttemptLogged }) {
             </div>
 
             {/* Action buttons */}
-            <div className="mt-6 flex items-center justify-between pt-4 border-t border-slate-800">
-              <div className="text-xs text-slate-400">
-                {!submitted ? 'Select an answer above and submit.' : (isCorrect ? 'Correct response!' : 'Incorrect response.')}
+            <div className="mt-6 flex items-center justify-between pt-4 border-t-2 border-[#111410]">
+              <div className="text-xs font-mono font-bold uppercase text-[#62685E]">
+                {!submitted ? 'Select choice to submit.' : (isCorrect ? 'Status: Correct' : 'Status: Incorrect')}
               </div>
               <div className="flex items-center space-x-3">
                 {!submitted ? (
                   <button
                     onClick={handleSubmit}
                     disabled={!selectedChoice || submitting}
-                    className="px-6 py-2.5 rounded-xl bg-sky-500 hover:bg-sky-400 disabled:opacity-40 disabled:cursor-not-allowed text-white font-semibold text-sm shadow-lg shadow-sky-500/20 transition active:scale-95"
+                    className="px-6 py-2.5 bg-[#7BB33B] hover:bg-[#84C341] text-white font-mono font-black text-xs uppercase border-2 border-[#111410] shadow-[3px_3px_0px_0px_#111410] transition active:translate-x-[2px] active:translate-y-[2px] active:shadow-[1px_1px_0px_0px_#111410] disabled:opacity-40 disabled:cursor-not-allowed"
                   >
-                    {submitting ? 'Verifying...' : 'Submit Answer'}
+                    {submitting ? 'Verifying...' : 'Submit Choice'}
                   </button>
                 ) : (
                   <button
                     onClick={handleNext}
-                    className="flex items-center space-x-2 px-6 py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white font-semibold text-sm shadow-lg shadow-emerald-600/20 transition active:scale-95"
+                    className="flex items-center space-x-2 px-6 py-2.5 bg-[#111410] hover:bg-[#42281D] text-white font-mono font-black text-xs uppercase border-2 border-[#111410] shadow-[3px_3px_0px_0px_#111410] transition active:translate-x-[2px] active:translate-y-[2px]"
                   >
                     <span>Next Question</span>
                     <ChevronRight className="w-4 h-4" />
@@ -691,124 +680,121 @@ export default function MathView({ questions, onAttemptLogged }) {
             </div>
           </div>
 
-          {/* Explanation Banner (when submitted) */}
+          {/* Solution & Explanation */}
           {submitted && (
-            <div className={`p-5 rounded-2xl border text-sm leading-relaxed animate-fade-in ${
-              isCorrect 
-                ? 'bg-emerald-950/30 border-emerald-500/30 text-emerald-200' 
-                : 'bg-slate-900 border-amber-500/30 text-slate-300'
+            <div className={`p-5 border-2 border-[#111410] shadow-[4px_4px_0px_0px_#111410] animate-fade-in ${
+              isCorrect ? 'bg-[#EDF5E5] text-[#2F441E]' : 'bg-[#FAFBF8] text-[#111410]'
             }`}>
-              <div className="flex items-center space-x-2 font-bold mb-2">
+              <div className="flex items-center space-x-2 font-mono font-black text-xs uppercase mb-2">
                 {isCorrect ? (
-                  <span className="text-emerald-400 flex items-center space-x-1.5">
-                    <CheckCircle2 className="w-4 h-4" />
-                    <span>Detailed Solution</span>
+                  <span className="text-[#2F441E] flex items-center space-x-1.5">
+                    <CheckCircle2 className="w-4 h-4 text-[#7BB33B]" />
+                    <span>Mathematical Rationale</span>
                   </span>
                 ) : (
-                  <span className="text-amber-400 flex items-center space-x-1.5">
-                    <HelpCircle className="w-4 h-4" />
-                    <span>Step-by-Step Explanation</span>
+                  <span className="text-[#42281D] flex items-center space-x-1.5">
+                    <HelpCircle className="w-4 h-4 text-[#42281D]" />
+                    <span>Step-by-Step Solution</span>
                   </span>
                 )}
               </div>
-              <p className="text-slate-300 font-sans">{currentQ.explanation}</p>
+              <p className="text-sm font-serif leading-relaxed text-[#111410]">{currentQ.explanation}</p>
             </div>
           )}
         </div>
 
         {/* Right Side: Interactive Formula Bar + Coordinate Grid */}
-        <div className="lg:col-span-6 space-y-3">
-          {/* INTERACTIVE FORMULA CONTROL BAR */}
-          <div className="bg-slate-900/90 rounded-2xl p-4 border border-slate-800 shadow-xl">
-            <div className="flex items-center justify-between mb-2">
+        <div className="lg:col-span-6 space-y-4">
+          {/* TERMINAL-STYLED INTERACTIVE FORMULA CONTROL BAR */}
+          <div className="bg-white border-2 border-[#111410] shadow-[4px_4px_0px_0px_#111410] p-4">
+            <div className="flex items-center justify-between mb-2 pb-2 border-b-2 border-[#111410] font-mono">
               <div className="flex items-center space-x-2">
-                <Sliders className="w-4 h-4 text-sky-400" />
-                <span className="text-xs font-bold uppercase tracking-wider text-slate-200 font-mono">
-                  Live Function Expression
+                <Sliders className="w-4 h-4 text-[#7BB33B]" />
+                <span className="text-xs font-black uppercase text-[#111410]">
+                  Interactive Formula Terminal
                 </span>
               </div>
-              <div className="flex items-center space-x-2">
+              <div>
                 {isFormulaValid ? (
-                  <span className="inline-flex items-center space-x-1 text-[11px] font-mono text-emerald-400 bg-emerald-500/10 px-2 py-0.5 rounded border border-emerald-500/20">
-                    <Check className="w-3 h-3" />
-                    <span>Valid Curve</span>
+                  <span className="inline-flex items-center space-x-1 text-[10px] font-mono font-bold text-[#2F441E] bg-[#EDF5E5] px-2 py-0.5 border border-[#111410]">
+                    <Check className="w-3 h-3 text-[#7BB33B]" />
+                    <span>VALID CURVE</span>
                   </span>
                 ) : (
-                  <span className="inline-flex items-center space-x-1 text-[11px] font-mono text-amber-400 bg-amber-500/10 px-2 py-0.5 rounded border border-amber-500/20">
-                    <AlertTriangle className="w-3 h-3" />
-                    <span>Syntax Error</span>
+                  <span className="inline-flex items-center space-x-1 text-[10px] font-mono font-bold text-[#991B1B] bg-[#FDF2F2] px-2 py-0.5 border border-[#111410]">
+                    <AlertTriangle className="w-3 h-3 text-[#991B1B]" />
+                    <span>SYNTAX ERROR</span>
                   </span>
                 )}
               </div>
             </div>
 
-            {/* Input field & Reset button */}
+            {/* Input field & Angular Reset button */}
             <div className="flex items-center space-x-2">
               <div className="relative flex-1 flex items-center">
-                <span className="absolute left-3 text-sm font-mono font-bold text-sky-400 select-none">
+                <span className="absolute left-3 text-xs font-mono font-black text-[#111410] select-none">
                   f(x) =
                 </span>
                 <input
                   type="text"
                   value={customFormula}
                   onChange={(e) => setCustomFormula(e.target.value)}
-                  placeholder="e.g. (x - 2)^2 - 4 or -0.5 * x + 3"
-                  className="w-full bg-slate-950 text-slate-100 font-mono text-sm pl-16 pr-3 py-2.5 rounded-xl border border-slate-700/80 focus:outline-none focus:ring-2 focus:ring-sky-500 focus:border-transparent transition"
+                  placeholder="e.g. (x - 2)^2 - 4"
+                  className="w-full bg-[#FAFBF8] text-[#111410] font-mono font-bold text-xs pl-14 pr-3 py-2.5 border-2 border-[#111410] focus:outline-none focus:bg-white shadow-[2px_2px_0px_0px_#111410]"
                   spellCheck="false"
                 />
               </div>
 
-              {/* Reset to Original Equation Button */}
+              {/* Angular Reset Button */}
               <button
                 type="button"
                 onClick={handleResetFormula}
                 disabled={!isModified}
-                className={`flex items-center space-x-1.5 px-3.5 py-2.5 rounded-xl text-xs font-semibold border transition ${
+                className={`flex items-center space-x-1.5 px-3.5 py-2.5 text-xs font-mono font-black uppercase border-2 border-[#111410] transition ${
                   isModified
-                    ? 'bg-amber-500/15 hover:bg-amber-500/25 text-amber-300 border-amber-500/40 shadow-sm'
-                    : 'bg-slate-800/60 text-slate-500 border-slate-700/50 cursor-not-allowed'
+                    ? 'bg-[#EFE8DF] hover:bg-[#FAFBF8] text-[#42281D] shadow-[2px_2px_0px_0px_#111410] active:translate-x-[1px] active:translate-y-[1px]'
+                    : 'bg-[#FAFBF8] text-[#A8AAA6] border-[#D1D5DB] cursor-not-allowed'
                 }`}
                 title="Reset to prompt's baseline equation"
               >
-                <RotateCcw className={`w-3.5 h-3.5 ${isModified ? 'animate-spin-once' : ''}`} />
-                <span className="hidden sm:inline">Reset Baseline</span>
+                <RotateCcw className="w-3.5 h-3.5" />
+                <span className="hidden sm:inline">Reset</span>
               </button>
             </div>
 
-            {/* Micro hint explaining student experimentation */}
-            <div className="mt-2 text-[11px] text-slate-400 flex items-center justify-between">
+            <div className="mt-2 text-[10px] font-mono font-bold text-[#62685E] uppercase flex items-center justify-between">
               <span>
                 {isModified ? (
-                  <span className="text-amber-300">
-                    Exploring modified equation. Click <strong>Reset Baseline</strong> when ready to solve.
+                  <span className="text-[#42281D]">
+                    [MODIFIED] Edit coefficients to explore transformations. Click <strong>Reset</strong> to solve.
                   </span>
                 ) : (
-                  <span>Edit coefficients above to observe geometric transformations in real time.</span>
+                  <span>[BASELINE] Edit coefficients above to observe graph changes in real-time.</span>
                 )}
               </span>
             </div>
           </div>
 
-          {/* Coordinate Plane Component */}
+          {/* Coordinate Plane Drafting Grid */}
           <CoordinatePlane 
             config={currentQ.graph_config} 
             activeFormula={customFormula}
             isFormulaValid={isFormulaValid}
           />
 
-          {/* Helpful Math Legend */}
-          <div className="p-4 rounded-xl bg-slate-900/60 border border-slate-800/80 text-xs text-slate-400 flex flex-wrap items-center justify-between gap-3">
+          {/* Swiss Drafting Legend */}
+          <div className="p-3 bg-white border-2 border-[#111410] shadow-[2px_2px_0px_0px_#111410] text-[11px] font-mono font-bold uppercase text-[#111410] flex flex-wrap items-center justify-between gap-3">
             <div className="flex items-center space-x-2">
-              <span className="w-3 h-0.5 bg-sky-400 rounded-full inline-block" />
-              <span>Interactive Function Curve</span>
+              <span className="w-3.5 h-1 bg-[#7BB33B] inline-block" />
+              <span>VIVID KIWI FUNCTION</span>
             </div>
             <div className="flex items-center space-x-2">
-              <span className="w-2.5 h-2.5 rounded-full bg-emerald-500 inline-block ring-2 ring-emerald-500/30" />
-              <span>Baseline Key Points</span>
+              <span className="w-2.5 h-2.5 bg-[#84C341] border border-[#111410] inline-block" />
+              <span>SQUARE CRITICAL POINT</span>
             </div>
             <div className="flex items-center space-x-2">
-              <span className="w-2.5 h-2.5 rounded-full bg-slate-600 inline-block" />
-              <span>Grid Step: 1.0 unit</span>
+              <span className="w-2.5 h-2.5 bg-[#FAFBF8] border border-[#111410] inline-block" />
+              <span>1.0 UNIT DRAFTING GRID</span>
             </div>
           </div>
         </div>

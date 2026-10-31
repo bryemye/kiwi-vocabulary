@@ -50,8 +50,8 @@ export default function App() {
       setMathQuestions(mathData);
       setReadingPassages(readingData);
     } catch (err) {
-      console.error('Error loading SAT prep data:', err);
-      setError('Unable to connect to backend API. Please verify the Django server is running on port 8000.');
+      console.error('Error loading Kiwi Learning data:', err);
+      setError('Unable to connect to backend API. Please verify the Django server is active on port 8000.');
     } finally {
       setLoading(false);
     }
@@ -71,7 +71,7 @@ export default function App() {
     }
   };
 
-  // Fetch fresh dashboard stats every time the user navigates to the dashboard view
+  // Fetch fresh dashboard stats every time user navigates to the dashboard view
   useEffect(() => {
     if (activeTab === 'dashboard') {
       fetchDashboardStats()
@@ -86,7 +86,7 @@ export default function App() {
   };
 
   return (
-    <div className="min-h-screen bg-slate-950 text-slate-100 flex flex-col font-sans selection:bg-sky-500 selection:text-white">
+    <div className="min-h-screen bg-[#FAFBF8] bg-grid-kiwi text-[#111410] flex flex-col font-sans selection:bg-[#7BB33B] selection:text-white">
       {/* Top Navbar */}
       <Navbar
         activeTab={activeTab}
@@ -97,17 +97,17 @@ export default function App() {
 
       {/* Error notification banner if API is unreachable */}
       {error && (
-        <div className="bg-rose-950/80 border-b border-rose-800 text-rose-200 px-4 py-2.5 text-xs flex items-center justify-between">
+        <div className="bg-[#FDF2F2] border-b-2 border-[#111410] text-[#991B1B] px-4 py-2.5 text-xs font-mono font-bold uppercase flex items-center justify-between">
           <div className="flex items-center space-x-2">
-            <AlertCircle className="w-4 h-4 text-rose-400" />
+            <AlertCircle className="w-4 h-4 text-[#991B1B]" />
             <span>{error}</span>
           </div>
           <button
             onClick={loadAllData}
-            className="flex items-center space-x-1 px-2.5 py-1 rounded bg-rose-900/60 hover:bg-rose-800 font-semibold"
+            className="flex items-center space-x-1 px-3 py-1 bg-white hover:bg-[#FAFBF8] border-2 border-[#111410] shadow-[2px_2px_0px_0px_#111410] text-xs font-black"
           >
             <RefreshCw className="w-3 h-3" />
-            <span>Retry</span>
+            <span>RETRY</span>
           </button>
         </div>
       )}
@@ -116,8 +116,10 @@ export default function App() {
       <main className="flex-1 pb-16">
         {loading ? (
           <div className="min-h-[500px] flex flex-col items-center justify-center space-y-4">
-            <div className="w-12 h-12 rounded-full border-4 border-slate-800 border-t-sky-500 animate-spin" />
-            <p className="text-sm text-slate-400 font-mono">Initializing SAT/ACT Diagnostic Engine...</p>
+            <div className="w-10 h-10 border-4 border-[#111410] border-t-[#7BB33B] animate-spin" />
+            <p className="text-xs text-[#111410] font-mono font-bold uppercase tracking-wider">
+              INITIALIZING KIWI LEARNING GRID...
+            </p>
           </div>
         ) : (
           <>
@@ -155,14 +157,14 @@ export default function App() {
         )}
       </main>
 
-      {/* Footer */}
-      <footer className="border-t border-slate-900 bg-slate-950 py-6 text-center text-xs text-slate-400">
+      {/* Swiss/Neo-Brutalist Technical Footer */}
+      <footer className="border-t-2 border-[#111410] bg-white py-6 text-center text-xs font-mono uppercase text-[#42281D]">
         <div className="max-w-7xl mx-auto px-4 flex flex-col sm:flex-row items-center justify-between gap-2">
-          <div>
-            AEGIS SAT/ACT Diagnostic Engine · Headless Django 6.0 & React 18
+          <div className="font-extrabold tracking-tight">
+            KIWI LEARNING SYSTEM · SWISS-GRID SAT/ACT DIAGNOSTICS · DJANGO & REACT
           </div>
-          <div className="font-mono text-slate-400">
-            Latin & Greek Etymology · Dynamic Math SVGs · Digital SAT Annotation
+          <div className="font-bold text-[#62685E]">
+            ROOT ETYMOLOGY · DRAFTING PLANE · KIWI-LIME ANNOTATION
           </div>
         </div>
       </footer>
