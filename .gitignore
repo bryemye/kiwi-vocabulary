@@ -4,6 +4,7 @@ __pycache__/
 *$py.class
 *.sqlite3
 db.sqlite3-journal
+.venv/
 
 # Node
 node_modules/

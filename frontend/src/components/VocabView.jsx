@@ -1,62 +1,130 @@
 import React, { useState, useEffect, useMemo, useCallback } from 'react';
-import { 
-  Volume2, 
-  RotateCw, 
-  ChevronLeft, 
-  ChevronRight, 
-  Check, 
-  Sparkles, 
-  BookMarked, 
-  Layers, 
-  Filter, 
-  CheckCircle, 
+import {
+  Volume2,
+  RotateCw,
+  ChevronLeft,
+  ChevronRight,
+  Check,
+  Sparkles,
+  BookMarked,
+  Layers,
+  Filter,
+  CheckCircle,
   HelpCircle,
   Search,
   X,
   ArrowRight,
   RotateCcw,
-  LayoutDashboard,
-  Award
+  Award,
+  Compass,
+  Target,
+  Zap,
+  BookOpen,
+  Network,
+  Sliders,
+  AlertTriangle,
+  ShieldCheck,
+  Edit3
 } from 'lucide-react';
 import confetti from 'canvas-confetti';
-import { logStudyAttempt, fetchWordSession } from '../services/api';
+import { logStudyAttempt, fetchVocabStats } from '../services/api';
+import MorphemeDetailView from './MorphemeDetailView';
+import VocabGraphView from '../views/VocabGraphView';
+import StudyDeck from './StudyDeck';
+import CustomPracticeModal from './CustomPracticeModal';
+import EditorialReviewModal from './EditorialReviewModal';
+import {
+  recordWordAttempt,
+  shuffleWithMorphemeVariety,
+  SESSION_SIZE
+} from '../services/studySessionService';
 
-const SESSION_SIZE = 15;
-
-export default function VocabView({ 
-  words = [], 
-  roots = [], 
-  onAttemptLogged, 
+export default function VocabView({
+  words = [],
+  roots = [],
+  stats = null,
+  onAttemptLogged,
   initialRootId,
-  onNavigateDashboard 
+  initialSubTab = 'study',
+  activeTab: propActiveTab,
+  onTabChange,
+  onSubTabChange,
+  onNavigateDashboard,
+  isAdminMode = false,
+  onUpdateWordReview
 }) {
+  // Navigation Sub-tab state
+  const [subTab, setSubTab] = useState(initialSubTab);
+
+  useEffect(() => {
+    const target = propActiveTab || initialSubTab;
+    if (target) {
+      setSubTab(target);
+      setActiveMorphemeView(null);
+    }
+  }, [propActiveTab, initialSubTab]);
+
+  const handleSubTabChange = useCallback((newTab) => {
+    setSubTab(newTab);
+    setActiveMorphemeView(null);
+    if (onTabChange) {
+      onTabChange(newTab);
+    } else if (onSubTabChange) {
+      onSubTabChange(newTab);
+    }
+  }, [onTabChange, onSubTabChange]);
+
+  // Dedicated Morpheme Detail & Subset Practice States
+  const [activeMorphemeView, setActiveMorphemeView] = useState(null);
+  const [subsetPracticeInfo, setSubsetPracticeInfo] = useState(null);
+
+  // Editorial Review Modal State
+  const [editingReviewWord, setEditingReviewWord] = useState(null);
+
+  // Custom Practice Session Modal State
+  const [isCustomModalOpen, setIsCustomModalOpen] = useState(false);
+  const [customModalInitialRoots, setCustomModalInitialRoots] = useState([]);
+
+  // Tab switch confirmation modal state (if leaving an active study session)
+  const [pendingTab, setPendingTab] = useState(null);
+  const [showTabConfirm, setShowTabConfirm] = useState(false);
+
   // Filter States
   const [selectedLanguage, setSelectedLanguage] = useState('ALL'); // 'ALL' | 'Latin' | 'Greek'
   const [selectedRootId, setSelectedRootId] = useState(initialRootId || 'ALL');
   const [searchTerm, setSearchTerm] = useState('');
 
-  // Deck & Session States
+  // Deck & Session States (Study Deck)
   const [sessionDeck, setSessionDeck] = useState([]);
   const [currentIndex, setCurrentIndex] = useState(0);
   const [isFlipped, setIsFlipped] = useState(false);
   const [submitting, setSubmitting] = useState(false);
-  const [feedback, setFeedback] = useState(null); // { type: 'success' | 'review', text: string }
+  const [feedback, setFeedback] = useState(null);
   const [cardStartTime, setCardStartTime] = useState(Date.now());
   const [sessionRound, setSessionRound] = useState(1);
   const [roundStats, setRoundStats] = useState({ correct: 0, total: 0 });
   const [isSessionComplete, setIsSessionComplete] = useState(false);
 
-  // Sync initialRootId if passed from dashboard
+  // Dedicated Vocab Stats from backend
+  const [vocabStats, setVocabStats] = useState(null);
+
+  useEffect(() => {
+    fetchVocabStats()
+      .then(data => setVocabStats(data))
+      .catch(err => console.warn('Vocab stats fetch note:', err));
+  }, []);
+
+  // Sync initialRootId if passed
   useEffect(() => {
     if (initialRootId) {
       setSelectedRootId(initialRootId);
-      // Auto-set language based on this root if found
       const matchingRoot = roots.find(r => r.id === Number(initialRootId));
       if (matchingRoot) {
         setSelectedLanguage(matchingRoot.language);
       }
+      handleSubTabChange('study');
     }
-  }, [initialRootId, roots]);
+  }, [initialRootId, roots, handleSubTabChange]);
 
   // Filter available roots based on selected language
   const availableRoots = useMemo(() => {
@@ -64,7 +132,6 @@ export default function VocabView({
     return roots.filter(r => r.language.toLowerCase() === selectedLanguage.toLowerCase());
   }, [roots, selectedLanguage]);
 
-  // When language changes, reset root filter if it doesn't belong to the language
   const handleLanguageChange = (lang) => {
     setSelectedLanguage(lang);
     if (selectedRootId !== 'ALL') {
@@ -78,18 +145,15 @@ export default function VocabView({
   // Build filtered master list
   const filteredWords = useMemo(() => {
     return words.filter((w) => {
-      // Language filter
       if (selectedLanguage !== 'ALL') {
         const rootLang = w.root_details?.language || roots.find(r => r.id === w.root)?.language;
         if (rootLang && rootLang.toLowerCase() !== selectedLanguage.toLowerCase()) {
           return false;
         }
       }
-      // Root filter
       if (selectedRootId !== 'ALL' && w.root !== Number(selectedRootId)) {
         return false;
       }
-      // Search filter
       if (searchTerm.trim()) {
         const query = searchTerm.toLowerCase();
         const wordMatch = w.word.toLowerCase().includes(query);
@@ -101,103 +165,287 @@ export default function VocabView({
       }
       return true;
     });
-  }, [words, roots, selectedLanguage, selectedRootId, searchTerm]);
+  }, [words, selectedLanguage, selectedRootId, searchTerm, roots]);
 
-  // Initialize or replenish a 15-word session deck
-  const initializeSession = useCallback(async (isNextRound = false) => {
-    setIsSessionComplete(false);
+  // Initialize or re-shuffle session deck (15-word slice with morpheme variety)
+  const initializeSession = useCallback((advanceRound = false) => {
+    if (subsetPracticeInfo) return; // Preserve active targeted subset session
+
+    if (filteredWords.length === 0) {
+      setSessionDeck([]);
+      setCurrentIndex(0);
+      setIsSessionComplete(false);
+      return;
+    }
+
+    const shuffled = [...filteredWords].sort(() => 0.5 - Math.random());
+    const slice = shuffled.slice(0, SESSION_SIZE);
+    const variedDeck = shuffleWithMorphemeVariety(slice);
+
+    setSessionDeck(variedDeck);
     setCurrentIndex(0);
     setIsFlipped(false);
-    setFeedback(null);
     setCardStartTime(Date.now());
-
-    if (isNextRound) {
-      setSessionRound(prev => prev + 1);
-    } else {
-      setSessionRound(1);
-    }
+    setIsSessionComplete(false);
     setRoundStats({ correct: 0, total: 0 });
 
-    try {
-      // Try backend session endpoint for prioritized deck
-      const params = { count: SESSION_SIZE };
-      if (selectedLanguage !== 'ALL') params.language = selectedLanguage;
-      if (selectedRootId !== 'ALL') params.root = selectedRootId;
-      if (searchTerm.trim()) params.search = searchTerm.trim();
+    if (advanceRound) {
+      setSessionRound(prev => prev + 1);
+    }
+  }, [filteredWords, subsetPracticeInfo]);
 
-      const serverSession = await fetchWordSession(params);
-      if (serverSession && serverSession.length > 0) {
-        setSessionDeck(serverSession);
-        return;
+  // Open Morpheme Detail View (for prefix, root, or suffix)
+  const handleOpenMorpheme = useCallback(({ type, raw = '', root = null, word = null }) => {
+    let title = '';
+    let cleanToken = '';
+    let meaning = '';
+    let language = 'Latin';
+    let mnemonic = '';
+    let definitionText = '';
+    let matchedWords = [];
+    let rootObj = null;
+
+    if (type === 'root') {
+      rootObj = root || word?.root_details || roots.find(r => r.id === word?.root);
+      const morpheme = rootObj?.morpheme || 'UNKNOWN ROOT';
+      title = `[${morpheme.toUpperCase()}]`;
+      cleanToken = morpheme;
+      meaning = rootObj?.core_meaning || '';
+      language = rootObj?.language || 'Latin';
+      mnemonic = rootObj?.mnemonic || '';
+      definitionText = `A root is the foundational base morpheme of a word that carries its primary semantic essence. Roots cannot be reduced to smaller grammatical units without destroying their conceptual core. The root "[${morpheme.toUpperCase()}]" originates from classical ${language} and embodies the core meaning "${meaning}".`;
+
+      matchedWords = words.filter(w => {
+        if (word && w.id === word.id) return true;
+        if (rootObj?.id && (w.root === rootObj.id || w.root_details?.id === rootObj.id)) return true;
+        if (morpheme && w.root_details?.morpheme?.toLowerCase() === morpheme.toLowerCase()) return true;
+        return false;
+      });
+    } else if (type === 'prefix') {
+      let token = raw;
+      const parenMatch = raw.match(/^([^(]+)\s*(?:\(([^)]+)\))?/);
+      if (parenMatch) {
+        token = parenMatch[1].trim();
+        meaning = parenMatch[2]?.trim() || '';
       }
-    } catch (err) {
-      // Fallback to client-side slicing
+      cleanToken = token.trim();
+      title = raw || cleanToken;
+      definitionText = `A prefix is an affix morpheme attached to the front of a stem or root word to alter its meaning by conveying direction, negation, relationship, or intensity. In this context, the prefix morpheme "${cleanToken}" introduces the modifier "${meaning || 'derivational prefix'}" to construct specialized words.`;
+
+      const basePrefix = cleanToken.toLowerCase().replace(/[^a-z]/g, '');
+      matchedWords = words.filter(w => {
+        if (word && w.id === word.id) return true;
+        if (!w.prefix) return false;
+        const pRaw = w.prefix.toLowerCase();
+        const pToken = (pRaw.split(' ')[0] || '').replace(/[^a-z]/g, '');
+        return pToken === basePrefix || pRaw.startsWith(cleanToken.toLowerCase()) || (basePrefix.length >= 2 && w.word.toLowerCase().startsWith(basePrefix));
+      });
+    } else if (type === 'suffix') {
+      let token = raw;
+      const parenMatch = raw.match(/^([^(]+)\s*(?:\(([^)]+)\))?/);
+      if (parenMatch) {
+        token = parenMatch[1].trim();
+        meaning = parenMatch[2]?.trim() || '';
+      }
+      cleanToken = token.trim();
+      title = raw || cleanToken;
+      definitionText = `A suffix is a bound affix morpheme joined to the conclusion of a root or base stem to establish its grammatical role (such as noun, adjective, or verb) or impart fine shades of meaning. Here, the suffix morpheme "${cleanToken}" functions as "${meaning || 'derivational ending'}" across related English terms.`;
+
+      const baseSuffix = cleanToken.toLowerCase().replace(/[^a-z]/g, '');
+      matchedWords = words.filter(w => {
+        if (word && w.id === word.id) return true;
+        if (!w.suffix) return false;
+        const sRaw = w.suffix.toLowerCase();
+        const sToken = (sRaw.split(' ')[0] || '').replace(/[^a-z]/g, '');
+        return sToken === baseSuffix || sRaw.startsWith(cleanToken.toLowerCase()) || (baseSuffix.length >= 2 && w.word.toLowerCase().endsWith(baseSuffix));
+      });
     }
 
-    // Client-side prioritized slicing: shuffle and pick up to 15
-    const shuffled = [...filteredWords].sort(() => Math.random() - 0.5);
-    setSessionDeck(shuffled.slice(0, SESSION_SIZE));
-  }, [selectedLanguage, selectedRootId, searchTerm, filteredWords]);
+    // Ensure source word is placed first in the list
+    if (word && matchedWords.some(w => w.id === word.id)) {
+      matchedWords = [word, ...matchedWords.filter(w => w.id !== word.id)];
+    }
 
-  // Re-seed session deck whenever primary filters change
+    setActiveMorphemeView({
+      type,
+      title,
+      cleanToken,
+      meaning,
+      language,
+      mnemonic,
+      definitionText,
+      sourceWord: word?.word || '',
+      matchedWords,
+      rootId: rootObj?.id || null,
+      root: rootObj
+    });
+  }, [roots, words]);
+
+  // Open Custom Practice Session Modal
+  const handleOpenCustomSession = useCallback((initialRootIds = []) => {
+    setCustomModalInitialRoots(initialRootIds);
+    setIsCustomModalOpen(true);
+  }, []);
+
+  // Launch a generated custom session (from CustomPracticeModal)
+  const handleLaunchCustomSession = useCallback((sessionData) => {
+    if (!sessionData || !sessionData.deck || sessionData.deck.length === 0) return;
+
+    setSubsetPracticeInfo({
+      title: sessionData.title,
+      mode: sessionData.mode,
+      modeLabel: sessionData.modeLabel,
+      details: sessionData.details,
+      count: sessionData.deck.length
+    });
+    setSessionDeck(sessionData.deck);
+    setCurrentIndex(0);
+    setIsFlipped(false);
+    setCardStartTime(Date.now());
+    setRoundStats({ correct: 0, total: 0 });
+    setIsSessionComplete(false);
+    handleSubTabChange('study');
+    setActiveMorphemeView(null);
+  }, [handleSubTabChange]);
+
+  // Start targeted subset practice (called from MorphemeDetailView launcher)
+  const handleStartSubsetPractice = useCallback((subsetWords, subsetTitle, morphemeData) => {
+    const rootId = morphemeData?.rootId || morphemeData?.root?.id;
+    if (rootId) {
+      handleOpenCustomSession([Number(rootId)]);
+    } else if (morphemeData?.cleanToken) {
+      const match = roots.find(r => r.morpheme.toLowerCase() === morphemeData.cleanToken.toLowerCase());
+      if (match) {
+        handleOpenCustomSession([Number(match.id)]);
+      } else {
+        handleOpenCustomSession([]);
+      }
+    } else {
+      handleOpenCustomSession([]);
+    }
+  }, [roots, handleOpenCustomSession]);
+
+  // Exit targeted subset practice and restore full 15-card session
+  const handleClearSubsetPractice = useCallback(() => {
+    setSubsetPracticeInfo(null);
+    if (filteredWords.length === 0) {
+      setSessionDeck([]);
+      setCurrentIndex(0);
+      setIsSessionComplete(false);
+      return;
+    }
+    const shuffled = [...filteredWords].sort(() => 0.5 - Math.random());
+    setSessionDeck(shuffleWithMorphemeVariety(shuffled.slice(0, SESSION_SIZE)));
+    setCurrentIndex(0);
+    setIsFlipped(false);
+    setCardStartTime(Date.now());
+    setIsSessionComplete(false);
+    setRoundStats({ correct: 0, total: 0 });
+  }, [filteredWords]);
+
+  // Select a single word to practice from the morpheme word list
+  const handleSelectSingleWord = useCallback((wordItem) => {
+    if (!wordItem) return;
+    const remainingWords = words.filter(w => w.id !== wordItem.id);
+    const customDeck = [wordItem, ...remainingWords.slice(0, SESSION_SIZE - 1)];
+    setSubsetPracticeInfo({
+      title: `Word Focus: ${wordItem.word}`,
+      mode: 'word_focus',
+      modeLabel: 'Word Focus',
+      details: `1 specific word + 14 general practice words`,
+      count: 1
+    });
+    setSessionDeck(shuffleWithMorphemeVariety(customDeck));
+    setCurrentIndex(0);
+    setIsFlipped(false);
+    setCardStartTime(Date.now());
+    setRoundStats({ correct: 0, total: 0 });
+    setIsSessionComplete(false);
+    handleSubTabChange('study');
+    setActiveMorphemeView(null);
+  }, [words, handleSubTabChange]);
+
+  // Safe Tab Navigation handling confirmation if active session in progress
+  const handleAttemptTabChange = useCallback((targetTab) => {
+    if (targetTab === subTab) return;
+    if (subTab === 'study' && currentIndex > 0 && !isSessionComplete) {
+      setPendingTab(targetTab);
+      setShowTabConfirm(true);
+    } else {
+      handleSubTabChange(targetTab);
+    }
+  }, [subTab, currentIndex, isSessionComplete, handleSubTabChange]);
+
+  const handleConfirmTabChange = useCallback(() => {
+    setShowTabConfirm(false);
+    if (pendingTab) {
+      setCurrentIndex(0);
+      setIsFlipped(false);
+      handleSubTabChange(pendingTab);
+      setPendingTab(null);
+    }
+  }, [pendingTab, handleSubTabChange]);
+
+  const handleCancelTabChange = useCallback(() => {
+    setShowTabConfirm(false);
+    setPendingTab(null);
+  }, []);
+
   useEffect(() => {
     initializeSession(false);
-  }, [selectedLanguage, selectedRootId, searchTerm, initializeSession]);
+  }, [initializeSession]);
 
   const currentWord = sessionDeck[currentIndex] || null;
 
-  // Reset flip on index change
+  // Reset timer on card change
   useEffect(() => {
-    setIsFlipped(false);
-    setFeedback(null);
     setCardStartTime(Date.now());
+    setIsFlipped(false);
   }, [currentIndex]);
 
+  // Pronunciation speech synthesis
   const handleSpeak = (text) => {
     if ('speechSynthesis' in window) {
       window.speechSynthesis.cancel();
       const utterance = new SpeechSynthesisUtterance(text);
-      utterance.rate = 0.9;
+      utterance.lang = 'en-US';
+      utterance.rate = 0.85;
       window.speechSynthesis.speak(utterance);
     }
   };
 
-  const handleResponse = useCallback(async (isCorrect) => {
+  // Submit study response
+  const handleResponse = useCallback(async (isKnown) => {
     if (!currentWord || submitting || isSessionComplete) return;
-    setSubmitting(true);
+
     const secondsSpent = Math.max(1, Math.round((Date.now() - cardStartTime) / 1000));
+    setSubmitting(true);
 
     try {
       await logStudyAttempt({
         item_type: 'WORD',
         word_id: currentWord.id,
-        is_correct: isCorrect,
+        is_correct: isKnown,
         seconds_spent: secondsSpent,
       });
 
-      // Update round stats
-      setRoundStats(prev => ({
-        correct: prev.correct + (isCorrect ? 1 : 0),
-        total: prev.total + 1
-      }));
-
-      if (isCorrect) {
-        confetti({
-          particleCount: 50,
-          spread: 60,
-          origin: { y: 0.7 },
-          colors: ['#7BB33B', '#84C341', '#42281D']
-        });
-        setFeedback({ type: 'success', text: 'WORD MASTERED (+1)' });
-      } else {
-        setFeedback({ type: 'review', text: 'SCHEDULED FOR ACTIVE REVIEW' });
-      }
+      // Update localStorage spaced repetition progress tracking
+      recordWordAttempt(currentWord, isKnown);
 
       if (onAttemptLogged) {
         onAttemptLogged();
       }
 
-      // Automatically flip to back if not flipped
+      setRoundStats(prev => ({
+        correct: prev.correct + (isKnown ? 1 : 0),
+        total: prev.total + 1
+      }));
+
+      setFeedback({
+        type: isKnown ? 'success' : 'review',
+        text: isKnown ? 'MASTERED · LOGGED' : 'NEEDS PRACTICE · LOGGED'
+      });
+
       if (!isFlipped) {
         setIsFlipped(true);
       }
@@ -207,7 +455,6 @@ export default function VocabView({
         if (currentIndex < sessionDeck.length - 1) {
           setCurrentIndex(prev => prev + 1);
         } else {
-          // Finished the 15-card session!
           setIsSessionComplete(true);
           confetti({
             particleCount: 80,
@@ -216,9 +463,9 @@ export default function VocabView({
             colors: ['#7BB33B', '#84C341', '#2F441E', '#C29B78']
           });
         }
-      }, 1100);
+      }, 1000);
     } catch (err) {
-      console.error(err);
+      console.error('Error logging study attempt:', err);
     } finally {
       setSubmitting(false);
     }
@@ -227,10 +474,10 @@ export default function VocabView({
   // Global Keyboard Shortcuts
   useEffect(() => {
     const handleKeyDown = (e) => {
-      // Ignore if user is focused inside input/textarea/select
       const activeTag = document.activeElement ? document.activeElement.tagName : '';
       if (['INPUT', 'SELECT', 'TEXTAREA'].includes(activeTag)) return;
-      if (isSessionComplete) return;
+      if (activeMorphemeView || isCustomModalOpen || showTabConfirm) return; // Disable flashcard shortcuts while modal is open
+      if (subTab !== 'study' || isSessionComplete) return;
 
       if (e.code === 'Space' || e.key === 'ArrowUp') {
         e.preventDefault();
@@ -246,431 +493,553 @@ export default function VocabView({
 
     window.addEventListener('keydown', handleKeyDown);
     return () => window.removeEventListener('keydown', handleKeyDown);
-  }, [handleResponse, isSessionComplete]);
+  }, [subTab, isSessionComplete, activeMorphemeView, isCustomModalOpen, showTabConfirm, handleResponse]);
 
-  // Connotation styling
-  const getConnotationBadge = (connotation) => {
-    switch (connotation?.toLowerCase()) {
-      case 'positive':
-        return 'bg-[#EDF5E5] text-[#2F441E] border-2 border-[#111410]';
-      case 'negative':
-        return 'bg-[#FDF2F2] text-[#991B1B] border-2 border-[#111410]';
-      default:
-        return 'bg-[#EFE8DF] text-[#42281D] border-2 border-[#111410]';
-    }
+  const handleLaunchRootPractice = (rootId) => {
+    handleOpenCustomSession([Number(rootId)]);
   };
 
+  // If a morpheme detail view is active, render dedicated Morpheme Definition page
+  if (activeMorphemeView) {
+    return (
+      <div className="max-w-6xl mx-auto px-4 py-6">
+        <MorphemeDetailView
+          morphemeData={activeMorphemeView}
+          onBack={() => setActiveMorphemeView(null)}
+          onStartPractice={handleStartSubsetPractice}
+          onSelectWordCard={handleSelectSingleWord}
+        />
+        <CustomPracticeModal
+          isOpen={isCustomModalOpen}
+          onClose={() => setIsCustomModalOpen(false)}
+          roots={roots}
+          words={words}
+          initialSelectedRootIds={customModalInitialRoots}
+          onLaunchSession={handleLaunchCustomSession}
+        />
+      </div>
+    );
+  }
+
   return (
-    <div className="max-w-4xl mx-auto px-4 py-6">
-      {/* STICKY ROOT & LANGUAGE FILTER TOOLBAR */}
-      <div className="sticky top-16 z-30 bg-[#FAFBF8] pb-4 mb-4 border-b-2 border-[#111410] pt-2">
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
-          {/* Language Origin Toggles */}
-          <div className="flex items-center space-x-1 font-mono text-xs">
-            <span className="text-[10px] font-black uppercase text-[#62685E] mr-1 hidden sm:inline">ORIGIN:</span>
-            {['ALL', 'Latin', 'Greek'].map((lang) => (
-              <button
-                key={lang}
-                onClick={() => handleLanguageChange(lang)}
-                className={`px-3 py-1 font-black uppercase border-2 border-[#111410] transition ${
-                  selectedLanguage.toLowerCase() === lang.toLowerCase()
-                    ? 'bg-[#7BB33B] text-white shadow-[2px_2px_0px_0px_#111410]'
-                    : 'bg-white text-[#111410] hover:bg-[#FAFBF8]'
-                }`}
-              >
-                {lang.toUpperCase()}
-              </button>
-            ))}
-          </div>
+    <div className={`mx-auto px-4 ${subTab === 'graph' ? 'max-w-7xl py-4 space-y-4' : 'max-w-6xl py-6 space-y-6'}`}>
 
-          {/* Root Dropdown & Search Input */}
-          <div className="flex items-center space-x-2 flex-1 sm:justify-end">
-            {/* Root Select */}
-            <div className="bg-white border-2 border-[#111410] shadow-[2px_2px_0px_0px_#111410] px-2 py-1 flex items-center">
-              <Filter className="w-3.5 h-3.5 text-[#42281D] mr-1.5 shrink-0" />
-              <select
-                value={selectedRootId}
-                onChange={(e) => setSelectedRootId(e.target.value)}
-                className="bg-transparent text-[#111410] text-xs font-mono font-bold uppercase focus:outline-none cursor-pointer max-w-[140px] sm:max-w-[190px] truncate"
-              >
-                <option value="ALL">ALL ROOTS ({availableRoots.length})</option>
-                {availableRoots.map((root) => (
-                  <option key={root.id} value={root.id}>
-                    [{root.morpheme.toUpperCase()}] {root.core_meaning.toUpperCase()}
-                  </option>
-                ))}
-              </select>
+      {/* FLAGSHIP HUB HEADER & DEDICATED SUB-NAVIGATION */}
+      <div className="bg-white border-2 border-[#111410] shadow-[5px_5px_0px_0px_#111410] p-5 sm:p-6">
+        <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 border-b-2 border-[#111410] pb-5">
+          <div className="flex items-center space-x-3">
+            <div className="w-12 h-12 bg-[#7BB33B] border-2 border-[#111410] shadow-[3px_3px_0px_0px_#111410] flex items-center justify-center shrink-0">
+              <Sparkles className="w-6 h-6 text-white" />
             </div>
-
-            {/* Instant Search Bar */}
-            <div className="relative flex-1 sm:max-w-[200px]">
-              <Search className="w-3.5 h-3.5 absolute left-2.5 top-2.5 text-[#62685E]" />
-              <input
-                type="text"
-                value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
-                placeholder="SEARCH WORDS..."
-                className="w-full bg-white text-[#111410] font-mono font-bold text-xs pl-8 pr-7 py-1 border-2 border-[#111410] shadow-[2px_2px_0px_0px_#111410] focus:outline-none uppercase placeholder:text-[#A8AAA6]"
-              />
-              {searchTerm && (
-                <button
-                  onClick={() => setSearchTerm('')}
-                  className="absolute right-2 top-2 text-[#42281D] hover:text-[#111410]"
-                >
-                  <X className="w-3.5 h-3.5" />
-                </button>
-              )}
+            <div>
+              <div className="flex items-center space-x-2">
+                <h1 className="text-2xl sm:text-3xl font-black font-sans uppercase tracking-tight text-[#111410]">
+                  Kiwi Vocabulary
+                </h1>
+              </div>
+              <p className="text-xs font-mono uppercase text-[#62685E] mt-0.5">
+                SAT/ACT Spaced Repetition
+              </p>
             </div>
           </div>
+
+          {/* Quick Metrics Capsule */}
+          <div className="flex items-center space-x-2 text-xs font-mono">
+            <div className="px-3 py-1.5 bg-[#FAFBF8] border-2 border-[#111410] shadow-[2px_2px_0px_0px_#111410]">
+              <span className="text-[#62685E] font-bold">LEXICON: </span>
+              <strong>{words.length} WORDS</strong>
+            </div>
+            <div className="px-3 py-1.5 bg-[#EDF5E5] border-2 border-[#111410] shadow-[2px_2px_0px_0px_#111410] text-[#2F441E]">
+              <span className="font-bold">ROOTS: </span>
+              <strong>{roots.length} FAMILIES</strong>
+            </div>
+          </div>
+        </div>
+
+        {/* DEDICATED SUB-NAVIGATION BAR */}
+        <div className="flex flex-wrap items-center gap-2 pt-4">
+          <button
+            onClick={() => handleAttemptTabChange('study')}
+            className={`flex items-center space-x-2 px-4 py-2 font-mono text-xs font-black uppercase tracking-wider border-2 border-[#111410] transition ${subTab === 'study'
+                ? 'bg-[#7BB33B] text-white shadow-[3px_3px_0px_0px_#111410] translate-x-[-1px] translate-y-[-1px]'
+                : 'bg-white hover:bg-[#FAFBF8] text-[#111410] shadow-[2px_2px_0px_0px_#111410]'
+              }`}
+          >
+            <Layers className="w-4 h-4" />
+            <span>Study Deck (15-Card Session)</span>
+          </button>
+
+          <button
+            onClick={() => handleAttemptTabChange('explorer')}
+            className={`flex items-center space-x-2 px-4 py-2 font-mono text-xs font-black uppercase tracking-wider border-2 border-[#111410] transition ${subTab === 'explorer'
+                ? 'bg-[#7BB33B] text-white shadow-[3px_3px_0px_0px_#111410] translate-x-[-1px] translate-y-[-1px]'
+                : 'bg-white hover:bg-[#FAFBF8] text-[#111410] shadow-[2px_2px_0px_0px_#111410]'
+              }`}
+          >
+            <Compass className="w-4 h-4" />
+            <span>Etymology Root Explorer</span>
+          </button>
+
+          <button
+            onClick={() => handleAttemptTabChange('progress')}
+            className={`flex items-center space-x-2 px-4 py-2 font-mono text-xs font-black uppercase tracking-wider border-2 border-[#111410] transition ${subTab === 'progress'
+                ? 'bg-[#7BB33B] text-white shadow-[3px_3px_0px_0px_#111410] translate-x-[-1px] translate-y-[-1px]'
+                : 'bg-white hover:bg-[#FAFBF8] text-[#111410] shadow-[2px_2px_0px_0px_#111410]'
+              }`}
+          >
+            <Award className="w-4 h-4" />
+            <span>Vocab Progress & Mastery</span>
+          </button>
+
+          <button
+            onClick={() => handleAttemptTabChange('graph')}
+            className={`flex items-center space-x-2 px-4 py-2 font-mono text-xs font-black uppercase tracking-wider border-2 border-[#111410] transition ${subTab === 'graph'
+                ? 'bg-[#7BB33B] text-white shadow-[3px_3px_0px_0px_#111410] translate-x-[-1px] translate-y-[-1px]'
+                : 'bg-white hover:bg-[#FAFBF8] text-[#111410] shadow-[2px_2px_0px_0px_#111410]'
+              }`}
+          >
+            <Network className="w-4 h-4" />
+            <span>ROOT GRAPH</span>
+          </button>
         </div>
       </div>
 
-      {/* SESSION COMPLETE BENTO CARD */}
-      {isSessionComplete ? (
-        <div className="bg-white border-2 border-[#111410] shadow-[6px_6px_0px_0px_#111410] p-8 text-center animate-fade-in my-8">
-          <div className="w-14 h-14 mx-auto bg-[#EDF5E5] border-2 border-[#111410] shadow-[3px_3px_0px_0px_#111410] flex items-center justify-center mb-4">
-            <Award className="w-7 h-7 text-[#7BB33B]" />
-          </div>
-
-          <span className="text-[10px] font-mono font-black uppercase tracking-wider px-2 py-0.5 bg-[#EDF5E5] text-[#2F441E] border border-[#111410] inline-block mb-2">
-            ROUND {sessionRound} SUMMARY
-          </span>
-
-          <h2 className="text-3xl font-black font-sans uppercase tracking-tight text-[#111410]">
-            Session Complete!
-          </h2>
-          <p className="text-sm font-mono text-[#62685E] mt-1 uppercase">
-            Structured 15-word mastery batch finished.
-          </p>
-
-          {/* Round Score Metric */}
-          <div className="my-6 max-w-sm mx-auto bg-[#FAFBF8] border-2 border-[#111410] p-4 shadow-[3px_3px_0px_0px_#111410]">
-            <div className="flex items-center justify-between text-xs font-mono font-bold uppercase mb-2">
-              <span className="text-[#62685E]">Batch Accuracy:</span>
-              <span className="text-[#2F441E] font-black">
-                {roundStats.correct} / {roundStats.total} MASTERED ({roundStats.total > 0 ? Math.round((roundStats.correct / roundStats.total) * 100) : 0}%)
-              </span>
+      {/* CONFIRMATION MODAL FOR TAB SWITCH DURING ACTIVE STUDY */}
+      {showTabConfirm && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-[#111410]/70 backdrop-blur-xs animate-fade-in">
+          <div className="w-full max-w-md bg-white border-3 border-[#111410] shadow-[6px_6px_0px_0px_#111410] p-6 space-y-4">
+            <div className="flex items-center space-x-3 text-[#991B1B]">
+              <AlertTriangle className="w-6 h-6 shrink-0" />
+              <h3 className="text-lg font-black font-sans uppercase text-[#111410]">
+                Active Session In Progress
+              </h3>
             </div>
-            {/* Progress meter */}
-            <div className="w-full h-3 bg-[#EFE8DF] border-2 border-[#111410] overflow-hidden">
-              <div 
-                className="h-full bg-[#7BB33B] transition-all duration-500"
-                style={{ width: `${roundStats.total > 0 ? (roundStats.correct / roundStats.total) * 100 : 0}%` }}
-              />
-            </div>
-          </div>
-
-          {/* Action Buttons */}
-          <div className="flex flex-col sm:flex-row items-center justify-center gap-4 mt-6">
-            <button
-              onClick={() => initializeSession(true)}
-              className="w-full sm:w-auto px-6 py-3 bg-[#7BB33B] hover:bg-[#84C341] text-white font-mono font-black text-xs uppercase tracking-wider border-2 border-[#111410] shadow-[4px_4px_0px_0px_#111410] transition active:translate-x-[2px] active:translate-y-[2px] active:shadow-[1px_1px_0px_0px_#111410] flex items-center justify-center space-x-2"
-            >
-              <RotateCcw className="w-4 h-4" />
-              <span>Start Next 15 Words</span>
-            </button>
-
-            {onNavigateDashboard && (
+            <p className="text-xs font-mono text-[#42281D] leading-relaxed">
+              You are currently on <strong>Card {currentIndex + 1} of {sessionDeck.length}</strong>.
+              Leaving this view will reset your active study round. Do you want to proceed?
+            </p>
+            <div className="flex items-center justify-end space-x-3 pt-2">
               <button
-                onClick={onNavigateDashboard}
-                className="w-full sm:w-auto px-6 py-3 bg-white hover:bg-[#FAFBF8] text-[#111410] font-mono font-black text-xs uppercase tracking-wider border-2 border-[#111410] shadow-[4px_4px_0px_0px_#111410] transition active:translate-x-[2px] active:translate-y-[2px] active:shadow-[1px_1px_0px_0px_#111410] flex items-center justify-center space-x-2"
+                type="button"
+                onClick={handleCancelTabChange}
+                className="px-4 py-2 bg-white hover:bg-[#FAFBF8] text-[#111410] font-mono font-bold text-xs uppercase border-2 border-[#111410] shadow-[2px_2px_0px_0px_#111410]"
               >
-                <LayoutDashboard className="w-4 h-4 text-[#42281D]" />
-                <span>Return to Dashboard</span>
+                Keep Studying
               </button>
-            )}
+              <button
+                type="button"
+                onClick={handleConfirmTabChange}
+                className="px-4 py-2 bg-[#991B1B] hover:bg-red-700 text-white font-mono font-bold text-xs uppercase border-2 border-[#111410] shadow-[2px_2px_0px_0px_#111410]"
+              >
+                Reset & Leave
+              </button>
+            </div>
           </div>
         </div>
-      ) : !currentWord ? (
-        /* Empty Filter State */
-        <div className="max-w-4xl mx-auto px-4 py-16 text-center bg-white border-2 border-[#111410] shadow-[4px_4px_0px_0px_#111410] my-8">
-          <div className="w-16 h-16 mx-auto bg-[#EFE8DF] border-2 border-[#111410] shadow-[4px_4px_0px_0px_#111410] flex items-center justify-center mb-4">
-            <Layers className="w-8 h-8 text-[#42281D]" />
+      )}
+
+      {/* ---------------------------------------------------------------------- */}
+      {/* TAB 1: STUDY DECK (FLASHCARD ENGINE) */}
+      {/* ---------------------------------------------------------------------- */}
+      {subTab === 'study' && (
+        <div className="max-w-4xl mx-auto space-y-4">
+
+          {/* FILTER & CUSTOM SESSION TOOLBAR */}
+          <div className="bg-[#FAFBF8] border-2 border-[#111410] p-3 shadow-[3px_3px_0px_0px_#111410]">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+              {/* Origin Filter */}
+              <div className="flex items-center space-x-1 font-mono text-xs">
+                <span className="text-[10px] font-black uppercase text-[#62685E] mr-1 hidden sm:inline">ORIGIN:</span>
+                {['ALL', 'Latin', 'Greek'].map((lang) => (
+                  <button
+                    key={lang}
+                    onClick={() => handleLanguageChange(lang)}
+                    className={`px-3 py-1 font-black uppercase border-2 border-[#111410] transition ${selectedLanguage.toLowerCase() === lang.toLowerCase()
+                        ? 'bg-[#7BB33B] text-white shadow-[2px_2px_0px_0px_#111410]'
+                        : 'bg-white text-[#111410] hover:bg-[#FAFBF8]'
+                      }`}
+                  >
+                    {lang.toUpperCase()}
+                  </button>
+                ))}
+              </div>
+
+              {/* Root Select, Search & Custom Session Trigger */}
+              <div className="flex items-center space-x-2 flex-1 sm:justify-end">
+                <div className="bg-white border-2 border-[#111410] shadow-[2px_2px_0px_0px_#111410] px-2 py-1 flex items-center">
+                  <Filter className="w-3.5 h-3.5 text-[#42281D] mr-1.5 shrink-0" />
+                  <select
+                    value={selectedRootId}
+                    onChange={(e) => setSelectedRootId(e.target.value)}
+                    className="bg-transparent text-[#111410] text-xs font-mono font-bold uppercase focus:outline-none cursor-pointer max-w-[130px] sm:max-w-[180px] truncate"
+                  >
+                    <option value="ALL">ALL ROOTS ({availableRoots.length})</option>
+                    {availableRoots.map((root) => (
+                      <option key={root.id} value={root.id}>
+                        [{root.morpheme.toUpperCase()}] {root.core_meaning.toUpperCase()}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+
+                <div className="relative flex-1 sm:max-w-[160px]">
+                  <Search className="w-3.5 h-3.5 absolute left-2.5 top-2.5 text-[#62685E]" />
+                  <input
+                    type="text"
+                    value={searchTerm}
+                    onChange={(e) => setSearchTerm(e.target.value)}
+                    placeholder="SEARCH WORDS..."
+                    className="w-full bg-white text-[#111410] font-mono font-bold text-xs pl-8 pr-7 py-1 border-2 border-[#111410] shadow-[2px_2px_0px_0px_#111410] focus:outline-none uppercase placeholder:text-[#A8AAA6]"
+                  />
+                  {searchTerm && (
+                    <button
+                      onClick={() => setSearchTerm('')}
+                      className="absolute right-2 top-2 text-[#42281D] hover:text-[#111410]"
+                    >
+                      <X className="w-3.5 h-3.5" />
+                    </button>
+                  )}
+                </div>
+
+                {/* Primary Launcher Button: Custom Practice Session */}
+                <button
+                  type="button"
+                  onClick={() => handleOpenCustomSession(selectedRootId !== 'ALL' ? [Number(selectedRootId)] : [])}
+                  className="flex items-center space-x-1.5 px-3 py-1.5 bg-[#7BB33B] hover:bg-[#84C341] text-white font-mono font-black text-xs uppercase tracking-wider border-2 border-[#111410] shadow-[2px_2px_0px_0px_#111410] active:translate-x-[1px] active:translate-y-[1px] transition shrink-0"
+                  title="Configure custom 15-card practice session"
+                >
+                  <Sliders className="w-3.5 h-3.5" />
+                  <span className="hidden sm:inline">Start Custom Session</span>
+                  <span className="sm:hidden">Custom</span>
+                </button>
+              </div>
+            </div>
           </div>
-          <h3 className="text-xl font-bold font-mono text-[#111410] uppercase">No Vocabulary Matches Found</h3>
-          <p className="text-sm font-mono text-[#62685E] mt-2">Try clearing your search query or reset root filters.</p>
-          <button
-            onClick={() => {
+
+          {/* DEDICATED STUDY DECK COMPONENT */}
+          <StudyDeck
+            sessionDeck={sessionDeck}
+            currentIndex={currentIndex}
+            isFlipped={isFlipped}
+            setIsFlipped={setIsFlipped}
+            submitting={submitting}
+            feedback={feedback}
+            onSpeak={handleSpeak}
+            onOpenMorpheme={handleOpenMorpheme}
+            onResponse={handleResponse}
+            isAdminMode={isAdminMode}
+            onEditWordVerification={(w) => setEditingReviewWord(w)}
+            subsetPracticeInfo={subsetPracticeInfo}
+            isSessionComplete={isSessionComplete}
+            roundStats={roundStats}
+            sessionRound={sessionRound}
+            onNextRound={() => initializeSession(true)}
+            onRestartSession={() => {
+              setCurrentIndex(0);
+              setIsFlipped(false);
+              setIsSessionComplete(false);
+              setRoundStats({ correct: 0, total: 0 });
+              setSessionDeck(prev => shuffleWithMorphemeVariety(prev));
+            }}
+            onReviewProgress={() => handleAttemptTabChange('progress')}
+            onOpenCustomModal={() => handleOpenCustomSession(selectedRootId !== 'ALL' ? [Number(selectedRootId)] : [])}
+            onExitSession={handleClearSubsetPractice}
+            onResetFilters={() => {
               setSelectedLanguage('ALL');
               setSelectedRootId('ALL');
               setSearchTerm('');
             }}
-            className="mt-6 px-6 py-2.5 bg-[#7BB33B] text-white font-mono font-bold text-xs uppercase border-2 border-[#111410] shadow-[3px_3px_0px_0px_#111410] transition hover:translate-x-[-1px] hover:translate-y-[-1px]"
-          >
-            Reset All Filters
-          </button>
+          />
+
         </div>
-      ) : (
-        /* ACTIVE FLASHCARD SESSION */
-        <>
-          {/* Geometric Progress Header: CARD 4 OF 15 alongside Kiwi Green Fill Bar */}
-          <div className="flex items-center justify-between mb-4 text-xs font-mono font-bold text-[#111410] uppercase">
-            <div className="flex items-center space-x-3">
-              <span className="px-2.5 py-1 bg-white border-2 border-[#111410] shadow-[2px_2px_0px_0px_#111410]">
-                CARD {currentIndex + 1} OF {sessionDeck.length}
-              </span>
-              <span className="text-[#42281D] hidden sm:inline">
-                ROOT: <strong>{currentWord.root_details?.morpheme?.toUpperCase()}</strong> ({currentWord.root_details?.language?.toUpperCase()})
-              </span>
+      )}
+
+      {/* ---------------------------------------------------------------------- */}
+      {/* TAB 2: ETYMOLOGY ROOT EXPLORER */}
+      {/* ---------------------------------------------------------------------- */}
+      {subTab === 'explorer' && (
+        <div className="space-y-6">
+          {/* Explorer Filter Bar */}
+          <div className="bg-white border-2 border-[#111410] shadow-[3px_3px_0px_0px_#111410] p-4 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+            <div className="flex items-center space-x-2 font-mono text-xs">
+              <span className="font-black uppercase text-[#62685E]">ORIGIN:</span>
+              {['ALL', 'Latin', 'Greek'].map((lang) => (
+                <button
+                  key={lang}
+                  onClick={() => setSelectedLanguage(lang)}
+                  className={`px-3 py-1 font-black uppercase border-2 border-[#111410] transition ${selectedLanguage.toLowerCase() === lang.toLowerCase()
+                      ? 'bg-[#7BB33B] text-white shadow-[2px_2px_0px_0px_#111410]'
+                      : 'bg-[#FAFBF8] text-[#111410] hover:bg-white'
+                    }`}
+                >
+                  {lang.toUpperCase()}
+                </button>
+              ))}
             </div>
 
-            {/* Thin Kiwi Green (#7BB33B) Fill Bar */}
-            <div className="w-44 h-3 bg-[#EFE8DF] border-2 border-[#111410] overflow-hidden shadow-[1px_1px_0px_0px_#111410]">
-              <div 
-                className="h-full bg-[#7BB33B] transition-all duration-300"
-                style={{ width: `${((currentIndex + 1) / sessionDeck.length) * 100}%` }}
+            <div className="relative max-w-sm w-full">
+              <Search className="w-4 h-4 absolute left-3 top-2.5 text-[#62685E]" />
+              <input
+                type="text"
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+                placeholder="SEARCH ROOTS, MEANINGS OR WORDS..."
+                className="w-full bg-[#FAFBF8] text-[#111410] font-mono font-bold text-xs pl-9 pr-8 py-2 border-2 border-[#111410] shadow-[2px_2px_0px_0px_#111410] focus:outline-none uppercase"
               />
-            </div>
-          </div>
-
-          {/* Flashcard Token */}
-          <div className="relative min-h-[440px] w-full perspective-1000 mb-4 select-none">
-            <div 
-              onClick={() => setIsFlipped(!isFlipped)}
-              className={`w-full min-h-[440px] bg-white border-2 border-[#111410] shadow-[6px_6px_0px_0px_#42281D] p-8 cursor-pointer transition-all duration-500 transform-style-3d relative flex flex-col justify-between hover:translate-x-[-1px] hover:translate-y-[-1px] hover:shadow-[7px_7px_0px_0px_#42281D] ${
-                isFlipped ? 'rotate-y-180 border-[#42281D]' : ''
-              }`}
-            >
-              {/* FRONT OF CARD */}
-              {!isFlipped ? (
-                <div className="flex flex-col h-full justify-between">
-                  {/* Top metadata */}
-                  <div className="flex items-center justify-between border-b-2 border-[#111410] pb-3">
-                    <div className="flex items-center space-x-2">
-                      <span className="text-[11px] font-mono font-extrabold uppercase tracking-wider px-2 py-0.5 bg-[#111410] text-white">
-                        {currentWord.part_of_speech || 'noun'}
-                      </span>
-                      <span className={`text-[11px] font-mono font-bold uppercase tracking-wider px-2 py-0.5 ${getConnotationBadge(currentWord.connotation)}`}>
-                        {currentWord.connotation}
-                      </span>
-                    </div>
-                    <button
-                      type="button"
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        handleSpeak(currentWord.word);
-                      }}
-                      className="p-1.5 bg-[#FAFBF8] hover:bg-[#EDF5E5] text-[#111410] border-2 border-[#111410] shadow-[2px_2px_0px_0px_#111410] transition"
-                      title="Listen to pronunciation"
-                    >
-                      <Volume2 className="w-4 h-4 text-[#2F441E]" />
-                    </button>
-                  </div>
-
-                  {/* Target Word & Pronunciation */}
-                  <div className="my-8 text-center">
-                    <h1 className="text-4xl sm:text-5xl font-black text-[#111410] tracking-tight uppercase font-sans">
-                      {currentWord.word}
-                    </h1>
-                    {currentWord.pronunciation && (
-                      <p className="text-[#62685E] text-sm mt-2 font-mono font-bold tracking-wider">
-                        /{currentWord.pronunciation}/
-                      </p>
-                    )}
-                  </div>
-
-                  {/* Morpheme Decomposition Tags */}
-                  <div className="bg-[#FAFBF8] border-2 border-[#111410] p-4">
-                    <div className="text-[11px] font-mono font-black text-[#111410] uppercase tracking-wider mb-3 flex items-center justify-between">
-                      <span className="flex items-center space-x-1.5">
-                        <Layers className="w-3.5 h-3.5 text-[#7BB33B]" />
-                        <span>Morpheme Decomposition</span>
-                      </span>
-                      <span className="text-[#62685E] text-[10px] font-normal uppercase">[Space] to reveal</span>
-                    </div>
-                    
-                    <div className="flex flex-wrap items-center gap-2">
-                      {/* Prefix: Soft Kiwi #EDF5E5 with Deep Olive #2F441E */}
-                      {currentWord.prefix && (
-                        <div className="px-3 py-1.5 bg-[#EDF5E5] text-[#2F441E] border-2 border-[#111410] shadow-[2px_2px_0px_0px_#111410]">
-                          <span className="text-[9px] block uppercase font-mono font-bold text-[#2F441E]/70">Prefix</span>
-                          <span className="font-mono font-extrabold text-xs">{currentWord.prefix}</span>
-                        </div>
-                      )}
-
-                      {currentWord.prefix && <span className="text-[#111410] font-black font-mono text-base">+</span>}
-
-                      {/* Roots/Stems: Warm Cream #EFE8DF with Deep Bark Brown #42281D */}
-                      <div className="px-3 py-1.5 bg-[#EFE8DF] text-[#42281D] border-2 border-[#111410] shadow-[2px_2px_0px_0px_#111410]">
-                        <span className="text-[9px] block uppercase font-mono font-bold text-[#42281D]/70">
-                          Root ({currentWord.root_details?.language})
-                        </span>
-                        <span className="font-mono font-black text-xs text-[#42281D]">
-                          [{currentWord.root_details?.morpheme?.toUpperCase()}]
-                        </span>
-                        <span className="text-[#42281D] text-xs ml-1.5 font-sans font-bold">
-                          = "{currentWord.root_details?.core_meaning}"
-                        </span>
-                      </div>
-
-                      {currentWord.suffix && <span className="text-[#111410] font-black font-mono text-base">+</span>}
-
-                      {/* Suffixes: Pure White #FFFFFF with Jet Black text */}
-                      {currentWord.suffix && (
-                        <div className="px-3 py-1.5 bg-[#FFFFFF] text-[#111410] border-2 border-[#111410] shadow-[2px_2px_0px_0px_#111410]">
-                          <span className="text-[9px] block uppercase font-mono font-bold text-[#62685E]">Suffix</span>
-                          <span className="font-mono font-extrabold text-xs">{currentWord.suffix}</span>
-                        </div>
-                      )}
-                    </div>
-
-                    {/* Mnemonic Memory Key */}
-                    {currentWord.root_details?.mnemonic && (
-                      <div className="mt-3 pt-2 border-t border-[#111410]/20 flex items-start space-x-2 text-xs font-mono text-[#42281D]">
-                        <span className="font-black uppercase text-[#2F441E] bg-[#EDF5E5] px-1 border border-[#111410]">Key:</span>
-                        <span className="italic font-serif">"{currentWord.root_details.mnemonic}"</span>
-                      </div>
-                    )}
-                  </div>
-
-                  {/* Flip Prompt */}
-                  <div className="mt-4 flex items-center justify-center space-x-2 text-[11px] font-mono font-bold uppercase text-[#62685E]">
-                    <RotateCw className="w-3.5 h-3.5 text-[#7BB33B]" />
-                    <span>Click or press [Space] to reveal official definition</span>
-                  </div>
-                </div>
-              ) : (
-                /* BACK OF CARD */
-                <div className="flex flex-col h-full justify-between rotate-y-180">
-                  <div className="flex items-center justify-between border-b-2 border-[#111410] pb-3">
-                    <div className="flex items-center space-x-2">
-                      <h3 className="text-2xl font-black text-[#111410] font-sans uppercase">{currentWord.word}</h3>
-                      <span className={`text-[10px] font-mono font-bold uppercase px-2 py-0.5 ${getConnotationBadge(currentWord.connotation)}`}>
-                        {currentWord.connotation}
-                      </span>
-                    </div>
-                    <span className="text-xs font-mono font-extrabold text-[#42281D] uppercase">SAT · ACT Lexicon</span>
-                  </div>
-
-                  {/* Core SAT Definition */}
-                  <div className="my-4">
-                    <h4 className="text-[10px] font-mono font-black uppercase tracking-wider text-[#62685E] mb-1.5">
-                      Official SAT Context Definition
-                    </h4>
-                    <p className="text-xl text-[#111410] font-serif leading-relaxed">
-                      "{currentWord.definition}"
-                    </p>
-                  </div>
-
-                  {/* Exam Context Sentence */}
-                  <div className="bg-[#FAFBF8] border-2 border-[#111410] p-4 shadow-[2px_2px_0px_0px_#111410]">
-                    <h4 className="text-[10px] font-mono font-black uppercase tracking-wider text-[#42281D] mb-1 flex items-center space-x-1.5">
-                      <BookMarked className="w-3.5 h-3.5 text-[#7BB33B]" />
-                      <span>Exam Context Sentence</span>
-                    </h4>
-                    <p className="text-sm text-[#111410] font-serif italic leading-relaxed">
-                      "{currentWord.sat_sentence}"
-                    </p>
-                  </div>
-
-                  {/* Root Family Connection */}
-                  <div className="mt-3 pt-2 border-t border-[#111410]/20 text-[11px] font-mono text-[#62685E] flex items-center justify-between uppercase">
-                    <span>Family: <strong className="text-[#42281D]">{currentWord.root_details?.morpheme}</strong> ({currentWord.root_details?.core_meaning})</span>
-                    <span className="text-[#7BB33B] font-bold">[Space] to flip front</span>
-                  </div>
-                </div>
+              {searchTerm && (
+                <button
+                  onClick={() => setSearchTerm('')}
+                  className="absolute right-2.5 top-2.5 text-[#42281D]"
+                >
+                  <X className="w-4 h-4" />
+                </button>
               )}
             </div>
-
-            {/* Response Telemetry Overlay */}
-            {feedback && (
-              <div className="absolute inset-0 z-20 flex items-center justify-center bg-white/90 border-2 border-[#111410] shadow-[6px_6px_0px_0px_#111410] animate-fade-in pointer-events-none">
-                <div className={`px-6 py-3 border-2 border-[#111410] text-sm font-mono font-black uppercase shadow-[4px_4px_0px_0px_#111410] flex items-center space-x-2 ${
-                  feedback.type === 'success'
-                    ? 'bg-[#7BB33B] text-white'
-                    : 'bg-[#42281D] text-white'
-                }`}>
-                  <Check className="w-5 h-5" />
-                  <span>{feedback.text}</span>
-                </div>
-              </div>
-            )}
           </div>
 
-          {/* Response Controls & Keyboard Shortcuts */}
-          <div className="space-y-3">
-            <div className="flex flex-col sm:flex-row items-center justify-between gap-4">
-              {/* Prev / Flip / Next buttons */}
-              <div className="flex items-center space-x-2 order-2 sm:order-1">
-                <button
-                  onClick={() => {
-                    if (currentIndex > 0) setCurrentIndex(prev => prev - 1);
-                  }}
-                  disabled={currentIndex === 0}
-                  className="p-2.5 bg-white hover:bg-[#FAFBF8] disabled:opacity-40 disabled:cursor-not-allowed text-[#111410] border-2 border-[#111410] shadow-[3px_3px_0px_0px_#111410] active:translate-x-[1px] active:translate-y-[1px] active:shadow-[1px_1px_0px_0px_#111410] transition"
-                  title="Previous Card"
-                >
-                  <ChevronLeft className="w-5 h-5" />
-                </button>
+          {/* Root Family Cards Bento Grid */}
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
+            {availableRoots
+              .filter(root => {
+                if (!searchTerm.trim()) return true;
+                const q = searchTerm.toLowerCase();
+                const mMatch = root.morpheme.toLowerCase().includes(q);
+                const cMatch = root.core_meaning.toLowerCase().includes(q);
+                const wMatch = root.words?.some(w => w.word.toLowerCase().includes(q));
+                return mMatch || cMatch || wMatch;
+              })
+              .map((root) => {
+                const rootWords = words.filter(w => w.root === root.id || w.root_details?.id === root.id);
 
-                <button
-                  onClick={() => setIsFlipped(!isFlipped)}
-                  className="px-4 py-2.5 bg-white hover:bg-[#FAFBF8] text-[#111410] border-2 border-[#111410] shadow-[3px_3px_0px_0px_#111410] text-xs font-mono font-black uppercase flex items-center space-x-1.5 transition active:translate-x-[1px] active:translate-y-[1px] active:shadow-[1px_1px_0px_0px_#111410]"
-                >
-                  <RotateCw className="w-3.5 h-3.5 text-[#7BB33B]" />
-                  <span>Flip Card</span>
-                </button>
+                return (
+                  <div
+                    key={root.id}
+                    className="bg-white border-2 border-[#111410] shadow-[4px_4px_0px_0px_#111410] p-5 flex flex-col justify-between hover:translate-x-[-1px] hover:translate-y-[-1px] transition"
+                  >
+                    <div>
+                      {/* Card Header */}
+                      <div className="flex items-center justify-between border-b-2 border-[#111410] pb-2.5 mb-3">
+                        <span className="font-mono text-sm font-black text-[#111410] uppercase tracking-wider">
+                          [{root.morpheme.toUpperCase()}]
+                        </span>
+                        <div className="flex items-center space-x-1.5">
+                          <span className="text-[10px] font-mono px-2 py-0.5 bg-[#EDF5E5] text-[#2F441E] border border-[#111410] uppercase font-bold">
+                            {root.language}
+                          </span>
+                          <span className="text-[10px] font-mono px-2 py-0.5 bg-[#FAFBF8] border border-[#111410] font-bold text-[#62685E]">
+                            {rootWords.length} Words
+                          </span>
+                        </div>
+                      </div>
 
-                <button
-                  onClick={() => {
-                    if (currentIndex < sessionDeck.length - 1) setCurrentIndex(prev => prev + 1);
-                  }}
-                  disabled={currentIndex === sessionDeck.length - 1}
-                  className="p-2.5 bg-white hover:bg-[#FAFBF8] disabled:opacity-40 disabled:cursor-not-allowed text-[#111410] border-2 border-[#111410] shadow-[3px_3px_0px_0px_#111410] active:translate-x-[1px] active:translate-y-[1px] active:shadow-[1px_1px_0px_0px_#111410] transition"
-                  title="Next Card"
-                >
-                  <ChevronRight className="w-5 h-5" />
-                </button>
-              </div>
+                      {/* Core Meaning & Key */}
+                      <div className="space-y-2 mb-4">
+                        <p className="text-sm font-serif italic text-[#42281D] leading-snug">
+                          "{root.core_meaning}"
+                        </p>
+                        {root.mnemonic && (
+                          <div className="text-[11px] font-mono text-[#62685E] bg-[#FAFBF8] p-2 border border-[#111410]/30">
+                            <span className="font-bold text-[#2F441E] uppercase mr-1">Key:</span>
+                            {root.mnemonic}
+                          </div>
+                        )}
+                      </div>
 
-              {/* Active Action Buttons */}
-              <div className="flex items-center space-x-3 w-full sm:w-auto order-1 sm:order-2">
-                {/* Need Review Button */}
-                <button
-                  onClick={() => handleResponse(false)}
-                  disabled={submitting}
-                  className="flex-1 sm:flex-none flex items-center justify-center space-x-2 px-6 py-3 bg-[#42281D] hover:bg-[#593627] text-white border-2 border-[#111410] shadow-[4px_4px_0px_0px_#111410] text-xs font-mono font-black uppercase tracking-wider transition active:translate-x-[2px] active:translate-y-[2px] active:shadow-[1px_1px_0px_0px_#111410] disabled:opacity-50"
-                >
-                  <HelpCircle className="w-4 h-4 text-[#C29B78]" />
-                  <span>Need Review</span>
-                </button>
+                      {/* Word Families Sample */}
+                      <div className="space-y-1.5">
+                        <span className="text-[9px] font-mono font-bold uppercase text-[#62685E] block">
+                          Family Derivatives:
+                        </span>
+                        <div className="flex flex-wrap gap-1">
+                          {rootWords.slice(0, 5).map((w, i) => (
+                            <button
+                              key={w.id || i}
+                              type="button"
+                              onClick={() => {
+                                if (isAdminMode) {
+                                  setEditingReviewWord(w);
+                                }
+                              }}
+                              className={`px-2 py-0.5 border text-[10px] font-mono font-bold uppercase transition ${
+                                isAdminMode 
+                                  ? 'hover:bg-[#EDF5E5] hover:border-[#7BB33B] cursor-pointer active:translate-x-[1px]' 
+                                  : 'cursor-default'
+                              } ${
+                                w.review?.verified
+                                  ? 'bg-[#EDF5E5] text-[#2F441E] border-[#7BB33B]'
+                                  : 'bg-[#FAFBF8] border-[#111410] text-[#111410]'
+                              }`}
+                              title={isAdminMode ? `Click to review and verify "${w.word}"` : undefined}
+                            >
+                              {w.review?.verified && <span className="mr-1 text-[#7BB33B]">✓</span>}
+                              {w.word}
+                            </button>
+                          ))}
+                          {rootWords.length > 5 && (
+                            <span className="px-1.5 py-0.5 text-[10px] font-mono text-[#62685E]">
+                              +{rootWords.length - 5} more
+                            </span>
+                          )}
+                        </div>
+                      </div>
+                    </div>
 
-                {/* I Knew It Button */}
-                <button
-                  onClick={() => handleResponse(true)}
-                  disabled={submitting}
-                  className="flex-1 sm:flex-none flex items-center justify-center space-x-2 px-7 py-3 bg-[#7BB33B] hover:bg-[#84C341] text-white border-2 border-[#111410] shadow-[4px_4px_0px_0px_#111410] text-xs font-mono font-black uppercase tracking-wider transition active:translate-x-[2px] active:translate-y-[2px] active:shadow-[1px_1px_0px_0px_#111410] disabled:opacity-50"
-                >
-                  <CheckCircle className="w-4 h-4 text-white" />
-                  <span>I Knew It!</span>
-                </button>
-              </div>
-            </div>
-
-            {/* Subtle Keyboard Shortcut Indicators */}
-            <div className="flex items-center justify-between text-[10px] font-mono font-bold uppercase text-[#62685E] pt-2 border-t border-[#111410]/20 px-1">
-              <span className="flex items-center space-x-1">
-                <kbd className="px-1.5 py-0.5 bg-[#FAFBF8] border border-[#111410] text-[#111410]">Space</kbd>
-                <span>or</span>
-                <kbd className="px-1.5 py-0.5 bg-[#FAFBF8] border border-[#111410] text-[#111410]">↑</kbd>
-                <span>to Flip</span>
-              </span>
-              <span className="flex items-center space-x-1">
-                <kbd className="px-1.5 py-0.5 bg-[#FAFBF8] border border-[#111410] text-[#111410]">←</kbd>
-                <span>or</span>
-                <kbd className="px-1.5 py-0.5 bg-[#FAFBF8] border border-[#111410] text-[#111410]">1</kbd>
-                <span>Review</span>
-              </span>
-              <span className="flex items-center space-x-1">
-                <kbd className="px-1.5 py-0.5 bg-[#FAFBF8] border border-[#111410] text-[#111410]">→</kbd>
-                <span>or</span>
-                <kbd className="px-1.5 py-0.5 bg-[#FAFBF8] border border-[#111410] text-[#111410]">2</kbd>
-                <span>Got It</span>
-              </span>
-            </div>
+                    {/* Launch Practice for this root */}
+                    <button
+                      onClick={() => handleLaunchRootPractice(root.id)}
+                      className="mt-5 w-full flex items-center justify-center space-x-2 py-2 bg-[#7BB33B] hover:bg-[#84C341] text-white border-2 border-[#111410] shadow-[2px_2px_0px_0px_#111410] font-mono text-xs font-black uppercase tracking-wider transition active:translate-x-[1px] active:translate-y-[1px]"
+                    >
+                      <Sparkles className="w-3.5 h-3.5" />
+                      <span>Study This Root</span>
+                    </button>
+                  </div>
+                );
+              })}
           </div>
-        </>
+        </div>
       )}
+
+      {/* ---------------------------------------------------------------------- */}
+      {/* TAB 3: VOCAB PROGRESS & MASTERY */}
+      {/* ---------------------------------------------------------------------- */}
+      {subTab === 'progress' && (
+        <div className="space-y-6">
+          {/* High-Level Stats Bento */}
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+            <div className="bg-white border-2 border-[#111410] shadow-[4px_4px_0px_0px_#111410] p-5">
+              <span className="text-[10px] font-mono font-black uppercase text-[#62685E]">Total Vocabulary</span>
+              <div className="text-3xl font-black font-mono text-[#111410] mt-1">{words.length}</div>
+              <span className="text-[10px] font-mono text-[#42281D] mt-1 block">Full SAT/ACT Lexicon</span>
+            </div>
+
+            <div className="bg-white border-2 border-[#111410] shadow-[4px_4px_0px_0px_#111410] p-5">
+              <span className="text-[10px] font-mono font-black uppercase text-[#62685E]">Roots Available</span>
+              <div className="text-3xl font-black font-mono text-[#111410] mt-1">{roots.length}</div>
+              <span className="text-[10px] font-mono text-[#42281D] mt-1 block">Latin & Greek Families</span>
+            </div>
+
+            <div className="bg-white border-2 border-[#111410] shadow-[4px_4px_0px_0px_#111410] p-5">
+              <span className="text-[10px] font-mono font-black uppercase text-[#62685E]">Words Reviewed</span>
+              <div className="text-3xl font-black font-mono text-[#7BB33B] mt-1">
+                {vocabStats?.words_reviewed ?? (stats?.sections?.vocab?.unique_reviewed || 0)}
+              </div>
+              <span className="text-[10px] font-mono text-[#62685E] mt-1 block">Unique Words Attempted</span>
+            </div>
+
+            <div className="bg-white border-2 border-[#111410] shadow-[4px_4px_0px_0px_#111410] p-5">
+              <span className="text-[10px] font-mono font-black uppercase text-[#62685E]">Retention Accuracy</span>
+              <div className="text-3xl font-black font-mono text-[#111410] mt-1">
+                {vocabStats?.retention_rate ?? (stats?.sections?.vocab?.accuracy_percentage || 0)}%
+              </div>
+              <span className="text-[10px] font-mono text-[#2F441E] mt-1 block font-bold">Session Accuracy Rate</span>
+            </div>
+          </div>
+
+          {/* Root Mastery List */}
+          <div className="bg-white border-2 border-[#111410] shadow-[5px_5px_0px_0px_#111410] p-6">
+            <div className="flex items-center justify-between border-b-2 border-[#111410] pb-3 mb-4">
+              <div>
+                <h3 className="text-lg font-black font-sans uppercase text-[#111410]">
+                  Etymology Root Mastery Index
+                </h3>
+                <p className="text-xs font-mono text-[#62685E]">
+                  Continuous tracking of root families, mastery rings, and retention rate.
+                </p>
+              </div>
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              {(vocabStats?.root_mastery || stats?.root_mastery || []).slice(0, 12).map((r) => (
+                <div
+                  key={r.id}
+                  className="bg-[#FAFBF8] border-2 border-[#111410] p-4 shadow-[2px_2px_0px_0px_#111410] flex items-center justify-between"
+                >
+                  <div className="min-w-0 flex-1 pr-3">
+                    <div className="flex items-center space-x-2">
+                      <span className="font-mono text-sm font-black uppercase text-[#111410]">
+                        {r.morpheme}
+                      </span>
+                      <span className="text-[9px] font-mono px-1.5 py-0.2 bg-[#EDF5E5] text-[#2F441E] border border-[#111410] uppercase font-bold">
+                        {r.language}
+                      </span>
+                    </div>
+                    <p className="text-xs font-serif italic text-[#42281D] truncate mt-0.5">
+                      "{r.core_meaning}"
+                    </p>
+                    <div className="w-full bg-[#EFE8DF] border border-[#111410] h-2 mt-2">
+                      <div
+                        className="bg-[#7BB33B] h-full"
+                        style={{ width: `${r.mastery_percentage || 0}%` }}
+                      />
+                    </div>
+                  </div>
+
+                  <div className="text-right shrink-0">
+                    <div className="text-base font-black font-mono text-[#111410]">
+                      {r.mastery_percentage || 0}%
+                    </div>
+                    <span className="text-[10px] font-mono text-[#62685E] block uppercase">
+                      {r.mastered_words || 0}/{r.total_words} Words
+                    </span>
+                    <button
+                      onClick={() => handleLaunchRootPractice(r.id)}
+                      className="mt-1 text-[10px] font-mono font-bold uppercase text-[#7BB33B] hover:underline"
+                    >
+                      Practice →
+                    </button>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* ---------------------------------------------------------------------- */}
+      {/* TAB 4: ROOT GRAPH (ETYMOLOGY KNOWLEDGE GRAPH) */}
+      {/* ---------------------------------------------------------------------- */}
+      {subTab === 'graph' && (
+        <VocabGraphView
+          initialRoots={roots}
+          isAdminMode={isAdminMode}
+          onUpdateWordReview={onUpdateWordReview}
+          onNavigateStudy={(word) => {
+            if (word) {
+              handleSelectSingleWord(word);
+            } else {
+              handleAttemptTabChange('study');
+            }
+          }}
+          onSelectRootPractice={(rootId) => {
+            handleOpenCustomSession([Number(rootId)]);
+          }}
+        />
+      )}
+
+      {/* CONFIGURABLE CUSTOM PRACTICE SESSION MODAL */}
+      <CustomPracticeModal
+        isOpen={isCustomModalOpen}
+        onClose={() => setIsCustomModalOpen(false)}
+        roots={roots}
+        words={words}
+        initialSelectedRootIds={customModalInitialRoots}
+        onLaunchSession={handleLaunchCustomSession}
+      />
+
+      {/* DEDICATED EDITORIAL REVIEW MODAL (ACTIVE IN REVIEW MODE) */}
+      <EditorialReviewModal
+        isOpen={Boolean(editingReviewWord)}
+        onClose={() => setEditingReviewWord(null)}
+        words={words}
+        roots={roots}
+        initialWord={editingReviewWord}
+        onSaveReview={(wordKey, review) => {
+          if (onUpdateWordReview) {
+            onUpdateWordReview(wordKey, review);
+          }
+        }}
+      />
+
     </div>
   );
 }

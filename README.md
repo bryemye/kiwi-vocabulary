@@ -49,12 +49,23 @@ A full-stack diagnostic and test-preparation web platform featuring a headless D
 
 ## Quickstart
 
-### 1. Backend (Django)
+### 1. Backend (Django with Pipenv)
 ```bash
+# Install dependencies into project virtualenv
+pipenv install
+
+# Activate the virtualenv shell or run commands with pipenv run
+pipenv shell
+
+# Run migrations and start backend server
 cd backend
 python manage.py migrate
 python manage.py seed_data
 python manage.py runserver 127.0.0.1:8000
+```
+Or run directly without activating shell:
+```bash
+pipenv run python backend/manage.py runserver 127.0.0.1:8000
 ```
 
 ### 2. Frontend (React + Vite)

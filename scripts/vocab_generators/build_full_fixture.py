@@ -16,16 +16,45 @@ sys.path.insert(0, PROJECT_ROOT)
 from data_part1 import ROOTS_PART1
 from data_part2 import ROOTS_PART2
 from data_part3 import ROOTS_PART3
+try:
+    from data_batch1 import ROOTS_BATCH1
+except ImportError:
+    ROOTS_BATCH1 = []
+try:
+    from data_batch2 import ROOTS_BATCH2
+except ImportError:
+    ROOTS_BATCH2 = []
+try:
+    from data_batch3 import ROOTS_BATCH3
+except ImportError:
+    ROOTS_BATCH3 = []
+try:
+    from data_batch4 import ROOTS_BATCH4
+except ImportError:
+    ROOTS_BATCH4 = []
+try:
+    from data_batch5 import ROOTS_BATCH5
+except ImportError:
+    ROOTS_BATCH5 = []
+try:
+    from data_batch6 import ROOTS_BATCH6
+except ImportError:
+    ROOTS_BATCH6 = []
+try:
+    from data_batch7 import ROOTS_BATCH7
+except ImportError:
+    ROOTS_BATCH7 = []
 
 
 def build_unified_fixture(target_paths=None):
     if target_paths is None:
         target_paths = [
+            os.path.join(PROJECT_ROOT, "backend", "kiwi_vocab", "fixtures", "sat_vocab_seed.json"),
             os.path.join(PROJECT_ROOT, "backend", "core", "fixtures", "sat_vocab_seed.json"),
             os.path.join(PROJECT_ROOT, "core", "fixtures", "sat_vocab_seed.json"),
         ]
 
-    all_parts = [ROOTS_PART1, ROOTS_PART2, ROOTS_PART3]
+    all_parts = [ROOTS_PART1, ROOTS_PART2, ROOTS_PART3, ROOTS_BATCH1, ROOTS_BATCH2, ROOTS_BATCH3, ROOTS_BATCH4, ROOTS_BATCH5, ROOTS_BATCH6, ROOTS_BATCH7]
 
     combined_roots = {}
     seen_words = set()

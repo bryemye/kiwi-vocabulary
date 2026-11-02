@@ -5,7 +5,10 @@ os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'config.settings')
 django.setup()
 
 from rest_framework.test import APIClient
-from core.models import Root, VocabularyWord, Question, ReadingPassage, StudyLog
+from kiwi_vocab.models import Root, VocabularyWord
+from kiwi_math.models import MathQuestion
+from kiwi_reading.models import ReadingPassage
+from platform_core.models import StudyLog
 
 client = APIClient()
 
@@ -13,7 +16,8 @@ print("=" * 60)
 print("VERIFICATION SUITE: STUDY LOGS & DYNAMIC DASHBOARD STATS")
 print("=" * 60)
 
-# Step 0: Get initial baseline
+# Step 0: Clean baseline
+StudyLog.objects.all().delete()
 stats_0 = client.get('/api/dashboard/stats/').data
 initial_attempts = stats_0['overall']['total_attempts']
 initial_correct = stats_0['overall']['total_correct']
@@ -37,10 +41,11 @@ print(f"-> Vocab Attempts: {stats_1['sections']['vocab']['total']}, Vocab Accura
 assert stats_1['overall']['total_attempts'] == initial_attempts + 1
 
 # Step 2: Submit Math Question Study Log (Mode 2)
-math_q = Question.objects.filter(section='MATH').first()
+math_q = MathQuestion.objects.first()
 print(f"\n[Mode 2: Math] Submitting attempt for Math Question ID {math_q.id} - is_correct=True, seconds=35")
 math_res = client.post('/api/study-logs/', {
     'item_type': 'QUESTION',
+    'section': 'MATH',
     'question': math_q.id,
     'is_correct': True,
     'seconds_spent': 35
@@ -53,10 +58,11 @@ print(f"-> Updated Math Attempts: {stats_2['sections']['math']['total']}, Math A
 assert stats_2['sections']['math']['total'] == stats_0['sections']['math']['total'] + 1
 
 # Step 3: Submit Reading Question Study Log (Mode 3)
-read_q = Question.objects.filter(section='READ').first()
+read_q = ReadingPassage.objects.first().questions.first()
 print(f"\n[Mode 3: Reading] Submitting attempt for Reading Question ID {read_q.id} - is_correct=False, seconds=45")
 read_res = client.post('/api/study-logs/', {
     'item_type': 'QUESTION',
+    'section': 'READ',
     'question': read_q.id,
     'is_correct': False,
     'seconds_spent': 45

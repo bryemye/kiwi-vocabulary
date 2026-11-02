@@ -18,8 +18,12 @@ INSTALLED_APPS = [
     # Third party apps
     'corsheaders',
     'rest_framework',
-    # Local apps
-    'core',
+    # Platform Core
+    'platform_core',
+    # Educational Products
+    'kiwi_vocab',
+    'kiwi_math',
+    'kiwi_reading',
 ]
 
 MIDDLEWARE = [
@@ -55,7 +59,7 @@ WSGI_APPLICATION = 'config.wsgi.application'
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': BASE_DIR / 'db.sqlite3',
+        'NAME': BASE_DIR / os.environ.get('SQLITE_DB', 'kiwi_platform.sqlite3'),
     }
 }
 
@@ -82,6 +86,14 @@ USE_TZ = True
 STATIC_URL = 'static/'
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
+# Unified Custom User Model
+AUTH_USER_MODEL = 'platform_core.User'
+
+# Email backend for local development (prints to terminal console)
+EMAIL_BACKEND = os.environ.get('EMAIL_BACKEND', 'platform_core.mail.KiwiConsoleEmailBackend')
+DEFAULT_FROM_EMAIL = 'Kiwi Learning <noreply@kiwilearning.com>'
+FRONTEND_URL = os.environ.get('FRONTEND_URL', 'http://localhost:5173')
+
 # CORS
 CORS_ALLOW_ALL_ORIGINS = True
 CORS_ALLOW_CREDENTIALS = True
@@ -89,7 +101,7 @@ CORS_ALLOW_CREDENTIALS = True
 # REST Framework
 REST_FRAMEWORK = {
     'DEFAULT_AUTHENTICATION_CLASSES': [
-        'rest_framework.authentication.SessionAuthentication',
+        'platform_core.authentication.CsrfExemptSessionAuthentication',
         'rest_framework.authentication.BasicAuthentication',
     ],
     'DEFAULT_PERMISSION_CLASSES': [

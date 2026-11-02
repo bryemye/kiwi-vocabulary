@@ -6,7 +6,11 @@ from .views import (
     QuestionViewSet,
     ReadingPassageViewSet,
     StudyLogViewSet,
-    DashboardStatsView
+    DashboardStatsView,
+    RequestMagicLinkView,
+    VerifyMagicLinkView,
+    CurrentUserView,
+    LogoutView,
 )
 
 router = DefaultRouter()
@@ -17,6 +21,12 @@ router.register(r'reading-passages', ReadingPassageViewSet, basename='readingpas
 router.register(r'study-logs', StudyLogViewSet, basename='studylog')
 
 urlpatterns = [
+    # Magic link authentication & session management
+    path('auth/magic-link/', RequestMagicLinkView.as_view(), name='auth-magic-link'),
+    path('auth/verify-magic-link/', VerifyMagicLinkView.as_view(), name='auth-verify-magic-link'),
+    path('auth/me/', CurrentUserView.as_view(), name='auth-me'),
+    path('auth/logout/', LogoutView.as_view(), name='auth-logout'),
+
     path('dashboard/stats/', DashboardStatsView.as_view(), name='dashboard-stats'),
     path('', include(router.urls)),
 ]

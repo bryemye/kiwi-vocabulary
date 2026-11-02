@@ -9,7 +9,7 @@ sys.path.insert(0, backend_dir)
 os.environ.setdefault("DJANGO_SETTINGS_MODULE", "config.settings")
 django.setup()
 
-from core.models import Root, VocabularyWord
+from kiwi_vocab.models import Root, VocabularyWord
 
 total_roots = Root.objects.count()
 total_words = VocabularyWord.objects.count()

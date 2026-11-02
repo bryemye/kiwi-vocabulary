@@ -49,7 +49,8 @@ class Command(BaseCommand):
                         "suffix": w.get("suffix", ""),
                         "definition": w["definition"],
                         "sat_sentence": w["sat_sentence"],
-                        "connotation": w.get("connotation", "neutral")
+                        "connotation": w.get("connotation", "neutral"),
+                        "review": w.get("review", {})
                     }
                 )
                 if w_created:

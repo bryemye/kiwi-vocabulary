@@ -56,7 +56,7 @@ export default function DashboardView({ stats, onSelectRoot, onNavigateMode }) {
               Kiwi Learning Command Grid
             </h1>
             <p className="text-[#62685E] text-xs sm:text-sm mt-2 max-w-2xl font-mono uppercase">
-              Adaptive etymological decomposition, Swiss drafting plane & Digital SAT reading annotations.
+              Adaptive etymological decomposition, Latin & Greek root families & SAT/ACT vocabulary mastery.
             </p>
           </div>
 
@@ -66,14 +66,7 @@ export default function DashboardView({ stats, onSelectRoot, onNavigateMode }) {
               className="flex items-center space-x-2 px-5 py-3 bg-[#7BB33B] hover:bg-[#84C341] text-white border-2 border-[#111410] shadow-[3px_3px_0px_0px_#111410] font-mono font-black text-xs uppercase tracking-wider transition active:translate-x-[2px] active:translate-y-[2px]"
             >
               <Sparkles className="w-4 h-4" />
-              <span>Review Lexicon</span>
-            </button>
-            <button
-              onClick={() => onNavigateMode('math')}
-              className="flex items-center space-x-2 px-5 py-3 bg-[#EFE8DF] hover:bg-white text-[#111410] border-2 border-[#111410] shadow-[3px_3px_0px_0px_#111410] font-mono font-black text-xs uppercase tracking-wider transition active:translate-x-[2px] active:translate-y-[2px]"
-            >
-              <LineChart className="w-4 h-4 text-[#42281D]" />
-              <span>Launch Math Lab</span>
+              <span>Start Study Session</span>
             </button>
           </div>
         </div>
@@ -104,12 +97,12 @@ export default function DashboardView({ stats, onSelectRoot, onNavigateMode }) {
           </div>
         </div>
 
-        {/* Metric 2: Math Accuracy % */}
+        {/* Metric 2: Root Families Available */}
         <div className="bg-white border-2 border-[#111410] shadow-[4px_4px_0px_0px_#111410] p-5 flex flex-col justify-between relative overflow-hidden">
-          <div className="w-full h-1.5 bg-[#2F441E] absolute top-0 left-0" />
+          <div className="w-full h-1.5 bg-[#42281D] absolute top-0 left-0" />
           <div className="flex items-center justify-between">
             <span className="text-[10px] font-mono font-black text-[#62685E] uppercase tracking-wider">
-              Math Coordinate Acc
+              Root Families Active
             </span>
             <div className="w-8 h-8 bg-[#EFE8DF] border border-[#111410] text-[#42281D] flex items-center justify-center font-mono font-bold text-xs">
               02
@@ -117,20 +110,20 @@ export default function DashboardView({ stats, onSelectRoot, onNavigateMode }) {
           </div>
           <div className="mt-4">
             <div className="text-4xl font-black font-mono text-[#111410]">
-              {sections.math?.accuracy_percentage || 0}%
+              {root_mastery.length}
             </div>
             <div className="text-xs font-mono text-[#62685E] mt-1 uppercase">
-              {sections.math?.correct || 0} OF {sections.math?.total || 0} GRAPH ITEMS SOLVED
+              LATIN & GREEK MORPHEME CLUSTERS
             </div>
           </div>
         </div>
 
-        {/* Metric 3: Reading Accuracy % */}
+        {/* Metric 3: Vocabulary Retention Rate */}
         <div className="bg-white border-2 border-[#111410] shadow-[4px_4px_0px_0px_#111410] p-5 flex flex-col justify-between relative overflow-hidden">
-          <div className="w-full h-1.5 bg-[#C29B78] absolute top-0 left-0" />
+          <div className="w-full h-1.5 bg-[#7BB33B] absolute top-0 left-0" />
           <div className="flex items-center justify-between">
             <span className="text-[10px] font-mono font-black text-[#62685E] uppercase tracking-wider">
-              Reading Comprehension
+              Vocabulary Retention
             </span>
             <div className="w-8 h-8 bg-[#EDF5E5] border border-[#111410] text-[#2F441E] flex items-center justify-center font-mono font-bold text-xs">
               03
@@ -138,10 +131,10 @@ export default function DashboardView({ stats, onSelectRoot, onNavigateMode }) {
           </div>
           <div className="mt-4">
             <div className="text-4xl font-black font-mono text-[#111410]">
-              {sections.reading?.accuracy_percentage || 0}%
+              {sections.vocab?.accuracy_percentage || 0}%
             </div>
-            <div className="text-xs font-mono text-[#62685E] mt-1 uppercase">
-              {sections.reading?.correct || 0} OF {sections.reading?.total || 0} PASSAGE ITEMS SOLVED
+            <div className="text-xs font-mono text-[#2F441E] mt-1 uppercase font-bold">
+              {sections.vocab?.correct || 0} OF {sections.vocab?.total || 0} WORDS RETAINED
             </div>
           </div>
         </div>
