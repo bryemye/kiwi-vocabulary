@@ -367,23 +367,9 @@ class RequestMagicLinkView(APIView):
 
         magic_link = f"{frontend_url}/auth/verify?token={token}"
 
-        # 4. Dispatch email via configured EMAIL_BACKEND
-        subject = "Your Kiwi Learning Magic Login Link"
-        message = (
-            f"Hello,\n\n"
-            f"Click the link below to sign in or complete your registration for Kiwi Learning:\n\n"
-            f"{magic_link}\n\n"
-            f"This link expires in 15 minutes and can only be used once.\n\n"
-            f"If you did not request this link, you can safely ignore this email.\n\n"
-            f"-- The Kiwi Learning Team"
-        )
-        send_mail(
-            subject=subject,
-            message=message,
-            from_email=getattr(settings, 'DEFAULT_FROM_EMAIL', 'noreply@kiwilearning.com'),
-            recipient_list=[user.email],
-            fail_silently=False,
-        )
+        # 4. Dispatch email via configured EMAIL_BACKEND (Resend SMTP or Console)
+        from platform_core.mail import send_magic_link_email
+        send_magic_link_email(to_email=user.email, magic_link=magic_link)
 
         # Ensure single-line clean clickable output for terminal/console development (ASCII-safe for Windows cp1252)
         print(f"\n{'='*80}\n[KIWI MAGIC LOGIN LINK] (DIRECT CLICK / SINGLE-LINE COPY):\n-> {magic_link}\n{'='*80}\n", flush=True)

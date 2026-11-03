@@ -8,6 +8,11 @@ db.sqlite3-journal
 staticfiles/
 backend/staticfiles/
 
+# Environment Variables
+.env
+.env.*
+!.env.example
+
 # Node
 node_modules/
 .DS_Store

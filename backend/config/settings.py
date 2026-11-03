@@ -1,7 +1,12 @@
 import os
 from pathlib import Path
+from dotenv import load_dotenv
 
 BASE_DIR = Path(__file__).resolve().parent.parent
+
+# Load environment variables from .env in backend/ or repository root
+load_dotenv(BASE_DIR / '.env')
+load_dotenv(BASE_DIR.parent / '.env')
 
 SECRET_KEY = os.environ.get('DJANGO_SECRET_KEY', 'django-insecure-_xcs+kj@-&d9of4=@=x)6gcvo+botgnutjfrsklv=vl*ttjpw_')
 DEBUG = os.environ.get('DJANGO_DEBUG', 'True').lower() in ('true', '1', 'yes')
@@ -102,9 +107,25 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 # Unified Custom User Model
 AUTH_USER_MODEL = 'platform_core.User'
 
-# Email backend for local development (prints to terminal console)
-EMAIL_BACKEND = os.environ.get('EMAIL_BACKEND', 'platform_core.mail.KiwiConsoleEmailBackend')
-DEFAULT_FROM_EMAIL = 'Kiwi Learning <noreply@kiwilearning.com>'
+# Email Configuration (Resend SMTP with local console fallback)
+RESEND_API_KEY = os.environ.get('RESEND_API_KEY', '').strip()
+_is_real_key = bool(RESEND_API_KEY and not RESEND_API_KEY.startswith('re_your_'))
+
+_default_backend = (
+    'django.core.mail.backends.smtp.EmailBackend'
+    if (_is_real_key or os.environ.get('EMAIL_HOST_PASSWORD'))
+    else 'platform_core.mail.KiwiConsoleEmailBackend'
+)
+EMAIL_BACKEND = os.environ.get('EMAIL_BACKEND', _default_backend)
+
+EMAIL_HOST = os.environ.get('EMAIL_HOST', 'smtp.resend.com')
+EMAIL_PORT = int(os.environ.get('EMAIL_PORT', 587))
+EMAIL_USE_TLS = os.environ.get('EMAIL_USE_TLS', 'True').lower() in ('true', '1', 'yes')
+EMAIL_USE_SSL = os.environ.get('EMAIL_USE_SSL', 'False').lower() in ('true', '1', 'yes')
+EMAIL_HOST_USER = os.environ.get('EMAIL_HOST_USER', 'resend')
+EMAIL_HOST_PASSWORD = RESEND_API_KEY or os.environ.get('EMAIL_HOST_PASSWORD', '')
+
+DEFAULT_FROM_EMAIL = os.environ.get('DEFAULT_FROM_EMAIL', 'Kiwi Learning <onboarding@resend.dev>')
 FRONTEND_URL = os.environ.get('FRONTEND_URL', 'http://localhost:5173')
 
 # CORS
