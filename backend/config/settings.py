@@ -3,10 +3,17 @@ from pathlib import Path
 
 BASE_DIR = Path(__file__).resolve().parent.parent
 
-SECRET_KEY = 'django-insecure-_xcs+kj@-&d9of4=@=x)6gcvo+botgnutjfrsklv=vl*ttjpw_'
-DEBUG = True
+SECRET_KEY = os.environ.get('DJANGO_SECRET_KEY', 'django-insecure-_xcs+kj@-&d9of4=@=x)6gcvo+botgnutjfrsklv=vl*ttjpw_')
+DEBUG = os.environ.get('DJANGO_DEBUG', 'True').lower() in ('true', '1', 'yes')
 
-ALLOWED_HOSTS = ['*']
+ALLOWED_HOSTS = [h.strip() for h in os.environ.get('DJANGO_ALLOWED_HOSTS', '*').split(',') if h.strip()]
+
+CSRF_TRUSTED_ORIGINS = [
+    origin.strip() for origin in os.environ.get(
+        'CSRF_TRUSTED_ORIGINS',
+        'https://*.pythonanywhere.com,http://localhost:5173,http://localhost:8000,http://127.0.0.1:8000'
+    ).split(',') if origin.strip()
+]
 
 INSTALLED_APPS = [
     'django.contrib.admin',
@@ -42,7 +49,9 @@ ROOT_URLCONF = 'config.urls'
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        'DIRS': [],
+        'DIRS': [
+            BASE_DIR.parent / 'frontend' / 'dist',
+        ],
         'APP_DIRS': True,
         'OPTIONS': {
             'context_processors': [
@@ -83,7 +92,11 @@ TIME_ZONE = 'UTC'
 USE_I18N = True
 USE_TZ = True
 
-STATIC_URL = 'static/'
+STATIC_URL = '/static/'
+STATIC_ROOT = BASE_DIR / 'staticfiles'
+STATICFILES_DIRS = [
+    d for d in [BASE_DIR.parent / 'frontend' / 'dist' / 'assets'] if d.exists()
+]
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 # Unified Custom User Model

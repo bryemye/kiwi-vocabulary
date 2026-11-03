@@ -1,5 +1,10 @@
 from django.contrib import admin
-from django.urls import path, include
+from django.urls import path, include, re_path
+from django.views.generic import TemplateView
+from django.views.static import serve
+from django.conf import settings
+
+assets_dir = settings.BASE_DIR.parent / 'frontend' / 'dist' / 'assets'
 
 urlpatterns = [
     path('admin/', admin.site.urls),
@@ -27,4 +32,10 @@ urlpatterns = [
     path('api/words/', include('kiwi_vocab.word_urls')),
     # path('api/questions/', include('kiwi_math.question_urls')),
     # path('api/reading-passages/', include('kiwi_reading.passage_urls')),
+
+    # 4. Vite Frontend Assets Fallback
+    re_path(r'^assets/(?P<path>.*)$', serve, {'document_root': assets_dir}),
+
+    # 5. SPA Catch-all: Serves React index.html for root and all client-side routes
+    re_path(r'^(?!api/|admin/|static/|assets/).*$', TemplateView.as_view(template_name='index.html')),
 ]
