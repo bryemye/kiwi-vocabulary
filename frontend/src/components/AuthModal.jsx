@@ -183,14 +183,14 @@ export default function AuthModal({ isOpen, onClose }) {
                 </ul>
               </div>
 
-              {/* Terminal development hint */}
+              {/* Inbox delivery info / Dev hint */}
               <div className="bg-[#111410] border-2 border-[#111410] shadow-[2px_2px_0px_0px_#111410] p-3 text-white">
                 <div className="flex items-center space-x-1.5 text-[10px] font-mono font-bold uppercase tracking-wider text-[#84C341] mb-1">
-                  <Terminal className="w-3.5 h-3.5" />
-                  <span>LOCAL DEV CONSOLE BACKEND</span>
+                  <Mail className="w-3.5 h-3.5" />
+                  <span>EMAIL DISPATCH ACTIVE</span>
                 </div>
                 <p className="text-[11px] font-mono text-[#C4CDBC] leading-relaxed">
-                  Django's console email backend is active. The magic login link is printed directly in your terminal console!
+                  Check your inbox and spam folder. (In local dev mode, the link is also mirrored in the Django server terminal).
                 </p>
               </div>
 

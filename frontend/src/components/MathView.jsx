@@ -740,7 +740,7 @@ export default function MathView({ questions, onAttemptLogged }) {
                   value={customFormula}
                   onChange={(e) => setCustomFormula(e.target.value)}
                   placeholder="e.g. (x - 2)^2 - 4"
-                  className="w-full bg-[#FAFBF8] text-[#111410] font-mono font-bold text-xs pl-14 pr-3 py-2.5 border-2 border-[#111410] focus:outline-none focus:bg-white shadow-[2px_2px_0px_0px_#111410]"
+                  className="w-full bg-[#FAFBF8] text-[#111410] font-mono font-bold text-base sm:text-xs pl-14 pr-3 py-2.5 border-2 border-[#111410] focus:outline-none focus:bg-white shadow-[2px_2px_0px_0px_#111410]"
                   spellCheck="false"
                 />
               </div>

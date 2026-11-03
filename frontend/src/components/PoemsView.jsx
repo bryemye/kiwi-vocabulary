@@ -58,15 +58,29 @@ export default function PoemsView({ onNavigateHome }) {
   const [playbackProgress, setPlaybackProgress] = useState(0); // 0 to 100%
   const [isControlsHidden, setIsControlsHidden] = useState(false);
   const [isFullscreen, setIsFullscreen] = useState(false);
+  const [mobileConsoleTab, setMobileConsoleTab] = useState('poem'); // 'poem' | 'style' | 'aesthetic'
+  const [swipeToast, setSwipeToast] = useState(null);
+  const toastTimeoutRef = useRef(null);
+
+  // Touch gesture tracking for mobile swipe & tap
+  const touchStartRef = useRef(null);
+
+  // Cinema viewport ref
+  const cinemaContainerRef = useRef(null);
+  const rollContainerRef = useRef(null);
 
   // Ambient Sound Engine (Web Audio API - completely offline / zero external asset dependency)
   const [isAudioEnabled, setIsAudioEnabled] = useState(false);
   const audioContextRef = useRef(null);
   const gainNodeRef = useRef(null);
 
-  // Cinema viewport ref
-  const cinemaContainerRef = useRef(null);
-  const rollContainerRef = useRef(null);
+  const showSwipeFeedback = useCallback((msg) => {
+    if (toastTimeoutRef.current) clearTimeout(toastTimeoutRef.current);
+    setSwipeToast(msg);
+    toastTimeoutRef.current = setTimeout(() => {
+      setSwipeToast(null);
+    }, 1200);
+  }, []);
 
   // When poem changes, align defaults
   const handleSelectPoem = (poemId) => {
@@ -258,6 +272,53 @@ export default function PoemsView({ onNavigateHome }) {
     setIsPlaying(true);
   };
 
+  const handleTouchStart = (e) => {
+    if (e.touches.length === 1) {
+      touchStartRef.current = {
+        x: e.touches[0].clientX,
+        y: e.touches[0].clientY,
+        time: Date.now()
+      };
+    }
+  };
+
+  const handleTouchEnd = (e) => {
+    if (!touchStartRef.current) return;
+    const touch = e.changedTouches[0];
+    const dx = touch.clientX - touchStartRef.current.x;
+    const dy = touch.clientY - touchStartRef.current.y;
+    const dt = Date.now() - touchStartRef.current.time;
+    touchStartRef.current = null;
+
+    // Horizontal swipe gesture (Next / Prev Stanza)
+    if (Math.abs(dx) > 40 && Math.abs(dx) > Math.abs(dy) * 1.3 && dt < 600) {
+      if (dx < 0) {
+        if (activeStyleId !== 'roll') {
+          handleNextStanza();
+          showSwipeFeedback('NEXT STANZA →');
+        }
+      } else {
+        if (activeStyleId !== 'roll') {
+          handlePrevStanza();
+          showSwipeFeedback('← PREV STANZA');
+        }
+      }
+      return;
+    }
+
+    // Fast tap (no drag) -> toggle play / pause
+    if (Math.hypot(dx, dy) < 15 && dt < 300) {
+      const target = e.target;
+      if (!target.closest('button, input, select, textarea, a')) {
+        setIsPlaying((p) => {
+          const next = !p;
+          showSwipeFeedback(next ? '▶ RESUMED' : '⏸ PAUSED');
+          return next;
+        });
+      }
+    }
+  };
+
   // Add Custom Poem Submission
   const handleSaveCustomPoem = (e) => {
     e.preventDefault();
@@ -348,8 +409,10 @@ export default function PoemsView({ onNavigateHome }) {
       {/* 2. Main Cinematic Theater Viewport */}
       <div
         ref={cinemaContainerRef}
-        className={`relative flex-1 flex flex-col items-center justify-center overflow-hidden bg-black transition-all ${
-          isFullscreen ? 'h-screen w-screen' : 'min-h-[640px] max-h-[820px] w-full'
+        onTouchStart={handleTouchStart}
+        onTouchEnd={handleTouchEnd}
+        className={`relative flex-1 flex flex-col items-center justify-center overflow-hidden bg-black transition-all touch-manipulation select-none ${
+          isFullscreen ? 'h-screen w-screen' : 'min-h-[460px] sm:min-h-[640px] max-h-[85vh] sm:max-h-[820px] w-full'
         }`}
       >
         {/* Dynamic Background Layer */}
@@ -398,14 +461,14 @@ export default function PoemsView({ onNavigateHome }) {
           {/* CinemaScope Letterbox Bars */}
           {showLetterbox && (
             <>
-              <div className="absolute top-0 left-0 right-0 h-10 sm:h-14 bg-black border-b border-white/5 z-20 pointer-events-none transition-all" />
-              <div className="absolute bottom-0 left-0 right-0 h-10 sm:h-14 bg-black border-t border-white/5 z-20 pointer-events-none transition-all" />
+              <div className="absolute top-0 left-0 right-0 h-6 sm:h-14 bg-black border-b border-white/5 z-20 pointer-events-none transition-all" />
+              <div className="absolute bottom-0 left-0 right-0 h-6 sm:h-14 bg-black border-t border-white/5 z-20 pointer-events-none transition-all" />
             </>
           )}
         </div>
 
         {/* Floating Minimal Controls Bar in Theater Mode (Top Left & Right Overlays) */}
-        <div className="absolute top-14 sm:top-18 left-6 z-20 flex items-center space-x-2 text-xs font-mono text-[#FAFBF8]/70 pointer-events-auto">
+        <div className="absolute top-8 sm:top-18 left-3 sm:left-6 z-20 flex items-center space-x-2 text-xs font-mono text-[#FAFBF8]/70 pointer-events-auto">
           <span className="px-2 py-0.5 bg-black/60 backdrop-blur-md border border-white/10 uppercase tracking-widest text-[10px]">
             {activeStyleId.toUpperCase()} STYLE
           </span>
@@ -414,7 +477,7 @@ export default function PoemsView({ onNavigateHome }) {
           </span>
         </div>
 
-        <div className="absolute top-14 sm:top-18 right-6 z-20 flex items-center space-x-2 pointer-events-auto">
+        <div className="absolute top-8 sm:top-18 right-3 sm:right-6 z-20 flex items-center space-x-2 pointer-events-auto">
           <button
             onClick={() => setIsControlsHidden((prev) => !prev)}
             className="p-1.5 bg-black/60 hover:bg-black/90 text-white/80 hover:text-white border border-white/20 backdrop-blur-md text-xs font-mono flex items-center space-x-1.5 transition-all"
@@ -434,6 +497,13 @@ export default function PoemsView({ onNavigateHome }) {
             {isFullscreen ? <Minimize className="w-3.5 h-3.5" /> : <Maximize className="w-3.5 h-3.5" />}
           </button>
         </div>
+
+        {/* Mobile Gesture Toast Feedback */}
+        {swipeToast && (
+          <div className="absolute top-14 sm:top-24 z-30 pointer-events-none px-3.5 py-1.5 bg-[#7BB33B] text-[#111410] font-mono font-black text-xs uppercase tracking-wider border border-[#111410] shadow-[3px_3px_0px_0px_#111410] animate-bounce">
+            {swipeToast}
+          </div>
+        )}
 
         {/* 3. Typography & Movie Credit Renderer (The 5 Styles) */}
         <div className="relative z-10 w-full max-w-4xl px-6 sm:px-12 flex-1 flex flex-col justify-center items-center text-center">
@@ -649,12 +719,12 @@ export default function PoemsView({ onNavigateHome }) {
 
         {/* Floating Quick Playback Pill Controls (Visible inside Theater Viewport) */}
         {!isControlsHidden && (
-          <div className="absolute bottom-6 sm:bottom-8 z-30 flex items-center space-x-2 sm:space-x-3 bg-black/75 backdrop-blur-md border border-white/20 px-4 py-2 shadow-2xl">
+          <div className="absolute bottom-3 sm:bottom-8 z-30 flex items-center space-x-1.5 sm:space-x-3 bg-black/80 backdrop-blur-md border border-white/20 px-2.5 sm:px-4 py-1.5 sm:py-2 shadow-2xl">
             {activeStyleId !== 'roll' && (
               <button
                 onClick={handlePrevStanza}
                 disabled={currentStanzaIndex === 0}
-                className="p-1.5 text-white/70 hover:text-white disabled:opacity-30 transition-colors"
+                className="p-1.5 sm:p-2 text-white/70 hover:text-white disabled:opacity-30 transition-colors"
                 title="Previous Stanza"
               >
                 <ChevronLeft className="w-4 h-4" />
@@ -663,7 +733,7 @@ export default function PoemsView({ onNavigateHome }) {
 
             <button
               onClick={() => setIsPlaying((p) => !p)}
-              className="p-2 bg-[#7BB33B] hover:bg-[#84C341] text-[#111410] font-black transition-all"
+              className="p-2 sm:p-2.5 bg-[#7BB33B] hover:bg-[#84C341] text-[#111410] font-black transition-all"
               title={isPlaying ? 'Pause (Space)' : 'Play (Space)'}
             >
               {isPlaying ? <Pause className="w-4 h-4" /> : <Play className="w-4 h-4" />}
@@ -673,25 +743,25 @@ export default function PoemsView({ onNavigateHome }) {
               <button
                 onClick={handleNextStanza}
                 disabled={currentStanzaIndex === currentPoem.stanzas.length - 1}
-                className="p-1.5 text-white/70 hover:text-white disabled:opacity-30 transition-colors"
+                className="p-1.5 sm:p-2 text-white/70 hover:text-white disabled:opacity-30 transition-colors"
                 title="Next Stanza"
               >
                 <ChevronRight className="w-4 h-4" />
               </button>
             )}
 
-            <div className="h-4 w-[1px] bg-white/20 mx-1" />
+            <div className="h-4 w-[1px] bg-white/20 mx-0.5 sm:mx-1" />
 
             <button
               onClick={handleResetPlayback}
-              className="p-1.5 text-white/70 hover:text-white transition-colors"
+              className="p-1.5 sm:p-2 text-white/70 hover:text-white transition-colors"
               title="Reset to Beginning"
             >
               <RotateCcw className="w-3.5 h-3.5" />
             </button>
 
             {/* Speed Multiplier Pill */}
-            <div className="flex items-center space-x-1 pl-1">
+            <div className="flex items-center space-x-0.5 sm:space-x-1 pl-0.5 sm:pl-1">
               {[0.5, 1, 1.5, 2].map((spd) => (
                 <button
                   key={spd}
@@ -722,7 +792,7 @@ export default function PoemsView({ onNavigateHome }) {
                 <h2 className="font-mono text-xs font-black uppercase tracking-wider text-white">
                   DIRECTOR'S CONTROL CONSOLE
                 </h2>
-                <span className="text-xs text-[#A1B898] font-mono">
+                <span className="text-xs text-[#A1B898] font-mono hidden sm:inline">
                   • Custom Movie Title & Credit Styling
                 </span>
               </div>
@@ -754,11 +824,42 @@ export default function PoemsView({ onNavigateHome }) {
               </div>
             </div>
 
+            {/* Mobile Segmented Console Tabs */}
+            <div className="md:hidden flex border-2 border-[#2F441E] bg-[#1C241B] p-1 font-mono text-xs uppercase font-black">
+              <button
+                type="button"
+                onClick={() => setMobileConsoleTab('poem')}
+                className={`flex-1 py-1.5 text-center transition ${
+                  mobileConsoleTab === 'poem' ? 'bg-[#7BB33B] text-[#111410] font-black' : 'text-white/70'
+                }`}
+              >
+                1. Poem
+              </button>
+              <button
+                type="button"
+                onClick={() => setMobileConsoleTab('style')}
+                className={`flex-1 py-1.5 text-center transition ${
+                  mobileConsoleTab === 'style' ? 'bg-[#7BB33B] text-[#111410] font-black' : 'text-white/70'
+                }`}
+              >
+                2. Style
+              </button>
+              <button
+                type="button"
+                onClick={() => setMobileConsoleTab('aesthetic')}
+                className={`flex-1 py-1.5 text-center transition ${
+                  mobileConsoleTab === 'aesthetic' ? 'bg-[#7BB33B] text-[#111410] font-black' : 'text-white/70'
+                }`}
+              >
+                3. Look
+              </button>
+            </div>
+
             {/* 3 Main Configuration Columns */}
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
 
               {/* Column 1: Poem Selector */}
-              <div className="space-y-3">
+              <div className={`space-y-3 ${mobileConsoleTab === 'poem' ? 'block' : 'hidden md:block'}`}>
                 <div className="flex items-center justify-between">
                   <span className="font-mono text-xs font-bold text-[#84C341] uppercase tracking-wider flex items-center space-x-1.5">
                     <Film className="w-3.5 h-3.5" />
@@ -796,7 +897,7 @@ export default function PoemsView({ onNavigateHome }) {
               </div>
 
               {/* Column 2: Movie Credit Style Presets */}
-              <div className="space-y-3">
+              <div className={`space-y-3 ${mobileConsoleTab === 'style' ? 'block' : 'hidden md:block'}`}>
                 <span className="font-mono text-xs font-bold text-[#84C341] uppercase tracking-wider flex items-center space-x-1.5">
                   <Palette className="w-3.5 h-3.5" />
                   <span>CREDIT STYLE PRESET</span>
@@ -838,7 +939,7 @@ export default function PoemsView({ onNavigateHome }) {
               </div>
 
               {/* Column 3: Background & Cinema Treatments */}
-              <div className="space-y-4">
+              <div className={`space-y-4 ${mobileConsoleTab === 'aesthetic' ? 'block' : 'hidden md:block'}`}>
                 <span className="font-mono text-xs font-bold text-[#84C341] uppercase tracking-wider flex items-center space-x-1.5">
                   <Film className="w-3.5 h-3.5" />
                   <span>BACKGROUND & TREATMENT</span>
@@ -920,8 +1021,8 @@ export default function PoemsView({ onNavigateHome }) {
 
       {/* 5. Custom Poem Authoring Modal */}
       {isCustomModalOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm">
-          <div className="bg-[#1C241B] border-2 border-[#7BB33B] shadow-[8px_8px_0px_0px_#111410] w-full max-w-xl text-[#FAFBF8] p-6 space-y-4">
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 bg-black/80 backdrop-blur-sm">
+          <div className="bg-[#1C241B] border-2 border-[#7BB33B] shadow-[8px_8px_0px_0px_#111410] w-full max-w-xl max-h-[92dvh] overflow-y-auto text-[#FAFBF8] p-5 sm:p-6 space-y-4">
             <div className="flex items-center justify-between border-b border-[#2F441E] pb-3">
               <div className="flex items-center space-x-2">
                 <span className="w-2.5 h-2.5 bg-[#7BB33B]" />
@@ -931,7 +1032,7 @@ export default function PoemsView({ onNavigateHome }) {
               </div>
               <button
                 onClick={() => setIsCustomModalOpen(false)}
-                className="p-1 hover:bg-[#2F441E] text-white/70 hover:text-white"
+                className="p-1.5 hover:bg-[#2F441E] text-white/70 hover:text-white"
               >
                 <X className="w-4 h-4" />
               </button>
@@ -947,7 +1048,7 @@ export default function PoemsView({ onNavigateHome }) {
                     placeholder="e.g. Midnight Reverie"
                     value={customTitle}
                     onChange={(e) => setCustomTitle(e.target.value)}
-                    className="w-full bg-[#111410] border border-[#2F441E] p-2 text-white placeholder-white/30 focus:border-[#7BB33B] outline-none"
+                    className="w-full bg-[#111410] border border-[#2F441E] p-2 text-base sm:text-xs text-white placeholder-white/30 focus:border-[#7BB33B] outline-none"
                   />
                 </div>
                 <div className="space-y-1">
@@ -957,7 +1058,7 @@ export default function PoemsView({ onNavigateHome }) {
                     placeholder="e.g. Your Name"
                     value={customPoet}
                     onChange={(e) => setCustomPoet(e.target.value)}
-                    className="w-full bg-[#111410] border border-[#2F441E] p-2 text-white placeholder-white/30 focus:border-[#7BB33B] outline-none"
+                    className="w-full bg-[#111410] border border-[#2F441E] p-2 text-base sm:text-xs text-white placeholder-white/30 focus:border-[#7BB33B] outline-none"
                   />
                 </div>
               </div>
@@ -968,11 +1069,11 @@ export default function PoemsView({ onNavigateHome }) {
                 </label>
                 <textarea
                   required
-                  rows={8}
+                  rows={6}
                   placeholder={`First line of stanza one\nSecond line of stanza one\n\nFirst line of stanza two\nSecond line of stanza two`}
                   value={customText}
                   onChange={(e) => setCustomText(e.target.value)}
-                  className="w-full bg-[#111410] border border-[#2F441E] p-2.5 text-white placeholder-white/30 focus:border-[#7BB33B] outline-none font-sans text-sm leading-relaxed"
+                  className="w-full bg-[#111410] border border-[#2F441E] p-2.5 text-white placeholder-white/30 focus:border-[#7BB33B] outline-none font-sans text-base sm:text-sm leading-relaxed"
                 />
               </div>
 
@@ -980,13 +1081,13 @@ export default function PoemsView({ onNavigateHome }) {
                 <button
                   type="button"
                   onClick={() => setIsCustomModalOpen(false)}
-                  className="px-4 py-2 border border-[#2F441E] hover:bg-[#2F441E] uppercase font-bold"
+                  className="min-h-[44px] px-4 py-2 border border-[#2F441E] hover:bg-[#2F441E] uppercase font-bold"
                 >
                   CANCEL
                 </button>
                 <button
                   type="submit"
-                  className="px-5 py-2 bg-[#7BB33B] hover:bg-[#84C341] text-[#111410] border border-[#111410] shadow-[2px_2px_0px_0px_#FAFBF8] font-black uppercase"
+                  className="min-h-[44px] px-5 py-2 bg-[#7BB33B] hover:bg-[#84C341] text-[#111410] border border-[#111410] shadow-[2px_2px_0px_0px_#FAFBF8] font-black uppercase"
                 >
                   ACTION / PREVIEW
                 </button>

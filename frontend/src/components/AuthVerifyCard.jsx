@@ -167,7 +167,7 @@ export default function AuthVerifyCard({ token: initialToken, onSuccess, onOpenA
                     value={manualInput}
                     onChange={(e) => setManualInput(e.target.value)}
                     placeholder="Paste link or token here..."
-                    className="flex-1 px-2.5 py-1.5 text-xs font-mono bg-[#FAFBF8] border-2 border-[#111410] focus:outline-none focus:border-[#7BB33B]"
+                    className="flex-1 px-2.5 py-1.5 text-base sm:text-xs font-mono bg-[#FAFBF8] border-2 border-[#111410] focus:outline-none focus:border-[#7BB33B]"
                   />
                   <button
                     type="submit"

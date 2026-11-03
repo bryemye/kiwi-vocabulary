@@ -2007,7 +2007,7 @@ export default function VocabGraphView({
                               value={reviewFormData.verifiedBy}
                               onChange={(e) => setReviewFormData(prev => ({ ...prev, verifiedBy: e.target.value }))}
                               placeholder="e.g. Admin, Senior Lexicographer"
-                              className="w-full text-xs font-mono px-2 py-1.5 bg-white border border-[#111410] focus:outline-none focus:ring-1 focus:ring-[#7BB33B]"
+                              className="w-full text-base sm:text-xs font-mono px-2 py-1.5 bg-white border border-[#111410] focus:outline-none focus:ring-1 focus:ring-[#7BB33B]"
                             />
                           </div>
 
@@ -2021,7 +2021,7 @@ export default function VocabGraphView({
                               value={reviewFormData.notes}
                               onChange={(e) => setReviewFormData(prev => ({ ...prev, notes: e.target.value }))}
                               placeholder="e.g. Checked against Merriam-Webster / Latin etymology confirmed"
-                              className="w-full text-xs font-sans p-2 bg-white border border-[#111410] focus:outline-none focus:ring-1 focus:ring-[#7BB33B] resize-y"
+                              className="w-full text-base sm:text-xs font-sans p-2 bg-white border border-[#111410] focus:outline-none focus:ring-1 focus:ring-[#7BB33B] resize-y"
                             />
                             <span className="text-[9px] font-mono text-[#62685E] mt-0.5 block">
                               Internal notes are hidden from regular students.

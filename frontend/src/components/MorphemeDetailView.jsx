@@ -126,7 +126,7 @@ export default function MorphemeDetailView({
       </div>
 
       {/* Morpheme Definition Hero Bento Card */}
-      <div className="bg-white border-2 border-[#111410] shadow-[6px_6px_0px_0px_#111410] p-6 sm:p-8">
+      <div className="bg-white border-2 border-[#111410] shadow-[6px_6px_0px_0px_#111410] p-4 sm:p-8">
         <div className="flex flex-col md:flex-row md:items-start justify-between gap-4 border-b-2 border-[#111410] pb-5">
           <div className="space-y-2">
             <div className="flex items-center space-x-2">
@@ -152,7 +152,7 @@ export default function MorphemeDetailView({
           {/* Primary Action: Practice Subset */}
           <button
             onClick={() => onStartPractice(matchedWords, title, morphemeData)}
-            className="flex items-center justify-center space-x-2 px-6 py-3.5 bg-[#7BB33B] hover:bg-[#84C341] text-white font-mono font-black text-xs uppercase tracking-wider border-2 border-[#111410] shadow-[4px_4px_0px_0px_#111410] active:translate-x-[2px] active:translate-y-[2px] transition shrink-0"
+            className="w-full md:w-auto min-h-[44px] flex items-center justify-center space-x-2 px-6 py-3.5 bg-[#7BB33B] hover:bg-[#84C341] text-white font-mono font-black text-xs uppercase tracking-wider border-2 border-[#111410] shadow-[4px_4px_0px_0px_#111410] active:translate-x-[2px] active:translate-y-[2px] transition shrink-0"
           >
             <Play className="w-4 h-4 fill-white" />
             <span>Practice This Subset ({matchedWords.length})</span>
@@ -192,19 +192,19 @@ export default function MorphemeDetailView({
           </h2>
         </div>
 
-        <div className="relative max-w-xs w-full">
-          <Search className="w-3.5 h-3.5 absolute left-2.5 top-2.5 text-[#62685E]" />
+        <div className="relative w-full sm:max-w-xs">
+          <Search className="w-3.5 h-3.5 absolute left-2.5 top-3 sm:top-2.5 text-[#62685E]" />
           <input
             type="text"
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
             placeholder="FILTER SUBSET WORDS..."
-            className="w-full bg-white text-[#111410] font-mono font-bold text-xs pl-8 pr-7 py-1.5 border-2 border-[#111410] shadow-[2px_2px_0px_0px_#111410] focus:outline-none uppercase placeholder:text-[#A8AAA6]"
+            className="w-full bg-white text-[#111410] font-mono font-bold text-base sm:text-xs pl-8 pr-7 py-2 sm:py-1.5 border-2 border-[#111410] shadow-[2px_2px_0px_0px_#111410] focus:outline-none uppercase placeholder:text-[#A8AAA6]"
           />
           {searchTerm && (
             <button
               onClick={() => setSearchTerm('')}
-              className="absolute right-2 top-2 text-[#42281D]"
+              className="absolute right-2.5 top-2.5 p-1 text-[#42281D]"
             >
               <X className="w-3.5 h-3.5" />
             </button>
