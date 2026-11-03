@@ -1,16 +1,17 @@
 import React, { useState, useRef, useEffect } from 'react';
 import {
   Sparkles,
-  LineChart,
-  BookOpenCheck,
+  Compass,
   CheckCircle2,
   Clock,
   User as UserIcon,
   LogOut,
   ChevronDown,
-  Network,
   ShieldCheck,
-  Film
+  Network,
+  Film,
+  Menu,
+  X
 } from 'lucide-react';
 
 export default function Navbar({
@@ -25,6 +26,7 @@ export default function Navbar({
   onToggleAdminMode
 }) {
   const [isSwitcherOpen, setIsSwitcherOpen] = useState(false);
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const switcherRef = useRef(null);
 
   const formatTime = (secs) => {
@@ -33,7 +35,7 @@ export default function Navbar({
     return `${m.toString().padStart(2, '0')}:${s.toString().padStart(2, '0')}`;
   };
 
-  // Close switcher on outside click
+  // Close desktop dropdown on outside click
   useEffect(() => {
     const handleClickOutside = (event) => {
       if (switcherRef.current && !switcherRef.current.contains(event.target)) {
@@ -44,6 +46,17 @@ export default function Navbar({
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, []);
 
+  // Close mobile menu on resize to desktop
+  useEffect(() => {
+    const handleResize = () => {
+      if (window.innerWidth >= 1024) {
+        setIsMobileMenuOpen(false);
+      }
+    };
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, []);
+
   const apps = [
     {
       id: 'vocab',
@@ -51,6 +64,16 @@ export default function Navbar({
       badge: 'ACTIVE',
       tagline: 'Etymological Flashcards & Spaced Repetition',
       icon: Sparkles,
+      color: '#7BB33B',
+      accentBg: '#EDF5E5',
+      disabled: false,
+    },
+    {
+      id: 'explorer',
+      name: 'Root Explorer',
+      badge: 'ACTIVE',
+      tagline: 'Morpheme & Etymology Root Explorer',
+      icon: Compass,
       color: '#7BB33B',
       accentBg: '#EDF5E5',
       disabled: false,
@@ -75,45 +98,31 @@ export default function Navbar({
       accentBg: '#EDF5E5',
       disabled: false,
     },
-    {
-      id: 'math',
-      name: 'Kiwi Math',
-      badge: 'IN DEVELOPMENT',
-      tagline: 'Interactive Coordinate Plane & Math Lab',
-      icon: LineChart,
-      color: '#42281D',
-      accentBg: '#FAFBF8',
-      disabled: true,
-    },
-    {
-      id: 'reading',
-      name: 'Kiwi Reading',
-      badge: 'IN DEVELOPMENT',
-      tagline: 'Passage Analysis & Active Annotation',
-      icon: BookOpenCheck,
-      color: '#42281D',
-      accentBg: '#FAFBF8',
-      disabled: true,
-    },
   ];
 
   const currentApp = apps.find(a => a.id === activeApp && !a.disabled) || apps[0];
 
+  const handleSelectApp = (appId) => {
+    setActiveApp(appId);
+    setIsSwitcherOpen(false);
+    setIsMobileMenuOpen(false);
+  };
+
   return (
     <header className="sticky top-0 z-40 bg-[#FFFFFF] border-b-2 border-[#111410]">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div className="max-w-7xl mx-auto px-3 sm:px-6 lg:px-8">
         <div className="flex items-center justify-between h-16">
 
-          {/* Platform Brand & App Switcher */}
-          <div className="flex items-center space-x-3 sm:space-x-5">
+          {/* Platform Brand & Desktop App Switcher */}
+          <div className="flex items-center space-x-2 sm:space-x-4">
             {/* Platform Brand */}
             <div
-              className="flex items-center space-x-3 cursor-pointer group"
-              onClick={() => setActiveApp('vocab')}
+              className="flex items-center space-x-2 sm:space-x-3 cursor-pointer group shrink-0"
+              onClick={() => handleSelectApp('vocab')}
             >
               {/* Geometric Kiwi Icon */}
-              <div className="w-10 h-10 bg-[#7BB33B] border-2 border-[#111410] shadow-[3px_3px_0px_0px_#111410] flex items-center justify-center relative overflow-hidden group-hover:translate-x-[-1px] group-hover:translate-y-[-1px] group-hover:shadow-[4px_4px_0px_0px_#111410] transition-all">
-                <svg viewBox="0 0 24 24" className="w-6 h-6" fill="none">
+              <div className="w-9 h-9 sm:w-10 sm:h-10 bg-[#7BB33B] border-2 border-[#111410] shadow-[2px_2px_0px_0px_#111410] sm:shadow-[3px_3px_0px_0px_#111410] flex items-center justify-center relative overflow-hidden group-hover:translate-x-[-1px] group-hover:translate-y-[-1px] transition-all shrink-0">
+                <svg viewBox="0 0 24 24" className="w-5 h-5 sm:w-6 sm:h-6" fill="none">
                   <circle cx="12" cy="12" r="9" fill="#84C341" stroke="#111410" strokeWidth="2" />
                   <circle cx="12" cy="12" r="3.5" fill="#FAFBF8" stroke="#111410" strokeWidth="1.5" />
                   <rect x="11.5" y="5.5" width="1" height="2" fill="#42281D" transform="rotate(0 12 12)" />
@@ -128,28 +137,28 @@ export default function Navbar({
               </div>
 
               <div>
-                <div className="flex items-center space-x-2">
+                <div className="flex items-center space-x-1.5">
                   <span className="font-extrabold text-base sm:text-lg tracking-tight text-[#111410] font-mono">
                     KIWI
                   </span>
-                  <span className="text-[9px] font-mono px-1.5 py-0.5 font-bold uppercase tracking-wider bg-[#EDF5E5] text-[#2F441E] border border-[#111410]">
-                    VOCABULARY
+                  <span className="text-[9px] font-mono px-1.5 py-0.2 sm:py-0.5 font-bold uppercase tracking-wider bg-[#EDF5E5] text-[#2F441E] border border-[#111410] hidden xs:inline-block">
+                    VOCAB
                   </span>
                 </div>
               </div>
             </div>
 
             {/* Separator Pipe */}
-            <div className="h-7 w-[2px] bg-[#111410]/20 hidden sm:block" />
+            <div className="h-7 w-[2px] bg-[#111410]/20 hidden md:block" />
 
-            {/* APP SWITCHER DROPDOWN */}
-            <div className="relative" ref={switcherRef}>
+            {/* APP SWITCHER DROPDOWN (Desktop/Tablet) */}
+            <div className="relative hidden md:block" ref={switcherRef}>
               <button
                 onClick={() => setIsSwitcherOpen(prev => !prev)}
-                className="flex items-center space-x-2 px-3 py-1.5 border-2 border-[#111410] font-mono text-xs font-bold uppercase transition-all bg-[#7BB33B] text-white shadow-[3px_3px_0px_0px_#111410]"
+                className="flex items-center space-x-2 px-3 py-1.5 border-2 border-[#111410] font-mono text-xs font-bold uppercase transition-all bg-[#7BB33B] text-white shadow-[2px_2px_0px_0px_#111410]"
               >
                 <currentApp.icon className="w-3.5 h-3.5 text-white" />
-                <span className="truncate max-w-[120px] sm:max-w-none">{currentApp.name}</span>
+                <span className="truncate max-w-[120px] lg:max-w-none">{currentApp.name}</span>
                 <ChevronDown className={`w-3.5 h-3.5 ml-1 transition-transform ${isSwitcherOpen ? 'rotate-180' : ''}`} />
               </button>
 
@@ -164,47 +173,19 @@ export default function Navbar({
                       const Icon = app.icon;
                       const isActive = activeApp === app.id && !app.disabled;
 
-                      if (app.disabled) {
-                        return (
-                          <div
-                            key={app.id}
-                            className="w-full text-left p-2.5 flex items-start space-x-3 border-2 border-dashed border-[#111410]/30 bg-[#FAFBF8] opacity-60 cursor-not-allowed select-none"
-                            title={`${app.name} is currently in development`}
-                          >
-                            <div className="p-1.5 border border-[#111410]/40 bg-[#EFE8DF] text-[#42281D] mt-0.5 shrink-0">
-                              <Icon className="w-3.5 h-3.5" />
-                            </div>
-                            <div className="flex-1 min-w-0">
-                              <div className="flex items-center justify-between gap-1">
-                                <span className="font-mono text-xs font-black uppercase truncate text-[#111410]/80">
-                                  {app.name}
-                                </span>
-                                <span className="bg-[#EFE8DF] text-[#42281D] text-xs font-mono px-1.5 py-0.5 border border-[#111410] font-bold uppercase tracking-wider shrink-0">
-                                  {app.badge}
-                                </span>
-                              </div>
-                              <p className="text-[10px] font-mono text-[#62685E] truncate mt-0.5">
-                                {app.tagline}
-                              </p>
-                            </div>
-                          </div>
-                        );
-                      }
-
                       return (
                         <button
                           key={app.id}
-                          onClick={() => {
-                            setActiveApp(app.id);
-                            setIsSwitcherOpen(false);
-                          }}
-                          className={`w-full text-left p-2.5 flex items-start space-x-3 border-2 transition ${isActive
+                          onClick={() => handleSelectApp(app.id)}
+                          className={`w-full text-left p-2.5 flex items-start space-x-3 border-2 transition ${
+                            isActive
                               ? 'bg-[#EDF5E5] border-[#111410] text-[#111410] shadow-[2px_2px_0px_0px_#111410]'
                               : 'bg-white border-transparent hover:border-[#111410] hover:bg-[#FAFBF8] text-[#111410]'
-                            }`}
+                          }`}
                         >
-                          <div className={`p-1.5 border border-[#111410] mt-0.5 shrink-0 ${isActive ? 'bg-[#7BB33B] text-white' : 'bg-white text-[#42281D]'
-                            }`}>
+                          <div className={`p-1.5 border border-[#111410] mt-0.5 shrink-0 ${
+                            isActive ? 'bg-[#7BB33B] text-white' : 'bg-white text-[#42281D]'
+                          }`}>
                             <Icon className="w-3.5 h-3.5" />
                           </div>
                           <div className="flex-1 min-w-0">
@@ -229,52 +210,38 @@ export default function Navbar({
             </div>
           </div>
 
-          {/* Quick Product Tabs for Desktop (Only Active Vocabulary Clickable) */}
-          <div className="hidden lg:flex items-center space-x-2 font-mono text-xs">
+          {/* Quick Product Tabs for Desktop (>= lg) */}
+          <div className="hidden xl:flex items-center space-x-2 font-mono text-xs">
             {apps.map((app) => {
               const Icon = app.icon;
               const isActive = activeApp === app.id && !app.disabled;
 
-              if (app.disabled) {
-                return (
-                  <div
-                    key={app.id}
-                    className="flex items-center space-x-1.5 px-2.5 py-1 text-xs font-bold uppercase bg-[#FAFBF8] text-[#42281D]/70 border-2 border-dashed border-[#111410]/30 opacity-60 cursor-not-allowed select-none"
-                    title={`${app.name} is in development`}
-                  >
-                    <Icon className="w-3 h-3 text-[#42281D]" />
-                    <span>{app.name.replace('Kiwi ', '')}</span>
-                    <span className="bg-[#EFE8DF] text-[#42281D] text-xs font-mono px-1.5 py-0.5 border border-[#111410] font-bold">
-                      SOON
-                    </span>
-                  </div>
-                );
-              }
-
               return (
                 <button
                   key={app.id}
-                  onClick={() => setActiveApp(app.id)}
-                  className={`flex items-center space-x-1.5 px-3 py-1 text-xs font-bold uppercase transition border-2 border-[#111410] shadow-[2px_2px_0px_0px_#111410] ${isActive
+                  onClick={() => handleSelectApp(app.id)}
+                  className={`flex items-center space-x-1.5 px-3 py-1 text-xs font-bold uppercase transition border-2 border-[#111410] shadow-[2px_2px_0px_0px_#111410] ${
+                    isActive
                       ? 'bg-[#7BB33B] text-white'
                       : 'bg-white hover:bg-[#FAFBF8] text-[#111410]'
-                    }`}
+                  }`}
                 >
                   <Icon className={`w-3.5 h-3.5 ${isActive ? 'text-white' : 'text-[#7BB33B]'}`} />
                   <span>{app.name.replace('Kiwi ', '')}</span>
-                  <span className={`text-[9px] font-mono px-1 py-0.2 border border-[#111410] font-bold ${isActive ? 'bg-[#EDF5E5] text-[#2F441E]' : 'bg-[#FAFBF8] text-[#62685E]'
-                    }`}>
-                    ACTIVE
+                  <span className={`text-[9px] font-mono px-1 py-0.2 border border-[#111410] font-bold ${
+                    isActive ? 'bg-[#EDF5E5] text-[#2F441E]' : 'bg-[#FAFBF8] text-[#62685E]'
+                  }`}>
+                    {app.badge}
                   </span>
                 </button>
               );
             })}
           </div>
 
-          {/* Right Section: Stats & Global Magic-Link Authentication */}
+          {/* Right Section: Stats, Auth & Mobile Menu Trigger */}
           <div className="flex items-center space-x-2 sm:space-x-3">
-            {/* Session Timer & Accuracy (Desktop) */}
-            <div className="hidden xl:flex items-center space-x-2">
+            {/* Session Timer & Accuracy (Desktop >= lg) */}
+            <div className="hidden lg:flex items-center space-x-2">
               <div className="flex items-center space-x-1.5 px-2.5 py-1 bg-[#FAFBF8] border-2 border-[#111410] shadow-[2px_2px_0px_0px_#111410] text-xs font-mono text-[#111410]">
                 <Clock className="w-3.5 h-3.5 text-[#42281D]" />
                 <span>TIME: <strong>{formatTime(sessionSeconds)}</strong></span>
@@ -287,27 +254,28 @@ export default function Navbar({
               )}
             </div>
 
-            {/* Editorial / Admin Review Mode Toggle */}
+            {/* Editorial Review Toggle (Desktop >= md) */}
             {onToggleAdminMode && (
               <button
                 onClick={onToggleAdminMode}
-                className={`flex items-center space-x-1.5 px-2.5 py-1 text-xs font-mono font-bold uppercase transition border-2 border-[#111410] ${isAdminMode
+                className={`hidden md:flex items-center space-x-1.5 px-2.5 py-1 text-xs font-mono font-bold uppercase transition border-2 border-[#111410] ${
+                  isAdminMode
                     ? 'bg-[#111410] text-[#7BB33B] shadow-[2px_2px_0px_0px_#7BB33B]'
                     : 'bg-[#FAFBF8] hover:bg-white text-[#42281D] shadow-[2px_2px_0px_0px_#111410]'
-                  }`}
-                title={`Toggle Editorial / Admin Review Mode (Ctrl+Shift+E) · Currently: ${isAdminMode ? 'ACTIVE' : 'OFF'}`}
+                }`}
+                title={`Toggle Editorial / Admin Review Mode · Currently: ${isAdminMode ? 'ACTIVE' : 'OFF'}`}
               >
                 <ShieldCheck className={`w-3.5 h-3.5 ${isAdminMode ? 'text-[#7BB33B]' : 'text-[#42281D]'}`} />
-                <span className="hidden sm:inline">REVIEW</span>
+                <span>REVIEW</span>
                 <span className={`w-2 h-2 rounded-full border border-[#111410] ${isAdminMode ? 'bg-[#7BB33B] animate-pulse' : 'bg-gray-300'}`} />
               </button>
             )}
 
-            {/* Global User Authentication Status */}
+            {/* Global User Authentication Status (Desktop >= sm) */}
             {user ? (
-              <div className="flex items-center space-x-1.5">
+              <div className="hidden sm:flex items-center space-x-1.5">
                 <div
-                  className="flex items-center space-x-1.5 px-2.5 py-1 bg-[#EDF5E5] border-2 border-[#111410] shadow-[2px_2px_0px_0px_#111410] text-xs font-mono text-[#2F441E] max-w-[130px] sm:max-w-[190px]"
+                  className="flex items-center space-x-1.5 px-2.5 py-1 bg-[#EDF5E5] border-2 border-[#111410] shadow-[2px_2px_0px_0px_#111410] text-xs font-mono text-[#2F441E] max-w-[130px] md:max-w-[180px]"
                   title={`Signed in as ${user.email}`}
                 >
                   <UserIcon className="w-3.5 h-3.5 text-[#7BB33B] shrink-0" />
@@ -317,24 +285,185 @@ export default function Navbar({
                 <button
                   onClick={onLogout}
                   title="Sign out of your session"
-                  className="flex items-center space-x-1 px-2.5 py-1 bg-white hover:bg-[#FDF2F2] hover:text-[#991B1B] text-[#42281D] border-2 border-[#111410] shadow-[2px_2px_0px_0px_#111410] text-xs font-mono font-bold uppercase transition hover:translate-x-[-1px] hover:translate-y-[-1px]"
+                  className="flex items-center space-x-1 px-2.5 py-1 bg-white hover:bg-[#FDF2F2] hover:text-[#991B1B] text-[#42281D] border-2 border-[#111410] shadow-[2px_2px_0px_0px_#111410] text-xs font-mono font-bold uppercase transition"
                 >
                   <LogOut className="w-3.5 h-3.5" />
-                  <span className="hidden sm:inline">LOGOUT</span>
+                  <span className="hidden md:inline">LOGOUT</span>
                 </button>
               </div>
             ) : (
               <button
                 onClick={onOpenAuth}
-                className="flex items-center space-x-1.5 px-3 py-1.5 bg-[#7BB33B] hover:bg-[#84C341] text-white border-2 border-[#111410] shadow-[3px_3px_0px_0px_#111410] hover:translate-x-[-1px] hover:translate-y-[-1px] hover:shadow-[4px_4px_0px_0px_#111410] text-xs font-mono font-black uppercase tracking-wider transition-all"
+                className="hidden sm:flex items-center space-x-1.5 px-3 py-1.5 bg-[#7BB33B] hover:bg-[#84C341] text-white border-2 border-[#111410] shadow-[2px_2px_0px_0px_#111410] text-xs font-mono font-black uppercase tracking-wider transition-all"
               >
                 <Sparkles className="w-3.5 h-3.5" />
-                <span>SIGN IN / REGISTER</span>
+                <span className="hidden md:inline">SIGN IN / REGISTER</span>
+                <span className="md:hidden">SIGN IN</span>
               </button>
             )}
+
+            {/* Mobile Header Quick Auth Trigger (When logged out on mobile) */}
+            {!user && (
+              <button
+                onClick={onOpenAuth}
+                className="sm:hidden flex items-center space-x-1 px-2.5 py-1.5 bg-[#7BB33B] text-white border-2 border-[#111410] shadow-[2px_2px_0px_0px_#111410] text-xs font-mono font-black uppercase"
+                title="Sign In / Register"
+              >
+                <Sparkles className="w-3.5 h-3.5" />
+                <span>SIGN IN</span>
+              </button>
+            )}
+
+            {/* Mobile Menu Hamburger Button (< lg) */}
+            <button
+              onClick={() => setIsMobileMenuOpen(prev => !prev)}
+              className="lg:hidden p-2 bg-white hover:bg-[#FAFBF8] border-2 border-[#111410] shadow-[2px_2px_0px_0px_#111410] text-[#111410] active:translate-x-[1px] active:translate-y-[1px] transition"
+              aria-label="Toggle navigation menu"
+              aria-expanded={isMobileMenuOpen}
+            >
+              {isMobileMenuOpen ? (
+                <X className="w-5 h-5 text-[#111410]" />
+              ) : (
+                <Menu className="w-5 h-5 text-[#111410]" />
+              )}
+            </button>
           </div>
         </div>
       </div>
+
+      {/* MOBILE FULL-WIDTH DRAWER MENU (< lg) */}
+      {isMobileMenuOpen && (
+        <div className="lg:hidden border-t-2 border-[#111410] bg-white shadow-[0px_8px_0px_0px_rgba(17,20,16,0.25)] animate-fade-in divide-y-2 divide-[#111410]/20">
+          
+          {/* Mobile Metrics Bar */}
+          <div className="p-3 bg-[#FAFBF8] flex items-center justify-between text-xs font-mono">
+            <div className="flex items-center space-x-1.5 px-2.5 py-1 bg-white border border-[#111410]">
+              <Clock className="w-3.5 h-3.5 text-[#42281D]" />
+              <span>TIME: <strong>{formatTime(sessionSeconds)}</strong></span>
+            </div>
+            {stats?.overall && (
+              <div className="flex items-center space-x-1.5 px-2.5 py-1 bg-[#EDF5E5] border border-[#111410] text-[#2F441E]">
+                <CheckCircle2 className="w-3.5 h-3.5 text-[#7BB33B]" />
+                <span>ACCURACY: <strong>{stats.overall.accuracy_percentage}%</strong></span>
+              </div>
+            )}
+          </div>
+
+          {/* Mobile Navigation Apps */}
+          <div className="p-3 space-y-2">
+            <div className="text-[10px] font-mono font-black uppercase text-[#62685E] px-1">
+              Kiwi Educational Products
+            </div>
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+              {apps.map((app) => {
+                const Icon = app.icon;
+                const isActive = activeApp === app.id && !app.disabled;
+
+                return (
+                  <button
+                    key={app.id}
+                    onClick={() => handleSelectApp(app.id)}
+                    className={`w-full text-left p-2.5 flex items-start space-x-3 border-2 transition ${
+                      isActive
+                        ? 'bg-[#EDF5E5] border-[#111410] text-[#111410] shadow-[2px_2px_0px_0px_#111410]'
+                        : 'bg-white border-[#111410]/30 hover:border-[#111410] text-[#111410]'
+                    }`}
+                  >
+                    <div className={`p-1.5 border border-[#111410] mt-0.5 shrink-0 ${
+                      isActive ? 'bg-[#7BB33B] text-white' : 'bg-white text-[#42281D]'
+                    }`}>
+                      <Icon className="w-4 h-4" />
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <div className="flex items-center justify-between">
+                        <span className="font-mono text-xs font-black uppercase truncate">
+                          {app.name}
+                        </span>
+                        <span className={`text-[9px] font-mono px-1.5 py-0.2 border uppercase font-bold ${
+                          isActive ? 'bg-[#7BB33B] text-white border-[#111410]' : 'bg-[#FAFBF8] border-[#111410] text-[#62685E]'
+                        }`}>
+                          {app.badge}
+                        </span>
+                      </div>
+                      <p className="text-[10px] font-mono text-[#62685E] truncate mt-0.5">
+                        {app.tagline}
+                      </p>
+                    </div>
+                  </button>
+                );
+              })}
+            </div>
+          </div>
+
+          {/* Mobile Editorial Review Mode Toggle */}
+          {onToggleAdminMode && (
+            <div className="p-3 bg-[#FAFBF8] flex items-center justify-between">
+              <div className="flex items-center space-x-2">
+                <ShieldCheck className={`w-4 h-4 ${isAdminMode ? 'text-[#7BB33B]' : 'text-[#42281D]'}`} />
+                <div>
+                  <div className="text-xs font-mono font-black uppercase text-[#111410]">
+                    Editorial Review Mode
+                  </div>
+                  <div className="text-[10px] font-mono text-[#62685E]">
+                    Currently: {isAdminMode ? 'ACTIVE (Editor Bar Visible)' : 'INACTIVE'}
+                  </div>
+                </div>
+              </div>
+
+              <button
+                onClick={onToggleAdminMode}
+                className={`px-3 py-1.5 text-xs font-mono font-black uppercase border-2 border-[#111410] transition ${
+                  isAdminMode
+                    ? 'bg-[#111410] text-[#7BB33B] shadow-[2px_2px_0px_0px_#7BB33B]'
+                    : 'bg-white text-[#111410] shadow-[2px_2px_0px_0px_#111410]'
+                }`}
+              >
+                {isAdminMode ? 'DISABLE' : 'ENABLE'}
+              </button>
+            </div>
+          )}
+
+          {/* Mobile User Profile & Auth */}
+          <div className="p-3 bg-white">
+            {user ? (
+              <div className="flex items-center justify-between">
+                <div className="flex items-center space-x-2 min-w-0 pr-2">
+                  <div className="p-1.5 bg-[#EDF5E5] border border-[#111410] text-[#7BB33B]">
+                    <UserIcon className="w-4 h-4" />
+                  </div>
+                  <div className="min-w-0">
+                    <span className="text-[10px] font-mono text-[#62685E] uppercase block">Signed In As</span>
+                    <span className="text-xs font-mono font-bold text-[#111410] truncate block">{user.email}</span>
+                  </div>
+                </div>
+
+                <button
+                  onClick={() => {
+                    setIsMobileMenuOpen(false);
+                    onLogout();
+                  }}
+                  className="px-3 py-1.5 bg-white hover:bg-[#FDF2F2] hover:text-[#991B1B] text-[#42281D] border-2 border-[#111410] shadow-[2px_2px_0px_0px_#111410] text-xs font-mono font-black uppercase"
+                >
+                  <LogOut className="w-3.5 h-3.5 inline mr-1" />
+                  <span>LOGOUT</span>
+                </button>
+              </div>
+            ) : (
+              <button
+                onClick={() => {
+                  setIsMobileMenuOpen(false);
+                  onOpenAuth();
+                }}
+                className="w-full py-2.5 bg-[#7BB33B] hover:bg-[#84C341] text-white border-2 border-[#111410] shadow-[3px_3px_0px_0px_#111410] text-xs font-mono font-black uppercase tracking-wider flex items-center justify-center space-x-2"
+              >
+                <Sparkles className="w-4 h-4" />
+                <span>SIGN IN / REGISTER VIA MAGIC LINK</span>
+              </button>
+            )}
+          </div>
+
+        </div>
+      )}
     </header>
   );
 }

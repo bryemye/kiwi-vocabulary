@@ -522,84 +522,87 @@ export default function VocabView({
   }
 
   return (
-    <div className={`mx-auto px-4 ${subTab === 'graph' ? 'max-w-7xl py-4 space-y-4' : 'max-w-6xl py-6 space-y-6'}`}>
+    <div className={`mx-auto px-3 sm:px-4 ${subTab === 'graph' ? 'max-w-7xl py-3 sm:py-4 space-y-4' : 'max-w-6xl py-4 sm:py-6 space-y-4 sm:space-y-6'}`}>
 
       {/* FLAGSHIP HUB HEADER & DEDICATED SUB-NAVIGATION */}
-      <div className="bg-white border-2 border-[#111410] shadow-[5px_5px_0px_0px_#111410] p-5 sm:p-6">
-        <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 border-b-2 border-[#111410] pb-5">
+      <div className="bg-white border-2 border-[#111410] shadow-[4px_4px_0px_0px_#111410] sm:shadow-[5px_5px_0px_0px_#111410] p-4 sm:p-6">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 sm:gap-4 border-b-2 border-[#111410] pb-4 sm:pb-5">
           <div className="flex items-center space-x-3">
-            <div className="w-12 h-12 bg-[#7BB33B] border-2 border-[#111410] shadow-[3px_3px_0px_0px_#111410] flex items-center justify-center shrink-0">
-              <Sparkles className="w-6 h-6 text-white" />
+            <div className="w-10 h-10 sm:w-12 sm:h-12 bg-[#7BB33B] border-2 border-[#111410] shadow-[2px_2px_0px_0px_#111410] sm:shadow-[3px_3px_0px_0px_#111410] flex items-center justify-center shrink-0">
+              <Sparkles className="w-5 h-5 sm:w-6 sm:h-6 text-white" />
             </div>
             <div>
               <div className="flex items-center space-x-2">
-                <h1 className="text-2xl sm:text-3xl font-black font-sans uppercase tracking-tight text-[#111410]">
+                <h1 className="text-xl sm:text-3xl font-black font-sans uppercase tracking-tight text-[#111410]">
                   Kiwi Vocabulary
                 </h1>
               </div>
-              <p className="text-xs font-mono uppercase text-[#62685E] mt-0.5">
+              <p className="text-[11px] sm:text-xs font-mono uppercase text-[#62685E] mt-0.5">
                 SAT/ACT Spaced Repetition
               </p>
             </div>
           </div>
 
           {/* Quick Metrics Capsule */}
-          <div className="flex items-center space-x-2 text-xs font-mono">
-            <div className="px-3 py-1.5 bg-[#FAFBF8] border-2 border-[#111410] shadow-[2px_2px_0px_0px_#111410]">
+          <div className="flex items-center space-x-2 text-[11px] sm:text-xs font-mono">
+            <div className="flex-1 sm:flex-none text-center px-2.5 sm:px-3 py-1 sm:py-1.5 bg-[#FAFBF8] border-2 border-[#111410] shadow-[2px_2px_0px_0px_#111410]">
               <span className="text-[#62685E] font-bold">LEXICON: </span>
               <strong>{words.length} WORDS</strong>
             </div>
-            <div className="px-3 py-1.5 bg-[#EDF5E5] border-2 border-[#111410] shadow-[2px_2px_0px_0px_#111410] text-[#2F441E]">
+            <div className="flex-1 sm:flex-none text-center px-2.5 sm:px-3 py-1 sm:py-1.5 bg-[#EDF5E5] border-2 border-[#111410] shadow-[2px_2px_0px_0px_#111410] text-[#2F441E]">
               <span className="font-bold">ROOTS: </span>
               <strong>{roots.length} FAMILIES</strong>
             </div>
           </div>
         </div>
 
-        {/* DEDICATED SUB-NAVIGATION BAR */}
-        <div className="flex flex-wrap items-center gap-2 pt-4">
+        {/* DEDICATED SUB-NAVIGATION BAR (HORIZONTALLY SCROLLABLE SEGMENTED BAR ON MOBILE) */}
+        <div className="flex items-center gap-2 pt-3 sm:pt-4 overflow-x-auto no-scrollbar scroll-smooth pb-1 -mx-1 px-1 sm:overflow-visible sm:flex-wrap">
           <button
             onClick={() => handleAttemptTabChange('study')}
-            className={`flex items-center space-x-2 px-4 py-2 font-mono text-xs font-black uppercase tracking-wider border-2 border-[#111410] transition ${subTab === 'study'
+            className={`flex items-center space-x-1.5 sm:space-x-2 px-3 sm:px-4 py-2 font-mono text-xs font-black uppercase tracking-wider border-2 border-[#111410] whitespace-nowrap shrink-0 transition ${subTab === 'study'
                 ? 'bg-[#7BB33B] text-white shadow-[3px_3px_0px_0px_#111410] translate-x-[-1px] translate-y-[-1px]'
                 : 'bg-white hover:bg-[#FAFBF8] text-[#111410] shadow-[2px_2px_0px_0px_#111410]'
               }`}
           >
-            <Layers className="w-4 h-4" />
-            <span>Study Deck (15-Card Session)</span>
+            <Layers className="w-3.5 h-3.5 sm:w-4 sm:h-4 shrink-0" />
+            <span className="hidden sm:inline">Study Deck (15-Card Session)</span>
+            <span className="sm:hidden">Study Deck</span>
           </button>
 
           <button
             onClick={() => handleAttemptTabChange('explorer')}
-            className={`flex items-center space-x-2 px-4 py-2 font-mono text-xs font-black uppercase tracking-wider border-2 border-[#111410] transition ${subTab === 'explorer'
+            className={`flex items-center space-x-1.5 sm:space-x-2 px-3 sm:px-4 py-2 font-mono text-xs font-black uppercase tracking-wider border-2 border-[#111410] whitespace-nowrap shrink-0 transition ${subTab === 'explorer'
                 ? 'bg-[#7BB33B] text-white shadow-[3px_3px_0px_0px_#111410] translate-x-[-1px] translate-y-[-1px]'
                 : 'bg-white hover:bg-[#FAFBF8] text-[#111410] shadow-[2px_2px_0px_0px_#111410]'
               }`}
           >
-            <Compass className="w-4 h-4" />
-            <span>Etymology Root Explorer</span>
+            <Compass className="w-3.5 h-3.5 sm:w-4 sm:h-4 shrink-0" />
+            <span className="hidden sm:inline">Etymology Root Explorer</span>
+            <span className="sm:hidden">Explorer</span>
           </button>
 
           <button
             onClick={() => handleAttemptTabChange('progress')}
-            className={`flex items-center space-x-2 px-4 py-2 font-mono text-xs font-black uppercase tracking-wider border-2 border-[#111410] transition ${subTab === 'progress'
+            className={`flex items-center space-x-1.5 sm:space-x-2 px-3 sm:px-4 py-2 font-mono text-xs font-black uppercase tracking-wider border-2 border-[#111410] whitespace-nowrap shrink-0 transition ${subTab === 'progress'
                 ? 'bg-[#7BB33B] text-white shadow-[3px_3px_0px_0px_#111410] translate-x-[-1px] translate-y-[-1px]'
                 : 'bg-white hover:bg-[#FAFBF8] text-[#111410] shadow-[2px_2px_0px_0px_#111410]'
               }`}
           >
-            <Award className="w-4 h-4" />
-            <span>Vocab Progress & Mastery</span>
+            <Award className="w-3.5 h-3.5 sm:w-4 sm:h-4 shrink-0" />
+            <span className="hidden sm:inline">Vocab Progress & Mastery</span>
+            <span className="sm:hidden">Mastery</span>
           </button>
 
           <button
             onClick={() => handleAttemptTabChange('graph')}
-            className={`flex items-center space-x-2 px-4 py-2 font-mono text-xs font-black uppercase tracking-wider border-2 border-[#111410] transition ${subTab === 'graph'
+            className={`flex items-center space-x-1.5 sm:space-x-2 px-3 sm:px-4 py-2 font-mono text-xs font-black uppercase tracking-wider border-2 border-[#111410] whitespace-nowrap shrink-0 transition ${subTab === 'graph'
                 ? 'bg-[#7BB33B] text-white shadow-[3px_3px_0px_0px_#111410] translate-x-[-1px] translate-y-[-1px]'
                 : 'bg-white hover:bg-[#FAFBF8] text-[#111410] shadow-[2px_2px_0px_0px_#111410]'
               }`}
           >
-            <Network className="w-4 h-4" />
-            <span>ROOT GRAPH</span>
+            <Network className="w-3.5 h-3.5 sm:w-4 sm:h-4 shrink-0" />
+            <span>Root Graph</span>
           </button>
         </div>
       </div>
@@ -648,30 +651,32 @@ export default function VocabView({
           <div className="bg-[#FAFBF8] border-2 border-[#111410] p-3 shadow-[3px_3px_0px_0px_#111410]">
             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
               {/* Origin Filter */}
-              <div className="flex items-center space-x-1 font-mono text-xs">
+              <div className="flex items-center justify-between sm:justify-start space-x-1.5 font-mono text-xs w-full sm:w-auto">
                 <span className="text-[10px] font-black uppercase text-[#62685E] mr-1 hidden sm:inline">ORIGIN:</span>
-                {['ALL', 'Latin', 'Greek'].map((lang) => (
-                  <button
-                    key={lang}
-                    onClick={() => handleLanguageChange(lang)}
-                    className={`px-3 py-1 font-black uppercase border-2 border-[#111410] transition ${selectedLanguage.toLowerCase() === lang.toLowerCase()
-                        ? 'bg-[#7BB33B] text-white shadow-[2px_2px_0px_0px_#111410]'
-                        : 'bg-white text-[#111410] hover:bg-[#FAFBF8]'
-                      }`}
-                  >
-                    {lang.toUpperCase()}
-                  </button>
-                ))}
+                <div className="flex items-center space-x-1 w-full sm:w-auto">
+                  {['ALL', 'Latin', 'Greek'].map((lang) => (
+                    <button
+                      key={lang}
+                      onClick={() => handleLanguageChange(lang)}
+                      className={`flex-1 sm:flex-none px-3 py-1 font-black uppercase border-2 border-[#111410] text-center transition ${selectedLanguage.toLowerCase() === lang.toLowerCase()
+                          ? 'bg-[#7BB33B] text-white shadow-[2px_2px_0px_0px_#111410]'
+                          : 'bg-white text-[#111410] hover:bg-[#FAFBF8]'
+                        }`}
+                    >
+                      {lang.toUpperCase()}
+                    </button>
+                  ))}
+                </div>
               </div>
 
               {/* Root Select, Search & Custom Session Trigger */}
-              <div className="flex items-center space-x-2 flex-1 sm:justify-end">
-                <div className="bg-white border-2 border-[#111410] shadow-[2px_2px_0px_0px_#111410] px-2 py-1 flex items-center">
+              <div className="flex flex-wrap sm:flex-nowrap items-center gap-2 flex-1 sm:justify-end">
+                <div className="bg-white border-2 border-[#111410] shadow-[2px_2px_0px_0px_#111410] px-2 py-1 flex items-center flex-1 sm:flex-none min-w-[130px]">
                   <Filter className="w-3.5 h-3.5 text-[#42281D] mr-1.5 shrink-0" />
                   <select
                     value={selectedRootId}
                     onChange={(e) => setSelectedRootId(e.target.value)}
-                    className="bg-transparent text-[#111410] text-xs font-mono font-bold uppercase focus:outline-none cursor-pointer max-w-[130px] sm:max-w-[180px] truncate"
+                    className="bg-transparent text-[#111410] text-base sm:text-xs font-mono font-bold uppercase focus:outline-none cursor-pointer w-full max-w-full sm:max-w-[160px] truncate"
                   >
                     <option value="ALL">ALL ROOTS ({availableRoots.length})</option>
                     {availableRoots.map((root) => (
@@ -682,14 +687,14 @@ export default function VocabView({
                   </select>
                 </div>
 
-                <div className="relative flex-1 sm:max-w-[160px]">
+                <div className="relative flex-1 sm:max-w-[150px] min-w-[120px]">
                   <Search className="w-3.5 h-3.5 absolute left-2.5 top-2.5 text-[#62685E]" />
                   <input
                     type="text"
                     value={searchTerm}
                     onChange={(e) => setSearchTerm(e.target.value)}
                     placeholder="SEARCH WORDS..."
-                    className="w-full bg-white text-[#111410] font-mono font-bold text-xs pl-8 pr-7 py-1 border-2 border-[#111410] shadow-[2px_2px_0px_0px_#111410] focus:outline-none uppercase placeholder:text-[#A8AAA6]"
+                    className="w-full bg-white text-[#111410] font-mono font-bold text-base sm:text-xs pl-8 pr-7 py-1 border-2 border-[#111410] shadow-[2px_2px_0px_0px_#111410] focus:outline-none uppercase placeholder:text-[#A8AAA6]"
                   />
                   {searchTerm && (
                     <button
@@ -705,7 +710,7 @@ export default function VocabView({
                 <button
                   type="button"
                   onClick={() => handleOpenCustomSession(selectedRootId !== 'ALL' ? [Number(selectedRootId)] : [])}
-                  className="flex items-center space-x-1.5 px-3 py-1.5 bg-[#7BB33B] hover:bg-[#84C341] text-white font-mono font-black text-xs uppercase tracking-wider border-2 border-[#111410] shadow-[2px_2px_0px_0px_#111410] active:translate-x-[1px] active:translate-y-[1px] transition shrink-0"
+                  className="flex items-center justify-center space-x-1.5 px-3 py-1.5 bg-[#7BB33B] hover:bg-[#84C341] text-white font-mono font-black text-xs uppercase tracking-wider border-2 border-[#111410] shadow-[2px_2px_0px_0px_#111410] active:translate-x-[1px] active:translate-y-[1px] transition shrink-0"
                   title="Configure custom 15-card practice session"
                 >
                   <Sliders className="w-3.5 h-3.5" />

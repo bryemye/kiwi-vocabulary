@@ -41,7 +41,9 @@ export default function App() {
   const [activeApp, setActiveApp] = useState(() => {
     const tab = getTabFromUrl();
     if (tab === 'poems') return 'poems';
-    return tab === 'graph' ? 'graph' : 'vocab';
+    if (tab === 'graph') return 'graph';
+    if (tab === 'explorer') return 'explorer';
+    return 'vocab';
   });
 
   const [stats, setStats] = useState(null);
@@ -106,6 +108,8 @@ export default function App() {
         setActiveApp('poems');
       } else if (tab === 'graph') {
         setActiveApp('graph');
+      } else if (tab === 'explorer') {
+        setActiveApp('explorer');
       } else {
         setActiveApp('vocab');
       }
@@ -136,7 +140,7 @@ export default function App() {
         setActiveApp('graph');
         setActiveTab('graph');
       } else if (fullPath.includes('explorer')) {
-        setActiveApp('vocab');
+        setActiveApp('explorer');
         setActiveTab('explorer');
       } else if (fullPath.includes('progress')) {
         setActiveApp('vocab');
@@ -239,6 +243,11 @@ export default function App() {
       if (window.history && window.history.replaceState) {
         window.history.replaceState({}, document.title, '#graph');
       }
+    } else if (tab === 'explorer') {
+      setActiveApp('explorer');
+      if (window.history && window.history.replaceState) {
+        window.history.replaceState({}, document.title, '#explorer');
+      }
     } else {
       setActiveApp('vocab');
       if (window.history && window.history.replaceState) {
@@ -261,11 +270,15 @@ export default function App() {
       handleNavigateTab('graph');
       return;
     }
+    if (targetApp === 'explorer') {
+      handleNavigateTab('explorer');
+      return;
+    }
     if (targetApp === 'vocab' || targetApp === 'study') {
       handleNavigateTab('study');
       return;
     }
-    if (targetApp === 'explorer' || targetApp === 'progress') {
+    if (targetApp === 'progress') {
       handleNavigateTab(targetApp);
       return;
     }
