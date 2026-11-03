@@ -213,29 +213,29 @@ export default function CustomPracticeModal({
   }, [mode, selectedRootIds, totalEligibleRootWords, backfillRelatedRoots, reviewWords, backfillUnstudiedReview]);
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 bg-[#111410]/70 backdrop-blur-xs animate-fade-in">
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-2 sm:p-4 bg-[#111410]/70 backdrop-blur-xs animate-fade-in">
       <div 
-        className="relative w-full max-w-3xl bg-white border-3 border-[#111410] shadow-[8px_8px_0px_0px_#111410] flex flex-col max-h-[92vh] overflow-hidden"
+        className="relative w-full max-w-3xl bg-white border-2 sm:border-3 border-[#111410] shadow-[6px_6px_0px_0px_#111410] sm:shadow-[8px_8px_0px_0px_#111410] flex flex-col h-full sm:h-auto max-h-[100dvh] sm:max-h-[92vh] overflow-hidden"
         role="dialog"
         aria-modal="true"
         aria-labelledby="modal-title"
       >
         {/* MODAL HEADER */}
-        <div className="p-4 sm:p-5 bg-[#FAFBF8] border-b-2 border-[#111410] flex items-center justify-between shrink-0">
-          <div className="flex items-center space-x-3">
-            <div className="w-10 h-10 bg-[#7BB33B] border-2 border-[#111410] shadow-[2px_2px_0px_0px_#111410] flex items-center justify-center shrink-0">
-              <Zap className="w-5 h-5 text-white" />
+        <div className="p-3 sm:p-5 bg-[#FAFBF8] border-b-2 border-[#111410] flex items-center justify-between shrink-0">
+          <div className="flex items-center space-x-2.5 sm:space-x-3">
+            <div className="w-8 h-8 sm:w-10 sm:h-10 bg-[#7BB33B] border-2 border-[#111410] shadow-[2px_2px_0px_0px_#111410] flex items-center justify-center shrink-0">
+              <Zap className="w-4 h-4 sm:w-5 sm:h-5 text-white" />
             </div>
             <div>
               <div className="flex items-center space-x-2">
-                <h2 id="modal-title" className="text-xl sm:text-2xl font-black font-sans uppercase tracking-tight text-[#111410]">
+                <h2 id="modal-title" className="text-base sm:text-2xl font-black font-sans uppercase tracking-tight text-[#111410]">
                   Custom Practice Session
                 </h2>
-                <span className="text-[10px] font-mono font-black uppercase px-2 py-0.5 bg-[#EDF5E5] text-[#2F441E] border border-[#111410]">
+                <span className="text-[9px] sm:text-[10px] font-mono font-black uppercase px-1.5 sm:px-2 py-0.2 sm:py-0.5 bg-[#EDF5E5] text-[#2F441E] border border-[#111410]">
                   15-CARD ENGINE
                 </span>
               </div>
-              <p className="text-xs font-mono uppercase text-[#62685E] mt-0.5">
+              <p className="text-[10px] sm:text-xs font-mono uppercase text-[#62685E] mt-0.5 hidden sm:block">
                 Tailor your study deck with targeted root families, spaced repetition, or high-yield roots
               </p>
             </div>
@@ -243,38 +243,39 @@ export default function CustomPracticeModal({
 
           <button
             onClick={onClose}
-            className="p-1.5 bg-white hover:bg-[#EFE8DF] text-[#111410] border-2 border-[#111410] shadow-[2px_2px_0px_0px_#111410] transition active:translate-x-[1px] active:translate-y-[1px]"
+            className="p-1 sm:p-1.5 bg-white hover:bg-[#EFE8DF] text-[#111410] border-2 border-[#111410] shadow-[2px_2px_0px_0px_#111410] transition active:translate-x-[1px] active:translate-y-[1px]"
             title="Close modal"
           >
-            <X className="w-5 h-5" />
+            <X className="w-4 h-4 sm:w-5 sm:h-5" />
           </button>
         </div>
 
-        {/* MODE SELECTION TABS */}
-        <div className="grid grid-cols-1 sm:grid-cols-3 border-b-2 border-[#111410] bg-[#FAFBF8] shrink-0">
+        {/* MODE SELECTION TABS (COMPACT 3-COLUMN SEGMENTED SWITCHER ON ALL SCREENS) */}
+        <div className="grid grid-cols-3 border-b-2 border-[#111410] bg-[#FAFBF8] shrink-0">
           <button
             type="button"
             onClick={() => setMode('root_family')}
-            className={`p-3.5 text-left border-b-2 sm:border-b-0 sm:border-r-2 border-[#111410] transition flex items-center space-x-3 ${
+            className={`p-2 sm:p-3.5 text-center sm:text-left border-r-2 border-[#111410] transition flex flex-col sm:flex-row items-center sm:space-x-3 justify-center sm:justify-start ${
               mode === 'root_family'
                 ? 'bg-white shadow-[inset_0_-3px_0_0_#7BB33B]'
                 : 'bg-[#FAFBF8] hover:bg-[#F2EFE9] opacity-75 hover:opacity-100'
             }`}
           >
-            <div className={`p-2 border border-[#111410] ${mode === 'root_family' ? 'bg-[#7BB33B] text-white' : 'bg-white text-[#111410]'}`}>
-              <Layers className="w-4 h-4" />
+            <div className={`p-1.5 sm:p-2 border border-[#111410] shrink-0 mb-1 sm:mb-0 ${mode === 'root_family' ? 'bg-[#7BB33B] text-white' : 'bg-white text-[#111410]'}`}>
+              <Layers className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
             </div>
             <div className="min-w-0">
-              <div className="flex items-center space-x-1.5">
-                <span className="font-mono text-xs font-black uppercase tracking-wider text-[#111410]">
+              <div className="flex items-center space-x-1 sm:space-x-1.5 justify-center sm:justify-start">
+                <span className="font-mono text-[10px] sm:text-xs font-black uppercase tracking-wider text-[#111410]">
                   Option A
                 </span>
-                <span className="text-[9px] font-mono uppercase px-1 bg-[#EDF5E5] text-[#2F441E] border border-[#111410] font-bold">
-                  DEFAULT
+                <span className="text-[8px] sm:text-[9px] font-mono uppercase px-1 bg-[#EDF5E5] text-[#2F441E] border border-[#111410] font-bold hidden xs:inline">
+                  DEF
                 </span>
               </div>
-              <div className="font-sans font-bold text-xs sm:text-sm text-[#111410] truncate">
-                Root Family Focus
+              <div className="font-sans font-bold text-[10px] sm:text-sm text-[#111410] truncate">
+                <span className="hidden sm:inline">Root Family Focus</span>
+                <span className="sm:hidden">Roots</span>
               </div>
             </div>
           </button>
@@ -282,21 +283,22 @@ export default function CustomPracticeModal({
           <button
             type="button"
             onClick={() => setMode('smart_review')}
-            className={`p-3.5 text-left border-b-2 sm:border-b-0 sm:border-r-2 border-[#111410] transition flex items-center space-x-3 ${
+            className={`p-2 sm:p-3.5 text-center sm:text-left border-r-2 border-[#111410] transition flex flex-col sm:flex-row items-center sm:space-x-3 justify-center sm:justify-start ${
               mode === 'smart_review'
                 ? 'bg-white shadow-[inset_0_-3px_0_0_#7BB33B]'
                 : 'bg-[#FAFBF8] hover:bg-[#F2EFE9] opacity-75 hover:opacity-100'
             }`}
           >
-            <div className={`p-2 border border-[#111410] ${mode === 'smart_review' ? 'bg-[#7BB33B] text-white' : 'bg-white text-[#111410]'}`}>
-              <RotateCcw className="w-4 h-4" />
+            <div className={`p-1.5 sm:p-2 border border-[#111410] shrink-0 mb-1 sm:mb-0 ${mode === 'smart_review' ? 'bg-[#7BB33B] text-white' : 'bg-white text-[#111410]'}`}>
+              <RotateCcw className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
             </div>
             <div className="min-w-0">
-              <div className="font-mono text-xs font-black uppercase tracking-wider text-[#111410]">
+              <div className="font-mono text-[10px] sm:text-xs font-black uppercase tracking-wider text-[#111410]">
                 Option B
               </div>
-              <div className="font-sans font-bold text-xs sm:text-sm text-[#111410] truncate">
-                Smart Review
+              <div className="font-sans font-bold text-[10px] sm:text-sm text-[#111410] truncate">
+                <span className="hidden sm:inline">Smart Review</span>
+                <span className="sm:hidden">Review</span>
               </div>
             </div>
           </button>
@@ -304,21 +306,22 @@ export default function CustomPracticeModal({
           <button
             type="button"
             onClick={() => setMode('tier1')}
-            className={`p-3.5 text-left transition flex items-center space-x-3 ${
+            className={`p-2 sm:p-3.5 text-center sm:text-left transition flex flex-col sm:flex-row items-center sm:space-x-3 justify-center sm:justify-start ${
               mode === 'tier1'
                 ? 'bg-white shadow-[inset_0_-3px_0_0_#7BB33B]'
                 : 'bg-[#FAFBF8] hover:bg-[#F2EFE9] opacity-75 hover:opacity-100'
             }`}
           >
-            <div className={`p-2 border border-[#111410] ${mode === 'tier1' ? 'bg-[#7BB33B] text-white' : 'bg-white text-[#111410]'}`}>
-              <Sparkles className="w-4 h-4" />
+            <div className={`p-1.5 sm:p-2 border border-[#111410] shrink-0 mb-1 sm:mb-0 ${mode === 'tier1' ? 'bg-[#7BB33B] text-white' : 'bg-white text-[#111410]'}`}>
+              <Sparkles className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
             </div>
             <div className="min-w-0">
-              <div className="font-mono text-xs font-black uppercase tracking-wider text-[#111410]">
+              <div className="font-mono text-[10px] sm:text-xs font-black uppercase tracking-wider text-[#111410]">
                 Option C
               </div>
-              <div className="font-sans font-bold text-xs sm:text-sm text-[#111410] truncate">
-                SAT/ACT Tier 1
+              <div className="font-sans font-bold text-[10px] sm:text-sm text-[#111410] truncate">
+                <span className="hidden sm:inline">SAT/ACT Tier 1</span>
+                <span className="sm:hidden">Tier 1</span>
               </div>
             </div>
           </button>
@@ -394,7 +397,7 @@ export default function CustomPracticeModal({
                     value={rootSearchTerm}
                     onChange={(e) => setRootSearchTerm(e.target.value)}
                     placeholder="SEARCH ROOTS OR CORE MEANINGS..."
-                    className="w-full bg-white text-[#111410] font-mono text-xs font-bold pl-8 pr-7 py-2 border-2 border-[#111410] shadow-[2px_2px_0px_0px_#111410] focus:outline-none uppercase placeholder:text-[#A8AAA6]"
+                    className="w-full bg-white text-[#111410] font-mono text-base sm:text-xs font-bold pl-8 pr-7 py-2 border-2 border-[#111410] shadow-[2px_2px_0px_0px_#111410] focus:outline-none uppercase placeholder:text-[#A8AAA6]"
                   />
                   {rootSearchTerm && (
                     <button
@@ -407,13 +410,13 @@ export default function CustomPracticeModal({
                   )}
                 </div>
 
-                <div className="flex items-center space-x-1 font-mono text-xs">
+                <div className="flex items-center space-x-1 font-mono text-xs w-full sm:w-auto">
                   {['ALL', 'Latin', 'Greek'].map(lang => (
                     <button
                       key={lang}
                       type="button"
                       onClick={() => setSelectedLanguageFilter(lang)}
-                      className={`px-3 py-2 font-black uppercase border-2 border-[#111410] transition ${
+                      className={`flex-1 sm:flex-none px-3 py-2 font-black uppercase border-2 border-[#111410] transition ${
                         selectedLanguageFilter.toLowerCase() === lang.toLowerCase()
                           ? 'bg-[#7BB33B] text-white shadow-[2px_2px_0px_0px_#111410]'
                           : 'bg-white text-[#111410] hover:bg-[#FAFBF8]'
@@ -698,41 +701,40 @@ export default function CustomPracticeModal({
         </div>
 
         {/* MODAL FOOTER */}
-        <div className="p-4 sm:p-5 bg-[#FAFBF8] border-t-2 border-[#111410] flex flex-col sm:flex-row items-center justify-between gap-3 shrink-0">
-          {/* Quick Start Alternative */}
-          <button
-            type="button"
-            onClick={handleQuickStart}
-            className="w-full sm:w-auto px-4 py-2.5 bg-white hover:bg-[#FAFBF8] text-[#42281D] font-mono font-black text-xs uppercase border-2 border-[#111410] shadow-[3px_3px_0px_0px_#111410] transition active:translate-x-[1px] active:translate-y-[1px] flex items-center justify-center space-x-1.5"
-            title="Start standard 15-card session without customizing"
-          >
-            <Play className="w-3.5 h-3.5 fill-[#42281D]" />
-            <span>Quick Start (General 15)</span>
-          </button>
-
-          <div className="flex items-center space-x-3 w-full sm:w-auto justify-end">
+        <div className="p-3 sm:p-5 bg-[#FAFBF8] border-t-2 border-[#111410] flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-2.5 sm:gap-3 shrink-0">
+          <div className="flex items-center space-x-2 w-full sm:w-auto order-2 sm:order-1">
+            <button
+              type="button"
+              onClick={handleQuickStart}
+              className="flex-1 sm:flex-none px-3.5 py-2.5 bg-white hover:bg-[#FAFBF8] text-[#42281D] font-mono font-black text-xs uppercase border-2 border-[#111410] shadow-[2px_2px_0px_0px_#111410] transition active:translate-x-[1px] active:translate-y-[1px] flex items-center justify-center space-x-1.5"
+              title="Start standard 15-card session without customizing"
+            >
+              <Play className="w-3.5 h-3.5 fill-[#42281D]" />
+              <span className="hidden sm:inline">Quick Start (General 15)</span>
+              <span className="sm:hidden">Quick Start (15)</span>
+            </button>
             <button
               type="button"
               onClick={onClose}
-              className="px-4 py-2.5 bg-white hover:bg-[#FAFBF8] text-[#111410] font-mono font-black text-xs uppercase border-2 border-[#111410] shadow-[2px_2px_0px_0px_#111410] transition"
+              className="px-3.5 py-2.5 bg-white hover:bg-[#FAFBF8] text-[#111410] font-mono font-black text-xs uppercase border-2 border-[#111410] shadow-[2px_2px_0px_0px_#111410] transition"
             >
               Cancel
             </button>
-
-            <button
-              type="button"
-              onClick={handleStartSession}
-              disabled={mode === 'root_family' && selectedRootIds.length === 0}
-              className={`w-full sm:w-auto px-6 py-2.5 font-mono font-black text-xs uppercase tracking-wider border-2 border-[#111410] transition flex items-center justify-center space-x-2 ${
-                mode === 'root_family' && selectedRootIds.length === 0
-                  ? 'bg-[#EFE8DF] text-[#A8AAA6] cursor-not-allowed shadow-none'
-                  : 'bg-[#7BB33B] hover:bg-[#84C341] text-white shadow-[4px_4px_0px_0px_#111410] active:translate-x-[2px] active:translate-y-[2px]'
-              }`}
-            >
-              <Zap className="w-4 h-4 fill-white" />
-              <span>Start Session ({estimatedCardCount} Cards)</span>
-            </button>
           </div>
+
+          <button
+            type="button"
+            onClick={handleStartSession}
+            disabled={mode === 'root_family' && selectedRootIds.length === 0}
+            className={`w-full sm:w-auto px-5 sm:px-6 py-3 sm:py-2.5 font-mono font-black text-xs uppercase tracking-wider border-2 border-[#111410] transition flex items-center justify-center space-x-2 order-1 sm:order-2 ${
+              mode === 'root_family' && selectedRootIds.length === 0
+                ? 'bg-[#EFE8DF] text-[#A8AAA6] cursor-not-allowed shadow-none'
+                : 'bg-[#7BB33B] hover:bg-[#84C341] text-white shadow-[3px_3px_0px_0px_#111410] sm:shadow-[4px_4px_0px_0px_#111410] active:translate-x-[2px] active:translate-y-[2px]'
+            }`}
+          >
+            <Zap className="w-4 h-4 fill-white" />
+            <span>Start Session ({estimatedCardCount} Cards)</span>
+          </button>
         </div>
 
       </div>

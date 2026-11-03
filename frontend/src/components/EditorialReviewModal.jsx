@@ -31,6 +31,7 @@ export default function EditorialReviewModal({
 
   const [searchTerm, setSearchTerm] = useState('');
   const [filterMode, setFilterMode] = useState('ALL'); // 'ALL' | 'UNREVIEWED' | 'VERIFIED'
+  const [mobileView, setMobileView] = useState(() => (initialWord ? 'detail' : 'list'));
   const [reviewFormData, setReviewFormData] = useState({
     verified: false,
     notes: '',
@@ -127,11 +128,11 @@ export default function EditorialReviewModal({
   return (
     <div className="fixed inset-0 z-50 bg-[#111410]/70 backdrop-blur-sm flex items-center justify-center p-3 sm:p-5 animate-fade-in">
       <div 
-        className="bg-white border-2 border-[#111410] shadow-[8px_8px_0px_0px_#111410] w-full max-w-5xl h-[92vh] max-h-[850px] flex flex-col overflow-hidden"
+        className="bg-white border-2 border-[#111410] shadow-[6px_6px_0px_0px_#111410] sm:shadow-[8px_8px_0px_0px_#111410] w-full max-w-5xl h-full sm:h-[92vh] max-h-[100dvh] sm:max-h-[850px] flex flex-col overflow-hidden"
         onClick={(e) => e.stopPropagation()}
       >
         {/* Modal Header */}
-        <div className="p-4 bg-[#FAFBF8] border-b-2 border-[#111410] flex items-center justify-between shrink-0">
+        <div className="p-3 sm:p-4 bg-[#FAFBF8] border-b-2 border-[#111410] flex items-center justify-between shrink-0">
           <div className="flex items-center space-x-2.5">
             <div className="p-1.5 bg-[#7BB33B] text-white border border-[#111410] shadow-[2px_2px_0px_0px_#111410]">
               <ShieldCheck className="w-4 h-4" />
@@ -141,11 +142,11 @@ export default function EditorialReviewModal({
                 <h2 className="text-sm sm:text-base font-black font-mono uppercase text-[#111410] tracking-tight">
                   Editorial / Admin Lexicon Reviewer
                 </h2>
-                <span className="text-[10px] font-mono font-bold uppercase px-2 py-0.5 bg-[#111410] text-white">
+                <span className="text-[10px] font-mono font-bold uppercase px-2 py-0.5 bg-[#111410] text-white hidden sm:inline-block">
                   CERTIFICATION PANEL
                 </span>
               </div>
-              <p className="text-[11px] font-mono text-[#62685E] mt-0.5">
+              <p className="text-[11px] font-mono text-[#62685E] mt-0.5 hidden sm:block">
                 Review AI-generated entries & attach editorial source attestations for SAT/ACT accuracy
               </p>
             </div>
@@ -153,10 +154,34 @@ export default function EditorialReviewModal({
 
           <button
             onClick={onClose}
-            className="p-1.5 hover:bg-[#FDF2F2] hover:text-[#991B1B] border-2 border-[#111410] shadow-[2px_2px_0px_0px_#111410] transition"
+            className="p-1 sm:p-1.5 hover:bg-[#FDF2F2] hover:text-[#991B1B] border-2 border-[#111410] shadow-[2px_2px_0px_0px_#111410] transition"
             title="Close Reviewer (Esc)"
           >
             <X className="w-4 h-4 text-[#111410]" />
+          </button>
+        </div>
+
+        {/* MOBILE VIEW TOGGLE TABS (< md) */}
+        <div className="md:hidden flex border-b-2 border-[#111410] bg-[#FAFBF8] shrink-0 font-mono text-xs font-bold uppercase">
+          <button
+            onClick={() => setMobileView('list')}
+            className={`flex-1 py-2.5 text-center flex items-center justify-center space-x-1.5 transition ${
+              mobileView === 'list'
+                ? 'bg-white text-[#111410] border-b-2 border-[#7BB33B] font-black'
+                : 'text-[#62685E] hover:bg-[#FAFBF8]'
+            }`}
+          >
+            <span>Words ({filteredWords.length})</span>
+          </button>
+          <button
+            onClick={() => setMobileView('detail')}
+            className={`flex-1 py-2.5 text-center flex items-center justify-center space-x-1.5 transition ${
+              mobileView === 'detail'
+                ? 'bg-white text-[#111410] border-b-2 border-[#7BB33B] font-black'
+                : 'text-[#62685E] hover:bg-[#FAFBF8]'
+            }`}
+          >
+            <span className="truncate">{activeWord?.word ? `Edit: ${activeWord.word}` : 'Edit Entry'}</span>
           </button>
         </div>
 
@@ -164,7 +189,9 @@ export default function EditorialReviewModal({
         <div className="flex-1 flex flex-col md:flex-row overflow-hidden">
           
           {/* LEFT: Word Selection Sidebar (Desktop width: 340px) */}
-          <div className="w-full md:w-[340px] border-b-2 md:border-b-0 md:border-r-2 border-[#111410] bg-[#FAFBF8] flex flex-col shrink-0 max-h-[35vh] md:max-h-none overflow-hidden">
+          <div className={`w-full md:w-[340px] border-b-2 md:border-b-0 md:border-r-2 border-[#111410] bg-[#FAFBF8] flex flex-col shrink-0 overflow-hidden ${
+            mobileView === 'list' ? 'flex-1 h-full' : 'hidden md:flex'
+          }`}>
             
             {/* Search and Filters */}
             <div className="p-3 border-b-2 border-[#111410] space-y-2 bg-white">
@@ -175,7 +202,7 @@ export default function EditorialReviewModal({
                   placeholder="Filter vocabulary..."
                   value={searchTerm}
                   onChange={(e) => setSearchTerm(e.target.value)}
-                  className="w-full pl-8 pr-3 py-1.5 bg-[#FAFBF8] border border-[#111410] text-xs font-mono placeholder:text-[#62685E] focus:outline-none focus:ring-1 focus:ring-[#7BB33B]"
+                  className="w-full pl-8 pr-3 py-1.5 bg-[#FAFBF8] border border-[#111410] text-base sm:text-xs font-mono placeholder:text-[#62685E] focus:outline-none focus:ring-1 focus:ring-[#7BB33B]"
                 />
               </div>
 
@@ -228,7 +255,10 @@ export default function EditorialReviewModal({
                   return (
                     <div
                       key={w.word || w.id}
-                      onClick={() => setSelectedWordName(w.word)}
+                      onClick={() => {
+                        setSelectedWordName(w.word);
+                        setMobileView('detail');
+                      }}
                       className={`p-3 cursor-pointer transition flex items-center justify-between ${
                         isSelected 
                           ? 'bg-[#EDF5E5] text-[#111410] border-l-4 border-l-[#7BB33B] font-bold'
@@ -266,23 +296,34 @@ export default function EditorialReviewModal({
           </div>
 
           {/* RIGHT: Active Entry Inspection & Verification Form */}
-          <div className="flex-1 overflow-y-auto p-5 sm:p-6 space-y-5 bg-white">
+          <div className={`flex-1 overflow-y-auto p-4 sm:p-6 space-y-4 sm:space-y-5 bg-white ${
+            mobileView === 'detail' ? 'block' : 'hidden md:block'
+          }`}>
             {activeWord ? (
               <>
+                {/* Mobile Back Button */}
+                <button
+                  onClick={() => setMobileView('list')}
+                  className="md:hidden flex items-center space-x-1.5 px-3 py-1.5 bg-[#FAFBF8] border border-[#111410] text-xs font-mono font-bold uppercase text-[#111410] shadow-[1px_1px_0px_0px_#111410]"
+                >
+                  <ArrowLeft className="w-3.5 h-3.5" />
+                  <span>← Back to Word List</span>
+                </button>
+
                 {/* Word Title & Live Status Header */}
                 <div className="border-b-2 border-[#111410] pb-4 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
                   <div>
-                    <div className="flex items-center space-x-3">
-                      <h1 className="text-3xl sm:text-4xl font-black font-sans tracking-tight text-[#111410] uppercase">
+                    <div className="flex items-center space-x-2 sm:space-x-3 flex-wrap gap-y-1">
+                      <h1 className="text-2xl sm:text-4xl font-black font-sans tracking-tight text-[#111410] uppercase break-words">
                         {activeWord.word}
                       </h1>
                       {reviewFormData.verified ? (
-                        <span className="px-2.5 py-1 bg-[#EDF5E5] text-[#2F441E] border-2 border-[#111410] text-[10px] font-mono font-black uppercase shadow-[2px_2px_0px_0px_#111410]">
-                          ✓ STATUS: VERIFIED
+                        <span className="px-2 sm:px-2.5 py-0.5 sm:py-1 bg-[#EDF5E5] text-[#2F441E] border-2 border-[#111410] text-[10px] font-mono font-black uppercase shadow-[2px_2px_0px_0px_#111410]">
+                          ✓ VERIFIED
                         </span>
                       ) : (
-                        <span className="px-2.5 py-1 bg-[#FEF3C7] text-[#92400E] border-2 border-[#111410] text-[10px] font-mono font-black uppercase shadow-[2px_2px_0px_0px_#111410]">
-                          ⚠ STATUS: UNREVIEWED
+                        <span className="px-2 sm:px-2.5 py-0.5 sm:py-1 bg-[#FEF3C7] text-[#92400E] border-2 border-[#111410] text-[10px] font-mono font-black uppercase shadow-[2px_2px_0px_0px_#111410]">
+                          ⚠ UNREVIEWED
                         </span>
                       )}
                     </div>
@@ -294,7 +335,7 @@ export default function EditorialReviewModal({
                       {activeWord.connotation && (
                         <>
                           <span>·</span>
-                          <span className="uppercase">{activeWord.connotation} connotation</span>
+                          <span className="uppercase">{activeWord.connotation}</span>
                         </>
                       )}
                     </div>
@@ -310,7 +351,7 @@ export default function EditorialReviewModal({
                 </div>
 
                 {/* Morpheme & Etymology Reference Box */}
-                <div className="p-3.5 bg-[#FAFBF8] border-2 border-[#111410] shadow-[2px_2px_0px_0px_#111410]">
+                <div className="p-3 sm:p-3.5 bg-[#FAFBF8] border-2 border-[#111410] shadow-[2px_2px_0px_0px_#111410]">
                   <span className="text-[10px] font-mono font-black uppercase text-[#62685E] block mb-1.5">
                     Morpheme Deconstruction &amp; Root Origin
                   </span>
@@ -321,7 +362,7 @@ export default function EditorialReviewModal({
                       </span>
                     )}
                     {parentRoot && (
-                      <span className="px-2.5 py-0.5 bg-[#EFE8DF] border-2 border-[#111410] font-black text-[#111410]">
+                      <span className="px-2 sm:px-2.5 py-0.5 bg-[#EFE8DF] border-2 border-[#111410] font-black text-[#111410]">
                         [{parentRoot.morpheme}] ({parentRoot.language} · "{parentRoot.core_meaning}")
                       </span>
                     )}
@@ -334,8 +375,8 @@ export default function EditorialReviewModal({
                 </div>
 
                 {/* Lexical Definition & Sentence Exemplar */}
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  <div className="p-3.5 bg-white border-2 border-[#111410] shadow-[2px_2px_0px_0px_#111410]">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-3 sm:gap-4">
+                  <div className="p-3 sm:p-3.5 bg-white border-2 border-[#111410] shadow-[2px_2px_0px_0px_#111410]">
                     <span className="text-[10px] font-mono font-black uppercase text-[#62685E] block mb-1">
                       Lexical Definition
                     </span>
@@ -344,7 +385,7 @@ export default function EditorialReviewModal({
                     </p>
                   </div>
 
-                  <div className="p-3.5 bg-white border-2 border-[#111410] shadow-[2px_2px_0px_0px_#111410]">
+                  <div className="p-3 sm:p-3.5 bg-white border-2 border-[#111410] shadow-[2px_2px_0px_0px_#111410]">
                     <span className="text-[10px] font-mono font-black uppercase text-[#62685E] block mb-1">
                       Contextual SAT Exemplar
                     </span>
@@ -355,15 +396,15 @@ export default function EditorialReviewModal({
                 </div>
 
                 {/* EDITORIAL CERTIFICATION FORM (Interactive Form) */}
-                <div className="p-4 sm:p-5 bg-[#FAFBF8] border-2 border-[#111410] shadow-[4px_4px_0px_0px_#111410] space-y-4">
+                <div className="p-3.5 sm:p-5 bg-[#FAFBF8] border-2 border-[#111410] shadow-[3px_3px_0px_0px_#111410] sm:shadow-[4px_4px_0px_0px_#111410] space-y-3.5 sm:space-y-4">
                   <div className="flex items-center justify-between border-b border-[#111410]/20 pb-2">
                     <div className="flex items-center space-x-2 text-xs font-mono font-black uppercase text-[#111410]">
                       <ShieldCheck className="w-4 h-4 text-[#7BB33B]" />
-                      <span>EDITORIAL VERIFICATION ATTESTATION</span>
+                      <span>EDITORIAL VERIFICATION</span>
                     </div>
                     {activeWord.review?.verifiedAt && (
                       <span className="text-[10px] font-mono text-[#62685E]">
-                        Last certified: {new Date(activeWord.review.verifiedAt).toLocaleDateString()}
+                        {new Date(activeWord.review.verifiedAt).toLocaleDateString()}
                       </span>
                     )}
                   </div>
@@ -374,13 +415,13 @@ export default function EditorialReviewModal({
                       type="checkbox"
                       checked={reviewFormData.verified}
                       onChange={(e) => setReviewFormData(prev => ({ ...prev, verified: e.target.checked }))}
-                      className="mt-0.5 w-5 h-5 text-[#7BB33B] border-2 border-[#111410] rounded-none focus:ring-0 accent-[#7BB33B] cursor-pointer"
+                      className="mt-0.5 w-5 h-5 text-[#7BB33B] border-2 border-[#111410] rounded-none focus:ring-0 accent-[#7BB33B] cursor-pointer shrink-0"
                     />
                     <div>
                       <span className="text-xs sm:text-sm font-mono font-black uppercase text-[#111410] block">
                         Mark as Independently Verified by Editor
                       </span>
-                      <span className="text-xs font-mono text-[#62685E] leading-relaxed block mt-0.5">
+                      <span className="text-[11px] sm:text-xs font-mono text-[#62685E] leading-relaxed block mt-0.5">
                         Certifies definition accuracy, morpheme formula decomposition, and SAT/ACT relevance.
                       </span>
                     </div>
@@ -396,7 +437,7 @@ export default function EditorialReviewModal({
                       value={reviewFormData.verifiedBy}
                       onChange={(e) => setReviewFormData(prev => ({ ...prev, verifiedBy: e.target.value }))}
                       placeholder="e.g. Admin, Senior Lexicographer"
-                      className="w-full text-xs font-mono px-3 py-2 bg-white border-2 border-[#111410] focus:outline-none focus:ring-2 focus:ring-[#7BB33B]"
+                      className="w-full text-base sm:text-xs font-mono px-3 py-2 bg-white border-2 border-[#111410] focus:outline-none focus:ring-2 focus:ring-[#7BB33B]"
                     />
                   </div>
 
@@ -409,8 +450,8 @@ export default function EditorialReviewModal({
                       rows={3}
                       value={reviewFormData.notes}
                       onChange={(e) => setReviewFormData(prev => ({ ...prev, notes: e.target.value }))}
-                      placeholder="e.g. Checked against Merriam-Webster Unabridged; Latin root and etymology verified for exam nuance."
-                      className="w-full text-xs font-sans p-3 bg-white border-2 border-[#111410] focus:outline-none focus:ring-2 focus:ring-[#7BB33B] resize-y"
+                      placeholder="e.g. Checked against Merriam-Webster Unabridged; Latin root and etymology verified."
+                      className="w-full text-base sm:text-xs font-sans p-2.5 sm:p-3 bg-white border-2 border-[#111410] focus:outline-none focus:ring-2 focus:ring-[#7BB33B] resize-y"
                     />
                     <span className="text-[10px] font-mono text-[#62685E] mt-1 block">
                       Internal editorial notes are strictly hidden from student views and preserved in exports.
@@ -418,10 +459,10 @@ export default function EditorialReviewModal({
                   </div>
 
                   {/* Commit Action Buttons */}
-                  <div className="flex flex-col sm:flex-row items-center gap-2 pt-2">
+                  <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2 pt-2">
                     <button
                       onClick={() => handleSave(false)}
-                      className="w-full sm:flex-1 flex items-center justify-center space-x-2 px-4 py-2.5 bg-[#7BB33B] hover:bg-[#84C341] text-white border-2 border-[#111410] shadow-[3px_3px_0px_0px_#111410] font-mono text-xs font-black uppercase tracking-wider transition active:translate-x-[1px] active:translate-y-[1px]"
+                      className="flex-1 flex items-center justify-center space-x-2 px-4 py-3 sm:py-2.5 bg-[#7BB33B] hover:bg-[#84C341] text-white border-2 border-[#111410] shadow-[2px_2px_0px_0px_#111410] sm:shadow-[3px_3px_0px_0px_#111410] font-mono text-xs font-black uppercase tracking-wider transition active:translate-x-[1px] active:translate-y-[1px] min-h-[44px]"
                     >
                       <Check className="w-4 h-4" />
                       <span>Save Verification</span>
@@ -429,7 +470,7 @@ export default function EditorialReviewModal({
 
                     <button
                       onClick={() => handleSave(true)}
-                      className="w-full sm:flex-1 flex items-center justify-center space-x-2 px-4 py-2.5 bg-[#EDF5E5] hover:bg-[#DCEDD0] text-[#2F441E] border-2 border-[#111410] shadow-[3px_3px_0px_0px_#111410] font-mono text-xs font-black uppercase tracking-wider transition active:translate-x-[1px] active:translate-y-[1px]"
+                      className="flex-1 flex items-center justify-center space-x-2 px-4 py-3 sm:py-2.5 bg-[#EDF5E5] hover:bg-[#DCEDD0] text-[#2F441E] border-2 border-[#111410] shadow-[2px_2px_0px_0px_#111410] sm:shadow-[3px_3px_0px_0px_#111410] font-mono text-xs font-black uppercase tracking-wider transition active:translate-x-[1px] active:translate-y-[1px] min-h-[44px]"
                     >
                       <span>Save &amp; Next Word</span>
                       <ArrowRight className="w-4 h-4" />
@@ -438,8 +479,8 @@ export default function EditorialReviewModal({
                 </div>
               </>
             ) : (
-              <div className="p-12 text-center text-xs font-mono text-[#62685E]">
-                Select a word from the left sidebar to inspect and review.
+              <div className="p-8 sm:p-12 text-center text-xs font-mono text-[#62685E]">
+                Select a word from the list to inspect and review.
               </div>
             )}
           </div>

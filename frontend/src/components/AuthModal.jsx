@@ -117,7 +117,7 @@ export default function AuthModal({ isOpen, onClose }) {
                     autoFocus
                     required
                     disabled={loading}
-                    className="w-full pl-9 pr-3 py-2.5 bg-white border-2 border-[#111410] shadow-[3px_3px_0px_0px_#111410] text-sm font-mono text-[#111410] placeholder-[#8F968A] focus:outline-none focus:border-[#7BB33B] focus:shadow-[4px_4px_0px_0px_#7BB33B] transition-all disabled:opacity-50"
+                    className="w-full pl-9 pr-3 py-2.5 bg-white border-2 border-[#111410] shadow-[3px_3px_0px_0px_#111410] text-base sm:text-sm font-mono text-[#111410] placeholder-[#8F968A] focus:outline-none focus:border-[#7BB33B] focus:shadow-[4px_4px_0px_0px_#7BB33B] transition-all disabled:opacity-50"
                   />
                 </div>
                 <p className="mt-1.5 text-[11px] font-mono text-[#62685E]">
@@ -129,7 +129,7 @@ export default function AuthModal({ isOpen, onClose }) {
               <button
                 type="submit"
                 disabled={loading}
-                className="w-full mt-2 flex items-center justify-center space-x-2 bg-[#7BB33B] hover:bg-[#84C341] text-white border-2 border-[#111410] shadow-[3px_3px_0px_0px_#111410] hover:shadow-[4px_4px_0px_0px_#111410] hover:translate-x-[-1px] hover:translate-y-[-1px] active:translate-x-[1px] active:translate-y-[1px] py-2.5 px-4 text-xs font-mono font-black uppercase tracking-wider transition-all disabled:opacity-50 disabled:pointer-events-none"
+                className="w-full mt-2 flex items-center justify-center space-x-2 bg-[#7BB33B] hover:bg-[#84C341] text-white border-2 border-[#111410] shadow-[3px_3px_0px_0px_#111410] hover:shadow-[4px_4px_0px_0px_#111410] hover:translate-x-[-1px] hover:translate-y-[-1px] active:translate-x-[1px] active:translate-y-[1px] py-3 sm:py-2.5 min-h-[46px] px-4 text-xs font-mono font-black uppercase tracking-wider transition-all disabled:opacity-50 disabled:pointer-events-none"
               >
                 {loading ? (
                   <>

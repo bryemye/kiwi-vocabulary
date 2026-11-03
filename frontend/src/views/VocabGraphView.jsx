@@ -1292,6 +1292,105 @@ export default function VocabGraphView({
     window.addEventListener('mouseup', onWindowMouseUp);
   };
 
+  // ---------------------------------------------------------------------------
+  // MOBILE TOUCH GESTURES (DRAG PAN, PINCH-TO-ZOOM, TAP SELECTION)
+  // ---------------------------------------------------------------------------
+  const touchStartRef = useRef(null);
+  const pinchStartRef = useRef(null);
+  const touchDistanceRef = useRef(0);
+
+  const handleTouchStart = (e) => {
+    targetCameraRef.current = null;
+    setIsSearchFocused(false);
+
+    if (e.touches.length === 1) {
+      const touch = e.touches[0];
+      touchStartRef.current = { x: touch.clientX, y: touch.clientY, time: Date.now() };
+      cameraStartRef.current = { ...cameraRef.current };
+      touchDistanceRef.current = 0;
+      pinchStartRef.current = null;
+    } else if (e.touches.length === 2) {
+      const t1 = e.touches[0];
+      const t2 = e.touches[1];
+      const dist = Math.hypot(t2.clientX - t1.clientX, t2.clientY - t1.clientY);
+      const centerX = (t1.clientX + t2.clientX) / 2;
+      const centerY = (t1.clientY + t2.clientY) / 2;
+      pinchStartRef.current = {
+        dist,
+        zoom: cameraRef.current.zoom,
+        centerX,
+        centerY,
+      };
+      touchStartRef.current = null;
+    }
+  };
+
+  const handleTouchMove = (e) => {
+    if (e.touches.length === 1 && touchStartRef.current) {
+      const touch = e.touches[0];
+      const dx = touch.clientX - touchStartRef.current.x;
+      const dy = touch.clientY - touchStartRef.current.y;
+      touchDistanceRef.current += Math.hypot(dx, dy);
+
+      cameraRef.current.x = cameraStartRef.current.x + dx;
+      cameraRef.current.y = cameraStartRef.current.y + dy;
+    } else if (e.touches.length === 2 && pinchStartRef.current && containerRef.current) {
+      const t1 = e.touches[0];
+      const t2 = e.touches[1];
+      const rect = containerRef.current.getBoundingClientRect();
+      const currentDist = Math.hypot(t2.clientX - t1.clientX, t2.clientY - t1.clientY);
+      
+      const { dist: startDist, zoom: startZoom, centerX, centerY } = pinchStartRef.current;
+      if (startDist > 0) {
+        const scale = currentDist / startDist;
+        const newZoom = Math.min(2.5, Math.max(0.18, startZoom * scale));
+        
+        const mouseX = centerX - rect.left;
+        const mouseY = centerY - rect.top;
+        const cam = cameraRef.current;
+        const worldXBefore = (mouseX - rect.width / 2 - cam.x) / cam.zoom;
+        const worldYBefore = (mouseY - rect.height / 2 - cam.y) / cam.zoom;
+
+        cam.zoom = newZoom;
+        cam.x = mouseX - rect.width / 2 - worldXBefore * newZoom;
+        cam.y = mouseY - rect.height / 2 - worldYBefore * newZoom;
+      }
+    }
+  };
+
+  const handleTouchEnd = (e) => {
+    if (touchStartRef.current) {
+      const elapsed = Date.now() - touchStartRef.current.time;
+      const wasTap = touchDistanceRef.current < 12 && elapsed < 350;
+      
+      if (wasTap && containerRef.current) {
+        const rect = containerRef.current.getBoundingClientRect();
+        const screenX = touchStartRef.current.x - rect.left;
+        const screenY = touchStartRef.current.y - rect.top;
+        const hitNode = getNodeAtScreenPos(screenX, screenY);
+
+        if (hitNode) {
+          if (hitNode.type === 'root') {
+            focusRoot(hitNode);
+          } else {
+            smoothPanToNode(hitNode);
+          }
+        } else {
+          if (focusedRootIdRef.current) {
+            clearFocus();
+          } else {
+            setSelectedNode(null);
+          }
+        }
+      }
+      touchStartRef.current = null;
+    }
+
+    if (e.touches.length < 2) {
+      pinchStartRef.current = null;
+    }
+  };
+
   const handleMouseMove = (e) => {
     if (isDraggingRef.current) return;
     const rect = containerRef.current?.getBoundingClientRect();
@@ -1393,208 +1492,220 @@ export default function VocabGraphView({
         style={{ touchAction: 'none', overscrollBehavior: 'contain' }}
         onMouseDown={handleMouseDown}
         onMouseMove={handleMouseMove}
+        onTouchStart={handleTouchStart}
+        onTouchMove={handleTouchMove}
+        onTouchEnd={handleTouchEnd}
       >
         <canvas ref={canvasRef} className="block w-full h-full" style={{ touchAction: 'none' }} />
       </div>
 
-      {/* TOP-LEFT RETURN TO STUDY DECK ACTION */}
-      <div className="absolute top-4 left-4 z-20">
-        <button
-          onClick={() => onNavigateStudy && onNavigateStudy()}
-          className="flex items-center space-x-1.5 px-3 py-2 bg-white hover:bg-[#FAFBF8] border-2 border-[#111410] shadow-[2px_2px_0px_0px_#111410] font-mono text-xs font-black uppercase text-[#111410] transition hover:translate-x-[-1px] hover:translate-y-[-1px] active:translate-x-[1px] active:translate-y-[1px]"
-          title="Return to Flashcards Study Deck"
-        >
-          <Layers className="w-3.5 h-3.5 text-[#7BB33B]" />
-          <span className="hidden sm:inline">← Back to Flashcards</span>
-          <span className="sm:hidden">← Deck</span>
-        </button>
-      </div>
-
-      {/* PROMINENT TOP SEARCH BAR */}
-      <div className="absolute top-4 left-1/2 -translate-x-1/2 z-30 w-full max-w-lg px-4">
-        <div className="relative bg-white border-2 border-[#111410] shadow-[4px_4px_0px_0px_#111410] p-1.5 flex items-center">
-          <div className="pl-2 pr-1.5 flex items-center text-[#111410]">
-            <Search className="w-4 h-4 text-[#111410]" />
-          </div>
-
-          <input
-            ref={searchInputRef}
-            type="text"
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
-            onFocus={() => setIsSearchFocused(true)}
-            onKeyDown={handleSearchKeyDown}
-            placeholder={
-              focusedRootId
-                ? `Focused on ${currentlyFocusedRoot?.morpheme || 'root'} (Search root or word)...`
-                : "Search roots (e.g. voc, spect) or words (e.g. circumspect)..."
-            }
-            className="flex-1 bg-transparent text-xs font-mono font-bold text-[#111410] placeholder-[#62685E] focus:outline-none px-2 py-1 min-w-0"
-          />
-
-          {/* Active Focus Capsule */}
-          {focusedRootId && !searchQuery && (
-            <div className="flex items-center space-x-1.5 px-2.5 py-1 bg-[#EDF5E5] border border-[#111410] text-[#2F441E] text-[10px] font-mono font-black uppercase shrink-0 mr-1 animate-fade-in">
-              <Eye className="w-3 h-3 text-[#7BB33B]" />
-              <span className="truncate max-w-[110px] sm:max-w-none">
-                FOCUSED: {currentlyFocusedRoot?.morpheme}
-              </span>
-              <button 
-                onClick={clearFocus} 
-                className="hover:text-[#991B1B] ml-1 p-0.5" 
-                title="Return to ambient dust motes (Esc)"
-              >
-                <X className="w-3 h-3" />
-              </button>
-            </div>
-          )}
-
-          {searchQuery && (
-            <button 
-              onClick={() => setSearchQuery('')} 
-              className="text-[#111410] hover:text-[#991B1B] p-1 mr-1"
-            >
-              <X className="w-3.5 h-3.5" />
-            </button>
-          )}
-
-          <div className="hidden sm:flex items-center pl-1 pr-2 border-l border-[#111410]/20 text-[10px] font-mono text-[#62685E]">
-            <kbd className="px-1.5 py-0.5 bg-[#FAFBF8] border border-[#111410] text-[#111410]">ESC</kbd>
-            <span className="ml-1">reset</span>
-          </div>
+      {/* RESPONSIVE TOP GRAPH CONTROL BAR */}
+      <div className="absolute top-2.5 sm:top-4 left-2.5 sm:left-4 right-2.5 sm:right-4 z-30 flex items-center justify-between gap-2 pointer-events-none">
+        {/* Left: Return to Study Deck */}
+        <div className="pointer-events-auto shrink-0">
+          <button
+            onClick={() => onNavigateStudy && onNavigateStudy()}
+            className="flex items-center space-x-1.5 px-2.5 sm:px-3 py-1.5 sm:py-2 bg-white hover:bg-[#FAFBF8] border-2 border-[#111410] shadow-[2px_2px_0px_0px_#111410] font-mono text-xs font-black uppercase text-[#111410] transition active:translate-x-[1px] active:translate-y-[1px]"
+            title="Return to Flashcards Study Deck"
+          >
+            <Layers className="w-3.5 h-3.5 text-[#7BB33B]" />
+            <span className="hidden sm:inline">← Back to Flashcards</span>
+            <span className="sm:hidden">← Deck</span>
+          </button>
         </div>
 
-        {/* Autocomplete Dropdown List with Roots & Vocabulary Words */}
-        {(isSearchFocused || searchQuery) && searchResults.total > 0 && (
-          <div className="absolute top-full left-4 right-4 mt-1.5 bg-white border-2 border-[#111410] shadow-[5px_5px_0px_0px_#111410] z-40 max-h-80 overflow-y-auto">
-            
-            {/* 1. ROOT MORPHEMES SECTION */}
-            {searchResults.roots.length > 0 && (
-              <div>
-                <div className="px-3 py-1.5 bg-[#FAFBF8] border-b border-[#111410] flex items-center justify-between text-[10px] font-mono font-black uppercase text-[#62685E]">
-                  <span>Roots ({searchResults.roots.length}):</span>
-                  <span>Select to focus family</span>
-                </div>
+        {/* Center: Search Bar with Autocomplete Dropdown */}
+        <div className="pointer-events-auto flex-1 max-w-lg relative">
+          <div className="relative bg-white border-2 border-[#111410] shadow-[3px_3px_0px_0px_#111410] sm:shadow-[4px_4px_0px_0px_#111410] p-1 flex items-center">
+            <div className="pl-1.5 sm:pl-2 pr-1 flex items-center text-[#111410]">
+              <Search className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-[#111410]" />
+            </div>
 
-                {searchResults.roots.map(rootNode => {
-                  const isCurrent = rootNode.id === focusedRootId;
-                  return (
-                    <div
-                      key={rootNode.id}
-                      onClick={() => handlePickRoot(rootNode)}
-                      className={`px-3 py-2 border-b border-[#111410]/20 cursor-pointer flex items-center justify-between transition ${
-                        isCurrent ? 'bg-[#EDF5E5]' : 'hover:bg-[#FAFBF8]'
-                      }`}
-                    >
-                      <div className="min-w-0 pr-3">
-                        <div className="flex items-center space-x-2">
-                          <span className="font-mono text-xs font-black uppercase text-[#111410]">
-                            {rootNode.morpheme}
-                          </span>
-                          <span className="text-[9px] font-mono uppercase px-1.5 py-0.2 border border-[#111410] bg-[#FAFBF8] font-bold">
-                            {rootNode.language}
-                          </span>
-                          <span className="text-[10px] font-mono text-[#62685E]">
-                            {rootNode.total_words} derivatives
-                          </span>
-                        </div>
-                        <p className="text-[11px] font-serif italic text-[#42281D] truncate mt-0.5">
-                          "{rootNode.core_meaning}"
-                        </p>
-                      </div>
+            <input
+              ref={searchInputRef}
+              type="text"
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              onFocus={() => setIsSearchFocused(true)}
+              onKeyDown={handleSearchKeyDown}
+              placeholder={
+                focusedRootId
+                  ? `Focused on ${currentlyFocusedRoot?.morpheme || 'root'}...`
+                  : "Search roots or words..."
+              }
+              className="flex-1 bg-transparent text-base sm:text-xs font-mono font-bold text-[#111410] placeholder-[#62685E] focus:outline-none px-1.5 py-1 min-w-0"
+            />
 
-                      <span className="text-[10px] font-mono font-black uppercase text-[#7BB33B] shrink-0 flex items-center space-x-1">
-                        <span>FOCUS ROOT</span>
-                        <ChevronRight className="w-3.5 h-3.5" />
-                      </span>
-                    </div>
-                  );
-                })}
+            {/* Active Focus Capsule */}
+            {focusedRootId && !searchQuery && (
+              <div className="flex items-center space-x-1 px-1.5 sm:px-2 py-0.5 bg-[#EDF5E5] border border-[#111410] text-[#2F441E] text-[10px] font-mono font-black uppercase shrink-0 mr-1 animate-fade-in">
+                <Eye className="w-3 h-3 text-[#7BB33B]" />
+                <span className="truncate max-w-[70px] sm:max-w-none">
+                  {currentlyFocusedRoot?.morpheme}
+                </span>
+                <button 
+                  onClick={clearFocus} 
+                  className="hover:text-[#991B1B] ml-0.5 p-0.5" 
+                  title="Clear focus (Esc)"
+                >
+                  <X className="w-3 h-3" />
+                </button>
               </div>
             )}
 
-            {/* 2. VOCABULARY WORDS SECTION */}
-            {searchResults.words.length > 0 && (
-              <div>
-                <div className="px-3 py-1.5 bg-[#FAFBF8] border-b border-t border-[#111410] flex items-center justify-between text-[10px] font-mono font-black uppercase text-[#42281D]">
-                  <span>Vocabulary Words ({searchResults.words.length}):</span>
-                  <span>Picks parent root & focuses</span>
-                </div>
-
-                {searchResults.words.map(wordNode => {
-                  const isSelected = selectedNode?.id === wordNode.id;
-                  return (
-                    <div
-                      key={wordNode.id}
-                      onClick={() => handlePickWord(wordNode)}
-                      className={`px-3 py-2 border-b border-[#111410]/20 cursor-pointer flex items-center justify-between transition ${
-                        isSelected ? 'bg-[#EDF5E5]' : 'hover:bg-[#FAFBF8]'
-                      }`}
-                    >
-                      <div className="min-w-0 pr-3">
-                        <div className="flex items-center space-x-2">
-                          <span className="font-sans text-xs font-black text-[#111410]">
-                            {wordNode.word}
-                          </span>
-                          {wordNode.isMastered && (
-                            <span className="w-2 h-2 rounded-full bg-[#7BB33B] border border-[#111410]" title="Mastered" />
-                          )}
-                          <span className="text-[10px] font-mono px-1.5 py-0.2 border border-[#111410] bg-[#EFE8DF] font-bold text-[#42281D]">
-                            Root: {wordNode.parentRoot?.morpheme || 'root'}
-                          </span>
-                        </div>
-                        <p className="text-[11px] font-sans text-[#62685E] truncate mt-0.5">
-                          {wordNode.data?.definition}
-                        </p>
-                      </div>
-
-                      <span className="text-[10px] font-mono font-black uppercase text-[#7BB33B] shrink-0 flex items-center space-x-1">
-                        <span>FOCUS ROOT</span>
-                        <ChevronRight className="w-3.5 h-3.5" />
-                      </span>
-                    </div>
-                  );
-                })}
-              </div>
+            {searchQuery && (
+              <button 
+                onClick={() => setSearchQuery('')} 
+                className="text-[#111410] hover:text-[#991B1B] p-1 mr-0.5"
+              >
+                <X className="w-3.5 h-3.5" />
+              </button>
             )}
 
+            <div className="hidden md:flex items-center pl-1 pr-2 border-l border-[#111410]/20 text-[10px] font-mono text-[#62685E]">
+              <kbd className="px-1.5 py-0.5 bg-[#FAFBF8] border border-[#111410] text-[#111410]">ESC</kbd>
+            </div>
           </div>
-        )}
+
+          {/* Autocomplete Dropdown List with Roots & Vocabulary Words */}
+          {(isSearchFocused || searchQuery) && searchResults.total > 0 && (
+            <div className="absolute top-full left-0 right-0 mt-1.5 bg-white border-2 border-[#111410] shadow-[5px_5px_0px_0px_#111410] z-40 max-h-72 sm:max-h-80 overflow-y-auto">
+              
+              {/* 1. ROOT MORPHEMES SECTION */}
+              {searchResults.roots.length > 0 && (
+                <div>
+                  <div className="px-3 py-1.5 bg-[#FAFBF8] border-b border-[#111410] flex items-center justify-between text-[10px] font-mono font-black uppercase text-[#62685E]">
+                    <span>Roots ({searchResults.roots.length}):</span>
+                    <span>Select to focus family</span>
+                  </div>
+
+                  {searchResults.roots.map(rootNode => {
+                    const isCurrent = rootNode.id === focusedRootId;
+                    return (
+                      <div
+                        key={rootNode.id}
+                        onClick={() => handlePickRoot(rootNode)}
+                        className={`px-3 py-2 border-b border-[#111410]/20 cursor-pointer flex items-center justify-between transition ${
+                          isCurrent ? 'bg-[#EDF5E5]' : 'hover:bg-[#FAFBF8]'
+                        }`}
+                      >
+                        <div className="min-w-0 pr-3">
+                          <div className="flex items-center space-x-2">
+                            <span className="font-mono text-xs font-black uppercase text-[#111410]">
+                              {rootNode.morpheme}
+                            </span>
+                            <span className="text-[9px] font-mono uppercase px-1.5 py-0.2 border border-[#111410] bg-[#FAFBF8] font-bold">
+                              {rootNode.language}
+                            </span>
+                            <span className="text-[10px] font-mono text-[#62685E]">
+                              {rootNode.total_words} derivatives
+                            </span>
+                          </div>
+                          <p className="text-[11px] font-serif italic text-[#42281D] truncate mt-0.5">
+                            "{rootNode.core_meaning}"
+                          </p>
+                        </div>
+
+                        <span className="text-[10px] font-mono font-black uppercase text-[#7BB33B] shrink-0 flex items-center space-x-1">
+                          <span>FOCUS</span>
+                          <ChevronRight className="w-3.5 h-3.5" />
+                        </span>
+                      </div>
+                    );
+                  })}
+                </div>
+              )}
+
+              {/* 2. VOCABULARY WORDS SECTION */}
+              {searchResults.words.length > 0 && (
+                <div>
+                  <div className="px-3 py-1.5 bg-[#FAFBF8] border-b border-t border-[#111410] flex items-center justify-between text-[10px] font-mono font-black uppercase text-[#42281D]">
+                    <span>Vocabulary Words ({searchResults.words.length}):</span>
+                    <span>Picks parent root & focuses</span>
+                  </div>
+
+                  {searchResults.words.map(wordNode => {
+                    const isSelected = selectedNode?.id === wordNode.id;
+                    return (
+                      <div
+                        key={wordNode.id}
+                        onClick={() => handlePickWord(wordNode)}
+                        className={`px-3 py-2 border-b border-[#111410]/20 cursor-pointer flex items-center justify-between transition ${
+                          isSelected ? 'bg-[#EDF5E5]' : 'hover:bg-[#FAFBF8]'
+                        }`}
+                      >
+                        <div className="min-w-0 pr-3">
+                          <div className="flex items-center space-x-2">
+                            <span className="font-sans text-xs font-black text-[#111410]">
+                              {wordNode.word}
+                            </span>
+                            {wordNode.isMastered && (
+                              <span className="w-2 h-2 rounded-full bg-[#7BB33B] border border-[#111410]" title="Mastered" />
+                            )}
+                            <span className="text-[10px] font-mono px-1.5 py-0.2 border border-[#111410] bg-[#EFE8DF] font-bold text-[#42281D]">
+                              Root: {wordNode.parentRoot?.morpheme || 'root'}
+                            </span>
+                          </div>
+                          <p className="text-[11px] font-sans text-[#62685E] truncate mt-0.5">
+                            {wordNode.data?.definition}
+                          </p>
+                        </div>
+
+                        <span className="text-[10px] font-mono font-black uppercase text-[#7BB33B] shrink-0 flex items-center space-x-1">
+                          <span>FOCUS</span>
+                          <ChevronRight className="w-3.5 h-3.5" />
+                        </span>
+                      </div>
+                    );
+                  })}
+                </div>
+              )}
+
+            </div>
+          )}
+        </div>
+
+        {/* Right: Zoom Controls */}
+        <div className="pointer-events-auto flex items-center space-x-1 shrink-0">
+          <button
+            onClick={() => {
+              targetCameraRef.current = null;
+              cameraRef.current.zoom = Math.min(2.5, cameraRef.current.zoom * 1.25);
+            }}
+            title="Zoom In"
+            className="p-1.5 sm:p-2 bg-white hover:bg-[#FAFBF8] border-2 border-[#111410] shadow-[2px_2px_0px_0px_#111410] text-[#111410] active:translate-x-[1px] active:translate-y-[1px]"
+          >
+            <ZoomIn className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
+          </button>
+          <button
+            onClick={() => {
+              targetCameraRef.current = null;
+              cameraRef.current.zoom = Math.max(0.18, cameraRef.current.zoom / 1.25);
+            }}
+            title="Zoom Out"
+            className="p-1.5 sm:p-2 bg-white hover:bg-[#FAFBF8] border-2 border-[#111410] shadow-[2px_2px_0px_0px_#111410] text-[#111410] active:translate-x-[1px] active:translate-y-[1px]"
+          >
+            <ZoomOut className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
+          </button>
+          <button
+            onClick={resetCamera}
+            title="Reset Camera"
+            className="p-1.5 sm:p-2 bg-white hover:bg-[#FAFBF8] border-2 border-[#111410] shadow-[2px_2px_0px_0px_#111410] text-[#111410] active:translate-x-[1px] active:translate-y-[1px]"
+          >
+            <RotateCcw className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
+          </button>
+        </div>
       </div>
 
-      {/* TOP-RIGHT VIEWPORT CONTROLS */}
-      <div className="absolute top-4 right-4 z-20 flex items-center space-x-1.5">
-        <button
-          onClick={() => {
-            targetCameraRef.current = null;
-            cameraRef.current.zoom = Math.min(2.5, cameraRef.current.zoom * 1.25);
-          }}
-          title="Zoom In (E or +)"
-          className="p-2 bg-white hover:bg-[#FAFBF8] border-2 border-[#111410] shadow-[2px_2px_0px_0px_#111410] text-[#111410] active:translate-x-[1px] active:translate-y-[1px]"
-        >
-          <ZoomIn className="w-4 h-4" />
-        </button>
-        <button
-          onClick={() => {
-            targetCameraRef.current = null;
-            cameraRef.current.zoom = Math.max(0.18, cameraRef.current.zoom / 1.25);
-          }}
-          title="Zoom Out (Q or -)"
-          className="p-2 bg-white hover:bg-[#FAFBF8] border-2 border-[#111410] shadow-[2px_2px_0px_0px_#111410] text-[#111410] active:translate-x-[1px] active:translate-y-[1px]"
-        >
-          <ZoomOut className="w-4 h-4" />
-        </button>
-        <button
-          onClick={resetCamera}
-          title="Reset Camera (R)"
-          className="p-2 bg-white hover:bg-[#FAFBF8] border-2 border-[#111410] shadow-[2px_2px_0px_0px_#111410] text-[#111410] active:translate-x-[1px] active:translate-y-[1px]"
-        >
-          <RotateCcw className="w-4 h-4" />
-        </button>
+      {/* MOBILE TOUCH HINT BAR */}
+      <div className="absolute bottom-3 left-3 right-3 z-20 pointer-events-none sm:hidden flex justify-center">
+        <div className="bg-white/95 backdrop-blur-xs border border-[#111410] shadow-[2px_2px_0px_0px_#111410] px-3 py-1 font-mono text-[10px] text-[#111410] font-bold">
+          Drag to Pan · Pinch to Zoom · Tap to Focus
+        </div>
       </div>
 
-      {/* CONTROLS HUD (BOTTOM-LEFT HEADS-UP DISPLAY) */}
-      <div className="absolute bottom-4 left-4 z-20 pointer-events-none">
+      {/* CONTROLS HUD (BOTTOM-LEFT HEADS-UP DISPLAY - DESKTOP ONLY) */}
+      <div className="absolute bottom-4 left-4 z-20 pointer-events-none hidden sm:block">
         <div className="bg-white border-2 border-[#111410] shadow-[3px_3px_0px_0px_#111410] px-3.5 py-2 font-mono text-xs text-[#111410] flex flex-wrap items-center gap-2">
           <div className="flex items-center space-x-1 font-black">
             <span className={`w-2 h-2 inline-block border border-[#111410] mr-1 ${
@@ -1633,7 +1744,7 @@ export default function VocabGraphView({
 
       {/* NODE INSPECTION SLIDEOUT DRAWER */}
       {selectedNode && (
-        <div className="absolute top-0 right-0 h-full w-full sm:w-[420px] bg-white border-l-2 border-[#111410] shadow-[-5px_0px_0px_0px_#111410] z-30 flex flex-col animate-slide-left overflow-hidden">
+        <div className="absolute top-0 right-0 h-full w-full sm:w-[420px] bg-white border-l-2 border-[#111410] shadow-[-5px_0px_0px_0px_#111410] z-40 flex flex-col animate-slide-left overflow-hidden">
           
           {/* Drawer Header */}
           <div className="p-4 border-b-2 border-[#111410] bg-[#FAFBF8] flex items-center justify-between">
