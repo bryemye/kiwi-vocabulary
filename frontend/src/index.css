@@ -42,3 +42,75 @@
     linear-gradient(to right, rgba(17, 20, 16, 0.05) 1px, transparent 1px),
     linear-gradient(to bottom, rgba(17, 20, 16, 0.05) 1px, transparent 1px);
 }
+
+/* Cinematic Poem Animations & Mask Utilities */
+@keyframes kenburns-slow {
+  0% {
+    transform: scale(1) translate(0%, 0%);
+  }
+  50% {
+    transform: scale(1.08) translate(-1.5%, -1%);
+  }
+  100% {
+    transform: scale(1) translate(0%, 0%);
+  }
+}
+
+@keyframes aurora-drift {
+  0% {
+    transform: scale(1) translate(0%, 0%) rotate(0deg);
+  }
+  33% {
+    transform: scale(1.15) translate(3%, -2%) rotate(4deg);
+  }
+  66% {
+    transform: scale(1.1) translate(-2%, 3%) rotate(-3deg);
+  }
+  100% {
+    transform: scale(1) translate(0%, 0%) rotate(0deg);
+  }
+}
+
+@keyframes film-grain {
+  0%, 100% { transform: translate(0, 0); }
+  10% { transform: translate(-1%, -1%); }
+  20% { transform: translate(1%, 1%); }
+  30% { transform: translate(-2%, 0%); }
+  40% { transform: translate(1%, -1%); }
+  50% { transform: translate(-1%, 2%); }
+  60% { transform: translate(2%, 1%); }
+  70% { transform: translate(0%, -2%); }
+  80% { transform: translate(-2%, 1%); }
+  90% { transform: translate(1%, 2%); }
+}
+
+.animate-kenburns {
+  animation: kenburns-slow 35s ease-in-out infinite;
+}
+
+.animate-aurora {
+  animation: aurora-drift 22s ease-in-out infinite alternate;
+}
+
+.animate-grain {
+  animation: film-grain 0.6s steps(6) infinite;
+}
+
+/* Vertical Roll Feathered Vignette Mask */
+.mask-feather-vertical {
+  mask-image: linear-gradient(
+    to bottom,
+    transparent 0%,
+    black 15%,
+    black 85%,
+    transparent 100%
+  );
+  -webkit-mask-image: linear-gradient(
+    to bottom,
+    transparent 0%,
+    black 15%,
+    black 85%,
+    transparent 100%
+  );
+}
+

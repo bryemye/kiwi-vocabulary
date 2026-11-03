@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import Navbar from './components/Navbar';
 import VocabView from './components/VocabView';
+import PoemsView from './components/PoemsView';
 import AdminReviewBar from './components/AdminReviewBar';
 // Dormant standalone module imports preserved for future activation
 import MathView from './components/MathView';
@@ -28,16 +29,18 @@ export default function App() {
     if (typeof window === 'undefined') return 'study';
     const hash = (window.location.hash || '').toLowerCase();
     const path = (window.location.pathname || '').toLowerCase();
+    if (hash.includes('poems') || path.includes('poems')) return 'poems';
     if (hash.includes('graph') || path.includes('graph')) return 'graph';
     if (hash.includes('explorer') || path.includes('explorer')) return 'explorer';
     if (hash.includes('progress') || path.includes('progress')) return 'progress';
     return 'study';
   };
 
-  // App Suite Navigation: 'vocab' is the standalone primary experience
+  // App Suite Navigation: 'vocab' is the primary SAT/ACT view, 'poems' is the poetry cinema
   const [activeTab, setActiveTab] = useState(getTabFromUrl);
   const [activeApp, setActiveApp] = useState(() => {
     const tab = getTabFromUrl();
+    if (tab === 'poems') return 'poems';
     return tab === 'graph' ? 'graph' : 'vocab';
   });
 
@@ -99,7 +102,13 @@ export default function App() {
     const handleLocationChange = () => {
       const tab = getTabFromUrl();
       setActiveTab(tab);
-      setActiveApp(tab === 'graph' ? 'graph' : 'vocab');
+      if (tab === 'poems') {
+        setActiveApp('poems');
+      } else if (tab === 'graph') {
+        setActiveApp('graph');
+      } else {
+        setActiveApp('vocab');
+      }
     };
 
     window.addEventListener('hashchange', handleLocationChange);
@@ -114,7 +123,10 @@ export default function App() {
   useEffect(() => {
     try {
       const fullPath = (window.location.pathname + window.location.hash + window.location.search).toLowerCase();
-      if (fullPath.includes('math') || fullPath.includes('reading')) {
+      if (fullPath.includes('poems')) {
+        setActiveApp('poems');
+        setActiveTab('poems');
+      } else if (fullPath.includes('math') || fullPath.includes('reading')) {
         if (window.history && window.history.replaceState) {
           window.history.replaceState({}, document.title, '#study');
         }
@@ -214,10 +226,15 @@ export default function App() {
     handleNavigateTab('study');
   };
 
-  // Safe navigation handler enforcing Kiwi Vocabulary views & Root Graph
+  // Safe navigation handler enforcing Kiwi Views
   const handleNavigateTab = (tab) => {
     setActiveTab(tab);
-    if (tab === 'graph') {
+    if (tab === 'poems') {
+      setActiveApp('poems');
+      if (window.history && window.history.pushState) {
+        window.history.pushState({}, document.title, '/poems');
+      }
+    } else if (tab === 'graph') {
       setActiveApp('graph');
       if (window.history && window.history.replaceState) {
         window.history.replaceState({}, document.title, '#graph');
@@ -231,6 +248,10 @@ export default function App() {
   };
 
   const handleNavigateApp = (targetApp) => {
+    if (targetApp === 'poems') {
+      handleNavigateTab('poems');
+      return;
+    }
     if (targetApp === 'math' || targetApp === 'reading') {
       // Disabled module: redirect immediately to Kiwi Vocabulary study deck
       handleNavigateTab('study');
@@ -293,6 +314,11 @@ export default function App() {
       window.history.replaceState({}, document.title, cleanUrl);
     }
   };
+
+  // Dedicated Cinematic Poetry Engine Route (/poems)
+  if (activeApp === 'poems') {
+    return <PoemsView onNavigateHome={() => handleNavigateApp('vocab')} />;
+  }
 
   return (
     <div className="min-h-screen bg-[#FAFBF8] bg-grid-kiwi text-[#111410] flex flex-col font-sans selection:bg-[#7BB33B] selection:text-white">

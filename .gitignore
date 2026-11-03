@@ -8,6 +8,5 @@ db.sqlite3-journal
 
 # Node
 node_modules/
-dist/
 .DS_Store
 *.local

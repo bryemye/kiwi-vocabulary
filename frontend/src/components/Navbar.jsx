@@ -9,7 +9,8 @@ import {
   LogOut,
   ChevronDown,
   Network,
-  ShieldCheck
+  ShieldCheck,
+  Film
 } from 'lucide-react';
 
 export default function Navbar({
@@ -60,6 +61,16 @@ export default function Navbar({
       badge: 'ACTIVE',
       tagline: 'Interactive Etymology Knowledge Graph',
       icon: Network,
+      color: '#7BB33B',
+      accentBg: '#EDF5E5',
+      disabled: false,
+    },
+    {
+      id: 'poems',
+      name: 'Kiwi Cinema / Poems',
+      badge: 'PROTOTYPE',
+      tagline: 'Movie Credit Typography & Atmospheric Cinema',
+      icon: Film,
       color: '#7BB33B',
       accentBg: '#EDF5E5',
       disabled: false,
