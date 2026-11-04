@@ -16,7 +16,7 @@ ALLOWED_HOSTS = [h.strip() for h in os.environ.get('DJANGO_ALLOWED_HOSTS', '*').
 CSRF_TRUSTED_ORIGINS = [
     origin.strip() for origin in os.environ.get(
         'CSRF_TRUSTED_ORIGINS',
-        'https://*.pythonanywhere.com,http://localhost:5173,http://localhost:8000,http://127.0.0.1:8000'
+        'https://*.learn-with-kiwi.com,https://learn-with-kiwi.com,https://*.pythonanywhere.com,http://localhost:5173,http://localhost:8000,http://127.0.0.1:8000'
     ).split(',') if origin.strip()
 ]
 
@@ -126,7 +126,7 @@ EMAIL_HOST_USER = os.environ.get('EMAIL_HOST_USER', 'resend')
 EMAIL_HOST_PASSWORD = RESEND_API_KEY or os.environ.get('EMAIL_HOST_PASSWORD', '')
 
 DEFAULT_FROM_EMAIL = os.environ.get('DEFAULT_FROM_EMAIL', 'Kiwi Learning <onboarding@resend.dev>')
-FRONTEND_URL = os.environ.get('FRONTEND_URL', 'http://localhost:5173')
+FRONTEND_URL = os.environ.get('FRONTEND_URL', 'http://localhost:5173' if DEBUG else 'https://www.learn-with-kiwi.com')
 
 # CORS
 CORS_ALLOW_ALL_ORIGINS = True
