@@ -2,14 +2,11 @@ import React, { useState, useRef, useEffect } from 'react';
 import {
   Sparkles,
   Compass,
-  CheckCircle2,
-  Clock,
   User as UserIcon,
   LogOut,
   ChevronDown,
   ShieldCheck,
   Network,
-  Film,
   Menu,
   X
 } from 'lucide-react';
@@ -28,12 +25,6 @@ export default function Navbar({
   const [isSwitcherOpen, setIsSwitcherOpen] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const switcherRef = useRef(null);
-
-  const formatTime = (secs) => {
-    const m = Math.floor(secs / 60);
-    const s = secs % 60;
-    return `${m.toString().padStart(2, '0')}:${s.toString().padStart(2, '0')}`;
-  };
 
   // Close desktop dropdown on outside click
   useEffect(() => {
@@ -84,16 +75,6 @@ export default function Navbar({
       badge: 'ACTIVE',
       tagline: 'Interactive Etymology Knowledge Graph',
       icon: Network,
-      color: '#7BB33B',
-      accentBg: '#EDF5E5',
-      disabled: false,
-    },
-    {
-      id: 'poems',
-      name: 'Kiwi Cinema / Poems',
-      badge: 'PROTOTYPE',
-      tagline: 'Movie Credit Typography & Atmospheric Cinema',
-      icon: Film,
       color: '#7BB33B',
       accentBg: '#EDF5E5',
       disabled: false,
@@ -238,39 +219,8 @@ export default function Navbar({
             })}
           </div>
 
-          {/* Right Section: Stats, Auth & Mobile Menu Trigger */}
+          {/* Right Section: Auth & Mobile Menu Trigger */}
           <div className="flex items-center space-x-2 sm:space-x-3">
-            {/* Session Timer & Accuracy (Desktop >= lg) */}
-            <div className="hidden lg:flex items-center space-x-2">
-              <div className="flex items-center space-x-1.5 px-2.5 py-1 bg-[#FAFBF8] border-2 border-[#111410] shadow-[2px_2px_0px_0px_#111410] text-xs font-mono text-[#111410]">
-                <Clock className="w-3.5 h-3.5 text-[#42281D]" />
-                <span>TIME: <strong>{formatTime(sessionSeconds)}</strong></span>
-              </div>
-              {stats?.overall && (
-                <div className="flex items-center space-x-1.5 px-2.5 py-1 bg-[#EDF5E5] border-2 border-[#111410] shadow-[2px_2px_0px_0px_#111410] text-xs font-mono text-[#2F441E]">
-                  <CheckCircle2 className="w-3.5 h-3.5 text-[#7BB33B]" />
-                  <span>ACC: <strong>{stats.overall.accuracy_percentage}%</strong></span>
-                </div>
-              )}
-            </div>
-
-            {/* Editorial Review Toggle (Desktop >= md) */}
-            {onToggleAdminMode && (
-              <button
-                onClick={onToggleAdminMode}
-                className={`hidden md:flex items-center space-x-1.5 px-2.5 py-1 text-xs font-mono font-bold uppercase transition border-2 border-[#111410] ${
-                  isAdminMode
-                    ? 'bg-[#111410] text-[#7BB33B] shadow-[2px_2px_0px_0px_#7BB33B]'
-                    : 'bg-[#FAFBF8] hover:bg-white text-[#42281D] shadow-[2px_2px_0px_0px_#111410]'
-                }`}
-                title={`Toggle Editorial / Admin Review Mode · Currently: ${isAdminMode ? 'ACTIVE' : 'OFF'}`}
-              >
-                <ShieldCheck className={`w-3.5 h-3.5 ${isAdminMode ? 'text-[#7BB33B]' : 'text-[#42281D]'}`} />
-                <span>REVIEW</span>
-                <span className={`w-2 h-2 rounded-full border border-[#111410] ${isAdminMode ? 'bg-[#7BB33B] animate-pulse' : 'bg-gray-300'}`} />
-              </button>
-            )}
-
             {/* Global User Authentication Status (Desktop >= sm) */}
             {user ? (
               <div className="hidden sm:flex items-center space-x-1.5">
@@ -334,21 +284,6 @@ export default function Navbar({
       {/* MOBILE FULL-WIDTH DRAWER MENU (< lg) */}
       {isMobileMenuOpen && (
         <div className="lg:hidden border-t-2 border-[#111410] bg-white shadow-[0px_8px_0px_0px_rgba(17,20,16,0.25)] animate-fade-in divide-y-2 divide-[#111410]/20">
-          
-          {/* Mobile Metrics Bar */}
-          <div className="p-3 bg-[#FAFBF8] flex items-center justify-between text-xs font-mono">
-            <div className="flex items-center space-x-1.5 px-2.5 py-1 bg-white border border-[#111410]">
-              <Clock className="w-3.5 h-3.5 text-[#42281D]" />
-              <span>TIME: <strong>{formatTime(sessionSeconds)}</strong></span>
-            </div>
-            {stats?.overall && (
-              <div className="flex items-center space-x-1.5 px-2.5 py-1 bg-[#EDF5E5] border border-[#111410] text-[#2F441E]">
-                <CheckCircle2 className="w-3.5 h-3.5 text-[#7BB33B]" />
-                <span>ACCURACY: <strong>{stats.overall.accuracy_percentage}%</strong></span>
-              </div>
-            )}
-          </div>
-
           {/* Mobile Navigation Apps */}
           <div className="p-3 space-y-2">
             <div className="text-[10px] font-mono font-black uppercase text-[#62685E] px-1">
