@@ -2,6 +2,7 @@ import os
 import django
 import time
 
+os.environ['EMAIL_BACKEND'] = 'platform_core.mail.KiwiConsoleEmailBackend'
 os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'config.settings')
 django.setup()
 

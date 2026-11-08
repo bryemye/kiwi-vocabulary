@@ -1,7 +1,13 @@
+import json
+import logging
 import re
+import urllib.error
+import urllib.request
 from django.conf import settings
 from django.core.mail import send_mail
 from django.core.mail.backends.console import EmailBackend as BaseConsoleEmailBackend
+
+logger = logging.getLogger(__name__)
 
 
 class KiwiConsoleEmailBackend(BaseConsoleEmailBackend):
@@ -25,11 +31,54 @@ class KiwiConsoleEmailBackend(BaseConsoleEmailBackend):
             self.stream.flush()
 
 
+def send_via_resend_api(to_email: str, subject: str, plain_message: str, html_message: str, from_email: str, api_key: str) -> dict:
+    """
+    Directly dispatches an email via Resend's HTTPS REST API (https://api.resend.com/emails).
+    This works on both local dev and PythonAnywhere (where SMTP port 587 is blocked
+    on free tier, but api.resend.com is explicitly allowlisted over HTTPS).
+    """
+    url = "https://api.resend.com/emails"
+    payload = {
+        "from": from_email,
+        "to": [to_email],
+        "subject": subject,
+        "text": plain_message,
+        "html": html_message,
+    }
+    data = json.dumps(payload).encode("utf-8")
+    req = urllib.request.Request(
+        url,
+        data=data,
+        headers={
+            "Authorization": f"Bearer {api_key.strip()}",
+            "Content-Type": "application/json",
+            "User-Agent": "KiwiLearning/1.0",
+        },
+        method="POST"
+    )
+
+    try:
+        # urllib automatically uses PythonAnywhere's HTTP/HTTPS proxy if configured
+        with urllib.request.urlopen(req, timeout=15) as resp:
+            resp_body = resp.read().decode("utf-8")
+            result = json.loads(resp_body) if resp_body else {}
+            logger.info("Resend email dispatched successfully: %s", result)
+            return result
+    except urllib.error.HTTPError as err:
+        err_body = err.read().decode("utf-8")
+        error_msg = f"Resend API error (HTTP {err.code}): {err_body}"
+        logger.error(error_msg)
+        raise RuntimeError(error_msg) from err
+    except Exception as exc:
+        error_msg = f"Failed to send email via Resend API: {exc}"
+        logger.error(error_msg)
+        raise RuntimeError(error_msg) from exc
+
+
 def send_magic_link_email(to_email: str, magic_link: str) -> None:
     """
-    Dispatches magic link email using either Resend SMTP or Console backend
-    configured via settings.EMAIL_BACKEND. Sends both clean plain-text and
-    branded neo-brutalist HTML.
+    Dispatches magic link email using either Resend HTTPS API, Resend SMTP, or Console backend.
+    Sends both clean plain-text and branded neo-brutalist HTML.
     """
     subject = "Your Kiwi Learning Magic Login Link"
 
@@ -101,14 +150,41 @@ def send_magic_link_email(to_email: str, magic_link: str) -> None:
 </html>
 """
 
-    from_email = getattr(settings, 'DEFAULT_FROM_EMAIL', 'Kiwi Learning <onboarding@resend.dev>')
+    from_email = getattr(settings, 'DEFAULT_FROM_EMAIL', 'Kiwi Learning <login@learn-with-kiwi.com>')
+    api_key = getattr(settings, 'RESEND_API_KEY', '') or getattr(settings, 'EMAIL_HOST_PASSWORD', '')
+    email_backend = str(getattr(settings, 'EMAIL_BACKEND', ''))
 
-    send_mail(
-        subject=subject,
-        message=plain_message,
-        from_email=from_email,
-        recipient_list=[to_email],
-        html_message=html_message,
-        fail_silently=False,
-    )
+    # If console backend is explicitly requested (e.g. in test suites), avoid external network call
+    if 'console' in email_backend.lower():
+        send_mail(
+            subject=subject,
+            message=plain_message,
+            from_email=from_email,
+            recipient_list=[to_email],
+            html_message=html_message,
+            fail_silently=False,
+        )
+        return
+
+    # If a valid Resend API key is present, use the HTTPS REST API (guaranteed PythonAnywhere compatibility)
+    if api_key and not api_key.startswith('re_your_'):
+        send_via_resend_api(
+            to_email=to_email,
+            subject=subject,
+            plain_message=plain_message,
+            html_message=html_message,
+            from_email=from_email,
+            api_key=api_key,
+        )
+    else:
+        # Fallback to standard Django mail backend (Console backend in local dev)
+        send_mail(
+            subject=subject,
+            message=plain_message,
+            from_email=from_email,
+            recipient_list=[to_email],
+            html_message=html_message,
+            fail_silently=False,
+        )
+
 

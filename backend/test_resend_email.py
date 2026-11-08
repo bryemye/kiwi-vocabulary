@@ -49,17 +49,17 @@ def test_email():
     try:
         send_magic_link_email(to_email=recipient, magic_link=test_link)
         print("\n-> Email dispatched successfully!")
-        if "console" in settings.EMAIL_BACKEND.lower():
-            print("   (Printed to console above because console backend is active)")
-        else:
-            print(f"   (Sent via Resend SMTP to {recipient})")
+        if api_key and not api_key.startswith('re_your_'):
+            print(f"   (Sent via Resend HTTPS REST API to {recipient})")
             print("   Check your inbox (and spam/promotions folder)!")
+        else:
+            print("   (Printed to console above because no live API key was provided)")
     except Exception as exc:
         print(f"\n[ERROR] Email dispatch failed:\n{exc}")
         print("\nResend Troubleshooting Tips:")
         print("1. If testing with 'onboarding@resend.dev', you can ONLY send to the email you used to register on Resend.")
-        print("2. To send to any student email, verify your own custom domain on resend.com/domains")
-        print("3. Ensure your API key has 'Sending access' permission on resend.com/api-keys")
+        print("2. For your verified domain learn-with-kiwi.com, ensure DEFAULT_FROM_EMAIL uses that domain (e.g. login@learn-with-kiwi.com).")
+        print("3. Ensure your API key has 'Full access' or 'Sending access' permission on resend.com/api-keys")
 
     print("=" * 70)
 
