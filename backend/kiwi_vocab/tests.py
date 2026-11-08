@@ -11,7 +11,9 @@ class KiwiVocabTests(TestCase):
             morpheme='chron',
             language='Greek',
             core_meaning='time',
-            mnemonic='chronometer'
+            mnemonic='chronometer',
+            thematic_cluster='Cognition',
+            sat_tier='Tier 1 High-Yield'
         )
         self.word1 = VocabularyWord.objects.create(
             word='anachronism',
@@ -33,7 +35,22 @@ class KiwiVocabTests(TestCase):
         self.assertEqual(res.status_code, status.HTTP_200_OK)
         self.assertEqual(len(res.data), 1)
         self.assertEqual(res.data[0]['morpheme'], 'chron')
+        self.assertEqual(res.data[0]['thematic_cluster'], 'Cognition')
+        self.assertEqual(res.data[0]['sat_tier'], 'Tier 1 High-Yield')
         self.assertEqual(len(res.data[0]['words']), 2)
+
+    def test_vocab_roots_filtering_by_cluster_and_tier(self):
+        res_cluster = self.client.get('/api/vocab/roots/?cluster=Cognition')
+        self.assertEqual(res_cluster.status_code, status.HTTP_200_OK)
+        self.assertEqual(len(res_cluster.data), 1)
+
+        res_wrong_cluster = self.client.get('/api/vocab/roots/?cluster=Movement')
+        self.assertEqual(res_wrong_cluster.status_code, status.HTTP_200_OK)
+        self.assertEqual(len(res_wrong_cluster.data), 0)
+
+        res_tier = self.client.get('/api/vocab/roots/?tier=Tier 1 High-Yield')
+        self.assertEqual(res_tier.status_code, status.HTTP_200_OK)
+        self.assertEqual(len(res_tier.data), 1)
 
     def test_vocab_words_endpoint(self):
         res = self.client.get('/api/vocab/words/?search=chronic')

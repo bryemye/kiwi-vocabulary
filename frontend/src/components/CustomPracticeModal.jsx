@@ -461,13 +461,23 @@ export default function CustomPracticeModal({
                             className="w-4 h-4 accent-[#7BB33B] border-2 border-[#111410] cursor-pointer"
                           />
                           <div className="min-w-0">
-                            <div className="flex items-center space-x-2">
+                            <div className="flex items-center space-x-2 flex-wrap gap-y-0.5">
                               <span className="font-mono text-xs font-black uppercase text-[#111410]">
                                 [{r.morpheme.toUpperCase()}]
                               </span>
                               <span className="text-[9px] font-mono px-1.5 py-0.2 bg-white text-[#2F441E] border border-[#111410] uppercase font-bold">
                                 {r.language}
                               </span>
+                              {r.thematic_cluster && (
+                                <span className="text-[8px] font-mono px-1 py-0.2 bg-white border border-[#111410] uppercase">
+                                  🧠 {r.thematic_cluster}
+                                </span>
+                              )}
+                              {r.sat_tier && (
+                                <span className="text-[8px] font-mono px-1 py-0.2 bg-[#FFFBEB] text-[#92400E] border border-[#111410] uppercase font-bold">
+                                  ⚡ {r.sat_tier}
+                                </span>
+                              )}
                             </div>
                             <p className="text-xs font-serif italic text-[#42281D] truncate">
                               "{r.core_meaning}"

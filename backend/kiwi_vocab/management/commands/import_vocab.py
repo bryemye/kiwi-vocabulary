@@ -42,12 +42,14 @@ class Command(BaseCommand):
 
         for entry in data:
             root_data = entry["root"]
-            root, created = Root.objects.get_or_create(
+            root, created = Root.objects.update_or_create(
                 morpheme=root_data["morpheme"],
                 defaults={
                     "language": root_data.get("language", "Latin"),
                     "core_meaning": root_data["core_meaning"],
-                    "mnemonic": root_data.get("mnemonic", "")
+                    "mnemonic": root_data.get("mnemonic", ""),
+                    "thematic_cluster": root_data.get("thematic_cluster", "Movement"),
+                    "sat_tier": root_data.get("sat_tier", "Tier 1 High-Yield"),
                 }
             )
             if created:

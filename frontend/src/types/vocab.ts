@@ -29,12 +29,33 @@ export interface VocabularyWord {
   review?: EditorialReview;
 }
 
+export type LearningPathway = 'thematic' | 'yield';
+
+export type ThematicCluster =
+  | 'Movement'
+  | 'Communication'
+  | 'Cognition'
+  | 'Emotion'
+  | 'Power & Conflict'
+  | 'Law & Morality'
+  | 'Form & Nature'
+  | 'Quantity & Relation'
+  | string;
+
+export type SATTier =
+  | 'Tier 1 High-Yield'
+  | 'Tier 2 Multipliers'
+  | 'Tier 3 Advanced'
+  | string;
+
 export interface RootSummary {
   id?: number;
   morpheme: string;
   language: 'Latin' | 'Greek' | string;
   core_meaning: string;
   mnemonic?: string;
+  thematic_cluster?: ThematicCluster;
+  sat_tier?: SATTier;
 }
 
 export interface Root extends RootSummary {
@@ -48,6 +69,8 @@ export interface LexiconSeedEntry {
     language: string;
     core_meaning: string;
     mnemonic?: string;
+    thematic_cluster?: ThematicCluster;
+    sat_tier?: SATTier;
   };
   words: Array<{
     word: string;

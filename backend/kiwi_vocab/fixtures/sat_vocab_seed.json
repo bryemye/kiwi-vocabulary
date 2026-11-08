@@ -4,7 +4,9 @@
       "morpheme": "ced / cess",
       "language": "Latin",
       "core_meaning": "to go, yield, withdraw",
-      "mnemonic": "Think 'precede' (go before) or 'concede' (yield to)"
+      "mnemonic": "Think 'precede' (go before) or 'concede' (yield to)",
+      "thematic_cluster": "Movement",
+      "sat_tier": "Tier 1 High-Yield"
     },
     "words": [
       {
@@ -70,7 +72,9 @@
       "morpheme": "cur / curs / cour",
       "language": "Latin",
       "core_meaning": "to run, course, flow",
-      "mnemonic": "Think 'current' (running flow) or 'courier' (runner)"
+      "mnemonic": "Think 'current' (running flow) or 'courier' (runner)",
+      "thematic_cluster": "Movement",
+      "sat_tier": "Tier 1 High-Yield"
     },
     "words": [
       {
@@ -84,7 +88,7 @@
       {
         "word": "concur",
         "prefix": "con- (together)",
-        "suffix": "-ur (run)",
+        "suffix": "",
         "definition": "To agree with an opinion or decision; to occur simultaneously.",
         "sat_sentence": "All three medical specialists concurred that immediate surgery was necessary.",
         "connotation": "positive"
@@ -116,7 +120,7 @@
       {
         "word": "succumb",
         "prefix": "sub- (under)",
-        "suffix": "-cumb (yield / fall under)",
+        "suffix": "",
         "definition": "To fail to resist pressure, temptation, or illness; to surrender.",
         "sat_sentence": "Weakened by dehydration, the explorer finally succumbed to heat exhaustion.",
         "connotation": "negative"
@@ -124,7 +128,7 @@
       {
         "word": "recur",
         "prefix": "re- (again)",
-        "suffix": "-ur (run)",
+        "suffix": "",
         "definition": "To occur again, periodically, or repeatedly.",
         "sat_sentence": "The financial crisis highlighted weaknesses in the market that recur every decade.",
         "connotation": "neutral"
@@ -136,13 +140,15 @@
       "morpheme": "grad / gress",
       "language": "Latin",
       "core_meaning": "to step, walk, go",
-      "mnemonic": "Think 'progress' (step forward) or 'gradual' (step by step)"
+      "mnemonic": "Think 'progress' (step forward) or 'gradual' (step by step)",
+      "thematic_cluster": "Movement",
+      "sat_tier": "Tier 1 High-Yield"
     },
     "words": [
       {
         "word": "digress",
         "prefix": "di- (apart, away)",
-        "suffix": "-gress (step)",
+        "suffix": "",
         "definition": "To leave the main subject temporarily in speech or writing.",
         "sat_sentence": "I must digress for a moment to explain the political backdrop of the treaty.",
         "connotation": "neutral"
@@ -150,7 +156,7 @@
       {
         "word": "egress",
         "prefix": "e- (out of)",
-        "suffix": "-gress (step)",
+        "suffix": "",
         "definition": "The action of going out of or leaving a place; a point of departure or exit.",
         "sat_sentence": "Fire safety codes dictate that all secondary egress pathways must remain unblocked.",
         "connotation": "neutral"
@@ -158,7 +164,7 @@
       {
         "word": "ingress",
         "prefix": "in- (into)",
-        "suffix": "-gress (step)",
+        "suffix": "",
         "definition": "The act of entering, or the right or permission to enter a place.",
         "sat_sentence": "Security guards stood at every ingress point to verify attendees' credentials.",
         "connotation": "neutral"
@@ -166,7 +172,7 @@
       {
         "word": "regress",
         "prefix": "re- (back)",
-        "suffix": "-gress (step)",
+        "suffix": "",
         "definition": "To return to a former, less developed, or worse state.",
         "sat_sentence": "Without sustained physical therapy, the patient's mobility began to regress.",
         "connotation": "negative"
@@ -174,7 +180,7 @@
       {
         "word": "transgress",
         "prefix": "trans- (across, beyond)",
-        "suffix": "-gress (step)",
+        "suffix": "",
         "definition": "To infringe or go beyond the bounds of a moral principle or established standard.",
         "sat_sentence": "The executive chose to transgress federal environmental regulations to maximize profits.",
         "connotation": "negative"
@@ -182,7 +188,7 @@
       {
         "word": "retrograde",
         "prefix": "retro- (backward)",
-        "suffix": "-grade (step)",
+        "suffix": "",
         "definition": "Moving or tending backward; reverting to an inferior or outmoded condition.",
         "sat_sentence": "Critics viewed the censorship bill as a retrograde step for civil liberties.",
         "connotation": "negative"
@@ -202,7 +208,9 @@
       "morpheme": "mot / mov",
       "language": "Latin",
       "core_meaning": "to move, stir, set in motion",
-      "mnemonic": "Think 'motion' or 'motivate' (stir to action)"
+      "mnemonic": "Think 'motion' or 'motivate' (stir to action)",
+      "thematic_cluster": "Movement",
+      "sat_tier": "Tier 1 High-Yield"
     },
     "words": [
       {
@@ -268,13 +276,15 @@
       "morpheme": "tract",
       "language": "Latin",
       "core_meaning": "to pull, drag, draw",
-      "mnemonic": "Think 'tractor' (pulling vehicle) or 'extract' (draw out)"
+      "mnemonic": "Think 'tractor' (pulling vehicle) or 'extract' (draw out)",
+      "thematic_cluster": "Movement",
+      "sat_tier": "Tier 1 High-Yield"
     },
     "words": [
       {
         "word": "abstract",
         "prefix": "abs- (away from)",
-        "suffix": "-tract (draw)",
+        "suffix": "",
         "definition": "Existing in thought or as an idea but not having a physical or concrete existence.",
         "sat_sentence": "Pure mathematics deals with abstract concepts rather than empirical measurements.",
         "connotation": "neutral"
@@ -282,7 +292,7 @@
       {
         "word": "retract",
         "prefix": "re- (back)",
-        "suffix": "-tract (draw)",
+        "suffix": "",
         "definition": "To withdraw a statement, accusation, or promise as untrue or unjustified.",
         "sat_sentence": "The journal forced the researcher to retract the flawed paper following an audit.",
         "connotation": "negative"
@@ -290,7 +300,7 @@
       {
         "word": "protract",
         "prefix": "pro- (forward, prolong)",
-        "suffix": "-tract (draw)",
+        "suffix": "",
         "definition": "To prolong or draw out in time, often unnecessarily.",
         "sat_sentence": "Filibusters are frequently used to protract legislative debates and stall votes.",
         "connotation": "negative"
@@ -306,7 +316,7 @@
       {
         "word": "detract",
         "prefix": "de- (away, down)",
-        "suffix": "-tract (draw)",
+        "suffix": "",
         "definition": "To diminish the worth, value, or reputation of something.",
         "sat_sentence": "Minor typographical errors should not detract from the brilliance of the author's argument.",
         "connotation": "negative"
@@ -322,7 +332,7 @@
       {
         "word": "extract",
         "prefix": "ex- (out)",
-        "suffix": "-tract (pull)",
+        "suffix": "",
         "definition": "To remove or take out, especially by effort, force, or chemical distillation.",
         "sat_sentence": "Botanists extracted medicinal compounds from the rare Andean wildflower.",
         "connotation": "neutral"
@@ -334,7 +344,9 @@
       "morpheme": "fer / lat",
       "language": "Latin",
       "core_meaning": "to carry, bear, bring",
-      "mnemonic": "Think 'transfer' (carry across) or 'ferry' (carry people)"
+      "mnemonic": "Think 'transfer' (carry across) or 'ferry' (carry people)",
+      "thematic_cluster": "Movement",
+      "sat_tier": "Tier 1 High-Yield"
     },
     "words": [
       {
@@ -356,7 +368,7 @@
       {
         "word": "infer",
         "prefix": "in- (into)",
-        "suffix": "-fer (bring)",
+        "suffix": "",
         "definition": "To deduce or conclude information from evidence and reasoning rather than explicit statements.",
         "sat_sentence": "From the tone of her voice, we could easily infer that she was unimpressed.",
         "connotation": "neutral"
@@ -364,7 +376,7 @@
       {
         "word": "confer",
         "prefix": "con- (together)",
-        "suffix": "-fer (bring)",
+        "suffix": "",
         "definition": "To grant or bestow a title or honor; to consult together and compare opinions.",
         "sat_sentence": "The university decided to confer an honorary doctorate on the civil rights activist.",
         "connotation": "positive"
@@ -400,13 +412,15 @@
       "morpheme": "pel / puls",
       "language": "Latin",
       "core_meaning": "to drive, push, urge",
-      "mnemonic": "Think 'propel' (push forward) or 'impulse' (inner drive)"
+      "mnemonic": "Think 'propel' (push forward) or 'impulse' (inner drive)",
+      "thematic_cluster": "Movement",
+      "sat_tier": "Tier 1 High-Yield"
     },
     "words": [
       {
         "word": "compel",
         "prefix": "com- (intensely)",
-        "suffix": "-el (drive)",
+        "suffix": "",
         "definition": "To force or oblige someone to do something; to bring about by effort.",
         "sat_sentence": "A subpoena will compel the witness to testify before the grand jury.",
         "connotation": "neutral"
@@ -414,7 +428,7 @@
       {
         "word": "dispel",
         "prefix": "dis- (apart, away)",
-        "suffix": "-el (drive)",
+        "suffix": "",
         "definition": "To make a doubt, feeling, or belief disappear; to drive away.",
         "sat_sentence": "The scientific paper helped dispel lingering myths about vaccine side effects.",
         "connotation": "positive"
@@ -422,7 +436,7 @@
       {
         "word": "expel",
         "prefix": "ex- (out)",
-        "suffix": "-el (drive)",
+        "suffix": "",
         "definition": "To force someone to leave an organization or place; to discharge.",
         "sat_sentence": "The board voted to expel the member for violating ethical bylaws.",
         "connotation": "negative"
@@ -430,7 +444,7 @@
       {
         "word": "impel",
         "prefix": "im- (into, upon)",
-        "suffix": "-el (drive)",
+        "suffix": "",
         "definition": "To drive, force, or urge someone forward to do something.",
         "sat_sentence": "A sense of duty impelled the officer to return to the burning building.",
         "connotation": "positive"
@@ -438,7 +452,7 @@
       {
         "word": "repel",
         "prefix": "re- (back)",
-        "suffix": "-el (drive)",
+        "suffix": "",
         "definition": "To drive or force back an attacker or intruder; to cause aversion.",
         "sat_sentence": "The castle garrison managed to repel the siege forces with heavy artillery.",
         "connotation": "neutral"
@@ -466,13 +480,15 @@
       "morpheme": "jac / ject",
       "language": "Latin",
       "core_meaning": "to throw, cast, hurl",
-      "mnemonic": "Think 'eject' (throw out) or 'projectile' (hurled object)"
+      "mnemonic": "Think 'eject' (throw out) or 'projectile' (hurled object)",
+      "thematic_cluster": "Movement",
+      "sat_tier": "Tier 1 High-Yield"
     },
     "words": [
       {
         "word": "abject",
         "prefix": "ab- (away, down)",
-        "suffix": "-ject (thrown)",
+        "suffix": "",
         "definition": "Experienced or present to the maximum degree, especially of something bad; utterly hopeless.",
         "sat_sentence": "The displaced refugees were living in conditions of abject misery and squalor.",
         "connotation": "negative"
@@ -480,7 +496,7 @@
       {
         "word": "deject",
         "prefix": "de- (down)",
-        "suffix": "-ject (throw)",
+        "suffix": "",
         "definition": "To make sad or dispirited; to depress.",
         "sat_sentence": "The continual rejection letters did not deject the young novelist for long.",
         "connotation": "negative"
@@ -488,7 +504,7 @@
       {
         "word": "interject",
         "prefix": "inter- (between)",
-        "suffix": "-ject (throw)",
+        "suffix": "",
         "definition": "To throw in a remark or statement abruptly between other remarks.",
         "sat_sentence": "She managed to interject a clarifying question before the presenter moved to the next slide.",
         "connotation": "neutral"
@@ -532,7 +548,9 @@
       "morpheme": "pugn / pug",
       "language": "Latin",
       "core_meaning": "to fight, fist, combat",
-      "mnemonic": "Think 'pugilist' (boxer) or 'pugnacious' (ready to fight)"
+      "mnemonic": "Think 'pugilist' (boxer) or 'pugnacious' (ready to fight)",
+      "thematic_cluster": "Power & Conflict",
+      "sat_tier": "Tier 2 Multipliers"
     },
     "words": [
       {
@@ -554,7 +572,7 @@
       {
         "word": "impugn",
         "prefix": "im- (against)",
-        "suffix": "-ugn (fight)",
+        "suffix": "",
         "definition": "To dispute the truth, validity, or honesty of a statement or motive.",
         "sat_sentence": "The political advertisement sought to impugn the incumbent's military service record.",
         "connotation": "negative"
@@ -598,7 +616,9 @@
       "morpheme": "bell / belli",
       "language": "Latin",
       "core_meaning": "war, fighting, hostility",
-      "mnemonic": "Think 'belligerent' (warlike) or 'antebellum' (before the war)"
+      "mnemonic": "Think 'belligerent' (warlike) or 'antebellum' (before the war)",
+      "thematic_cluster": "Power & Conflict",
+      "sat_tier": "Tier 2 Multipliers"
     },
     "words": [
       {
@@ -620,7 +640,7 @@
       {
         "word": "antebellum",
         "prefix": "ante- (before)",
-        "suffix": "-bellum (war)",
+        "suffix": "",
         "definition": "Occurring or existing before a particular war, especially the American Civil War.",
         "sat_sentence": "Scholars studied the complex agrarian economy of the antebellum American South.",
         "connotation": "neutral"
@@ -636,7 +656,7 @@
       {
         "word": "rebel",
         "prefix": "re- (against)",
-        "suffix": "-el (war)",
+        "suffix": "",
         "definition": "To rise in opposition or armed resistance against an established authority.",
         "sat_sentence": "Teenagers often rebel against strict parental curfews to establish independence.",
         "connotation": "neutral"
@@ -644,7 +664,7 @@
       {
         "word": "postbellum",
         "prefix": "post- (after)",
-        "suffix": "-bellum (war)",
+        "suffix": "",
         "definition": "Occurring or existing after a war, especially the American Civil War.",
         "sat_sentence": "Postbellum reconstruction faced fierce political resistance throughout the devastated region.",
         "connotation": "neutral"
@@ -664,13 +684,15 @@
       "morpheme": "rupt",
       "language": "Latin",
       "core_meaning": "to break, burst, shatter",
-      "mnemonic": "Think 'rupture' (burst) or 'interrupt' (break between)"
+      "mnemonic": "Think 'rupture' (burst) or 'interrupt' (break between)",
+      "thematic_cluster": "Power & Conflict",
+      "sat_tier": "Tier 2 Multipliers"
     },
     "words": [
       {
         "word": "abrupt",
         "prefix": "ab- (away, off)",
-        "suffix": "-rupt (broken)",
+        "suffix": "",
         "definition": "Sudden and unexpected; brief to the point of rudeness.",
         "sat_sentence": "The CEO's abrupt resignation sparked rumors of financial impropriety.",
         "connotation": "neutral"
@@ -678,7 +700,7 @@
       {
         "word": "disrupt",
         "prefix": "dis- (apart)",
-        "suffix": "-rupt (break)",
+        "suffix": "",
         "definition": "To interrupt an event, activity, or process by causing a disturbance or problem.",
         "sat_sentence": "Power outages disrupted train services across the metropolitan area.",
         "connotation": "negative"
@@ -686,7 +708,7 @@
       {
         "word": "erupt",
         "prefix": "e- (out)",
-        "suffix": "-rupt (break)",
+        "suffix": "",
         "definition": "To break out suddenly and dramatically; to eject lava, rock, or steam.",
         "sat_sentence": "Protests erupted in the capital after the disputed election results were certified.",
         "connotation": "neutral"
@@ -694,7 +716,7 @@
       {
         "word": "interrupt",
         "prefix": "inter- (between)",
-        "suffix": "-rupt (break)",
+        "suffix": "",
         "definition": "To stop the continuous progress of an activity or speech.",
         "sat_sentence": "Please do not interrupt the witness while she is giving her testimony.",
         "connotation": "negative"
@@ -702,7 +724,7 @@
       {
         "word": "bankrupt",
         "prefix": "bank- (bench/counter)",
-        "suffix": "-rupt (broken)",
+        "suffix": "",
         "definition": "Declared in law unable to pay debts; depleted of valuable qualities.",
         "sat_sentence": "The airline went bankrupt following months of soaring fuel costs and grounded fleets.",
         "connotation": "negative"
@@ -710,7 +732,7 @@
       {
         "word": "corrupt",
         "prefix": "cor- (completely)",
-        "suffix": "-rupt (broken)",
+        "suffix": "",
         "definition": "Having or showing a willingness to act dishonestly in return for money or personal gain.",
         "sat_sentence": "Investigative journalists exposed the corrupt procurement practices inside City Hall.",
         "connotation": "negative"
@@ -730,13 +752,15 @@
       "morpheme": "tort / tors",
       "language": "Latin",
       "core_meaning": "to twist, wind, bend",
-      "mnemonic": "Think 'contort' (twist together) or 'torture' (twisting pain)"
+      "mnemonic": "Think 'contort' (twist together) or 'torture' (twisting pain)",
+      "thematic_cluster": "Form & Nature",
+      "sat_tier": "Tier 2 Multipliers"
     },
     "words": [
       {
         "word": "distort",
         "prefix": "dis- (apart, away)",
-        "suffix": "-tort (twist)",
+        "suffix": "",
         "definition": "To pull or twist out of shape; to misrepresent facts or reality.",
         "sat_sentence": "Partisan media outlets often distort statistics to fit their predetermined narratives.",
         "connotation": "negative"
@@ -744,7 +768,7 @@
       {
         "word": "contort",
         "prefix": "con- (together)",
-        "suffix": "-tort (twist)",
+        "suffix": "",
         "definition": "To twist or bend out of the normal or natural shape.",
         "sat_sentence": "His face contorted in agony as the cramp seized his hamstring.",
         "connotation": "negative"
@@ -752,7 +776,7 @@
       {
         "word": "extort",
         "prefix": "ex- (out)",
-        "suffix": "-tort (twist)",
+        "suffix": "",
         "definition": "To obtain something by force, threats, or other unfair means.",
         "sat_sentence": "Criminal syndicates used blackmail to extort millions from wealthy restaurateurs.",
         "connotation": "negative"
@@ -760,7 +784,7 @@
       {
         "word": "retort",
         "prefix": "re- (back)",
-        "suffix": "-tort (twist)",
+        "suffix": "",
         "definition": "To answer a remark or accusation, typically in a sharp, witty, or incisive manner.",
         "sat_sentence": "'Experience is what you get when you don't get what you wanted,' she retorted.",
         "connotation": "neutral"
@@ -796,7 +820,9 @@
       "morpheme": "fract / frag",
       "language": "Latin",
       "core_meaning": "to break, shatter, split",
-      "mnemonic": "Think 'fracture' (bone break) or 'fragment' (broken piece)"
+      "mnemonic": "Think 'fracture' (bone break) or 'fragment' (broken piece)",
+      "thematic_cluster": "Form & Nature",
+      "sat_tier": "Tier 2 Multipliers"
     },
     "words": [
       {
@@ -862,13 +888,15 @@
       "morpheme": "sec / sect / seg",
       "language": "Latin",
       "core_meaning": "to cut, divide, slice",
-      "mnemonic": "Think 'dissect' (cut apart) or 'segment' (cut slice)"
+      "mnemonic": "Think 'dissect' (cut apart) or 'segment' (cut slice)",
+      "thematic_cluster": "Form & Nature",
+      "sat_tier": "Tier 2 Multipliers"
     },
     "words": [
       {
         "word": "dissect",
         "prefix": "dis- (apart)",
-        "suffix": "-sect (cut)",
+        "suffix": "",
         "definition": "To cut apart or analyze down to the smallest component parts.",
         "sat_sentence": "Literary critics thoroughly dissected the symbolism in the poet's final collection.",
         "connotation": "neutral"
@@ -876,7 +904,7 @@
       {
         "word": "intersect",
         "prefix": "inter- (between)",
-        "suffix": "-sect (cut)",
+        "suffix": "",
         "definition": "To divide by passing through or across; to cross at a point.",
         "sat_sentence": "The two commuter rail lines intersect beneath the central plaza.",
         "connotation": "neutral"
@@ -884,7 +912,7 @@
       {
         "word": "transect",
         "prefix": "trans- (across)",
-        "suffix": "-sect (cut)",
+        "suffix": "",
         "definition": "To cut or divide something transversely across an area.",
         "sat_sentence": "Ecologists established a survey line that transected three distinct forest zones.",
         "connotation": "neutral"
@@ -892,7 +920,7 @@
       {
         "word": "bisect",
         "prefix": "bi- (two)",
-        "suffix": "-sect (cut)",
+        "suffix": "",
         "definition": "To divide into two equal or nearly equal parts.",
         "sat_sentence": "A newly paved interstate highway bisected the rural farming community.",
         "connotation": "neutral"
@@ -928,13 +956,15 @@
       "morpheme": "mit / miss",
       "language": "Latin",
       "core_meaning": "to send, let go, discharge",
-      "mnemonic": "Think 'transmit' (send across) or 'mission' (sent task)"
+      "mnemonic": "Think 'transmit' (send across) or 'mission' (sent task)",
+      "thematic_cluster": "Movement",
+      "sat_tier": "Tier 1 High-Yield"
     },
     "words": [
       {
         "word": "transmit",
         "prefix": "trans- (across)",
-        "suffix": "-mit (send)",
+        "suffix": "",
         "definition": "To pass or cause something to pass from one person or place to another.",
         "sat_sentence": "Optical fiber cables transmit immense volumes of digital data at light speed.",
         "connotation": "neutral"
@@ -942,7 +972,7 @@
       {
         "word": "remiss",
         "prefix": "re- (back, slack)",
-        "suffix": "-miss (let go)",
+        "suffix": "",
         "definition": "Lacking care or attention to duty; negligent.",
         "sat_sentence": "The inspector would be remiss if he failed to note the severe corrosion in the boiler.",
         "connotation": "negative"
@@ -974,7 +1004,7 @@
       {
         "word": "premise",
         "prefix": "pre- (before)",
-        "suffix": "-mise (sent, put)",
+        "suffix": "",
         "definition": "A previous statement or proposition from which another is inferred or follows as a conclusion.",
         "sat_sentence": "His conclusion collapses if you disprove the fundamental premise of his argument.",
         "connotation": "neutral"
@@ -994,7 +1024,9 @@
       "morpheme": "ven / vent",
       "language": "Latin",
       "core_meaning": "to come, arrive",
-      "mnemonic": "Think 'convene' (come together) or 'advent' (arrival)"
+      "mnemonic": "Think 'convene' (come together) or 'advent' (arrival)",
+      "thematic_cluster": "Movement",
+      "sat_tier": "Tier 1 High-Yield"
     },
     "words": [
       {
@@ -1008,7 +1040,7 @@
       {
         "word": "circumvent",
         "prefix": "circum- (around)",
-        "suffix": "-vent (come)",
+        "suffix": "",
         "definition": "To find a way around an obstacle or rule, often through clever evasion.",
         "sat_sentence": "Clever offshore accounts allowed the firm to circumvent domestic corporate taxes.",
         "connotation": "negative"
@@ -1024,7 +1056,7 @@
       {
         "word": "advent",
         "prefix": "ad- (to, toward)",
-        "suffix": "-vent (come)",
+        "suffix": "",
         "definition": "The arrival of a notable person, thing, or event.",
         "sat_sentence": "The advent of mRNA vaccines transformed modern immunological therapeutics.",
         "connotation": "positive"
@@ -1060,7 +1092,9 @@
       "morpheme": "vad / vas",
       "language": "Latin",
       "core_meaning": "to go, walk, rush",
-      "mnemonic": "Think 'evade' (go away from) or 'invade' (rush into)"
+      "mnemonic": "Think 'evade' (go away from) or 'invade' (rush into)",
+      "thematic_cluster": "Movement",
+      "sat_tier": "Tier 2 Multipliers"
     },
     "words": [
       {
@@ -1126,7 +1160,9 @@
       "morpheme": "flu / flux",
       "language": "Latin",
       "core_meaning": "to flow, glide, stream",
-      "mnemonic": "Think 'fluid' or 'influx' (flowing in)"
+      "mnemonic": "Think 'fluid' or 'influx' (flowing in)",
+      "thematic_cluster": "Movement",
+      "sat_tier": "Tier 1 High-Yield"
     },
     "words": [
       {
@@ -1172,7 +1208,7 @@
       {
         "word": "influx",
         "prefix": "in- (into)",
-        "suffix": "-flux (flow)",
+        "suffix": "",
         "definition": "An arrival or entry of large numbers of people or things.",
         "sat_sentence": "The sudden influx of tourism energized the mountain town's winter economy.",
         "connotation": "positive"
@@ -1192,7 +1228,9 @@
       "morpheme": "fus / fund",
       "language": "Latin",
       "core_meaning": "to pour, melt, spread",
-      "mnemonic": "Think 'diffuse' (pour out) or 'fusion' (melting together)"
+      "mnemonic": "Think 'diffuse' (pour out) or 'fusion' (melting together)",
+      "thematic_cluster": "Form & Nature",
+      "sat_tier": "Tier 2 Multipliers"
     },
     "words": [
       {
@@ -1258,7 +1296,9 @@
       "morpheme": "cid / cis",
       "language": "Latin",
       "core_meaning": "to cut, kill, sever",
-      "mnemonic": "Think 'incision' (surgical cut) or 'homicide' (killing)"
+      "mnemonic": "Think 'incision' (surgical cut) or 'homicide' (killing)",
+      "thematic_cluster": "Form & Nature",
+      "sat_tier": "Tier 2 Multipliers"
     },
     "words": [
       {
@@ -1296,7 +1336,7 @@
       {
         "word": "fratricide",
         "prefix": "fratri- (brother)",
-        "suffix": "-cide (killing)",
+        "suffix": "",
         "definition": "The crime of killing one's own brother; the accidental killing of friendly troops.",
         "sat_sentence": "The civil war turned neighbors against one another in a tragedy of national fratricide.",
         "connotation": "negative"
@@ -1304,7 +1344,7 @@
       {
         "word": "homicide",
         "prefix": "homi- (human)",
-        "suffix": "-cide (killing)",
+        "suffix": "",
         "definition": "The deliberate and unlawful killing of one human being by another.",
         "sat_sentence": "Detectives were dispatched to investigate the suspicious homicide downtown.",
         "connotation": "negative"
@@ -1312,7 +1352,7 @@
       {
         "word": "suicidal",
         "prefix": "sui- (of oneself)",
-        "suffix": "-cidal (killing)",
+        "suffix": "-al (adjective)",
         "definition": "Deeply self-destructive; likely to lead to one's own demise.",
         "sat_sentence": "Launching a naval assault without air cover was deemed suicidal by the admirals.",
         "connotation": "negative"
@@ -1324,13 +1364,15 @@
       "morpheme": "scend / scent",
       "language": "Latin",
       "core_meaning": "to climb, leap, mount",
-      "mnemonic": "Think 'ascend' (climb up) or 'descend' (climb down)"
+      "mnemonic": "Think 'ascend' (climb up) or 'descend' (climb down)",
+      "thematic_cluster": "Movement",
+      "sat_tier": "Tier 2 Multipliers"
     },
     "words": [
       {
         "word": "ascend",
         "prefix": "ad- (to, upward)",
-        "suffix": "-scend (climb)",
+        "suffix": "",
         "definition": "To go up or climb; to rise through the air.",
         "sat_sentence": "The hot air balloon began to ascend gently into the cloudless dawn sky.",
         "connotation": "positive"
@@ -1338,7 +1380,7 @@
       {
         "word": "descend",
         "prefix": "de- (down)",
-        "suffix": "-scend (climb)",
+        "suffix": "",
         "definition": "To move or fall downward; to pass by inheritance.",
         "sat_sentence": "The trail descends rapidly from the ridge into a sheltered pine valley.",
         "connotation": "neutral"
@@ -1346,7 +1388,7 @@
       {
         "word": "condescend",
         "prefix": "con- (together) + de- (down)",
-        "suffix": "-scend (climb)",
+        "suffix": "",
         "definition": "To show feelings of superiority; to patronize.",
         "sat_sentence": "Do not condescend to your audience by oversimplifying nuanced concepts.",
         "connotation": "negative"
@@ -1390,7 +1432,9 @@
       "morpheme": "cliv / clin",
       "language": "Latin",
       "core_meaning": "to slope, lean, incline",
-      "mnemonic": "Think 'incline' (slope up) or 'recline' (lean back)"
+      "mnemonic": "Think 'incline' (slope up) or 'recline' (lean back)",
+      "thematic_cluster": "Movement",
+      "sat_tier": "Tier 2 Multipliers"
     },
     "words": [
       {
@@ -1456,7 +1500,9 @@
       "morpheme": "vert / vers",
       "language": "Latin",
       "core_meaning": "to turn, reverse, alter",
-      "mnemonic": "Think 'reverse' (turn back) or 'convert' (turn around)"
+      "mnemonic": "Think 'reverse' (turn back) or 'convert' (turn around)",
+      "thematic_cluster": "Movement",
+      "sat_tier": "Tier 1 High-Yield"
     },
     "words": [
       {
@@ -1470,7 +1516,7 @@
       {
         "word": "avert",
         "prefix": "ab- (away from)",
-        "suffix": "-ert (turn)",
+        "suffix": "",
         "definition": "To turn away one's eyes or thoughts; to prevent or ward off an undesirable occurrence.",
         "sat_sentence": "Swift intervention by central bankers helped avert a complete liquidity collapse.",
         "connotation": "positive"
@@ -1478,7 +1524,7 @@
       {
         "word": "subvert",
         "prefix": "sub- (under)",
-        "suffix": "-ert (turn)",
+        "suffix": "",
         "definition": "To undermine the power and authority of an established system or institution.",
         "sat_sentence": "Authoritarian regimes accused foreign NGOs of trying to subvert state elections.",
         "connotation": "negative"
@@ -1510,7 +1556,7 @@
       {
         "word": "revert",
         "prefix": "re- (back)",
-        "suffix": "-ert (turn)",
+        "suffix": "",
         "definition": "To return to a previous state, condition, practice, or topic.",
         "sat_sentence": "When the supervisor left the room, the workers reverted to their idle conversation.",
         "connotation": "neutral"
@@ -1522,7 +1568,9 @@
       "morpheme": "err",
       "language": "Latin",
       "core_meaning": "to wander, stray, make a mistake",
-      "mnemonic": "Think 'error' (mistake) or 'erratic' (wandering unpredictably)"
+      "mnemonic": "Think 'error' (mistake) or 'erratic' (wandering unpredictably)",
+      "thematic_cluster": "Movement",
+      "sat_tier": "Tier 2 Multipliers"
     },
     "words": [
       {
@@ -1588,7 +1636,9 @@
       "morpheme": "her / hes",
       "language": "Latin",
       "core_meaning": "to stick, cling, adhere",
-      "mnemonic": "Think 'adhesive' (sticking) or 'coherent' (sticking together)"
+      "mnemonic": "Think 'adhesive' (sticking) or 'coherent' (sticking together)",
+      "thematic_cluster": "Quantity & Relation",
+      "sat_tier": "Tier 2 Multipliers"
     },
     "words": [
       {
@@ -1654,7 +1704,9 @@
       "morpheme": "string / strict",
       "language": "Latin",
       "core_meaning": "to bind, draw tight, compress",
-      "mnemonic": "Think 'strict' (tight rule) or 'constrict' (tighten together)"
+      "mnemonic": "Think 'strict' (tight rule) or 'constrict' (tighten together)",
+      "thematic_cluster": "Quantity & Relation",
+      "sat_tier": "Tier 2 Multipliers"
     },
     "words": [
       {
@@ -1676,7 +1728,7 @@
       {
         "word": "constrict",
         "prefix": "con- (together)",
-        "suffix": "-strict (tight)",
+        "suffix": "",
         "definition": "To make narrower, smaller, or tighter by squeezing or binding.",
         "sat_sentence": "Cold temperatures cause blood vessels near the skin to constrict to conserve heat.",
         "connotation": "neutral"
@@ -1684,7 +1736,7 @@
       {
         "word": "restrict",
         "prefix": "re- (back, tight)",
-        "suffix": "-strict (bind)",
+        "suffix": "",
         "definition": "To put a limit on; to keep under control.",
         "sat_sentence": "Drought ordinances restrict lawn watering to two days per week.",
         "connotation": "neutral"
@@ -1720,13 +1772,15 @@
       "morpheme": "pend / pens",
       "language": "Latin",
       "core_meaning": "to hang, weigh, pay",
-      "mnemonic": "Think 'pendant' (hanging jewel) or 'suspend' (hang under)"
+      "mnemonic": "Think 'pendant' (hanging jewel) or 'suspend' (hang under)",
+      "thematic_cluster": "Quantity & Relation",
+      "sat_tier": "Tier 2 Multipliers"
     },
     "words": [
       {
         "word": "append",
         "prefix": "ad- (to, onto)",
-        "suffix": "-end (hang)",
+        "suffix": "",
         "definition": "To add as an attachment or supplement to something.",
         "sat_sentence": "Please append your resume and three letters of reference to the application.",
         "connotation": "neutral"
@@ -1734,7 +1788,7 @@
       {
         "word": "suspend",
         "prefix": "sub- (under)",
-        "suffix": "-end (hang)",
+        "suffix": "",
         "definition": "To hang something from somewhere; to temporarily halt an operation or privilege.",
         "sat_sentence": "The airline decided to suspend all transatlantic flights pending safety inspections.",
         "connotation": "neutral"
@@ -1750,7 +1804,7 @@
       {
         "word": "impend",
         "prefix": "in- (upon, over)",
-        "suffix": "-end (hang)",
+        "suffix": "",
         "definition": "To be about to happen; to hang threateningly over.",
         "sat_sentence": "Dark thunderclouds impended over the valley as campers scrambled to pack their tents.",
         "connotation": "negative"
@@ -1786,13 +1840,15 @@
       "morpheme": "tend / tens / tent",
       "language": "Latin",
       "core_meaning": "to stretch, aim, strain",
-      "mnemonic": "Think 'tension' (stretched tight) or 'extend' (stretch out)"
+      "mnemonic": "Think 'tension' (stretched tight) or 'extend' (stretch out)",
+      "thematic_cluster": "Quantity & Relation",
+      "sat_tier": "Tier 2 Multipliers"
     },
     "words": [
       {
         "word": "contend",
         "prefix": "con- (together)",
-        "suffix": "-end (strain, strive)",
+        "suffix": "",
         "definition": "To struggle to surmount a difficulty; to assert something as a position in an argument.",
         "sat_sentence": "Economists contend that lowering tariffs will bolster long-term consumer welfare.",
         "connotation": "neutral"
@@ -1800,7 +1856,7 @@
       {
         "word": "distend",
         "prefix": "dis- (apart)",
-        "suffix": "-end (stretch)",
+        "suffix": "",
         "definition": "To swell or cause to swell by pressure from inside.",
         "sat_sentence": "Starvation caused the malnourished children's abdomens to distend noticeably.",
         "connotation": "negative"
@@ -1808,7 +1864,7 @@
       {
         "word": "portend",
         "prefix": "pro- (forth, forward)",
-        "suffix": "-end (stretch/indicate)",
+        "suffix": "",
         "definition": "To be a sign or warning that something momentous or calamitous is likely to happen.",
         "sat_sentence": "In ancient times, eclipses were thought to portend the downfall of emperors.",
         "connotation": "negative"
@@ -1852,7 +1908,9 @@
       "morpheme": "sta / sist / stit",
       "language": "Latin",
       "core_meaning": "to stand, halt, set firmly",
-      "mnemonic": "Think 'stationary' (standing still) or 'resist' (stand against)"
+      "mnemonic": "Think 'stationary' (standing still) or 'resist' (stand against)",
+      "thematic_cluster": "Quantity & Relation",
+      "sat_tier": "Tier 1 High-Yield"
     },
     "words": [
       {
@@ -1882,7 +1940,7 @@
       {
         "word": "persist",
         "prefix": "per- (through)",
-        "suffix": "-sist (stand)",
+        "suffix": "",
         "definition": "To continue firmly or obstinately in an opinion or course of action in spite of difficulty.",
         "sat_sentence": "If symptoms persist for more than three days, consult a physician immediately.",
         "connotation": "neutral"
@@ -1918,7 +1976,9 @@
       "morpheme": "kin / kinet",
       "language": "Greek",
       "core_meaning": "movement, motion, speed",
-      "mnemonic": "Think 'kinetic' energy (energy of motion) or 'cinema' (moving pictures)"
+      "mnemonic": "Think 'kinetic' energy (energy of motion) or 'cinema' (moving pictures)",
+      "thematic_cluster": "Movement",
+      "sat_tier": "Tier 2 Multipliers"
     },
     "words": [
       {
@@ -1940,7 +2000,7 @@
       {
         "word": "telekinesis",
         "prefix": "tele- (far off)",
-        "suffix": "-kinesis (movement)",
+        "suffix": "",
         "definition": "The supposed ability to move objects at a distance by mental power alone.",
         "sat_sentence": "Science fiction novels frequently feature protagonists gifted with telekinesis.",
         "connotation": "neutral"
@@ -1964,7 +2024,7 @@
       {
         "word": "dyskinesia",
         "prefix": "dys- (bad, impaired)",
-        "suffix": "-kinesia (movement)",
+        "suffix": "",
         "definition": "Abnormality or impairment of voluntary muscle movement.",
         "sat_sentence": "Long-term antipsychotic medication can occasionally trigger tardive dyskinesia.",
         "connotation": "negative"
@@ -1972,7 +2032,7 @@
       {
         "word": "hyperkinetic",
         "prefix": "hyper- (excessive)",
-        "suffix": "-kinetic (moving)",
+        "suffix": "-ic (adjective)",
         "definition": "Characterized by fast-paced, frenetic, or uncontrollable movement.",
         "sat_sentence": "The action movie featured hyperkinetic editing that left some audience members dizzy.",
         "connotation": "neutral"
@@ -1984,13 +2044,15 @@
       "morpheme": "stroph",
       "language": "Greek",
       "core_meaning": "to turn, twist, bend",
-      "mnemonic": "Think 'catastrophe' (a downturn) or 'apostrophe' (turning away)"
+      "mnemonic": "Think 'catastrophe' (a downturn) or 'apostrophe' (turning away)",
+      "thematic_cluster": "Movement",
+      "sat_tier": "Tier 3 Advanced"
     },
     "words": [
       {
         "word": "catastrophe",
         "prefix": "kata- (down)",
-        "suffix": "-strophe (turning)",
+        "suffix": "",
         "definition": "An event causing great and often sudden damage or suffering; a disaster.",
         "sat_sentence": "The oil spill was an environmental catastrophe that devastated coastal ecosystems.",
         "connotation": "negative"
@@ -1998,7 +2060,7 @@
       {
         "word": "apostrophe",
         "prefix": "apo- (away from)",
-        "suffix": "-strophe (turning)",
+        "suffix": "",
         "definition": "A punctuation mark; an exclamatory rhetorical address to a personified object or absent person.",
         "sat_sentence": "The poet employed apostrophe, turning directly to address 'O Death' in the final stanza.",
         "connotation": "neutral"
@@ -2006,7 +2068,7 @@
       {
         "word": "antistrophe",
         "prefix": "anti- (against, opposite)",
-        "suffix": "-strophe (turning)",
+        "suffix": "",
         "definition": "The second section of an ancient Greek choral ode, chanted while moving west to east.",
         "sat_sentence": "The tragic chorus replied with an antistrophe mirroring the meter of the first ode.",
         "connotation": "neutral"
@@ -2014,7 +2076,7 @@
       {
         "word": "epistrophe",
         "prefix": "epi- (upon, after)",
-        "suffix": "-strophe (turning)",
+        "suffix": "",
         "definition": "The repetition of a word at the end of successive clauses or sentences.",
         "sat_sentence": "Lincoln's phrase 'of the people, by the people, for the people' is a famed epistrophe.",
         "connotation": "positive"
@@ -2038,7 +2100,7 @@
       {
         "word": "anastrophe",
         "prefix": "ana- (back, upside down)",
-        "suffix": "-strophe (turn)",
+        "suffix": "",
         "definition": "The inversion of the usual order of words or clauses.",
         "sat_sentence": "Yoda's speech pattern is famous for using anastrophe, such as 'Told you, I did.'",
         "connotation": "neutral"
@@ -2050,7 +2112,9 @@
       "morpheme": "agon",
       "language": "Greek",
       "core_meaning": "contest, struggle, trial",
-      "mnemonic": "Think 'agony' (pain of struggle) or 'antagonist' (struggler against)"
+      "mnemonic": "Think 'agony' (pain of struggle) or 'antagonist' (struggler against)",
+      "thematic_cluster": "Power & Conflict",
+      "sat_tier": "Tier 3 Advanced"
     },
     "words": [
       {
@@ -2072,7 +2136,7 @@
       {
         "word": "antagonist",
         "prefix": "anti- (against)",
-        "suffix": "-agonist (struggler)",
+        "suffix": "-ist (noun)",
         "definition": "A person who actively opposes or is hostile to someone or something; an adversary.",
         "sat_sentence": "Iago serves as the cunning antagonist who manipulates Othello's insecurities.",
         "connotation": "negative"
@@ -2080,7 +2144,7 @@
       {
         "word": "protagonist",
         "prefix": "protos- (first)",
-        "suffix": "-agonist (struggler)",
+        "suffix": "-ist (noun)",
         "definition": "The leading character or one of the major characters in a drama, movie, or novel.",
         "sat_sentence": "The novel's protagonist grapples with moral dilemmas in wartime London.",
         "connotation": "positive"
@@ -2116,7 +2180,9 @@
       "morpheme": "polem",
       "language": "Greek",
       "core_meaning": "war, dispute, hostility",
-      "mnemonic": "Think 'polemic' (war of words) or 'polemical' (argumentative)"
+      "mnemonic": "Think 'polemic' (war of words) or 'polemical' (argumentative)",
+      "thematic_cluster": "Power & Conflict",
+      "sat_tier": "Tier 3 Advanced"
     },
     "words": [
       {
@@ -2182,13 +2248,15 @@
       "morpheme": "ball / bol",
       "language": "Greek",
       "core_meaning": "to throw, cast, put",
-      "mnemonic": "Think 'ballistic' (thrown through air) or 'symbol' (thrown together)"
+      "mnemonic": "Think 'ballistic' (thrown through air) or 'symbol' (thrown together)",
+      "thematic_cluster": "Movement",
+      "sat_tier": "Tier 2 Multipliers"
     },
     "words": [
       {
         "word": "symbol",
         "prefix": "syn- (together)",
-        "suffix": "-bol (throw)",
+        "suffix": "",
         "definition": "A thing that represents or stands for something else, especially an abstract concept.",
         "sat_sentence": "The olive branch has endured for centuries as an international symbol of peace.",
         "connotation": "positive"
@@ -2212,7 +2280,7 @@
       {
         "word": "hyperbole",
         "prefix": "hyper- (beyond, over)",
-        "suffix": "-bole (throw)",
+        "suffix": "",
         "definition": "Exaggerated statements or claims not meant to be taken literally.",
         "sat_sentence": "To say that the movie was the worst ever made is mere hyperbole.",
         "connotation": "negative"
@@ -2220,7 +2288,7 @@
       {
         "word": "metabolic",
         "prefix": "meta- (change)",
-        "suffix": "-bolic (throwing)",
+        "suffix": "-ic (adjective)",
         "definition": "Relating to the chemical processes occurring within a living organism to maintain life.",
         "sat_sentence": "Thyroid disorders can disrupt metabolic rate, leading to sudden weight fluctuations.",
         "connotation": "neutral"
@@ -2248,7 +2316,9 @@
       "morpheme": "tach / tachy",
       "language": "Greek",
       "core_meaning": "swift, rapid, fast",
-      "mnemonic": "Think 'tachometer' (measures rapid engine revs)"
+      "mnemonic": "Think 'tachometer' (measures rapid engine revs)",
+      "thematic_cluster": "Movement",
+      "sat_tier": "Tier 3 Advanced"
     },
     "words": [
       {
@@ -2314,7 +2384,9 @@
       "morpheme": "cogn / gnos",
       "language": "Latin",
       "core_meaning": "to know, recognize, learn",
-      "mnemonic": "Think 'cognition' (mental processing) or 'diagnosis' (knowing through symptoms)"
+      "mnemonic": "Think 'cognition' (mental processing) or 'diagnosis' (knowing through symptoms)",
+      "thematic_cluster": "Cognition",
+      "sat_tier": "Tier 1 High-Yield"
     },
     "words": [
       {
@@ -2336,7 +2408,7 @@
       {
         "word": "prognosis",
         "prefix": "pro- (before)",
-        "suffix": "-gnosis (knowledge)",
+        "suffix": "",
         "definition": "A forecast of the likely course of a disease or situation.",
         "sat_sentence": "Because the tumor was caught early, the patient's prognosis was exceptionally positive.",
         "connotation": "positive"
@@ -2344,7 +2416,7 @@
       {
         "word": "agnostic",
         "prefix": "a- (without)",
-        "suffix": "-gnostic (knowledge)",
+        "suffix": "",
         "definition": "Believing that nothing is known or can be known of the existence or nature of God.",
         "sat_sentence": "Regarding the true origins of the cosmos, he remained an agnostic philosopher.",
         "connotation": "neutral"
@@ -2360,7 +2432,7 @@
       {
         "word": "diagnosis",
         "prefix": "dia- (through)",
-        "suffix": "-gnosis (knowledge)",
+        "suffix": "",
         "definition": "The identification of the nature of an illness or other problem by examination.",
         "sat_sentence": "The mechanic reached an accurate diagnosis after running computerized engine diagnostics.",
         "connotation": "neutral"
@@ -2380,13 +2452,15 @@
       "morpheme": "sci",
       "language": "Latin",
       "core_meaning": "to know, understand",
-      "mnemonic": "Think 'science' (knowledge) or 'conscious' (knowing within)"
+      "mnemonic": "Think 'science' (knowledge) or 'conscious' (knowing within)",
+      "thematic_cluster": "Cognition",
+      "sat_tier": "Tier 1 High-Yield"
     },
     "words": [
       {
         "word": "omniscient",
         "prefix": "omni- (all)",
-        "suffix": "-scient (knowing)",
+        "suffix": "-ent (adjective)",
         "definition": "Knowing everything; having infinite awareness, understanding, and insight.",
         "sat_sentence": "The novel is narrated from a third-person omniscient perspective that reveals every character's inner thoughts.",
         "connotation": "neutral"
@@ -2394,7 +2468,7 @@
       {
         "word": "prescient",
         "prefix": "pre- (before)",
-        "suffix": "-scient (knowing)",
+        "suffix": "-ent (adjective)",
         "definition": "Having or showing knowledge of events before they take place; prophetic.",
         "sat_sentence": "Her prescient investment in renewable energy yielded historic dividends two decades later.",
         "connotation": "positive"
@@ -2402,7 +2476,7 @@
       {
         "word": "conscience",
         "prefix": "con- (with, together)",
-        "suffix": "-science (knowing)",
+        "suffix": "-ence (noun)",
         "definition": "An inner feeling or voice viewed as acting as a guide to the rightness or wrongness of one's behavior.",
         "sat_sentence": "His guilty conscience compelled him to return the stolen artifacts to the museum.",
         "connotation": "positive"
@@ -2426,7 +2500,7 @@
       {
         "word": "nescience",
         "prefix": "ne- (not)",
-        "suffix": "-science (knowledge)",
+        "suffix": "-ence (noun)",
         "definition": "Lack of knowledge or awareness; ignorance.",
         "sat_sentence": "The tribe's complete nescience regarding modern industrial technology astonished the explorers.",
         "connotation": "neutral"
@@ -2434,7 +2508,7 @@
       {
         "word": "conscious",
         "prefix": "con- (with)",
-        "suffix": "-scious (knowing)",
+        "suffix": "-ous (adjective)",
         "definition": "Aware of and responding to one's surroundings; deliberate.",
         "sat_sentence": "She made a conscious decision to pursue a career in public interest environmental law.",
         "connotation": "positive"
@@ -2446,7 +2520,9 @@
       "morpheme": "spec / spic",
       "language": "Latin",
       "core_meaning": "to look, see, watch",
-      "mnemonic": "Think 'spectator' (one who looks) or 'inspect' (look into)"
+      "mnemonic": "Think 'spectator' (one who looks) or 'inspect' (look into)",
+      "thematic_cluster": "Cognition",
+      "sat_tier": "Tier 1 High-Yield"
     },
     "words": [
       {
@@ -2460,7 +2536,7 @@
       {
         "word": "circumspect",
         "prefix": "circum- (around)",
-        "suffix": "-spect (looking)",
+        "suffix": "",
         "definition": "Wary and unwilling to take risks; prudently looking around at all possibilities.",
         "sat_sentence": "Experienced diplomats are circumspect in public, weighing every word to avoid international incident.",
         "connotation": "positive"
@@ -2512,7 +2588,9 @@
       "morpheme": "vid / vis",
       "language": "Latin",
       "core_meaning": "to see, look, perceive",
-      "mnemonic": "Think 'visible' (can be seen) or 'vision' (act of seeing)"
+      "mnemonic": "Think 'visible' (can be seen) or 'vision' (act of seeing)",
+      "thematic_cluster": "Cognition",
+      "sat_tier": "Tier 1 High-Yield"
     },
     "words": [
       {
@@ -2578,7 +2656,9 @@
       "morpheme": "sent / sens",
       "language": "Latin",
       "core_meaning": "to feel, perceive, think",
-      "mnemonic": "Think 'sentiment' (feeling) or 'sensation' (perception)"
+      "mnemonic": "Think 'sentiment' (feeling) or 'sensation' (perception)",
+      "thematic_cluster": "Cognition",
+      "sat_tier": "Tier 1 High-Yield"
     },
     "words": [
       {
@@ -2644,13 +2724,15 @@
       "morpheme": "path",
       "language": "Greek",
       "core_meaning": "feeling, suffering, emotion, disease",
-      "mnemonic": "Think 'sympathy' (feeling with) or 'pathology' (study of suffering/disease)"
+      "mnemonic": "Think 'sympathy' (feeling with) or 'pathology' (study of suffering/disease)",
+      "thematic_cluster": "Emotion",
+      "sat_tier": "Tier 1 High-Yield"
     },
     "words": [
       {
         "word": "empathy",
         "prefix": "en- (in)",
-        "suffix": "-pathy (feeling)",
+        "suffix": "",
         "definition": "The ability to understand and share the feelings of another.",
         "sat_sentence": "Effective leadership requires not just technical skill, but profound interpersonal empathy.",
         "connotation": "positive"
@@ -2658,7 +2740,7 @@
       {
         "word": "apathy",
         "prefix": "a- (without)",
-        "suffix": "-pathy (feeling)",
+        "suffix": "",
         "definition": "Lack of interest, enthusiasm, or concern.",
         "sat_sentence": "Voter apathy during midterm elections often leads to low turnout in suburban districts.",
         "connotation": "negative"
@@ -2666,7 +2748,7 @@
       {
         "word": "antipathy",
         "prefix": "anti- (against)",
-        "suffix": "-pathy (feeling)",
+        "suffix": "",
         "definition": "A deep-seated feeling of dislike or aversion.",
         "sat_sentence": "There was long-standing mutual antipathy between the two rival pharmaceutical executives.",
         "connotation": "negative"
@@ -2690,7 +2772,7 @@
       {
         "word": "telepathy",
         "prefix": "tele- (distant)",
-        "suffix": "-pathy (feeling/thought)",
+        "suffix": "",
         "definition": "The supposed communication of thoughts or ideas by means other than the known senses.",
         "sat_sentence": "Identical twins often joke that they share an unspoken bond bordering on telepathy.",
         "connotation": "neutral"
@@ -2710,7 +2792,9 @@
       "morpheme": "anim",
       "language": "Latin",
       "core_meaning": "mind, soul, breath, spirit",
-      "mnemonic": "Think 'animate' (breathe life into) or 'unanimous' (one mind)"
+      "mnemonic": "Think 'animate' (breathe life into) or 'unanimous' (one mind)",
+      "thematic_cluster": "Emotion",
+      "sat_tier": "Tier 1 High-Yield"
     },
     "words": [
       {
@@ -2776,7 +2860,9 @@
       "morpheme": "mem / mne",
       "language": "Latin / Greek",
       "core_meaning": "memory, mindful, remembering",
-      "mnemonic": "Think 'memory' or 'mnemonic' (memory aid device)"
+      "mnemonic": "Think 'memory' or 'mnemonic' (memory aid device)",
+      "thematic_cluster": "Cognition",
+      "sat_tier": "Tier 2 Multipliers"
     },
     "words": [
       {
@@ -2790,7 +2876,7 @@
       {
         "word": "amnesty",
         "prefix": "a- (not, without)",
-        "suffix": "-mne (remembering/forgetting offenses)",
+        "suffix": "",
         "definition": "An official pardon for people who have been convicted of political offenses.",
         "sat_sentence": "The new government declared a general amnesty for all nonviolent dissidents jailed during the coup.",
         "connotation": "positive"
@@ -2842,7 +2928,9 @@
       "morpheme": "loqu / loc",
       "language": "Latin",
       "core_meaning": "to speak, talk, converse",
-      "mnemonic": "Think 'eloquent' (speaking well) or 'loquacious' (talkative)"
+      "mnemonic": "Think 'eloquent' (speaking well) or 'loquacious' (talkative)",
+      "thematic_cluster": "Communication",
+      "sat_tier": "Tier 1 High-Yield"
     },
     "words": [
       {
@@ -2908,7 +2996,9 @@
       "morpheme": "voc / vok",
       "language": "Latin",
       "core_meaning": "voice, to call, summon",
-      "mnemonic": "Think 'vocal' (voice) or 'invoke' (call upon)"
+      "mnemonic": "Think 'vocal' (voice) or 'invoke' (call upon)",
+      "thematic_cluster": "Communication",
+      "sat_tier": "Tier 1 High-Yield"
     },
     "words": [
       {
@@ -2974,13 +3064,15 @@
       "morpheme": "dict",
       "language": "Latin",
       "core_meaning": "to say, speak, declare",
-      "mnemonic": "Think 'dictate' (say aloud) or 'predict' (say beforehand)"
+      "mnemonic": "Think 'dictate' (say aloud) or 'predict' (say beforehand)",
+      "thematic_cluster": "Communication",
+      "sat_tier": "Tier 1 High-Yield"
     },
     "words": [
       {
         "word": "edict",
         "prefix": "e- (out)",
-        "suffix": "-ict (speak)",
+        "suffix": "",
         "definition": "An official order or proclamation issued by a person in authority.",
         "sat_sentence": "The monarch issued a royal edict banishing foreign merchants from the capital port.",
         "connotation": "neutral"
@@ -2988,7 +3080,7 @@
       {
         "word": "indict",
         "prefix": "in- (against)",
-        "suffix": "-ict (declare)",
+        "suffix": "",
         "definition": "Formally accuse of or charge with a serious crime.",
         "sat_sentence": "A federal grand jury voted to indict the former executive on five counts of wire fraud.",
         "connotation": "negative"
@@ -3012,7 +3104,7 @@
       {
         "word": "contradict",
         "prefix": "contra- (against)",
-        "suffix": "-ict (speak)",
+        "suffix": "",
         "definition": "To assert the opposite of a statement made by someone; to be in conflict with.",
         "sat_sentence": "Physical evidence at the crime scene seemed to contradict the suspect's written confession.",
         "connotation": "neutral"
@@ -3028,7 +3120,7 @@
       {
         "word": "verdict",
         "prefix": "veri- (true)",
-        "suffix": "-dict (saying)",
+        "suffix": "",
         "definition": "A decision on a disputed issue in a civil or criminal case or an inquest.",
         "sat_sentence": "Spectators in the gallery gasped when the jury foreman read the acquittal verdict.",
         "connotation": "neutral"
@@ -3040,7 +3132,9 @@
       "morpheme": "clam / claim",
       "language": "Latin",
       "core_meaning": "to shout, cry out, call",
-      "mnemonic": "Think 'clamor' (loud shout) or 'exclaim' (cry out)"
+      "mnemonic": "Think 'clamor' (loud shout) or 'exclaim' (cry out)",
+      "thematic_cluster": "Communication",
+      "sat_tier": "Tier 2 Multipliers"
     },
     "words": [
       {
@@ -3054,7 +3148,7 @@
       {
         "word": "acclaim",
         "prefix": "ad- (to, praise)",
-        "suffix": "-claim (shout)",
+        "suffix": "",
         "definition": "Praise enthusiastically and publicly.",
         "sat_sentence": "The debut novel won widespread critical acclaim and topped international bestseller lists.",
         "connotation": "positive"
@@ -3062,7 +3156,7 @@
       {
         "word": "declaim",
         "prefix": "de- (thoroughly)",
-        "suffix": "-claim (cry out)",
+        "suffix": "",
         "definition": "To utter or deliver words or a speech in a rhetorical or impassioned way.",
         "sat_sentence": "The actor declaimed the theatrical monologue with booming resonance from center stage.",
         "connotation": "positive"
@@ -3070,7 +3164,7 @@
       {
         "word": "disclaim",
         "prefix": "dis- (away)",
-        "suffix": "-claim (cry out)",
+        "suffix": "",
         "definition": "To refuse to acknowledge; to deny any connection with or responsibility for.",
         "sat_sentence": "The pharmaceutical manufacturer was quick to disclaim responsibility for unapproved off-label usage.",
         "connotation": "negative"
@@ -3078,7 +3172,7 @@
       {
         "word": "proclaim",
         "prefix": "pro- (forth)",
-        "suffix": "-claim (shout)",
+        "suffix": "",
         "definition": "To announce officially or publicly.",
         "sat_sentence": "The governor proclaimed the third week of October as statewide Cyber Literacy Week.",
         "connotation": "positive"
@@ -3106,13 +3200,15 @@
       "morpheme": "phon",
       "language": "Greek",
       "core_meaning": "sound, voice, speech",
-      "mnemonic": "Think 'telephone' (distant sound) or 'phonics' (sounds of letters)"
+      "mnemonic": "Think 'telephone' (distant sound) or 'phonics' (sounds of letters)",
+      "thematic_cluster": "Communication",
+      "sat_tier": "Tier 2 Multipliers"
     },
     "words": [
       {
         "word": "cacophony",
         "prefix": "kakos- (bad, harsh)",
-        "suffix": "-phony (sound)",
+        "suffix": "",
         "definition": "A harsh, discordant mixture of sounds.",
         "sat_sentence": "The awakening city was a cacophony of blaring horns, screeching subways, and construction drills.",
         "connotation": "negative"
@@ -3120,7 +3216,7 @@
       {
         "word": "euphony",
         "prefix": "eu- (good, sweet)",
-        "suffix": "-phony (sound)",
+        "suffix": "",
         "definition": "The quality of being pleasing to the ear, especially through a harmonious combination of words.",
         "sat_sentence": "Keats was celebrated for the sheer euphony and lyrical softness of his romantic stanzas.",
         "connotation": "positive"
@@ -3128,7 +3224,7 @@
       {
         "word": "symphony",
         "prefix": "syn- (together)",
-        "suffix": "-phony (sound)",
+        "suffix": "",
         "definition": "An elaborate musical composition for full orchestra; a harmonious combination of elements.",
         "sat_sentence": "The fall foliage presented a breathtaking symphony of russet, amber, and deep vermilion hues.",
         "connotation": "positive"
@@ -3144,7 +3240,7 @@
       {
         "word": "megaphone",
         "prefix": "mega- (large)",
-        "suffix": "-phone (sound)",
+        "suffix": "",
         "definition": "A large cone-shaped device for amplifying and directing the human voice.",
         "sat_sentence": "The rally organizer shouted safety instructions through a battery-operated megaphone.",
         "connotation": "neutral"
@@ -3172,7 +3268,9 @@
       "morpheme": "aud",
       "language": "Latin",
       "core_meaning": "to hear, listen",
-      "mnemonic": "Think 'audio' (sound you hear) or 'auditorium' (place for hearing)"
+      "mnemonic": "Think 'audio' (sound you hear) or 'auditorium' (place for hearing)",
+      "thematic_cluster": "Communication",
+      "sat_tier": "Tier 1 High-Yield"
     },
     "words": [
       {
@@ -3238,7 +3336,9 @@
       "morpheme": "tact / tang / ting",
       "language": "Latin",
       "core_meaning": "to touch, handle",
-      "mnemonic": "Think 'tangible' (touchable) or 'tactile' (felt by touch)"
+      "mnemonic": "Think 'tangible' (touchable) or 'tactile' (felt by touch)",
+      "thematic_cluster": "Form & Nature",
+      "sat_tier": "Tier 2 Multipliers"
     },
     "words": [
       {
@@ -3304,7 +3404,9 @@
       "morpheme": "sap / sag",
       "language": "Latin",
       "core_meaning": "to taste, perceive, be wise",
-      "mnemonic": "Think 'sage' (wise person) or 'sapient' (wise/perceptive)"
+      "mnemonic": "Think 'sage' (wise person) or 'sapient' (wise/perceptive)",
+      "thematic_cluster": "Cognition",
+      "sat_tier": "Tier 3 Advanced"
     },
     "words": [
       {
@@ -3370,7 +3472,9 @@
       "morpheme": "gust",
       "language": "Latin",
       "core_meaning": "taste, flavor, relish",
-      "mnemonic": "Think 'gusto' (enthusiastic relish) or 'disgust' (bad taste)"
+      "mnemonic": "Think 'gusto' (enthusiastic relish) or 'disgust' (bad taste)",
+      "thematic_cluster": "Form & Nature",
+      "sat_tier": "Tier 3 Advanced"
     },
     "words": [
       {
@@ -3392,7 +3496,7 @@
       {
         "word": "disgust",
         "prefix": "dis- (away, bad)",
-        "suffix": "-gust (taste)",
+        "suffix": "",
         "definition": "A feeling of revulsion or strong disapproval aroused by something unpleasant.",
         "sat_sentence": "The voter expressed deep disgust with political advertisements spreading blatant lies.",
         "connotation": "negative"
@@ -3436,7 +3540,9 @@
       "morpheme": "olfact / odor",
       "language": "Latin",
       "core_meaning": "smell, scent, fragrance",
-      "mnemonic": "Think 'olfactory' (sense of smell) or 'malodorous' (bad smelling)"
+      "mnemonic": "Think 'olfactory' (sense of smell) or 'malodorous' (bad smelling)",
+      "thematic_cluster": "Form & Nature",
+      "sat_tier": "Tier 3 Advanced"
     },
     "words": [
       {
@@ -3502,7 +3608,9 @@
       "morpheme": "luc / lum / lus",
       "language": "Latin",
       "core_meaning": "light, shine, clear, bright",
-      "mnemonic": "Think 'lucid' (clear as light) or 'illuminate' (light up)"
+      "mnemonic": "Think 'lucid' (clear as light) or 'illuminate' (light up)",
+      "thematic_cluster": "Form & Nature",
+      "sat_tier": "Tier 1 High-Yield"
     },
     "words": [
       {
@@ -3540,7 +3648,7 @@
       {
         "word": "lackluster",
         "prefix": "lack- (without)",
-        "suffix": "-luster (shine)",
+        "suffix": "",
         "definition": "Lacking in vitality, force, or conviction; uninspired or uninspiring.",
         "sat_sentence": "The football team delivered a lackluster first half, trailing twenty points at the break.",
         "connotation": "negative"
@@ -3568,7 +3676,9 @@
       "morpheme": "umbr",
       "language": "Latin",
       "core_meaning": "shade, shadow, obscure",
-      "mnemonic": "Think 'umbrella' (little shadow) or 'umbrage' (shadow of offense)"
+      "mnemonic": "Think 'umbrella' (little shadow) or 'umbrage' (shadow of offense)",
+      "thematic_cluster": "Form & Nature",
+      "sat_tier": "Tier 2 Multipliers"
     },
     "words": [
       {
@@ -3590,7 +3700,7 @@
       {
         "word": "penumbra",
         "prefix": "paene- (almost)",
-        "suffix": "-umbra (shadow)",
+        "suffix": "",
         "definition": "The partially shaded outer region of a shadow; a peripheral or marginal area.",
         "sat_sentence": "During the solar eclipse, viewers in the penumbra witnessed a partial obscuration of the sun.",
         "connotation": "neutral"
@@ -3634,7 +3744,9 @@
       "morpheme": "cand",
       "language": "Latin",
       "core_meaning": "white, glowing, pure, shining",
-      "mnemonic": "Think 'candle' (glowing light) or 'candor' (pure frankness)"
+      "mnemonic": "Think 'candle' (glowing light) or 'candor' (pure frankness)",
+      "thematic_cluster": "Form & Nature",
+      "sat_tier": "Tier 2 Multipliers"
     },
     "words": [
       {
@@ -3700,7 +3812,9 @@
       "morpheme": "cord / card",
       "language": "Latin / Greek",
       "core_meaning": "heart, mind, courage",
-      "mnemonic": "Think 'cardiac' (heart) or 'cordial' (from the heart)"
+      "mnemonic": "Think 'cardiac' (heart) or 'cordial' (from the heart)",
+      "thematic_cluster": "Emotion",
+      "sat_tier": "Tier 2 Multipliers"
     },
     "words": [
       {
@@ -3714,7 +3828,7 @@
       {
         "word": "accord",
         "prefix": "ad- (to)",
-        "suffix": "-cord (heart/harmony)",
+        "suffix": "",
         "definition": "Give or grant someone power, status, or recognition; an official agreement.",
         "sat_sentence": "The signing of the Paris Peace Accord ended years of devastating regional warfare.",
         "connotation": "positive"
@@ -3738,7 +3852,7 @@
       {
         "word": "concord",
         "prefix": "con- (together)",
-        "suffix": "-cord (hearts in agreement)",
+        "suffix": "",
         "definition": "Agreement or harmony between people or groups.",
         "sat_sentence": "Decades of diplomatic dialogue fostered unprecedented concord among former rival nations.",
         "connotation": "positive"
@@ -3754,7 +3868,7 @@
       {
         "word": "record",
         "prefix": "re- (again)",
-        "suffix": "-cord (bring to heart/mind)",
+        "suffix": "",
         "definition": "To set down in writing or other permanent form for later reference.",
         "sat_sentence": "Scribes in ancient Sumer recorded grain transactions on durable clay tablets.",
         "connotation": "neutral"
@@ -3766,7 +3880,9 @@
       "morpheme": "cred",
       "language": "Latin",
       "core_meaning": "to believe, trust",
-      "mnemonic": "Think 'credible' (believable) or 'creed' (statement of belief)"
+      "mnemonic": "Think 'credible' (believable) or 'creed' (statement of belief)",
+      "thematic_cluster": "Law & Morality",
+      "sat_tier": "Tier 1 High-Yield"
     },
     "words": [
       {
@@ -3832,7 +3948,9 @@
       "morpheme": "fid",
       "language": "Latin",
       "core_meaning": "faith, trust, loyalty",
-      "mnemonic": "Think 'fidelity' (faithfulness) or 'confide' (trust with secrets)"
+      "mnemonic": "Think 'fidelity' (faithfulness) or 'confide' (trust with secrets)",
+      "thematic_cluster": "Law & Morality",
+      "sat_tier": "Tier 1 High-Yield"
     },
     "words": [
       {
@@ -3898,7 +4016,9 @@
       "morpheme": "fatu",
       "language": "Latin",
       "core_meaning": "foolish, silly, empty",
-      "mnemonic": "Think 'fatuous' (foolish/silly) or 'infatuation' (foolish obsession)"
+      "mnemonic": "Think 'fatuous' (foolish/silly) or 'infatuation' (foolish obsession)",
+      "thematic_cluster": "Emotion",
+      "sat_tier": "Tier 3 Advanced"
     },
     "words": [
       {
@@ -3964,7 +4084,9 @@
       "morpheme": "soph",
       "language": "Greek",
       "core_meaning": "wise, wisdom, knowledge",
-      "mnemonic": "Think 'philosophy' (love of wisdom) or 'sophisticated' (worldly wise)"
+      "mnemonic": "Think 'philosophy' (love of wisdom) or 'sophisticated' (worldly wise)",
+      "thematic_cluster": "Cognition",
+      "sat_tier": "Tier 2 Multipliers"
     },
     "words": [
       {
@@ -3986,7 +4108,7 @@
       {
         "word": "philosopher",
         "prefix": "philo- (loving)",
-        "suffix": "-sopher (wisdom)",
+        "suffix": "-er (noun: agent)",
         "definition": "A person engaged or learned in philosophy, especially as an academic discipline.",
         "sat_sentence": "Socrates walked the marketplace in Athens questioning fellow citizens about justice and virtue.",
         "connotation": "positive"
@@ -4002,7 +4124,7 @@
       {
         "word": "theosophy",
         "prefix": "theos- (god)",
-        "suffix": "-sophy (wisdom)",
+        "suffix": "",
         "definition": "A philosophy maintaining that knowledge of God may be achieved through spiritual ecstasy and direct intuition.",
         "sat_sentence": "Late 19th-century occultists founded societies dedicated to the study of theosophy and mysticism.",
         "connotation": "neutral"
@@ -4010,7 +4132,7 @@
       {
         "word": "pansophy",
         "prefix": "pan- (all)",
-        "suffix": "-sophy (wisdom)",
+        "suffix": "",
         "definition": "Universal wisdom or encyclopedic knowledge of all things.",
         "sat_sentence": "Renaissance polymaths aspired toward pansophy, striving to master every known science and art.",
         "connotation": "positive"
@@ -4030,7 +4152,9 @@
       "morpheme": "phil",
       "language": "Greek",
       "core_meaning": "love, friendship, affection",
-      "mnemonic": "Think 'philanthropy' (love of humanity) or 'philosophy' (love of wisdom)"
+      "mnemonic": "Think 'philanthropy' (love of humanity) or 'philosophy' (love of wisdom)",
+      "thematic_cluster": "Emotion",
+      "sat_tier": "Tier 2 Multipliers"
     },
     "words": [
       {
@@ -4044,7 +4168,7 @@
       {
         "word": "bibliophile",
         "prefix": "biblio- (book)",
-        "suffix": "-phile (lover of)",
+        "suffix": "",
         "definition": "A person who collects or has a great love of books.",
         "sat_sentence": "The bibliophile spent entire weekends browsing dusty shelves in antiquarian bookstores.",
         "connotation": "positive"
@@ -4060,7 +4184,7 @@
       {
         "word": "hydrophilic",
         "prefix": "hydro- (water)",
-        "suffix": "-philic (loving)",
+        "suffix": "-ic (adjective)",
         "definition": "Having a tendency to mix with, dissolve in, or be wetted by water.",
         "sat_sentence": "The outer surface of the cellular membrane consists of hydrophilic phosphate heads.",
         "connotation": "neutral"
@@ -4096,13 +4220,15 @@
       "morpheme": "phob",
       "language": "Greek",
       "core_meaning": "fear, dread, terror, aversion",
-      "mnemonic": "Think 'phobia' (irrational fear) or 'claustrophobia' (fear of confined spaces)"
+      "mnemonic": "Think 'phobia' (irrational fear) or 'claustrophobia' (fear of confined spaces)",
+      "thematic_cluster": "Emotion",
+      "sat_tier": "Tier 2 Multipliers"
     },
     "words": [
       {
         "word": "hydrophobia",
         "prefix": "hydro- (water)",
-        "suffix": "-phobia (fear)",
+        "suffix": "",
         "definition": "Extreme or irrational fear of water, especially as a symptom of rabies in humans.",
         "sat_sentence": "In terminal stages of rabies, difficulty swallowing triggers intense hydrophobia.",
         "connotation": "negative"
@@ -4110,7 +4236,7 @@
       {
         "word": "xenophobia",
         "prefix": "xenos- (stranger/foreign)",
-        "suffix": "-phobia (fear/hatred)",
+        "suffix": "",
         "definition": "Dislike of or prejudice against people from other countries.",
         "sat_sentence": "Economic hardship often fuels political xenophobia, scapegoating migrant communities for job losses.",
         "connotation": "negative"
@@ -4118,7 +4244,7 @@
       {
         "word": "claustrophobia",
         "prefix": "claustrum- (confined space)",
-        "suffix": "-phobia (fear)",
+        "suffix": "",
         "definition": "Extreme or irrational fear of confined places.",
         "sat_sentence": "Suffering from acute claustrophobia, he took the stairs rather than ride in crowded elevators.",
         "connotation": "negative"
@@ -4126,7 +4252,7 @@
       {
         "word": "agoraphobia",
         "prefix": "agora- (marketplace/open space)",
-        "suffix": "-phobia (fear)",
+        "suffix": "",
         "definition": "Extreme or irrational fear of entering open or crowded places.",
         "sat_sentence": "Her agoraphobia became so severe that she had not stepped outside her apartment in six months.",
         "connotation": "negative"
@@ -4142,7 +4268,7 @@
       {
         "word": "arachnophobia",
         "prefix": "arachne- (spider)",
-        "suffix": "-phobia (fear)",
+        "suffix": "",
         "definition": "Extreme or irrational fear of spiders.",
         "sat_sentence": "His arachnophobia made camping in the wooded countryside an agonizing prospect.",
         "connotation": "negative"
@@ -4150,7 +4276,7 @@
       {
         "word": "acrophobia",
         "prefix": "acro- (height/extremity)",
-        "suffix": "-phobia (fear)",
+        "suffix": "",
         "definition": "Extreme or irrational fear of heights.",
         "sat_sentence": "Visiting the observation deck on the 100th floor was terrifying for someone with acrophobia.",
         "connotation": "negative"
@@ -4162,13 +4288,15 @@
       "morpheme": "mania",
       "language": "Greek",
       "core_meaning": "madness, frenzy, obsessive passion",
-      "mnemonic": "Think 'maniac' (mad person) or 'megalomania' (obsession with power)"
+      "mnemonic": "Think 'maniac' (mad person) or 'megalomania' (obsession with power)",
+      "thematic_cluster": "Emotion",
+      "sat_tier": "Tier 3 Advanced"
     },
     "words": [
       {
         "word": "megalomania",
         "prefix": "megalo- (great/large)",
-        "suffix": "-mania (madness)",
+        "suffix": "",
         "definition": "Obsession with the exercise of power, especially in the domination of others; delusions of grandeur.",
         "sat_sentence": "The dictator's megalomania led him to construct colossal statues of himself in every provincial capital.",
         "connotation": "negative"
@@ -4176,7 +4304,7 @@
       {
         "word": "pyromania",
         "prefix": "pyro- (fire)",
-        "suffix": "-mania (madness)",
+        "suffix": "",
         "definition": "An obsessive desire to set fire to things.",
         "sat_sentence": "Investigators determined that the series of warehouse blazes was the work of an individual with pyromania.",
         "connotation": "negative"
@@ -4184,7 +4312,7 @@
       {
         "word": "bibliomania",
         "prefix": "biblio- (book)",
-        "suffix": "-mania (passion/madness)",
+        "suffix": "",
         "definition": "Passionate enthusiasm for collecting and possessing books.",
         "sat_sentence": "His bibliomania was evident from the towering stacks of paperbacks spilling out of every closet.",
         "connotation": "positive"
@@ -4192,7 +4320,7 @@
       {
         "word": "monomania",
         "prefix": "mono- (single)",
-        "suffix": "-mania (madness)",
+        "suffix": "",
         "definition": "Exaggerated or obsessive enthusiasm for or preoccupation with one thing.",
         "sat_sentence": "Captain Ahab's hunt for the white whale escalated into an all-consuming monomania.",
         "connotation": "negative"
@@ -4208,7 +4336,7 @@
       {
         "word": "kleptomania",
         "prefix": "klepto- (steal)",
-        "suffix": "-mania (madness)",
+        "suffix": "",
         "definition": "A recurrent urge to steal, typically without regard for need or profit.",
         "sat_sentence": "Psychological counseling helped the heiress manage her compulsive kleptomania.",
         "connotation": "negative"
@@ -4216,7 +4344,7 @@
       {
         "word": "dipsomania",
         "prefix": "dipso- (thirst)",
-        "suffix": "-mania (craving)",
+        "suffix": "",
         "definition": "Alcoholism, specifically in the form of periodic bouts of uncontrollable craving.",
         "sat_sentence": "Writers in the 1920s often struggled privately with dipsomania and depression.",
         "connotation": "negative"
@@ -4228,7 +4356,9 @@
       "morpheme": "psych",
       "language": "Greek",
       "core_meaning": "mind, soul, spirit, mental",
-      "mnemonic": "Think 'psychology' (study of mind) or 'psychic' (mental sensitivity)"
+      "mnemonic": "Think 'psychology' (study of mind) or 'psychic' (mental sensitivity)",
+      "thematic_cluster": "Cognition",
+      "sat_tier": "Tier 2 Multipliers"
     },
     "words": [
       {
@@ -4294,13 +4424,15 @@
       "morpheme": "dox / dog",
       "language": "Greek",
       "core_meaning": "opinion, belief, praise, teaching",
-      "mnemonic": "Think 'orthodox' (straight belief) or 'dogmatic' (rigid in opinion)"
+      "mnemonic": "Think 'orthodox' (straight belief) or 'dogmatic' (rigid in opinion)",
+      "thematic_cluster": "Cognition",
+      "sat_tier": "Tier 2 Multipliers"
     },
     "words": [
       {
         "word": "orthodox",
         "prefix": "ortho- (straight, right)",
-        "suffix": "-dox (belief)",
+        "suffix": "",
         "definition": "Conforming to what is generally or traditionally accepted as right or true; established.",
         "sat_sentence": "The physicist proposed radical theories that challenged orthodox quantum interpretations.",
         "connotation": "neutral"
@@ -4308,7 +4440,7 @@
       {
         "word": "paradox",
         "prefix": "para- (contrary to)",
-        "suffix": "-dox (opinion/belief)",
+        "suffix": "",
         "definition": "A seemingly absurd or self-contradicty statement that when investigated may prove to be true.",
         "sat_sentence": "It is an ironic paradox that the wealthiest societies often report high rates of depression.",
         "connotation": "neutral"
@@ -4324,7 +4456,7 @@
       {
         "word": "heterodox",
         "prefix": "hetero- (other, different)",
-        "suffix": "-dox (opinion)",
+        "suffix": "",
         "definition": "Not conforming with accepted or orthodox standards or beliefs; unorthodox.",
         "sat_sentence": "Galileo was prosecuted by the Inquisition for promoting heterodox cosmological views.",
         "connotation": "neutral"
@@ -4360,7 +4492,9 @@
       "morpheme": "crit / cris",
       "language": "Greek",
       "core_meaning": "judge, decide, separate",
-      "mnemonic": "Think 'critical' (judging carefully) or 'crisis' (decisive turning point)"
+      "mnemonic": "Think 'critical' (judging carefully) or 'crisis' (decisive turning point)",
+      "thematic_cluster": "Cognition",
+      "sat_tier": "Tier 2 Multipliers"
     },
     "words": [
       {
@@ -4398,7 +4532,7 @@
       {
         "word": "hypocrite",
         "prefix": "hypo- (under)",
-        "suffix": "-crite (judge/actor)",
+        "suffix": "",
         "definition": "A person who claims to have moral standards to which their own behavior does not conform.",
         "sat_sentence": "He was labeled a hypocrite for flying in private jets while lecturing others on their carbon footprints.",
         "connotation": "negative"
@@ -4414,7 +4548,7 @@
       {
         "word": "diacritic",
         "prefix": "dia- (distinguish)",
-        "suffix": "-critic (judge/separate)",
+        "suffix": "-ic (adjective)",
         "definition": "A sign, such as an accent or cedilla, which when written above or below a letter indicates pronunciation.",
         "sat_sentence": "French words like 'résumé' rely on diacritic marks to guide proper phonetic vowel stress.",
         "connotation": "neutral"
@@ -4426,7 +4560,9 @@
       "morpheme": "leg / lect / log",
       "language": "Greek / Latin",
       "core_meaning": "to read, gather, choose, speak",
-      "mnemonic": "Think 'legible' (readable) or 'dialogue' (speaking across)"
+      "mnemonic": "Think 'legible' (readable) or 'dialogue' (speaking across)",
+      "thematic_cluster": "Communication",
+      "sat_tier": "Tier 2 Multipliers"
     },
     "words": [
       {
@@ -4440,7 +4576,7 @@
       {
         "word": "dialect",
         "prefix": "dia- (across)",
-        "suffix": "-lect (speech)",
+        "suffix": "",
         "definition": "A particular form of a language that is peculiar to a specific region or social group.",
         "sat_sentence": "Geographic isolation in the mountain valleys allowed a distinctive Elizabethan dialect to survive.",
         "connotation": "neutral"
@@ -4448,7 +4584,7 @@
       {
         "word": "eulogy",
         "prefix": "eu- (good, well)",
-        "suffix": "-logy (speech of praise)",
+        "suffix": "",
         "definition": "A speech or piece of writing that praises someone or something highly, typically someone who has just died.",
         "sat_sentence": "His daughter delivered a deeply touching eulogy that celebrated his boundless kindness.",
         "connotation": "positive"
@@ -4492,7 +4628,9 @@
       "morpheme": "nom / nym",
       "language": "Greek / Latin",
       "core_meaning": "name, word, term",
-      "mnemonic": "Think 'pseudonym' (false name) or 'synonym' (same name/meaning)"
+      "mnemonic": "Think 'pseudonym' (false name) or 'synonym' (same name/meaning)",
+      "thematic_cluster": "Communication",
+      "sat_tier": "Tier 2 Multipliers"
     },
     "words": [
       {
@@ -4558,7 +4696,9 @@
       "morpheme": "mon / monit",
       "language": "Latin",
       "core_meaning": "to warn, advise, remind",
-      "mnemonic": "Think 'admonish' (warn gently) or 'monitor' (watch and warn)"
+      "mnemonic": "Think 'admonish' (warn gently) or 'monitor' (watch and warn)",
+      "thematic_cluster": "Communication",
+      "sat_tier": "Tier 2 Multipliers"
     },
     "words": [
       {
@@ -4596,7 +4736,7 @@
       {
         "word": "summon",
         "prefix": "sub- (under, secretly)",
-        "suffix": "-mon (warn/call)",
+        "suffix": "",
         "definition": "Authoritatively or urgently call on someone to be present, especially as a defendant or witness.",
         "sat_sentence": "The congressional committee voted to summon the technology executives to testify on privacy.",
         "connotation": "neutral"
@@ -4624,7 +4764,9 @@
       "morpheme": "bene / bon",
       "language": "Latin",
       "core_meaning": "good, well, favorable",
-      "mnemonic": "Think 'benefit' (good result) or 'benevolent' (wishing good)"
+      "mnemonic": "Think 'benefit' (good result) or 'benevolent' (wishing good)",
+      "thematic_cluster": "Law & Morality",
+      "sat_tier": "Tier 1 High-Yield"
     },
     "words": [
       {
@@ -4690,7 +4832,9 @@
       "morpheme": "mal / mis",
       "language": "Latin / Old French",
       "core_meaning": "bad, evil, wrong, ill",
-      "mnemonic": "Think 'malicious' (evil-minded) or 'mistake' (wrong step)"
+      "mnemonic": "Think 'malicious' (evil-minded) or 'mistake' (wrong step)",
+      "thematic_cluster": "Law & Morality",
+      "sat_tier": "Tier 1 High-Yield"
     },
     "words": [
       {
@@ -4756,7 +4900,9 @@
       "morpheme": "pac / peac",
       "language": "Latin",
       "core_meaning": "peace, calm, appease",
-      "mnemonic": "Think 'pacify' (make peaceful) or 'Pacific' (peaceful ocean)"
+      "mnemonic": "Think 'pacify' (make peaceful) or 'Pacific' (peaceful ocean)",
+      "thematic_cluster": "Law & Morality",
+      "sat_tier": "Tier 1 High-Yield"
     },
     "words": [
       {
@@ -4770,7 +4916,7 @@
       {
         "word": "appease",
         "prefix": "ad- (to)",
-        "suffix": "-pease (peace)",
+        "suffix": "",
         "definition": "Pacify or placate someone by acceding to their demands; relieve or satisfy a demand.",
         "sat_sentence": "History shows that attempting to appease aggressive dictators only invites further aggression.",
         "connotation": "negative"
@@ -4822,7 +4968,9 @@
       "morpheme": "pot / poss",
       "language": "Latin",
       "core_meaning": "powerful, able, master",
-      "mnemonic": "Think 'potent' (powerful) or 'omnipotent' (all-powerful)"
+      "mnemonic": "Think 'potent' (powerful) or 'omnipotent' (all-powerful)",
+      "thematic_cluster": "Power & Conflict",
+      "sat_tier": "Tier 1 High-Yield"
     },
     "words": [
       {
@@ -4844,7 +4992,7 @@
       {
         "word": "omnipotent",
         "prefix": "omni- (all)",
-        "suffix": "-potent (powerful)",
+        "suffix": "-ent (adjective)",
         "definition": "Having unlimited power; able to do anything.",
         "sat_sentence": "Monotheistic theologies describe the creator as an omnipotent, eternal supreme being.",
         "connotation": "neutral"
@@ -4852,7 +5000,7 @@
       {
         "word": "impotent",
         "prefix": "in- (not)",
-        "suffix": "-potent (powerful)",
+        "suffix": "-ent (adjective)",
         "definition": "Unable to take effective action; helpless or powerless.",
         "sat_sentence": "International observers stood impotent as the rogue regime ignored United Nations sanctions.",
         "connotation": "negative"
@@ -4888,7 +5036,9 @@
       "morpheme": "val / vail",
       "language": "Latin",
       "core_meaning": "strength, worth, health, to be strong",
-      "mnemonic": "Think 'valor' (strength of bravery) or 'prevail' (prove stronger)"
+      "mnemonic": "Think 'valor' (strength of bravery) or 'prevail' (prove stronger)",
+      "thematic_cluster": "Power & Conflict",
+      "sat_tier": "Tier 1 High-Yield"
     },
     "words": [
       {
@@ -4910,7 +5060,7 @@
       {
         "word": "prevail",
         "prefix": "pre- (before, over)",
-        "suffix": "-vail (be strong)",
+        "suffix": "",
         "definition": "Prove more powerful than opposing forces; be victorious; be widespread.",
         "sat_sentence": "Justice and truth will ultimately prevail even against systemic political oppression.",
         "connotation": "positive"
@@ -4918,7 +5068,7 @@
       {
         "word": "ambivalent",
         "prefix": "ambi- (both)",
-        "suffix": "-valent (having strength)",
+        "suffix": "-ent (adjective)",
         "definition": "Having mixed feelings or contradictory ideas about something or someone.",
         "sat_sentence": "The graduate felt ambivalent about moving to Tokyo, excited by adventure but reluctant to leave family.",
         "connotation": "neutral"
@@ -4946,7 +5096,9 @@
       "morpheme": "mut",
       "language": "Latin",
       "core_meaning": "to change, alter, exchange",
-      "mnemonic": "Think 'mutate' (change form) or 'immutable' (unchangeable)"
+      "mnemonic": "Think 'mutate' (change form) or 'immutable' (unchangeable)",
+      "thematic_cluster": "Form & Nature",
+      "sat_tier": "Tier 1 High-Yield"
     },
     "words": [
       {
@@ -4960,7 +5112,7 @@
       {
         "word": "transmute",
         "prefix": "trans- (across)",
-        "suffix": "-mute (change)",
+        "suffix": "",
         "definition": "Change in form, nature, or substance, especially into a higher state.",
         "sat_sentence": "Medieval alchemists fruitlessly attempted to transmute base lead into lustrous gold.",
         "connotation": "neutral"
@@ -5012,7 +5164,9 @@
       "morpheme": "morph",
       "language": "Greek",
       "core_meaning": "form, shape, structure",
-      "mnemonic": "Think 'metamorphosis' (change of form) or 'amorphous' (shapeless)"
+      "mnemonic": "Think 'metamorphosis' (change of form) or 'amorphous' (shapeless)",
+      "thematic_cluster": "Form & Nature",
+      "sat_tier": "Tier 2 Multipliers"
     },
     "words": [
       {
@@ -5078,7 +5232,9 @@
       "morpheme": "gen",
       "language": "Latin / Greek",
       "core_meaning": "birth, origin, race, kind, generate",
-      "mnemonic": "Think 'genesis' (origin) or 'generate' (give birth to)"
+      "mnemonic": "Think 'genesis' (origin) or 'generate' (give birth to)",
+      "thematic_cluster": "Form & Nature",
+      "sat_tier": "Tier 1 High-Yield"
     },
     "words": [
       {
@@ -5108,7 +5264,7 @@
       {
         "word": "progeny",
         "prefix": "pro- (forward)",
-        "suffix": "-geny (offspring/birth)",
+        "suffix": "",
         "definition": "A descendant or the descendants of a person, animal, or plant; offspring.",
         "sat_sentence": "The champion thoroughbred produced dozens of prize-winning progeny during his breeding career.",
         "connotation": "positive"
@@ -5144,7 +5300,9 @@
       "morpheme": "plic / plex / ply",
       "language": "Latin",
       "core_meaning": "to fold, bend, intertwine, weave",
-      "mnemonic": "Think 'complicate' (fold together) or 'duplicity' (two-folded deceit)"
+      "mnemonic": "Think 'complicate' (fold together) or 'duplicity' (two-folded deceit)",
+      "thematic_cluster": "Form & Nature",
+      "sat_tier": "Tier 1 High-Yield"
     },
     "words": [
       {
@@ -5198,7 +5356,7 @@
       {
         "word": "perplex",
         "prefix": "per- (thoroughly)",
-        "suffix": "-plex (entangled/folded)",
+        "suffix": "",
         "definition": "Cause someone to feel completely baffled or puzzled.",
         "sat_sentence": "The baffling disappearance of flight communications continued to perplex aviation investigators.",
         "connotation": "negative"
@@ -5210,7 +5368,9 @@
       "morpheme": "chron",
       "language": "Greek",
       "core_meaning": "time",
-      "mnemonic": "Think 'chronological' (in order of time) or 'chronic' (lasting over time)"
+      "mnemonic": "Think 'chronological' (in order of time) or 'chronic' (lasting over time)",
+      "thematic_cluster": "Quantity & Relation",
+      "sat_tier": "Tier 1 High-Yield"
     },
     "words": [
       {
@@ -5276,7 +5436,9 @@
       "morpheme": "temp / tempor",
       "language": "Latin",
       "core_meaning": "time, season, moderation, restraint",
-      "mnemonic": "Think 'temporary' (for a short time) or 'temperate' (moderate/restrained)"
+      "mnemonic": "Think 'temporary' (for a short time) or 'temperate' (moderate/restrained)",
+      "thematic_cluster": "Quantity & Relation",
+      "sat_tier": "Tier 2 Multipliers"
     },
     "words": [
       {
@@ -5342,7 +5504,9 @@
       "morpheme": "magn / maj",
       "language": "Latin",
       "core_meaning": "great, large, elevated",
-      "mnemonic": "Think 'magnify' (make large) or 'majestic' (grand/great)"
+      "mnemonic": "Think 'magnify' (make large) or 'majestic' (grand/great)",
+      "thematic_cluster": "Quantity & Relation",
+      "sat_tier": "Tier 1 High-Yield"
     },
     "words": [
       {
@@ -5408,7 +5572,9 @@
       "morpheme": "brev",
       "language": "Latin",
       "core_meaning": "short, brief",
-      "mnemonic": "Think 'brevity' (shortness) or 'abbreviate' (make shorter)"
+      "mnemonic": "Think 'brevity' (shortness) or 'abbreviate' (make shorter)",
+      "thematic_cluster": "Quantity & Relation",
+      "sat_tier": "Tier 1 High-Yield"
     },
     "words": [
       {
@@ -5474,7 +5640,9 @@
       "morpheme": "hyper",
       "language": "Greek",
       "core_meaning": "over, above, excessive, beyond",
-      "mnemonic": "Think 'hyperactive' (excessively active) or 'hyperbole' (overstatement)"
+      "mnemonic": "Think 'hyperactive' (excessively active) or 'hyperbole' (overstatement)",
+      "thematic_cluster": "Quantity & Relation",
+      "sat_tier": "Tier 2 Multipliers"
     },
     "words": [
       {
@@ -5532,7 +5700,9 @@
       "morpheme": "hypo",
       "language": "Greek",
       "core_meaning": "under, below, deficient",
-      "mnemonic": "Think 'hypothesis' (supposition placed under) or 'hypodermic' (under the skin)"
+      "mnemonic": "Think 'hypothesis' (supposition placed under) or 'hypodermic' (under the skin)",
+      "thematic_cluster": "Quantity & Relation",
+      "sat_tier": "Tier 2 Multipliers"
     },
     "words": [
       {
@@ -5590,7 +5760,9 @@
       "morpheme": "auto",
       "language": "Greek",
       "core_meaning": "self, same, one's own",
-      "mnemonic": "Think 'autonomy' (self-rule) or 'automatic' (self-moving)"
+      "mnemonic": "Think 'autonomy' (self-rule) or 'automatic' (self-moving)",
+      "thematic_cluster": "Quantity & Relation",
+      "sat_tier": "Tier 2 Multipliers"
     },
     "words": [
       {
@@ -5656,7 +5828,9 @@
       "morpheme": "anti / ant",
       "language": "Greek",
       "core_meaning": "against, opposite, counteracting",
-      "mnemonic": "Think 'antidote' (against poison) or 'antithesis' (opposite thesis)"
+      "mnemonic": "Think 'antidote' (against poison) or 'antithesis' (opposite thesis)",
+      "thematic_cluster": "Quantity & Relation",
+      "sat_tier": "Tier 1 High-Yield"
     },
     "words": [
       {
@@ -5706,7 +5880,9 @@
       "morpheme": "syn / sym",
       "language": "Greek",
       "core_meaning": "together, with, united",
-      "mnemonic": "Think 'synthesis' (putting together) or 'symphony' (sounding together)"
+      "mnemonic": "Think 'synthesis' (putting together) or 'symphony' (sounding together)",
+      "thematic_cluster": "Quantity & Relation",
+      "sat_tier": "Tier 1 High-Yield"
     },
     "words": [
       {
@@ -5764,7 +5940,9 @@
       "morpheme": "anthrop",
       "language": "Greek",
       "core_meaning": "human, mankind",
-      "mnemonic": "Think 'anthropology' (study of human cultures) or 'philanthropy' (love of humans)"
+      "mnemonic": "Think 'anthropology' (study of human cultures) or 'philanthropy' (love of humans)",
+      "thematic_cluster": "Quantity & Relation",
+      "sat_tier": "Tier 2 Multipliers"
     },
     "words": [
       {
@@ -5786,7 +5964,7 @@
       {
         "word": "lycanthrope",
         "prefix": "lykos- (wolf)",
-        "suffix": "-anthrope (human)",
+        "suffix": "",
         "definition": "A werewolf, according to folklore and mythological tradition.",
         "sat_sentence": "Gothic legends describe the tragic curse of the lycanthrope who transforms under the full moon.",
         "connotation": "neutral"
@@ -5806,7 +5984,9 @@
       "morpheme": "jur / jud / just",
       "language": "Latin",
       "core_meaning": "law, swear, right, judge",
-      "mnemonic": "Think 'jury' (group sworn to judge) or 'judicious' (wise in judgment)"
+      "mnemonic": "Think 'jury' (group sworn to judge) or 'judicious' (wise in judgment)",
+      "thematic_cluster": "Law & Morality",
+      "sat_tier": "Tier 1 High-Yield"
     },
     "words": [
       {
@@ -5828,7 +6008,7 @@
       {
         "word": "perjure",
         "prefix": "per- (through/detrimentally)",
-        "suffix": "-jure (swear)",
+        "suffix": "",
         "definition": "Willfully tell an untruth when giving evidence to a court; commit perjury.",
         "sat_sentence": "The witness chose to perjure herself rather than implicate her powerful boss in the bribery scheme.",
         "connotation": "negative"
@@ -5860,7 +6040,7 @@
       {
         "word": "injudicious",
         "prefix": "in- (not)",
-        "suffix": "-judicious (wise)",
+        "suffix": "",
         "definition": "Showing very poor judgment; unwise.",
         "sat_sentence": "The young executive's injudicious late-night social media post cost him his high-paying promotion.",
         "connotation": "negative"
@@ -5872,7 +6052,9 @@
       "morpheme": "ver / veri",
       "language": "Latin",
       "core_meaning": "true, truth",
-      "mnemonic": "Think 'verify' (prove true) or 'veracity' (truthfulness)"
+      "mnemonic": "Think 'verify' (prove true) or 'veracity' (truthfulness)",
+      "thematic_cluster": "Law & Morality",
+      "sat_tier": "Tier 1 High-Yield"
     },
     "words": [
       {
@@ -5910,7 +6092,7 @@
       {
         "word": "aver",
         "prefix": "ad- (to)",
-        "suffix": "-ver (state as true)",
+        "suffix": "",
         "definition": "State or assert to be the case; declare firmly.",
         "sat_sentence": "The defendant continued to aver his innocence despite mounting circumstantial forensic evidence.",
         "connotation": "neutral"
@@ -5930,7 +6112,9 @@
       "morpheme": "rect",
       "language": "Latin",
       "core_meaning": "straight, right, upright, rule",
-      "mnemonic": "Think 'rectify' (make right) or 'rectitude' (upright morality)"
+      "mnemonic": "Think 'rectify' (make right) or 'rectitude' (upright morality)",
+      "thematic_cluster": "Law & Morality",
+      "sat_tier": "Tier 1 High-Yield"
     },
     "words": [
       {
@@ -5952,7 +6136,7 @@
       {
         "word": "correct",
         "prefix": "con- (completely)",
-        "suffix": "-rect (straight)",
+        "suffix": "",
         "definition": "Free from error; in accordance with fact or truth.",
         "sat_sentence": "Double-check your calculations to ensure that every algebraic answer is fully correct.",
         "connotation": "positive"
@@ -5976,7 +6160,7 @@
       {
         "word": "resurrection",
         "prefix": "re- (again) + sub- (up)",
-        "suffix": "-rect- (straight/rise)",
+        "suffix": "",
         "definition": "The act of rising from the dead; a revival of an idea or cultural form.",
         "sat_sentence": "The 1990s witnessed a surprising resurrection of interest in traditional vinyl record albums.",
         "connotation": "positive"
@@ -5984,7 +6168,7 @@
       {
         "word": "erect",
         "prefix": "e- (up, out)",
-        "suffix": "-rect (straight)",
+        "suffix": "",
         "definition": "Rigidly upright or straight; to build or put up a structure.",
         "sat_sentence": "Workers labored around the clock to erect temporary levee walls before the river crested.",
         "connotation": "positive"
@@ -5996,7 +6180,9 @@
       "morpheme": "aequ / equi",
       "language": "Latin",
       "core_meaning": "equal, even, fair, level",
-      "mnemonic": "Think 'equilibrium' (equal balance) or 'equitable' (fair and equal)"
+      "mnemonic": "Think 'equilibrium' (equal balance) or 'equitable' (fair and equal)",
+      "thematic_cluster": "Law & Morality",
+      "sat_tier": "Tier 1 High-Yield"
     },
     "words": [
       {
@@ -6026,7 +6212,7 @@
       {
         "word": "inequity",
         "prefix": "in- (not)",
-        "suffix": "-equity (fairness)",
+        "suffix": "-ty (noun)",
         "definition": "Lack of fairness or justice; unfair behavior or treatment.",
         "sat_sentence": "The civil rights report exposed deep systemic inequities in school funding between postal zip codes.",
         "connotation": "negative"
@@ -6046,7 +6232,9 @@
       "morpheme": "grav / griev",
       "language": "Latin",
       "core_meaning": "heavy, serious, weighty, burdened",
-      "mnemonic": "Think 'gravity' (heaviness/weight) or 'aggravate' (make heavier/worse)"
+      "mnemonic": "Think 'gravity' (heaviness/weight) or 'aggravate' (make heavier/worse)",
+      "thematic_cluster": "Quantity & Relation",
+      "sat_tier": "Tier 2 Multipliers"
     },
     "words": [
       {
@@ -6100,7 +6288,7 @@
       {
         "word": "aggrieve",
         "prefix": "ad- (to)",
-        "suffix": "-grieve (burden/injure)",
+        "suffix": "",
         "definition": "To distress, afflict, or treat someone unjustly.",
         "sat_sentence": "Aggrieved minority shareholders brought a class-action lawsuit against the deceitful corporate board.",
         "connotation": "negative"
@@ -6112,7 +6300,9 @@
       "morpheme": "lev",
       "language": "Latin",
       "core_meaning": "light, to lift, raise, rise",
-      "mnemonic": "Think 'levitate' (rise lightly) or 'alleviate' (lighten pain)"
+      "mnemonic": "Think 'levitate' (rise lightly) or 'alleviate' (lighten pain)",
+      "thematic_cluster": "Quantity & Relation",
+      "sat_tier": "Tier 2 Multipliers"
     },
     "words": [
       {
@@ -6178,7 +6368,9 @@
       "morpheme": "plen / plet",
       "language": "Latin",
       "core_meaning": "full, abundance, to fill",
-      "mnemonic": "Think 'plenty' (abundance) or 'replenish' (fill again)"
+      "mnemonic": "Think 'plenty' (abundance) or 'replenish' (fill again)",
+      "thematic_cluster": "Quantity & Relation",
+      "sat_tier": "Tier 2 Multipliers"
     },
     "words": [
       {
@@ -6244,7 +6436,9 @@
       "morpheme": "vac / van / void",
       "language": "Latin",
       "core_meaning": "empty, hollow, unoccupied",
-      "mnemonic": "Think 'vacant' (empty) or 'devoid' (completely empty)"
+      "mnemonic": "Think 'vacant' (empty) or 'devoid' (completely empty)",
+      "thematic_cluster": "Quantity & Relation",
+      "sat_tier": "Tier 2 Multipliers"
     },
     "words": [
       {
@@ -6282,7 +6476,7 @@
       {
         "word": "devoid",
         "prefix": "de- (completely)",
-        "suffix": "-void (empty)",
+        "suffix": "",
         "definition": "Entirely lacking or free from.",
         "sat_sentence": "The barren desert salt flats were completely devoid of vegetative life and fresh water.",
         "connotation": "negative"
@@ -6310,7 +6504,9 @@
       "morpheme": "nov / neo",
       "language": "Latin / Greek",
       "core_meaning": "new, fresh, recent",
-      "mnemonic": "Think 'novel' (new/fresh) or 'neophyte' (new beginner)"
+      "mnemonic": "Think 'novel' (new/fresh) or 'neophyte' (new beginner)",
+      "thematic_cluster": "Quantity & Relation",
+      "sat_tier": "Tier 1 High-Yield"
     },
     "words": [
       {
@@ -6376,7 +6572,9 @@
       "morpheme": "prim / proto",
       "language": "Latin / Greek",
       "core_meaning": "first, earliest, primary, original",
-      "mnemonic": "Think 'primary' (first) or 'prototype' (first model)"
+      "mnemonic": "Think 'primary' (first) or 'prototype' (first model)",
+      "thematic_cluster": "Quantity & Relation",
+      "sat_tier": "Tier 2 Multipliers"
     },
     "words": [
       {
@@ -6434,7 +6632,9 @@
       "morpheme": "omni",
       "language": "Latin",
       "core_meaning": "all, every, everywhere",
-      "mnemonic": "Think 'omniscient' (all-knowing) or 'omnipresent' (everywhere present)"
+      "mnemonic": "Think 'omniscient' (all-knowing) or 'omnipresent' (everywhere present)",
+      "thematic_cluster": "Quantity & Relation",
+      "sat_tier": "Tier 2 Multipliers"
     },
     "words": [
       {
@@ -6484,7 +6684,9 @@
       "morpheme": "pan",
       "language": "Greek",
       "core_meaning": "all, whole, entire, universal",
-      "mnemonic": "Think 'panacea' (cure for all) or 'panorama' (view of all)"
+      "mnemonic": "Think 'panacea' (cure for all) or 'panorama' (view of all)",
+      "thematic_cluster": "Quantity & Relation",
+      "sat_tier": "Tier 2 Multipliers"
     },
     "words": [
       {
@@ -6550,13 +6752,15 @@
       "morpheme": "arch / archi",
       "language": "Greek",
       "core_meaning": "chief, ruler, origin, ancient",
-      "mnemonic": "Think 'monarch' (sole ruler) or 'archaic' (ancient origin)"
+      "mnemonic": "Think 'monarch' (sole ruler) or 'archaic' (ancient origin)",
+      "thematic_cluster": "Power & Conflict",
+      "sat_tier": "Tier 2 Multipliers"
     },
     "words": [
       {
         "word": "hierarchy",
         "prefix": "hieros- (sacred)",
-        "suffix": "-archy (rule)",
+        "suffix": "",
         "definition": "A system or organization in which people or groups are ranked one above the other according to status or authority.",
         "sat_sentence": "The company flattened its corporate hierarchy to encourage open communication and agile decisions.",
         "connotation": "neutral"
@@ -6564,7 +6768,7 @@
       {
         "word": "anarchy",
         "prefix": "an- (without)",
-        "suffix": "-archy (ruler/government)",
+        "suffix": "",
         "definition": "A state of disorder due to absence or nonrecognition of authority.",
         "sat_sentence": "Following the collapse of the central government, the coastal region descended into lawless anarchy.",
         "connotation": "negative"
@@ -6572,7 +6776,7 @@
       {
         "word": "monarchy",
         "prefix": "monos- (single)",
-        "suffix": "-archy (ruler)",
+        "suffix": "",
         "definition": "A form of government with a monarch at the head.",
         "sat_sentence": "The United Kingdom evolved from an absolute medieval monarchy into a constitutional democracy.",
         "connotation": "neutral"
@@ -6596,7 +6800,7 @@
       {
         "word": "patriarch",
         "prefix": "pater- (father)",
-        "suffix": "-arch (ruler)",
+        "suffix": "",
         "definition": "The male head of a family or tribe; a founding figure.",
         "sat_sentence": "The venerable patriarch celebrated his ninetieth birthday surrounded by four generations of descendants.",
         "connotation": "positive"
@@ -6604,7 +6808,7 @@
       {
         "word": "oligarchy",
         "prefix": "oligos- (few)",
-        "suffix": "-archy (rule)",
+        "suffix": "",
         "definition": "A small group of people having control of a country, organization, or institution.",
         "sat_sentence": "A wealthy financial oligarchy controlled the major national media outlets and mining concessions.",
         "connotation": "negative"
@@ -6616,13 +6820,15 @@
       "morpheme": "crat / cracy",
       "language": "Greek",
       "core_meaning": "rule, power, governance, strength",
-      "mnemonic": "Think 'democracy' (rule of the people) or 'autocrat' (self-ruler)"
+      "mnemonic": "Think 'democracy' (rule of the people) or 'autocrat' (self-ruler)",
+      "thematic_cluster": "Power & Conflict",
+      "sat_tier": "Tier 2 Multipliers"
     },
     "words": [
       {
         "word": "democrat",
         "prefix": "demo- (people)",
-        "suffix": "-crat (advocate of rule)",
+        "suffix": "",
         "definition": "An advocate or supporter of democracy and representative government.",
         "sat_sentence": "As a passionate democrat, Thomas Paine championed popular representation against monarchical tyranny.",
         "connotation": "positive"
@@ -6630,7 +6836,7 @@
       {
         "word": "plutocracy",
         "prefix": "ploutos- (wealth)",
-        "suffix": "-cracy (rule)",
+        "suffix": "",
         "definition": "Government by the wealthy; a country or society governed by the wealthy.",
         "sat_sentence": "Campaign finance reformers argued that unlimited political donations would transform the republic into a plutocracy.",
         "connotation": "negative"
@@ -6638,7 +6844,7 @@
       {
         "word": "theocracy",
         "prefix": "theos- (god)",
-        "suffix": "-cracy (rule)",
+        "suffix": "",
         "definition": "A system of government in which priests rule in the name of God or a god.",
         "sat_sentence": "In a strict theocracy, secular legal statutes are completely subordinate to religious doctrine.",
         "connotation": "neutral"
@@ -6646,7 +6852,7 @@
       {
         "word": "technocrat",
         "prefix": "techne- (skill/technology)",
-        "suffix": "-crat (governor)",
+        "suffix": "",
         "definition": "An expert in science or technology who has a very high position in government or industry.",
         "sat_sentence": "The interim government appointed a respected technocrat to manage the fiscal stabilization plan.",
         "connotation": "positive"
@@ -6654,7 +6860,7 @@
       {
         "word": "bureaucracy",
         "prefix": "bureau- (desk/office)",
-        "suffix": "-cracy (rule)",
+        "suffix": "",
         "definition": "A system of government in which most important decisions are made by state officials rather than elected representatives.",
         "sat_sentence": "Entangled in layers of red tape and rigid bureaucracy, the grant approval took over a year.",
         "connotation": "negative"
@@ -6662,7 +6868,7 @@
       {
         "word": "aristocracy",
         "prefix": "aristos- (best)",
-        "suffix": "-cracy (rule)",
+        "suffix": "",
         "definition": "The highest class in certain societies, especially those holding hereditary titles or offices.",
         "sat_sentence": "The French Revolution violently stripped the landed aristocracy of their feudal estates and privileges.",
         "connotation": "negative"
@@ -6674,7 +6880,9 @@
       "morpheme": "dem / demo",
       "language": "Greek",
       "core_meaning": "people, populace, common folk",
-      "mnemonic": "Think 'democracy' (people power) or 'demographic' (study of human populations)"
+      "mnemonic": "Think 'democracy' (people power) or 'demographic' (study of human populations)",
+      "thematic_cluster": "Quantity & Relation",
+      "sat_tier": "Tier 2 Multipliers"
     },
     "words": [
       {
@@ -6696,7 +6904,7 @@
       {
         "word": "epidemic",
         "prefix": "epi- (upon)",
-        "suffix": "-demic (the people)",
+        "suffix": "-ic (adjective)",
         "definition": "A widespread occurrence of an infectious disease in a community at a particular time.",
         "sat_sentence": "Public health clinics launched an aggressive vaccination campaign to curb the measles epidemic.",
         "connotation": "negative"
@@ -6704,7 +6912,7 @@
       {
         "word": "endemic",
         "prefix": "en- (in)",
-        "suffix": "-demic (the people/native)",
+        "suffix": "-ic (adjective)",
         "definition": "Regularly found among particular people or in a certain area, of a disease or condition.",
         "sat_sentence": "Malaria remains endemic in humid equatorial regions where mosquito vectors breed year-round.",
         "connotation": "negative"
@@ -6732,7 +6940,9 @@
       "morpheme": "dur",
       "language": "Latin",
       "core_meaning": "hard, strong, lasting, to endure",
-      "mnemonic": "Think 'durable' (lasting/hard) or 'endure' (bear through hardships)"
+      "mnemonic": "Think 'durable' (lasting/hard) or 'endure' (bear through hardships)",
+      "thematic_cluster": "Power & Conflict",
+      "sat_tier": "Tier 2 Multipliers"
     },
     "words": [
       {
@@ -6746,7 +6956,7 @@
       {
         "word": "endure",
         "prefix": "en- (in, within)",
-        "suffix": "-dure (remain hard/last)",
+        "suffix": "",
         "definition": "Suffer something painful or difficult patiently; remain in existence; last.",
         "sat_sentence": "The ancient Roman aqueducts continue to endure after two millennia of weather and seismic tremors.",
         "connotation": "positive"
@@ -6798,7 +7008,9 @@
       "morpheme": "cap / cept / cip",
       "language": "Latin",
       "core_meaning": "to take, seize, hold, catch",
-      "mnemonic": "Think 'capture' (seize by force) or 'intercept' (catch in transit)"
+      "mnemonic": "Think 'capture' (seize by force) or 'intercept' (catch in transit)",
+      "thematic_cluster": "Power & Conflict",
+      "sat_tier": "Tier 1 High-Yield"
     },
     "words": [
       {
@@ -6899,7 +7111,9 @@
       "morpheme": "scrib / script",
       "language": "Latin",
       "core_meaning": "to write, record, draw",
-      "mnemonic": "Think 'inscribe' (carve or write into) or 'manuscript' (written document)"
+      "mnemonic": "Think 'inscribe' (carve or write into) or 'manuscript' (written document)",
+      "thematic_cluster": "Communication",
+      "sat_tier": "Tier 1 High-Yield"
     },
     "words": [
       {
@@ -6985,7 +7199,7 @@
         "part_of_speech": "noun",
         "partOfSpeech": "noun",
         "prefix": "post- (after, behind)",
-        "suffix": "-script (written)",
+        "suffix": "",
         "definition": "An additional remark, afterthought, or supplement appended to a completed letter or document.",
         "officialContextDefinition": "An additional remark, afterthought, or supplement appended to a completed letter or document.",
         "sat_sentence": "In a hurried postscript, the explorer provided coordinates for the hidden alpine cache.",
@@ -7000,7 +7214,9 @@
       "morpheme": "vinc / vict",
       "language": "Latin",
       "core_meaning": "to conquer, overcome, win",
-      "mnemonic": "Think 'victory' (triumph) or 'invincible' (incapable of being defeated)"
+      "mnemonic": "Think 'victory' (triumph) or 'invincible' (incapable of being defeated)",
+      "thematic_cluster": "Power & Conflict",
+      "sat_tier": "Tier 2 Multipliers"
     },
     "words": [
       {
@@ -7047,7 +7263,7 @@
         "part_of_speech": "verb",
         "partOfSpeech": "verb",
         "prefix": "e- (out, away)",
-        "suffix": "-ict (conquer, expel)",
+        "suffix": "",
         "definition": "To expel someone lawfully from a property or residence.",
         "officialContextDefinition": "To expel someone lawfully from a property or residence.",
         "sat_sentence": "The municipal housing authority warned landlords not to illegally evict tenants during winter months.",
@@ -7086,7 +7302,7 @@
         "part_of_speech": "verb",
         "partOfSpeech": "verb",
         "prefix": "con- (thoroughly)",
-        "suffix": "-ict (vanquish legally)",
+        "suffix": "",
         "definition": "To declare someone guilty of a criminal offense by formal court verdict.",
         "officialContextDefinition": "To declare someone guilty of a criminal offense by formal court verdict.",
         "sat_sentence": "Prosecutors lacked sufficient corroborating forensic evidence to convict the suspect beyond reasonable doubt.",
@@ -7101,7 +7317,9 @@
       "morpheme": "duc / duct",
       "language": "Latin",
       "core_meaning": "to lead, guide, bring",
-      "mnemonic": "Think 'conduct' (lead along) or 'induce' (lead into a state)"
+      "mnemonic": "Think 'conduct' (lead along) or 'induce' (lead into a state)",
+      "thematic_cluster": "Movement",
+      "sat_tier": "Tier 1 High-Yield"
     },
     "words": [
       {
@@ -7161,7 +7379,7 @@
         "part_of_speech": "verb",
         "partOfSpeech": "verb",
         "prefix": "ab- (away, from)",
-        "suffix": "-uct (lead)",
+        "suffix": "",
         "definition": "To take someone away illegally by force, deception, or coercion.",
         "officialContextDefinition": "To take someone away illegally by force, deception, or coercion.",
         "sat_sentence": "Federal agents uncovered a syndicate conspiring to abduct affluent executives for multimillion-dollar ransoms.",
@@ -7174,7 +7392,7 @@
         "part_of_speech": "noun",
         "partOfSpeech": "noun",
         "prefix": "aque- (water)",
-        "suffix": "-duct (channel, conduit)",
+        "suffix": "",
         "definition": "An artificial channel or elevated bridge constructed for conveying water across valleys.",
         "officialContextDefinition": "An artificial channel or elevated bridge constructed for conveying water across valleys.",
         "sat_sentence": "Ancient Roman engineers constructed monumental stone aqueduct systems to supply clean water to distant cities.",
@@ -7202,7 +7420,9 @@
       "morpheme": "pon / pos / posit",
       "language": "Latin",
       "core_meaning": "to place, put, set",
-      "mnemonic": "Think 'deposit' (put down) or 'posture' (manner of placing oneself)"
+      "mnemonic": "Think 'deposit' (put down) or 'posture' (manner of placing oneself)",
+      "thematic_cluster": "Quantity & Relation",
+      "sat_tier": "Tier 1 High-Yield"
     },
     "words": [
       {
@@ -7210,7 +7430,7 @@
         "part_of_speech": "verb",
         "partOfSpeech": "verb",
         "prefix": "juxta- (near, alongside)",
-        "suffix": "-pose (place, set)",
+        "suffix": "",
         "definition": "To place contrasting elements side by side to compare, contrast, or emphasize differences.",
         "officialContextDefinition": "To place contrasting elements side by side to compare, contrast, or emphasize differences.",
         "sat_sentence": "The curator chose to juxtapose stark industrial photography with idyllic pastoral landscapes.",
@@ -7249,7 +7469,7 @@
         "part_of_speech": "verb",
         "partOfSpeech": "verb",
         "prefix": "de- (down, from)",
-        "suffix": "-pose (place)",
+        "suffix": "",
         "definition": "To remove an authority figure from office forcefully; or to take sworn testimony under oath.",
         "officialContextDefinition": "To remove an authority figure from office forcefully; or to take sworn testimony under oath.",
         "sat_sentence": "A coalition of dissident military officers conspired to depose the corrupt head of state.",
@@ -7262,7 +7482,7 @@
         "part_of_speech": "verb",
         "partOfSpeech": "verb",
         "prefix": "super- (above, over) + in- (on)",
-        "suffix": "-pose (place)",
+        "suffix": "",
         "definition": "To place or lay one thing over another so that both items are still evident.",
         "officialContextDefinition": "To place or lay one thing over another so that both items are still evident.",
         "sat_sentence": "Meteorologists superimpose real-time Doppler radar readings over regional road maps.",
@@ -7303,7 +7523,9 @@
       "morpheme": "ten / tin / tain",
       "language": "Latin",
       "core_meaning": "to hold, keep, maintain",
-      "mnemonic": "Think 'tenant' (one who holds property) or 'tenacious' (holding firmly)"
+      "mnemonic": "Think 'tenant' (one who holds property) or 'tenacious' (holding firmly)",
+      "thematic_cluster": "Quantity & Relation",
+      "sat_tier": "Tier 1 High-Yield"
     },
     "words": [
       {
@@ -7324,7 +7546,7 @@
         "part_of_speech": "verb",
         "partOfSpeech": "verb",
         "prefix": "ab- (away, from)",
-        "suffix": "-tain (hold)",
+        "suffix": "",
         "definition": "To restrain oneself from doing, enjoying, or partaking in something; or to decline to vote.",
         "officialContextDefinition": "To restrain oneself from doing, enjoying, or partaking in something; or to decline to vote.",
         "sat_sentence": "Doctors advised the athlete to abstain from high-impact aerobic training until the tendon fully healed.",
@@ -7404,7 +7626,9 @@
       "morpheme": "doc / doct",
       "language": "Latin",
       "core_meaning": "to teach, instruct, prove",
-      "mnemonic": "Think 'doctor' (originally one qualified to teach) or 'indoctrinate' (teach beliefs)"
+      "mnemonic": "Think 'doctor' (originally one qualified to teach) or 'indoctrinate' (teach beliefs)",
+      "thematic_cluster": "Cognition",
+      "sat_tier": "Tier 2 Multipliers"
     },
     "words": [
       {
@@ -7505,7 +7729,9 @@
       "morpheme": "sed / sid / sess",
       "language": "Latin",
       "core_meaning": "to sit, settle, reside",
-      "mnemonic": "Think 'sedentary' (sitting still) or 'president' (one who sits before and leads)"
+      "mnemonic": "Think 'sedentary' (sitting still) or 'president' (one who sits before and leads)",
+      "thematic_cluster": "Quantity & Relation",
+      "sat_tier": "Tier 2 Multipliers"
     },
     "words": [
       {
@@ -7565,7 +7791,7 @@
         "part_of_speech": "verb",
         "partOfSpeech": "verb",
         "prefix": "super- (above, over)",
-        "suffix": "-sede (sit, take the seat of)",
+        "suffix": "",
         "definition": "To supplant, replace, or take the place of a person or obsolete authority.",
         "officialContextDefinition": "To supplant, replace, or take the place of a person or obsolete authority.",
         "sat_sentence": "Next-generation solid-state batteries are anticipated to supersede conventional lithium-ion cells.",
@@ -7578,7 +7804,7 @@
         "part_of_speech": "verb",
         "partOfSpeech": "verb",
         "prefix": "prae- (before, in front)",
-        "suffix": "-side (sit)",
+        "suffix": "",
         "definition": "To occupy the chair of authority; act as president, moderator, or chairman.",
         "officialContextDefinition": "To occupy the chair of authority; act as president, moderator, or chairman.",
         "sat_sentence": "Chief Justice Marshall was tapped to preside over the landmark constitutional tribunal.",
@@ -7606,7 +7832,9 @@
       "morpheme": "greg",
       "language": "Latin",
       "core_meaning": "flock, herd, gather",
-      "mnemonic": "Think 'congregate' (gather into a flock) or 'gregarious' (flocking in social groups)"
+      "mnemonic": "Think 'congregate' (gather into a flock) or 'gregarious' (flocking in social groups)",
+      "thematic_cluster": "Quantity & Relation",
+      "sat_tier": "Tier 2 Multipliers"
     },
     "words": [
       {
@@ -7707,7 +7935,9 @@
       "morpheme": "theo / the",
       "language": "Greek",
       "core_meaning": "god, deity, divine",
-      "mnemonic": "Think 'theology' (study of religion/god) or 'monotheism' (one god)"
+      "mnemonic": "Think 'theology' (study of religion/god) or 'monotheism' (one god)",
+      "thematic_cluster": "Law & Morality",
+      "sat_tier": "Tier 2 Multipliers"
     },
     "words": [
       {
@@ -7821,7 +8051,9 @@
       "morpheme": "clud / clus / claus",
       "language": "Latin",
       "core_meaning": "to shut, close",
-      "mnemonic": "Think 'exclude' (shut out) or 'conclude' (close together)"
+      "mnemonic": "Think 'exclude' (shut out) or 'conclude' (close together)",
+      "thematic_cluster": "Quantity & Relation",
+      "sat_tier": "Tier 1 High-Yield"
     },
     "words": [
       {
@@ -7922,7 +8154,9 @@
       "morpheme": "fac / fec / fic / fect",
       "language": "Latin",
       "core_meaning": "to make, do, produce",
-      "mnemonic": "Think 'factory' (place of making) or 'efficient' (doing thoroughly)"
+      "mnemonic": "Think 'factory' (place of making) or 'efficient' (doing thoroughly)",
+      "thematic_cluster": "Form & Nature",
+      "sat_tier": "Tier 1 High-Yield"
     },
     "words": [
       {
@@ -7956,7 +8190,7 @@
         "part_of_speech": "noun",
         "partOfSpeech": "noun",
         "prefix": "art- (skill, craft)",
-        "suffix": "-fice (making, doing)",
+        "suffix": "",
         "definition": "Clever or cunning devices or stratagems, especially as used to trick or deceive others.",
         "officialContextDefinition": "Clever or cunning devices or stratagems, especially as used to trick or deceive others.",
         "sat_sentence": "Behind a facade of polite modesty lay calculated political artifice designed to outmaneuver rivals.",
@@ -7969,7 +8203,7 @@
         "part_of_speech": "noun",
         "partOfSpeech": "noun",
         "prefix": "de- (down, lacking)",
-        "suffix": "-fic- (make, do)",
+        "suffix": "",
         "definition": "An amount by which something, especially a sum of money, is too small or falls short.",
         "officialContextDefinition": "An amount by which something, especially a sum of money, is too small or falls short.",
         "sat_sentence": "The municipal council debated tax adjustments to close a multi-million-dollar structural budget deficit.",
@@ -8023,7 +8257,9 @@
       "morpheme": "mor / mort",
       "language": "Latin",
       "core_meaning": "death, dead, dying",
-      "mnemonic": "Think 'mortal' (subject to death) or 'mortician' (undertaker)"
+      "mnemonic": "Think 'mortal' (subject to death) or 'mortician' (undertaker)",
+      "thematic_cluster": "Form & Nature",
+      "sat_tier": "Tier 2 Multipliers"
     },
     "words": [
       {
@@ -8109,7 +8345,7 @@
         "part_of_speech": "noun",
         "partOfSpeech": "noun",
         "prefix": "post- (after)",
-        "suffix": "-mortem (death)",
+        "suffix": "",
         "definition": "An examination of a dead body to determine cause of death; or an analysis following an event.",
         "officialContextDefinition": "An examination of a dead body to determine cause of death; or an analysis following an event.",
         "sat_sentence": "After the failed software rollout, engineering leadership held an exhaustive postmortem to audit technical failures.",
@@ -8124,7 +8360,9 @@
       "morpheme": "plac / placat",
       "language": "Latin",
       "core_meaning": "to please, calm, appease",
-      "mnemonic": "Think 'placate' (calm down) or 'placid' (peaceful and calm)"
+      "mnemonic": "Think 'placate' (calm down) or 'placid' (peaceful and calm)",
+      "thematic_cluster": "Emotion",
+      "sat_tier": "Tier 1 High-Yield"
     },
     "words": [
       {
@@ -8225,7 +8463,9 @@
       "morpheme": "am / amat / amor",
       "language": "Latin",
       "core_meaning": "love, affection, friendship",
-      "mnemonic": "Think 'amorous' (loving) or 'amiable' (friendly and warm)"
+      "mnemonic": "Think 'amorous' (loving) or 'amiable' (friendly and warm)",
+      "thematic_cluster": "Emotion",
+      "sat_tier": "Tier 2 Multipliers"
     },
     "words": [
       {
@@ -8326,7 +8566,9 @@
       "morpheme": "grat / grac",
       "language": "Latin",
       "core_meaning": "thankful, pleasing, favor",
-      "mnemonic": "Think 'gratitude' (thankfulness) or 'gratify' (give pleasure)"
+      "mnemonic": "Think 'gratitude' (thankfulness) or 'gratify' (give pleasure)",
+      "thematic_cluster": "Emotion",
+      "sat_tier": "Tier 2 Multipliers"
     },
     "words": [
       {
@@ -8427,7 +8669,9 @@
       "morpheme": "corp / corpor",
       "language": "Latin",
       "core_meaning": "body, flesh, physical substance",
-      "mnemonic": "Think 'corpse' (dead body) or 'corporation' (a legally formed body)"
+      "mnemonic": "Think 'corpse' (dead body) or 'corporation' (a legally formed body)",
+      "thematic_cluster": "Form & Nature",
+      "sat_tier": "Tier 2 Multipliers"
     },
     "words": [
       {
@@ -8528,7 +8772,9 @@
       "morpheme": "vor / vour",
       "language": "Latin",
       "core_meaning": "to eat, swallow, devour",
-      "mnemonic": "Think 'voracious' (eating greedily) or 'devour' (swallow down greedily)"
+      "mnemonic": "Think 'voracious' (eating greedily) or 'devour' (swallow down greedily)",
+      "thematic_cluster": "Form & Nature",
+      "sat_tier": "Tier 3 Advanced"
     },
     "words": [
       {
@@ -8549,7 +8795,7 @@
         "part_of_speech": "verb",
         "partOfSpeech": "verb",
         "prefix": "de- (down, completely)",
-        "suffix": "-vour (eat, consume)",
+        "suffix": "",
         "definition": "To eat food hungrily or quickly; or to consume, destroy, or engulf something completely.",
         "officialContextDefinition": "To eat food hungrily or quickly; or to consume, destroy, or engulf something completely.",
         "sat_sentence": "Wildfires swept down the arid mountain canyon, threatening to devour historic timber lodges in their path.",
@@ -8562,7 +8808,7 @@
         "part_of_speech": "noun",
         "partOfSpeech": "noun",
         "prefix": "carni- (flesh, meat)",
-        "suffix": "-vore (eater)",
+        "suffix": "",
         "definition": "An animal or organism that feeds primarily or exclusively on the flesh of other animals.",
         "officialContextDefinition": "An animal or organism that feeds primarily or exclusively on the flesh of other animals.",
         "sat_sentence": "As an apex carnivore, the polar bear depends on sea-ice seal populations for caloric survival.",
@@ -8575,7 +8821,7 @@
         "part_of_speech": "adjective",
         "partOfSpeech": "adjective",
         "prefix": "herbi- (plant, grass)",
-        "suffix": "-vorous (eating)",
+        "suffix": "-ous (adjective)",
         "definition": "Feeding primarily or exclusively on plants and plant-derived foliage.",
         "officialContextDefinition": "Feeding primarily or exclusively on plants and plant-derived foliage.",
         "sat_sentence": "Sauropod dinosaurs developed elongated necks to browse foliage that other herbivorous species could not reach.",
@@ -8588,7 +8834,7 @@
         "part_of_speech": "adjective",
         "partOfSpeech": "adjective",
         "prefix": "insecti- (insect)",
-        "suffix": "-vorous (consuming)",
+        "suffix": "-ous (adjective)",
         "definition": "Feeding primarily on insects and other small invertebrates.",
         "officialContextDefinition": "Feeding primarily on insects and other small invertebrates.",
         "sat_sentence": "The Venus flytrap is an insectivorous carnivorous plant that thrives in nutrient-deprived peat bogs.",
@@ -8601,7 +8847,7 @@
         "part_of_speech": "noun",
         "partOfSpeech": "noun",
         "prefix": "frugi- (fruit)",
-        "suffix": "-vore (eater)",
+        "suffix": "",
         "definition": "An animal that thrives primarily or entirely on fruit as its principal food source.",
         "officialContextDefinition": "An animal that thrives primarily or entirely on fruit as its principal food source.",
         "sat_sentence": "Tropical toucans function as key seed-dispersal frugivore species throughout lowland rainforest canopies.",
@@ -8614,7 +8860,7 @@
         "part_of_speech": "adjective",
         "partOfSpeech": "adjective",
         "prefix": "sangui- (blood)",
-        "suffix": "-vorous (feeding upon)",
+        "suffix": "-ous (adjective)",
         "definition": "Feeding on blood as a nutritional source; hematophagous.",
         "officialContextDefinition": "Feeding on blood as a nutritional source; hematophagous.",
         "sat_sentence": "Vampire bats are sanguivorous mammals that utilize specialized thermal facial sensors to locate prey veins.",
@@ -8629,7 +8875,9 @@
       "morpheme": "ambul",
       "language": "Latin",
       "core_meaning": "to walk, move about, wander",
-      "mnemonic": "Think 'ambulatory' (able to walk) or 'preamble' (walking before to introduce)"
+      "mnemonic": "Think 'ambulatory' (able to walk) or 'preamble' (walking before to introduce)",
+      "thematic_cluster": "Movement",
+      "sat_tier": "Tier 3 Advanced"
     },
     "words": [
       {
@@ -8730,7 +8978,9 @@
       "morpheme": "crypt / cryph",
       "language": "Greek",
       "core_meaning": "hidden, secret, concealed",
-      "mnemonic": "Think 'cryptic' (having hidden meaning) or 'encrypt' (hide with code)"
+      "mnemonic": "Think 'cryptic' (having hidden meaning) or 'encrypt' (hide with code)",
+      "thematic_cluster": "Cognition",
+      "sat_tier": "Tier 2 Multipliers"
     },
     "words": [
       {
@@ -8831,7 +9081,9 @@
       "morpheme": "acri / acr / acer",
       "language": "Latin",
       "core_meaning": "sharp, bitter, sour, stinging",
-      "mnemonic": "Think 'acrid' (stinging bitter smell) or 'acerbic' (sharp sour tone)"
+      "mnemonic": "Think 'acrid' (stinging bitter smell) or 'acerbic' (sharp sour tone)",
+      "thematic_cluster": "Form & Nature",
+      "sat_tier": "Tier 3 Advanced"
     },
     "words": [
       {
@@ -8932,7 +9184,9 @@
       "morpheme": "fall / fals",
       "language": "Latin",
       "core_meaning": "to deceive, trick, err",
-      "mnemonic": "Think 'fallacy' (deceptive mistaken belief) or 'falsify' (alter deceptively)"
+      "mnemonic": "Think 'fallacy' (deceptive mistaken belief) or 'falsify' (alter deceptively)",
+      "thematic_cluster": "Cognition",
+      "sat_tier": "Tier 1 High-Yield"
     },
     "words": [
       {
@@ -9033,7 +9287,9 @@
       "morpheme": "quer / quest / quir / quis",
       "language": "Latin",
       "core_meaning": "to seek, ask, inquire",
-      "mnemonic": "Think 'inquire' (ask into) or 'quest' (search or journey of seeking)"
+      "mnemonic": "Think 'inquire' (ask into) or 'quest' (search or journey of seeking)",
+      "thematic_cluster": "Cognition",
+      "sat_tier": "Tier 1 High-Yield"
     },
     "words": [
       {
@@ -9134,7 +9390,9 @@
       "morpheme": "pung / punct",
       "language": "Latin",
       "core_meaning": "to prick, pierce, point, sting",
-      "mnemonic": "Think 'puncture' (pierce a hole) or 'punctual' (right on the sharp point of time)"
+      "mnemonic": "Think 'puncture' (pierce a hole) or 'punctual' (right on the sharp point of time)",
+      "thematic_cluster": "Form & Nature",
+      "sat_tier": "Tier 3 Advanced"
     },
     "words": [
       {
@@ -9235,7 +9493,9 @@
       "morpheme": "tac / tic",
       "language": "Latin",
       "core_meaning": "silent, quiet",
-      "mnemonic": "Think 'tacit' (unspoken agreement) or 'taciturn' (habitually silent)"
+      "mnemonic": "Think 'tacit' (unspoken agreement) or 'taciturn' (habitually silent)",
+      "thematic_cluster": "Communication",
+      "sat_tier": "Tier 3 Advanced"
     },
     "words": [
       {
@@ -9336,7 +9596,9 @@
       "morpheme": "prob / prov",
       "language": "Latin",
       "core_meaning": "to prove, test, upright, good",
-      "mnemonic": "Think 'probity' (proven integrity) or 'approbation' (proven praise)"
+      "mnemonic": "Think 'probity' (proven integrity) or 'approbation' (proven praise)",
+      "thematic_cluster": "Cognition",
+      "sat_tier": "Tier 2 Multipliers"
     },
     "words": [
       {
@@ -9437,7 +9699,9 @@
       "morpheme": "turb",
       "language": "Latin",
       "core_meaning": "confusion, disturbance, turmoil, whirl",
-      "mnemonic": "Think 'turbulent' (stormy turmoil) or 'perturb' (disturb deeply)"
+      "mnemonic": "Think 'turbulent' (stormy turmoil) or 'perturb' (disturb deeply)",
+      "thematic_cluster": "Power & Conflict",
+      "sat_tier": "Tier 2 Multipliers"
     },
     "words": [
       {
@@ -9538,7 +9802,9 @@
       "morpheme": "ann / enn",
       "language": "Latin",
       "core_meaning": "year",
-      "mnemonic": "Think 'annual' (occurring yearly) or 'perennial' (lasting through the years)"
+      "mnemonic": "Think 'annual' (occurring yearly) or 'perennial' (lasting through the years)",
+      "thematic_cluster": "Quantity & Relation",
+      "sat_tier": "Tier 2 Multipliers"
     },
     "words": [
       {
@@ -9639,7 +9905,9 @@
       "morpheme": "poly",
       "language": "Greek",
       "core_meaning": "many, multiple, much",
-      "mnemonic": "Think 'polyglot' (speaking many languages) or 'polygon' (figure with many angles)"
+      "mnemonic": "Think 'polyglot' (speaking many languages) or 'polygon' (figure with many angles)",
+      "thematic_cluster": "Quantity & Relation",
+      "sat_tier": "Tier 2 Multipliers"
     },
     "words": [
       {
@@ -9740,7 +10008,9 @@
       "morpheme": "bio",
       "language": "Greek",
       "core_meaning": "life, living organisms",
-      "mnemonic": "Think 'biology' (study of living things) or 'biodiversity' (variety of life)"
+      "mnemonic": "Think 'biology' (study of living things) or 'biodiversity' (variety of life)",
+      "thematic_cluster": "Form & Nature",
+      "sat_tier": "Tier 2 Multipliers"
     },
     "words": [
       {
@@ -9841,7 +10111,9 @@
       "morpheme": "culp",
       "language": "Latin",
       "core_meaning": "blame, fault, guilt",
-      "mnemonic": "Think 'culprit' (one who committed the fault) or 'exculpate' (free from blame)"
+      "mnemonic": "Think 'culprit' (one who committed the fault) or 'exculpate' (free from blame)",
+      "thematic_cluster": "Law & Morality",
+      "sat_tier": "Tier 2 Multipliers"
     },
     "words": [
       {
@@ -9942,7 +10214,9 @@
       "morpheme": "noc / noxi / noce",
       "language": "Latin",
       "core_meaning": "harm, hurt, injure",
-      "mnemonic": "Think 'innocuous' (doing no harm) or 'noxious' (harmful/poisonous)"
+      "mnemonic": "Think 'innocuous' (doing no harm) or 'noxious' (harmful/poisonous)",
+      "thematic_cluster": "Law & Morality",
+      "sat_tier": "Tier 3 Advanced"
     },
     "words": [
       {
@@ -10043,7 +10317,9 @@
       "morpheme": "oner / onus",
       "language": "Latin",
       "core_meaning": "burden, load, duty",
-      "mnemonic": "Think 'onerous' (burdensome) or 'onus' (burden of responsibility)"
+      "mnemonic": "Think 'onerous' (burdensome) or 'onus' (burden of responsibility)",
+      "thematic_cluster": "Quantity & Relation",
+      "sat_tier": "Tier 3 Advanced"
     },
     "words": [
       {
@@ -10144,7 +10420,9 @@
       "morpheme": "flect / flex",
       "language": "Latin",
       "core_meaning": "to bend, curve",
-      "mnemonic": "Think 'deflect' (bend away from) or 'flexible' (able to bend easily)"
+      "mnemonic": "Think 'deflect' (bend away from) or 'flexible' (able to bend easily)",
+      "thematic_cluster": "Form & Nature",
+      "sat_tier": "Tier 3 Advanced"
     },
     "words": [
       {
@@ -10245,7 +10523,9 @@
       "morpheme": "son",
       "language": "Latin",
       "core_meaning": "sound",
-      "mnemonic": "Think 'sonorous' (deep, rich sound) or 'dissonant' (harsh conflicting sound)"
+      "mnemonic": "Think 'sonorous' (deep, rich sound) or 'dissonant' (harsh conflicting sound)",
+      "thematic_cluster": "Communication",
+      "sat_tier": "Tier 3 Advanced"
     },
     "words": [
       {
@@ -10346,7 +10626,9 @@
       "morpheme": "pecc",
       "language": "Latin",
       "core_meaning": "sin, fault, stumble, err",
-      "mnemonic": "Think 'impeccable' (flawless, without fault) or 'peccadillo' (minor fault/peccancy)"
+      "mnemonic": "Think 'impeccable' (flawless, without fault) or 'peccadillo' (minor fault/peccancy)",
+      "thematic_cluster": "Law & Morality",
+      "sat_tier": "Tier 3 Advanced"
     },
     "words": [
       {
@@ -10447,7 +10729,9 @@
       "morpheme": "pass / pati",
       "language": "Latin",
       "core_meaning": "to suffer, endure, feel, allow",
-      "mnemonic": "Think 'compassion' (suffering/feeling with) or 'impassive' (enduring without emotion)"
+      "mnemonic": "Think 'compassion' (suffering/feeling with) or 'impassive' (enduring without emotion)",
+      "thematic_cluster": "Emotion",
+      "sat_tier": "Tier 3 Advanced"
     },
     "words": [
       {
@@ -10548,7 +10832,9 @@
       "morpheme": "ferv",
       "language": "Latin",
       "core_meaning": "to boil, glow, burn with zeal",
-      "mnemonic": "Think 'fervent' (burning with passion) or 'effervescent' (bubbling over with vitality)"
+      "mnemonic": "Think 'fervent' (burning with passion) or 'effervescent' (bubbling over with vitality)",
+      "thematic_cluster": "Emotion",
+      "sat_tier": "Tier 3 Advanced"
     },
     "words": [
       {
@@ -10649,7 +10935,9 @@
       "morpheme": "di / dia",
       "language": "Greek",
       "core_meaning": "through, across, between",
-      "mnemonic": "Think 'diameter' (measuring across) or 'diaphanous' (translucent, light shining through)"
+      "mnemonic": "Think 'diameter' (measuring across) or 'diaphanous' (translucent, light shining through)",
+      "thematic_cluster": "Quantity & Relation",
+      "sat_tier": "Tier 3 Advanced"
     },
     "words": [
       {
@@ -10750,7 +11038,9 @@
       "morpheme": "torp",
       "language": "Latin",
       "core_meaning": "numb, sluggish, inactive, dull",
-      "mnemonic": "Think 'torpid' (sluggish/inactive) or 'torpor' (state of dormant lethargy)"
+      "mnemonic": "Think 'torpid' (sluggish/inactive) or 'torpor' (state of dormant lethargy)",
+      "thematic_cluster": "Emotion",
+      "sat_tier": "Tier 3 Advanced"
     },
     "words": [
       {
@@ -10851,7 +11141,9 @@
       "morpheme": "sanct / sacr",
       "language": "Latin",
       "core_meaning": "sacred, holy, solemnly decree",
-      "mnemonic": "Think 'sanctuary' (sacred refuge) or 'sacrosanct' (too holy to be violated)"
+      "mnemonic": "Think 'sanctuary' (sacred refuge) or 'sacrosanct' (too holy to be violated)",
+      "thematic_cluster": "Law & Morality",
+      "sat_tier": "Tier 3 Advanced"
     },
     "words": [
       {
@@ -10952,7 +11244,9 @@
       "morpheme": "mit / miti",
       "language": "Latin",
       "core_meaning": "mild, soft, gentle, calm",
-      "mnemonic": "Think 'mitigate' (make milder or less severe) or 'unmitigated' (pure/not softened)"
+      "mnemonic": "Think 'mitigate' (make milder or less severe) or 'unmitigated' (pure/not softened)",
+      "thematic_cluster": "Law & Morality",
+      "sat_tier": "Tier 3 Advanced"
     },
     "words": [
       {
@@ -11053,7 +11347,9 @@
       "morpheme": "trep",
       "language": "Latin",
       "core_meaning": "tremble, shake, fear, alarm",
-      "mnemonic": "Think 'trepidation' (trembling fear) or 'intrepid' (without trembling/fearless)"
+      "mnemonic": "Think 'trepidation' (trembling fear) or 'intrepid' (without trembling/fearless)",
+      "thematic_cluster": "Emotion",
+      "sat_tier": "Tier 3 Advanced"
     },
     "words": [
       {
@@ -11154,7 +11450,9 @@
       "morpheme": "mend",
       "language": "Latin",
       "core_meaning": "fault, flaw, defect, lie",
-      "mnemonic": "Think 'mendacious' (habitually dishonest) or 'emend' (correct defects in a text)"
+      "mnemonic": "Think 'mendacious' (habitually dishonest) or 'emend' (correct defects in a text)",
+      "thematic_cluster": "Law & Morality",
+      "sat_tier": "Tier 3 Advanced"
     },
     "words": [
       {
@@ -11255,7 +11553,9 @@
       "morpheme": "pet / petit",
       "language": "Latin",
       "core_meaning": "to seek, rush at, strive for, aim",
-      "mnemonic": "Think 'impetuous' (rushing impulsively) or 'petulant' (peevishly aggressive)"
+      "mnemonic": "Think 'impetuous' (rushing impulsively) or 'petulant' (peevishly aggressive)",
+      "thematic_cluster": "Movement",
+      "sat_tier": "Tier 3 Advanced"
     },
     "words": [
       {
@@ -11356,7 +11656,9 @@
       "morpheme": "verb",
       "language": "Latin",
       "core_meaning": "word",
-      "mnemonic": "Think 'verbose' (too many words) or 'verbatim' (word for word)"
+      "mnemonic": "Think 'verbose' (too many words) or 'verbatim' (word for word)",
+      "thematic_cluster": "Communication",
+      "sat_tier": "Tier 3 Advanced"
     },
     "words": [
       {
@@ -11457,7 +11759,9 @@
       "morpheme": "lit / litig",
       "language": "Latin",
       "core_meaning": "dispute, lawsuit, contend, quarrel",
-      "mnemonic": "Think 'litigation' (legal court lawsuit) or 'litigious' (prone to arguing/suing)"
+      "mnemonic": "Think 'litigation' (legal court lawsuit) or 'litigious' (prone to arguing/suing)",
+      "thematic_cluster": "Power & Conflict",
+      "sat_tier": "Tier 3 Advanced"
     },
     "words": [
       {
@@ -11558,7 +11862,9 @@
       "morpheme": "man / manu",
       "language": "Latin",
       "core_meaning": "hand",
-      "mnemonic": "Think 'manipulate' (handle skillfully) or 'manumit' (release from the hand/free)"
+      "mnemonic": "Think 'manipulate' (handle skillfully) or 'manumit' (release from the hand/free)",
+      "thematic_cluster": "Form & Nature",
+      "sat_tier": "Tier 3 Advanced"
     },
     "words": [
       {
@@ -11659,7 +11965,9 @@
       "morpheme": "pyr / pyro",
       "language": "Greek",
       "core_meaning": "fire, heat",
-      "mnemonic": "Think 'pyrotechnics' (fireworks display) or 'pyre' (ceremonial fire)"
+      "mnemonic": "Think 'pyrotechnics' (fireworks display) or 'pyre' (ceremonial fire)",
+      "thematic_cluster": "Form & Nature",
+      "sat_tier": "Tier 3 Advanced"
     },
     "words": [
       {
@@ -11760,7 +12068,9 @@
       "morpheme": "dorm",
       "language": "Latin",
       "core_meaning": "sleep",
-      "mnemonic": "Think 'dormant' (sleeping/inactive) or 'dormitory' (sleeping hall)"
+      "mnemonic": "Think 'dormant' (sleeping/inactive) or 'dormitory' (sleeping hall)",
+      "thematic_cluster": "Form & Nature",
+      "sat_tier": "Tier 3 Advanced"
     },
     "words": [
       {
@@ -11861,7 +12171,9 @@
       "morpheme": "palp",
       "language": "Latin",
       "core_meaning": "to touch, stroke, feel gently",
-      "mnemonic": "Think 'palpable' (able to be touched/felt) or 'palpitate' (heart fluttering)"
+      "mnemonic": "Think 'palpable' (able to be touched/felt) or 'palpitate' (heart fluttering)",
+      "thematic_cluster": "Form & Nature",
+      "sat_tier": "Tier 3 Advanced"
     },
     "words": [
       {
@@ -11962,7 +12274,9 @@
       "morpheme": "quie / quit",
       "language": "Latin",
       "core_meaning": "quiet, rest, calm",
-      "mnemonic": "Think 'quiescent' (at quiet rest) or 'acquiesce' (quietly yield to)"
+      "mnemonic": "Think 'quiescent' (at quiet rest) or 'acquiesce' (quietly yield to)",
+      "thematic_cluster": "Form & Nature",
+      "sat_tier": "Tier 3 Advanced"
     },
     "words": [
       {
@@ -12063,7 +12377,9 @@
       "morpheme": "clar",
       "language": "Latin",
       "core_meaning": "clear, bright, loud",
-      "mnemonic": "Think 'clarity' (clearness of thought) or 'clarion' (clear, ringing trumpet call)"
+      "mnemonic": "Think 'clarity' (clearness of thought) or 'clarion' (clear, ringing trumpet call)",
+      "thematic_cluster": "Communication",
+      "sat_tier": "Tier 3 Advanced"
     },
     "words": [
       {
@@ -12164,7 +12480,9 @@
       "morpheme": "sinu",
       "language": "Latin",
       "core_meaning": "curve, winding, fold, bend",
-      "mnemonic": "Think 'sinuous' (full of winding curves) or 'insinuate' (wind deviously into)"
+      "mnemonic": "Think 'sinuous' (full of winding curves) or 'insinuate' (wind deviously into)",
+      "thematic_cluster": "Form & Nature",
+      "sat_tier": "Tier 3 Advanced"
     },
     "words": [
       {
@@ -12265,7 +12583,9 @@
       "morpheme": "sal / sil / sult",
       "language": "Latin",
       "core_meaning": "to leap, jump, spring forward",
-      "mnemonic": "Think 'salient' (leaping out/prominent) or 'resilient' (leaping back from adversity)"
+      "mnemonic": "Think 'salient' (leaping out/prominent) or 'resilient' (leaping back from adversity)",
+      "thematic_cluster": "Movement",
+      "sat_tier": "Tier 3 Advanced"
     },
     "words": [
       {
@@ -12366,7 +12686,9 @@
       "morpheme": "und / unda",
       "language": "Latin",
       "core_meaning": "wave, flow, overflow",
-      "mnemonic": "Think 'inundate' (overflow with waves/deluge) or 'undulate' (move with wave-like curves)"
+      "mnemonic": "Think 'inundate' (overflow with waves/deluge) or 'undulate' (move with wave-like curves)",
+      "thematic_cluster": "Movement",
+      "sat_tier": "Tier 3 Advanced"
     },
     "words": [
       {
@@ -12467,7 +12789,9 @@
       "morpheme": "fulg / flagr",
       "language": "Latin",
       "core_meaning": "shine, flash, blaze, burn",
-      "mnemonic": "Think 'refulgent' (shining radiantly) or 'conflagration' (destructive blaze)"
+      "mnemonic": "Think 'refulgent' (shining radiantly) or 'conflagration' (destructive blaze)",
+      "thematic_cluster": "Form & Nature",
+      "sat_tier": "Tier 3 Advanced"
     },
     "words": [
       {
@@ -12568,7 +12892,9 @@
       "morpheme": "moll",
       "language": "Latin",
       "core_meaning": "soft, supple, to soften",
-      "mnemonic": "Think 'mollify' (soften anger/soothe) or 'emollient' (skin-softening cream)"
+      "mnemonic": "Think 'mollify' (soften anger/soothe) or 'emollient' (skin-softening cream)",
+      "thematic_cluster": "Form & Nature",
+      "sat_tier": "Tier 3 Advanced"
     },
     "words": [
       {
@@ -12669,7 +12995,9 @@
       "morpheme": "av / avar",
       "language": "Latin",
       "core_meaning": "eager, craving, greedy",
-      "mnemonic": "Think 'avarice' (greed for wealth) or 'avid' (eagerly craving/keen)"
+      "mnemonic": "Think 'avarice' (greed for wealth) or 'avid' (eagerly craving/keen)",
+      "thematic_cluster": "Emotion",
+      "sat_tier": "Tier 3 Advanced"
     },
     "words": [
       {
@@ -12770,7 +13098,9 @@
       "morpheme": "vet / veter",
       "language": "Latin",
       "core_meaning": "old, seasoned, long-standing",
-      "mnemonic": "Think 'inveterate' (deep-rooted by long habit) or 'veteran' (experienced through years)"
+      "mnemonic": "Think 'inveterate' (deep-rooted by long habit) or 'veteran' (experienced through years)",
+      "thematic_cluster": "Quantity & Relation",
+      "sat_tier": "Tier 3 Advanced"
     },
     "words": [
       {
@@ -12871,7 +13201,9 @@
       "morpheme": "ard / ars",
       "language": "Latin",
       "core_meaning": "to burn, glow, passion",
-      "mnemonic": "Think 'ardent' (burning with passion) or 'arson' (deliberate burning)"
+      "mnemonic": "Think 'ardent' (burning with passion) or 'arson' (deliberate burning)",
+      "thematic_cluster": "Emotion",
+      "sat_tier": "Tier 3 Advanced"
     },
     "words": [
       {
@@ -12972,7 +13304,9 @@
       "morpheme": "queri / querul",
       "language": "Latin",
       "core_meaning": "to complain, lament, dispute",
-      "mnemonic": "Think 'querulous' (habitually whining/complaining) or 'quarrel' (angry dispute)"
+      "mnemonic": "Think 'querulous' (habitually whining/complaining) or 'quarrel' (angry dispute)",
+      "thematic_cluster": "Communication",
+      "sat_tier": "Tier 3 Advanced"
     },
     "words": [
       {
@@ -13073,7 +13407,9 @@
       "morpheme": "hetero",
       "language": "Greek",
       "core_meaning": "other, different, diverse",
-      "mnemonic": "Think 'heterogeneous' (diverse components) or 'heteroclite' (departing from standard rules)"
+      "mnemonic": "Think 'heterogeneous' (diverse components) or 'heteroclite' (departing from standard rules)",
+      "thematic_cluster": "Quantity & Relation",
+      "sat_tier": "Tier 3 Advanced"
     },
     "words": [
       {
@@ -13174,7 +13510,9 @@
       "morpheme": "homo / homeo",
       "language": "Greek",
       "core_meaning": "same, similar, uniform",
-      "mnemonic": "Think 'homologous' (similar in structure/origin) or 'homeostasis' (maintaining internal equilibrium)"
+      "mnemonic": "Think 'homologous' (similar in structure/origin) or 'homeostasis' (maintaining internal equilibrium)",
+      "thematic_cluster": "Quantity & Relation",
+      "sat_tier": "Tier 3 Advanced"
     },
     "words": [
       {
@@ -13275,7 +13613,9 @@
       "morpheme": "cast / chast",
       "language": "Latin",
       "core_meaning": "pure, cut off from fault, correct, punish",
-      "mnemonic": "Think 'castigate' (punish severely to correct) or 'chaste' (pure/unstained)"
+      "mnemonic": "Think 'castigate' (punish severely to correct) or 'chaste' (pure/unstained)",
+      "thematic_cluster": "Power & Conflict",
+      "sat_tier": "Tier 3 Advanced"
     },
     "words": [
       {
@@ -13376,7 +13716,9 @@
       "morpheme": "pau / pauc",
       "language": "Latin",
       "core_meaning": "few, little, small quantity",
-      "mnemonic": "Think 'paucity' (scarcity, small number) or 'pauper' (person with few resources)"
+      "mnemonic": "Think 'paucity' (scarcity, small number) or 'pauper' (person with few resources)",
+      "thematic_cluster": "Quantity & Relation",
+      "sat_tier": "Tier 3 Advanced"
     },
     "words": [
       {
@@ -13477,7 +13819,9 @@
       "morpheme": "scintill",
       "language": "Latin",
       "core_meaning": "spark, glimmer, flash",
-      "mnemonic": "Think 'scintillating' (sparkling brilliantly) or 'scintilla' (a tiny spark/trace)"
+      "mnemonic": "Think 'scintillating' (sparkling brilliantly) or 'scintilla' (a tiny spark/trace)",
+      "thematic_cluster": "Form & Nature",
+      "sat_tier": "Tier 3 Advanced"
     },
     "words": [
       {
@@ -13578,7 +13922,9 @@
       "morpheme": "peri",
       "language": "Greek",
       "core_meaning": "around, about, enclosing, near",
-      "mnemonic": "Think 'periphery' (boundary around) or 'peripatetic' (walking around)"
+      "mnemonic": "Think 'periphery' (boundary around) or 'peripatetic' (walking around)",
+      "thematic_cluster": "Quantity & Relation",
+      "sat_tier": "Tier 3 Advanced"
     },
     "words": [
       {
@@ -13679,7 +14025,9 @@
       "morpheme": "cata",
       "language": "Greek",
       "core_meaning": "down, against, completely, thoroughly",
-      "mnemonic": "Think 'cataclysm' (violent down-wash) or 'catalyst' (completely breaks down energy barrier)"
+      "mnemonic": "Think 'cataclysm' (violent down-wash) or 'catalyst' (completely breaks down energy barrier)",
+      "thematic_cluster": "Quantity & Relation",
+      "sat_tier": "Tier 3 Advanced"
     },
     "words": [
       {
@@ -13780,7 +14128,9 @@
       "morpheme": "lucr",
       "language": "Latin",
       "core_meaning": "gain, profit, wealth",
-      "mnemonic": "Think 'lucrative' (yielding great financial profit) or 'filthy lucre' (illicit financial gain)"
+      "mnemonic": "Think 'lucrative' (yielding great financial profit) or 'filthy lucre' (illicit financial gain)",
+      "thematic_cluster": "Quantity & Relation",
+      "sat_tier": "Tier 3 Advanced"
     },
     "words": [
       {

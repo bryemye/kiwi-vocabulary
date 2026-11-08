@@ -24,6 +24,19 @@ import {
   getWordReview, 
   mergeReviewsIntoRoots 
 } from '../services/editorialService';
+import { useCelestialTrajectory } from '../context/CelestialTrajectoryContext';
+import PathwayToggle from '../components/PathwayToggle';
+import {
+  getStoredPathway,
+  setStoredPathway,
+  PATHWAY_CHANGE_EVENT,
+  PATHWAY_THEMATIC,
+  PATHWAY_YIELD,
+  THEMATIC_CLUSTER_DEFS,
+  SAT_TIER_DEFS,
+  getClusterMeta,
+  getTierMeta,
+} from '../services/pathwayService';
 
 /**
  * Deterministic Pseudo-Random Generator based on seed
@@ -205,6 +218,8 @@ function buildGraphLayout(roots, masteredSet) {
         language: root.language,
         core_meaning: root.core_meaning,
         mnemonic: root.mnemonic,
+        thematic_cluster: root.thematic_cluster || 'Movement',
+        sat_tier: root.sat_tier || 'Tier 1 High-Yield',
         total_words: (root.words || []).length,
         data: root,
         baseX: rootX,
@@ -362,6 +377,27 @@ export default function VocabGraphView({
   });
   const [saveSuccessToast, setSaveSuccessToast] = useState(null);
 
+  // Dual Learning Pathway State & User Preference Persistence
+  const [learningPathway, setLearningPathway] = useState(getStoredPathway);
+  const [pathwayFilter, setPathwayFilter] = useState('ALL');
+
+  useEffect(() => {
+    const handlePathwaySync = (e) => {
+      const next = e.detail?.pathway;
+      if (next && (next === PATHWAY_THEMATIC || next === PATHWAY_YIELD)) {
+        setLearningPathway(next);
+      }
+    };
+    window.addEventListener(PATHWAY_CHANGE_EVENT, handlePathwaySync);
+    return () => window.removeEventListener(PATHWAY_CHANGE_EVENT, handlePathwaySync);
+  }, []);
+
+  const handlePathwayChange = useCallback((newPathway) => {
+    setLearningPathway(newPathway);
+    setStoredPathway(newPathway);
+    setPathwayFilter('ALL');
+  }, []);
+
   // Focus & Search States
   // When focusedRootId is set, that root and its connections enter SHARP FOCUS
   // While all other nodes become ambient floating dust motes
@@ -490,10 +526,31 @@ export default function VocabGraphView({
   // Ambient Dust Specks in Cavern of Mind
   const ambientDustMotesRef = useRef(createAmbientDustMotes());
 
+  // Celestial Trajectory History Tracking
+  const { recordWaypoint } = useCelestialTrajectory();
+
   // Mini-Flashcard Study Modal State
   const [studyWordModal, setStudyWordModal] = useState(null);
   const [flashcardFlipped, setFlashcardFlipped] = useState(false);
   const [cardStartTime, setCardStartTime] = useState(Date.now());
+
+  // Record Specimen Node when mini study modal is opened
+  useEffect(() => {
+    if (studyWordModal) {
+      recordWaypoint({
+        type: 'SATELLITE',
+        title: studyWordModal.word?.toUpperCase() || 'SPECIMEN',
+        subtitle: studyWordModal.definition ? `"${studyWordModal.definition.slice(0, 35)}..."` : 'WORD SPECIMEN NODE',
+        system: studyWordModal.root_details?.morpheme ? `Root [${studyWordModal.root_details.morpheme.toUpperCase()}]` : 'Constellation Graph',
+        depth: 3,
+        state: {
+          app: 'vocab',
+          tab: 'graph',
+          wordName: studyWordModal.word,
+        },
+      });
+    }
+  }, [studyWordModal, recordWaypoint]);
 
   // Camera & Canvas Refs
   const canvasRef = useRef(null);
@@ -514,6 +571,16 @@ export default function VocabGraphView({
   useEffect(() => {
     focusedRootIdRef.current = focusedRootId;
   }, [focusedRootId]);
+
+  const learningPathwayRef = useRef(learningPathway);
+  useEffect(() => {
+    learningPathwayRef.current = learningPathway;
+  }, [learningPathway]);
+
+  const pathwayFilterRef = useRef(pathwayFilter);
+  useEffect(() => {
+    pathwayFilterRef.current = pathwayFilter;
+  }, [pathwayFilter]);
 
   // Sync initialRoots if passed or changed
   useEffect(() => {
@@ -1121,9 +1188,24 @@ export default function VocabGraphView({
 
   const drawRootNode = (ctx, node, isSelected, isHovered, isFocal) => {
     const isHighlighted = isSelected || isHovered;
-    const effectiveAlpha = isFocal ? 1.0 : isHighlighted ? 1.0 : node.opacity;
+    const filter = pathwayFilterRef.current;
+    const pathway = learningPathwayRef.current;
 
-    const borderColor = isFocal || isHighlighted ? '#7BB33B' : '#111410';
+    let matchesFilter = true;
+    if (filter && filter !== 'ALL') {
+      if (pathway === PATHWAY_YIELD) {
+        matchesFilter = (node.sat_tier || '').toLowerCase() === filter.toLowerCase();
+      } else {
+        matchesFilter = (node.thematic_cluster || '').toLowerCase() === filter.toLowerCase();
+      }
+    }
+
+    let effectiveAlpha = isFocal ? 1.0 : isHighlighted ? 1.0 : node.opacity;
+    if (!matchesFilter && !isFocal && !isHighlighted) {
+      effectiveAlpha = 0.15;
+    }
+
+    const borderColor = isFocal || isHighlighted ? '#7BB33B' : matchesFilter && filter !== 'ALL' ? '#111410' : '#111410';
     const borderWidth = isFocal ? 3 : isHighlighted ? 2.5 : 2;
     const shadowColor = isFocal || isHighlighted ? '#7BB33B' : '#42281D';
 
@@ -1140,6 +1222,16 @@ export default function VocabGraphView({
     ctx.save();
     ctx.globalAlpha = effectiveAlpha;
 
+    // Accent top stripe representing active pathway attribute
+    let stripeColor = '#7BB33B';
+    if (pathway === PATHWAY_YIELD) {
+      stripeColor = (node.sat_tier || '').includes('1') ? '#7BB33B' : (node.sat_tier || '').includes('2') ? '#2563eb' : '#7c3aed';
+    } else {
+      stripeColor = getClusterMeta(node.thematic_cluster).accentColor || '#7BB33B';
+    }
+    ctx.fillStyle = stripeColor;
+    ctx.fillRect(node.x - node.width / 2 + 2, node.y - node.height / 2 + 2, node.width - 4, 3);
+
     // Root Morpheme Typography
     ctx.fillStyle = '#111410';
     ctx.font = isFocal 
@@ -1152,12 +1244,15 @@ export default function VocabGraphView({
     if (displayMorpheme.length > 12) {
       displayMorpheme = displayMorpheme.slice(0, 11) + '…';
     }
-    ctx.fillText(displayMorpheme, node.x, node.y - 6);
+    ctx.fillText(displayMorpheme, node.x, node.y - 4);
 
-    // Subtitle badge
+    // Subtitle badge showing pathway context
     ctx.fillStyle = isFocal ? '#2F441E' : '#62685E';
-    ctx.font = 'bold 9px "JetBrains Mono", Menlo, Consolas, monospace';
-    ctx.fillText(`${node.total_words} WORDS`, node.x, node.y + 11);
+    ctx.font = 'bold 8.5px "JetBrains Mono", Menlo, Consolas, monospace';
+    const pathwaySubtext = pathway === PATHWAY_YIELD
+      ? `${(node.sat_tier || 'T1').replace('Tier ', 'T')} · ${node.total_words}W`
+      : `${(node.thematic_cluster || 'Core').slice(0, 9)} · ${node.total_words}W`;
+    ctx.fillText(pathwaySubtext, node.x, node.y + 12);
     ctx.restore();
   };
 
@@ -1506,8 +1601,8 @@ export default function VocabGraphView({
 
       {/* RESPONSIVE TOP GRAPH CONTROL BAR */}
       <div className="absolute top-2.5 sm:top-4 left-2.5 sm:left-4 right-2.5 sm:right-4 z-30 flex items-center justify-between gap-2 pointer-events-none">
-        {/* Left: Return to Study Deck */}
-        <div className="pointer-events-auto shrink-0">
+        {/* Left: Return to Study Deck + Pathway Toggle */}
+        <div className="pointer-events-auto shrink-0 flex items-center space-x-2">
           <button
             onClick={() => onNavigateStudy && onNavigateStudy()}
             className="flex items-center space-x-1.5 px-2.5 sm:px-3 py-1.5 sm:py-2 bg-white hover:bg-[#FAFBF8] border-2 border-[#111410] shadow-[2px_2px_0px_0px_#111410] font-mono text-xs font-black uppercase text-[#111410] transition active:translate-x-[1px] active:translate-y-[1px]"
@@ -1517,10 +1612,16 @@ export default function VocabGraphView({
             <span className="hidden sm:inline">← Back to Flashcards</span>
             <span className="sm:hidden">← Deck</span>
           </button>
+
+          <PathwayToggle
+            currentPathway={learningPathway}
+            onPathwayChange={handlePathwayChange}
+            compact
+          />
         </div>
 
         {/* Center: Search Bar with Autocomplete Dropdown */}
-        <div className="pointer-events-auto flex-1 max-w-lg relative">
+        <div className="pointer-events-auto flex-1 max-w-md relative">
           <div className="relative bg-white border-2 border-[#111410] shadow-[3px_3px_0px_0px_#111410] sm:shadow-[4px_4px_0px_0px_#111410] p-1 flex items-center">
             <div className="pl-1.5 sm:pl-2 pr-1 flex items-center text-[#111410]">
               <Search className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-[#111410]" />
@@ -1702,6 +1803,55 @@ export default function VocabGraphView({
         </div>
       </div>
 
+      {/* PERSPECTIVE FILTER PILLS RIBBON */}
+      <div className="absolute top-14 sm:top-16 left-2.5 sm:left-4 right-2.5 sm:right-4 z-20 pointer-events-none flex items-center overflow-x-auto no-scrollbar pb-1">
+        <div className="pointer-events-auto bg-white/95 backdrop-blur-xs border-2 border-[#111410] shadow-[3px_3px_0px_0px_#111410] p-1 inline-flex items-center space-x-1 font-mono text-[10px] sm:text-[11px] font-black uppercase max-w-full overflow-x-auto no-scrollbar">
+          <span className="text-[9px] text-[#62685E] px-1.5 select-none shrink-0">
+            {learningPathway === PATHWAY_YIELD ? '⚡ FREQUENCY TIERS:' : '🧠 SEMANTIC CLUSTERS:'}
+          </span>
+          <button
+            type="button"
+            onClick={() => setPathwayFilter('ALL')}
+            className={`px-2 py-0.5 border text-center whitespace-nowrap transition ${
+              pathwayFilter === 'ALL'
+                ? 'bg-[#111410] text-white border-[#111410]'
+                : 'bg-transparent text-[#111410] border-transparent hover:bg-[#FAFBF8]'
+            }`}
+          >
+            ALL
+          </button>
+          {learningPathway === PATHWAY_YIELD
+            ? SAT_TIER_DEFS.map((tier) => (
+                <button
+                  key={tier.name}
+                  type="button"
+                  onClick={() => setPathwayFilter(pathwayFilter === tier.name ? 'ALL' : tier.name)}
+                  className={`px-2 py-0.5 border whitespace-nowrap transition ${
+                    pathwayFilter === tier.name
+                      ? 'bg-[#F59E0B] text-black border-[#111410] font-black shadow-[1px_1px_0px_0px_#111410]'
+                      : 'bg-white text-[#111410] border-[#111410]/20 hover:border-[#111410]'
+                  }`}
+                >
+                  {tier.icon} {tier.badge}
+                </button>
+              ))
+            : THEMATIC_CLUSTER_DEFS.map((cluster) => (
+                <button
+                  key={cluster.name}
+                  type="button"
+                  onClick={() => setPathwayFilter(pathwayFilter === cluster.name ? 'ALL' : cluster.name)}
+                  className={`px-2 py-0.5 border whitespace-nowrap transition ${
+                    pathwayFilter === cluster.name
+                      ? 'bg-[#7BB33B] text-white border-[#111410] font-black shadow-[1px_1px_0px_0px_#111410]'
+                      : 'bg-white text-[#111410] border-[#111410]/20 hover:border-[#111410]'
+                  }`}
+                >
+                  {cluster.icon} {cluster.name}
+                </button>
+              ))}
+        </div>
+      </div>
+
       {/* MOBILE TOUCH HINT BAR */}
       <div className="absolute bottom-3 left-3 right-3 z-20 pointer-events-none sm:hidden flex justify-center">
         <div className="bg-white/95 backdrop-blur-xs border border-[#111410] shadow-[2px_2px_0px_0px_#111410] px-3 py-1 font-mono text-[10px] text-[#111410] font-bold">
@@ -1800,6 +1950,14 @@ export default function VocabGraphView({
                   <p className="text-xs font-mono uppercase text-[#62685E] mt-1 font-bold">
                     {selectedNode.language} Morpheme · {selectedNode.total_words} Derivative Words in Sharp Focus
                   </p>
+                  <div className="flex flex-wrap items-center gap-1.5 mt-2">
+                    <span className="text-[10px] font-mono font-bold uppercase px-2 py-0.5 bg-[#EDF5E5] text-[#2F441E] border border-[#111410]">
+                      🧠 {selectedNode.thematic_cluster || selectedNode.data?.thematic_cluster || 'Movement'}
+                    </span>
+                    <span className="text-[10px] font-mono font-bold uppercase px-2 py-0.5 bg-[#FFFBEB] text-[#92400E] border border-[#111410]">
+                      ⚡ {selectedNode.sat_tier || selectedNode.data?.sat_tier || 'Tier 1 High-Yield'}
+                    </span>
+                  </div>
                 </div>
 
                 {/* Core Meaning Box */}
@@ -2219,7 +2377,19 @@ export default function VocabGraphView({
                         <span className="text-[9px] block uppercase font-mono font-bold text-[#42281D]/70">
                           Root ({selectedNode.parentRoot?.language || 'Latin'})
                         </span>
-                        <span className="text-[9px] font-mono font-bold opacity-60 group-hover:opacity-100">↗</span>
+                        <div className="flex items-center space-x-1">
+                          {selectedNode.parentRoot?.thematic_cluster && (
+                            <span className="text-[8px] font-mono px-1 py-0.2 bg-white/80 border border-[#111410]/40">
+                              🧠 {selectedNode.parentRoot.thematic_cluster}
+                            </span>
+                          )}
+                          {selectedNode.parentRoot?.sat_tier && (
+                            <span className="text-[8px] font-mono px-1 py-0.2 bg-[#FFFBEB] text-[#92400E] border border-[#111410]/40">
+                              ⚡ {selectedNode.parentRoot.sat_tier}
+                            </span>
+                          )}
+                          <span className="text-[9px] font-mono font-bold opacity-60 group-hover:opacity-100">↗</span>
+                        </div>
                       </div>
                       <span className="font-mono font-black text-xs text-[#42281D]">
                         [{selectedNode.parentRoot?.morpheme?.toUpperCase() || 'ROOT'}]

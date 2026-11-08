@@ -128,4 +128,51 @@
   padding-right: env(safe-area-inset-right, 0px);
 }
 
+/* Celestial Trajectory & Orbital Telemetry Animations */
+@keyframes celestial-pulsar {
+  0% {
+    transform: scale(0.85);
+    opacity: 0.95;
+  }
+  50% {
+    opacity: 0.4;
+  }
+  100% {
+    transform: scale(2.4);
+    opacity: 0;
+  }
+}
+
+@keyframes celestial-orbit {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+@keyframes transit-dash {
+  to {
+    stroke-dashoffset: -24;
+  }
+}
+
+.animate-celestial-pulsar {
+  animation: celestial-pulsar 2.8s cubic-bezier(0, 0.2, 0.8, 1) infinite;
+}
+
+.animate-celestial-orbit {
+  animation: celestial-orbit 14s linear infinite;
+}
+
+.animate-celestial-orbit-reverse {
+  animation: celestial-orbit 22s linear infinite reverse;
+}
+
+.animate-transit-dash {
+  animation: transit-dash 1.6s linear infinite;
+}
+
+
 

@@ -35,8 +35,10 @@ class Command(BaseCommand):
                     "morpheme": entry["root"]["morpheme"],
                     "language": entry["root"]["language"],
                     "core_meaning": entry["root"]["core_meaning"],
-                    "mnemonic": entry["root"]["mnemonic"],
-                    "words": entry["words"]
+                    "mnemonic": entry["root"].get("mnemonic", ""),
+                    "thematic_cluster": entry["root"].get("thematic_cluster", "Movement"),
+                    "sat_tier": entry["root"].get("sat_tier", "Tier 1 High-Yield"),
+                    "words": entry.get("words", [])
                 }
                 for entry in fixture_data
             ]
@@ -54,7 +56,9 @@ class Command(BaseCommand):
                 defaults={
                     "language": r_item["language"],
                     "core_meaning": r_item["core_meaning"],
-                    "mnemonic": r_item["mnemonic"]
+                    "mnemonic": r_item["mnemonic"],
+                    "thematic_cluster": r_item.get("thematic_cluster", "Movement"),
+                    "sat_tier": r_item.get("sat_tier", "Tier 1 High-Yield"),
                 }
             )
             created_roots_count += 1

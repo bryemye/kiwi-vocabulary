@@ -60,10 +60,31 @@ def get_vocab_session_deck(queryset, user=None, count=15):
 class RootViewSet(viewsets.ReadOnlyModelViewSet):
     """
     List and retrieve etymological roots with associated vocabulary word families.
+    Supports filtering by language, thematic_cluster, sat_tier, or search query.
     """
     queryset = Root.objects.prefetch_related('words').all()
     serializer_class = RootSerializer
     permission_classes = [permissions.AllowAny]
+
+    def get_queryset(self):
+        queryset = super().get_queryset()
+        cluster = self.request.query_params.get('cluster') or self.request.query_params.get('thematic_cluster')
+        tier = self.request.query_params.get('tier') or self.request.query_params.get('sat_tier')
+        language = self.request.query_params.get('language')
+        search = self.request.query_params.get('search')
+
+        if cluster and cluster.upper() != 'ALL':
+            queryset = queryset.filter(thematic_cluster__iexact=cluster)
+        if tier and tier.upper() != 'ALL':
+            queryset = queryset.filter(sat_tier__iexact=tier)
+        if language and language.upper() != 'ALL':
+            queryset = queryset.filter(language__iexact=language)
+        if search:
+            search = search.strip()
+            queryset = queryset.filter(
+                Q(morpheme__icontains=search) | Q(core_meaning__icontains=search)
+            )
+        return queryset
 
 
 class VocabularyWordViewSet(viewsets.ReadOnlyModelViewSet):
@@ -78,6 +99,8 @@ class VocabularyWordViewSet(viewsets.ReadOnlyModelViewSet):
         queryset = super().get_queryset()
         root_id = self.request.query_params.get('root')
         language = self.request.query_params.get('language')
+        cluster = self.request.query_params.get('cluster') or self.request.query_params.get('thematic_cluster')
+        tier = self.request.query_params.get('tier') or self.request.query_params.get('sat_tier')
         search = self.request.query_params.get('search')
         connotation = self.request.query_params.get('connotation')
 
@@ -85,6 +108,10 @@ class VocabularyWordViewSet(viewsets.ReadOnlyModelViewSet):
             queryset = queryset.filter(root_id=root_id)
         if language and language.upper() != 'ALL':
             queryset = queryset.filter(root__language__iexact=language)
+        if cluster and cluster.upper() != 'ALL':
+            queryset = queryset.filter(root__thematic_cluster__iexact=cluster)
+        if tier and tier.upper() != 'ALL':
+            queryset = queryset.filter(root__sat_tier__iexact=tier)
         if search:
             search = search.strip()
             queryset = queryset.filter(
@@ -205,6 +232,8 @@ class VocabStatsView(APIView):
                 'language': root.language,
                 'core_meaning': root.core_meaning,
                 'mnemonic': root.mnemonic,
+                'thematic_cluster': root.thematic_cluster,
+                'sat_tier': root.sat_tier,
                 'total_words': total_root_words,
                 'mastered_words': words_mastered_count,
                 'mastery_percentage': mastery_percentage,

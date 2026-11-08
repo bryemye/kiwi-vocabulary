@@ -419,6 +419,16 @@ export default function StudyDeck({
                     <span className={`text-[10px] sm:text-[11px] font-mono font-bold uppercase tracking-wider px-2 py-0.5 ${getConnotationBadge(currentWord.connotation)}`}>
                       {currentWord.connotation}
                     </span>
+                    {currentWord.root_details?.thematic_cluster && (
+                      <span className="text-[10px] sm:text-[11px] font-mono font-bold uppercase tracking-wider px-2 py-0.5 bg-[#EDF5E5] text-[#2F441E] border border-[#111410]">
+                        🧠 {currentWord.root_details.thematic_cluster}
+                      </span>
+                    )}
+                    {currentWord.root_details?.sat_tier && (
+                      <span className="text-[10px] sm:text-[11px] font-mono font-bold uppercase tracking-wider px-2 py-0.5 bg-[#FFFBEB] text-[#92400E] border border-[#111410]">
+                        ⚡ {currentWord.root_details.sat_tier}
+                      </span>
+                    )}
                     {currentWord.review?.verified && (
                       <span 
                         className="inline-flex items-center space-x-1 px-1.5 sm:px-2 py-0.5 bg-[#EDF5E5] text-[#2F441E] border border-[#7BB33B] text-[10px] font-mono font-bold uppercase shadow-[1px_1px_0px_0px_#2F441E] cursor-help"
@@ -529,7 +539,19 @@ export default function StudyDeck({
                         <span className="text-[9px] block uppercase font-mono font-bold text-[#42281D]/70">
                           Root ({currentWord.root_details?.language || 'Latin'})
                         </span>
-                        <span className="text-[9px] font-mono font-bold opacity-60 group-hover:opacity-100">↗</span>
+                        <div className="flex items-center space-x-1">
+                          {currentWord.root_details?.thematic_cluster && (
+                            <span className="text-[8px] font-mono font-bold px-1 py-0.2 bg-white/80 border border-[#111410]/40">
+                              🧠 {currentWord.root_details.thematic_cluster}
+                            </span>
+                          )}
+                          {currentWord.root_details?.sat_tier && (
+                            <span className="text-[8px] font-mono font-bold px-1 py-0.2 bg-[#FFFBEB] text-[#92400E] border border-[#111410]/40">
+                              ⚡ {currentWord.root_details.sat_tier}
+                            </span>
+                          )}
+                          <span className="text-[9px] font-mono font-bold opacity-60 group-hover:opacity-100">↗</span>
+                        </div>
                       </div>
                       <span className="font-mono font-black text-xs text-[#42281D]">
                         [{currentWord.root_details?.morpheme?.toUpperCase()}]

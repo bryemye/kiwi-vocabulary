@@ -15,7 +15,10 @@ class VocabularyWordSimpleSerializer(serializers.ModelSerializer):
 class RootSimpleSerializer(serializers.ModelSerializer):
     class Meta:
         model = Root
-        fields = ['id', 'morpheme', 'language', 'core_meaning', 'mnemonic']
+        fields = [
+            'id', 'morpheme', 'language', 'core_meaning', 'mnemonic',
+            'thematic_cluster', 'sat_tier'
+        ]
 
 
 class RootSerializer(serializers.ModelSerializer):
@@ -23,7 +26,10 @@ class RootSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Root
-        fields = ['id', 'morpheme', 'language', 'core_meaning', 'mnemonic', 'words']
+        fields = [
+            'id', 'morpheme', 'language', 'core_meaning', 'mnemonic',
+            'thematic_cluster', 'sat_tier', 'words'
+        ]
 
 
 class VocabularyWordSerializer(serializers.ModelSerializer):

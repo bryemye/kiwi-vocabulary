@@ -129,10 +129,20 @@ export default function MorphemeDetailView({
       <div className="bg-white border-2 border-[#111410] shadow-[6px_6px_0px_0px_#111410] p-4 sm:p-8">
         <div className="flex flex-col md:flex-row md:items-start justify-between gap-4 border-b-2 border-[#111410] pb-5">
           <div className="space-y-2">
-            <div className="flex items-center space-x-2">
+            <div className="flex items-center space-x-2 flex-wrap gap-y-1">
               <span className={`text-[10px] font-mono font-black uppercase px-2.5 py-0.5 border border-[#111410] ${badgeStyle.bg} ${badgeStyle.text}`}>
                 {badgeStyle.label}
               </span>
+              {(morphemeData.root?.thematic_cluster || morphemeData.thematic_cluster) && (
+                <span className="text-[10px] font-mono font-bold uppercase px-2 py-0.5 bg-[#EDF5E5] text-[#2F441E] border border-[#111410]">
+                  🧠 {morphemeData.root?.thematic_cluster || morphemeData.thematic_cluster}
+                </span>
+              )}
+              {(morphemeData.root?.sat_tier || morphemeData.sat_tier) && (
+                <span className="text-[10px] font-mono font-bold uppercase px-2 py-0.5 bg-[#FFFBEB] text-[#92400E] border border-[#111410]">
+                  ⚡ {morphemeData.root?.sat_tier || morphemeData.sat_tier}
+                </span>
+              )}
               <span className="text-[10px] font-mono font-bold uppercase text-[#62685E]">
                 {matchedWords.length} {matchedWords.length === 1 ? 'Word' : 'Words'} in Lexicon
               </span>

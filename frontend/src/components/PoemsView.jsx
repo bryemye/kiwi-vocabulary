@@ -31,18 +31,44 @@ import {
   BACKGROUND_PRESETS,
   FONT_PAIRINGS
 } from '../data/poemsData';
+import { useCelestialTrajectory } from '../context/CelestialTrajectoryContext';
 
-export default function PoemsView({ onNavigateHome }) {
+export default function PoemsView({ onNavigateHome, initialPoemId }) {
   // Active Poem & Custom Poems State
   const [poemsList, setPoemsList] = useState(SAMPLE_POEMS);
-  const [activePoemId, setActivePoemId] = useState(SAMPLE_POEMS[0].id);
+  const [activePoemId, setActivePoemId] = useState(() => initialPoemId || SAMPLE_POEMS[0].id);
   const [isCustomModalOpen, setIsCustomModalOpen] = useState(false);
   const [customTitle, setCustomTitle] = useState('');
   const [customPoet, setCustomPoet] = useState('');
   const [customYear, setCustomYear] = useState('');
   const [customText, setCustomText] = useState('');
 
+  const { recordWaypoint } = useCelestialTrajectory();
+
+  useEffect(() => {
+    if (initialPoemId && poemsList.some((p) => p.id === initialPoemId)) {
+      setActivePoemId(initialPoemId);
+    }
+  }, [initialPoemId, poemsList]);
+
   const currentPoem = poemsList.find((p) => p.id === activePoemId) || poemsList[0];
+
+  // Record active poem as a node in Trajectory
+  useEffect(() => {
+    if (currentPoem) {
+      recordWaypoint({
+        type: 'ANOMALY',
+        title: currentPoem.title ? currentPoem.title.toUpperCase() : 'POEM',
+        subtitle: currentPoem.poet ? `BY ${currentPoem.poet.toUpperCase()}` : 'CINEMATIC TEXT RUNNER',
+        system: 'Poetry Cinema',
+        depth: 2,
+        state: {
+          app: 'poems',
+          poemId: currentPoem.id,
+        },
+      });
+    }
+  }, [currentPoem?.id, recordWaypoint]);
 
   // Cinematic Style & Aesthetics State
   const [activeStyleId, setActiveStyleId] = useState(currentPoem.recommendedStyle || 'dissolve');

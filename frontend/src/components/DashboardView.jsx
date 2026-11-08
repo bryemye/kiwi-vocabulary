@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { 
   Sparkles, 
   LineChart, 
@@ -12,9 +12,35 @@ import {
   Target,
   Zap
 } from 'lucide-react';
+import PathwayToggle from './PathwayToggle';
+import {
+  getStoredPathway,
+  setStoredPathway,
+  PATHWAY_CHANGE_EVENT,
+  PATHWAY_THEMATIC,
+  PATHWAY_YIELD,
+  groupRootsByPathway,
+  getClusterMeta,
+  getTierMeta
+} from '../services/pathwayService';
 
 export default function DashboardView({ stats, onSelectRoot, onNavigateMode }) {
   const [originFilter, setOriginFilter] = useState('ALL'); // 'ALL' | 'Latin' | 'Greek'
+  const [learningPathway, setLearningPathway] = useState(getStoredPathway);
+
+  useEffect(() => {
+    const handlePathwayEvent = (e) => {
+      const next = e.detail?.pathway || getStoredPathway();
+      setLearningPathway(next);
+    };
+    window.addEventListener(PATHWAY_CHANGE_EVENT, handlePathwayEvent);
+    return () => window.removeEventListener(PATHWAY_CHANGE_EVENT, handlePathwayEvent);
+  }, []);
+
+  const handlePathwayChange = (newPathway) => {
+    setLearningPathway(newPathway);
+    setStoredPathway(newPathway);
+  };
 
   if (!stats) {
     return (
@@ -197,6 +223,18 @@ export default function DashboardView({ stats, onSelectRoot, onNavigateMode }) {
                   <p className="text-xs text-[#62685E] italic font-serif line-clamp-1 mt-1">
                     {root.mnemonic}
                   </p>
+                  <div className="flex flex-wrap items-center gap-1.5 mt-2">
+                    {root.thematic_cluster && (
+                      <span className="px-1.5 py-0.5 bg-[#EDF5E5] text-[#2F441E] border border-[#111410] text-[9px] font-mono font-bold uppercase">
+                        🧠 {root.thematic_cluster}
+                      </span>
+                    )}
+                    {root.sat_tier && (
+                      <span className="px-1.5 py-0.5 bg-[#FAF3DD] text-[#42281D] border border-[#111410] text-[9px] font-mono font-bold uppercase">
+                        ⚡ {root.sat_tier}
+                      </span>
+                    )}
+                  </div>
                 </div>
 
                 <div className="pt-2 border-t border-[#111410]/20 flex items-center justify-between font-mono">
@@ -217,9 +255,9 @@ export default function DashboardView({ stats, onSelectRoot, onNavigateMode }) {
         </div>
       )}
 
-      {/* Root Mastery Tree / Matrix (Greek vs. Latin Origin Blocks) */}
+      {/* Root Mastery Tree / Matrix (Organized by Active Pathway) */}
       <div className="bg-white border-2 border-[#111410] shadow-[5px_5px_0px_0px_#111410] p-6 sm:p-8 space-y-6">
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b-2 border-[#111410] pb-4">
+        <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4 border-b-2 border-[#111410] pb-4">
           <div>
             <div className="flex items-center space-x-2">
               <span className="w-6 h-6 bg-[#42281D] text-white flex items-center justify-center font-mono font-black text-xs">
@@ -230,101 +268,175 @@ export default function DashboardView({ stats, onSelectRoot, onNavigateMode }) {
               </h2>
             </div>
             <p className="text-xs font-mono text-[#62685E] mt-1 uppercase">
-              Morpheme families categorized by Classical Greek vs. Latin origin
+              {learningPathway === PATHWAY_THEMATIC
+                ? 'Roots organized into semantic narrative clusters (Movement, Cognition, Emotion, etc.)'
+                : 'Roots prioritized by SAT/ACT frequency tiers for 80/20 test prep leverage'}
             </p>
           </div>
 
-          {/* Origin filter buttons */}
-          <div className="flex items-center space-x-1 font-mono text-xs">
-            {['ALL', 'Latin', 'Greek'].map((origin) => (
-              <button
-                key={origin}
-                onClick={() => setOriginFilter(origin)}
-                className={`px-3 py-1 font-black uppercase border-2 border-[#111410] transition ${
-                  originFilter === origin
-                    ? 'bg-[#7BB33B] text-white shadow-[2px_2px_0px_0px_#111410]'
-                    : 'bg-white text-[#111410] hover:bg-[#FAFBF8]'
-                }`}
-              >
-                {origin === 'ALL' ? 'ALL ORIGINS' : `${origin.toUpperCase()}`}
-              </button>
-            ))}
+          <div className="flex flex-wrap items-center gap-3">
+            {/* Learning Mode Pathway Toggle */}
+            <PathwayToggle
+              currentPathway={learningPathway}
+              onPathwayChange={handlePathwayChange}
+              variant="compact"
+            />
+
+            {/* Origin filter buttons */}
+            <div className="flex items-center space-x-1 font-mono text-xs">
+              {['ALL', 'Latin', 'Greek'].map((origin) => (
+                <button
+                  key={origin}
+                  onClick={() => setOriginFilter(origin)}
+                  className={`px-3 py-1 font-black uppercase border-2 border-[#111410] transition ${
+                    originFilter === origin
+                      ? 'bg-[#7BB33B] text-white shadow-[2px_2px_0px_0px_#111410]'
+                      : 'bg-white text-[#111410] hover:bg-[#FAFBF8]'
+                  }`}
+                >
+                  {origin === 'ALL' ? 'ALL ORIGINS' : `${origin.toUpperCase()}`}
+                </button>
+              ))}
+            </div>
           </div>
         </div>
 
-        {/* Matrix Grid of Roots */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
-          {filteredRoots.map((root) => {
-            const isFullMastery = root.mastered_words === root.total_words && root.total_words > 0;
+        {/* Grouped Matrix View */}
+        <div className="space-y-8">
+          {groupRootsByPathway(filteredRoots, learningPathway).map((group) => {
+            if (group.roots.length === 0) return null;
+            const groupMastered = group.roots.reduce((acc, r) => acc + (r.mastered_words || 0), 0);
+            const groupTotalWords = group.roots.reduce((acc, r) => acc + (r.total_words || 0), 0);
+            const groupAccuracy = groupTotalWords > 0 ? Math.round((groupMastered / groupTotalWords) * 100) : 0;
+
             return (
-              <div
-                key={root.id}
-                className="bg-[#FAFBF8] border-2 border-[#111410] shadow-[3px_3px_0px_0px_#111410] p-5 flex flex-col justify-between"
-              >
-                <div>
-                  {/* Card Header */}
-                  <div className="flex items-center justify-between mb-2 font-mono">
-                    <span className="px-2 py-0.5 text-xs font-black bg-white text-[#111410] border border-[#111410]">
-                      [{root.morpheme.toUpperCase()}]
-                    </span>
-                    <span className="text-[10px] font-bold text-[#42281D] uppercase">
-                      {root.language}
-                    </span>
+              <div key={group.id} className="space-y-4">
+                {/* Pathway Group Header Banner */}
+                <div className="bg-[#FAFBF8] border-2 border-[#111410] shadow-[3px_3px_0px_0px_#111410] p-4 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                  <div className="flex items-center space-x-3">
+                    <span className="text-2xl" role="img" aria-label={group.name}>{group.icon}</span>
+                    <div>
+                      <div className="flex items-center space-x-2">
+                        <h3 className="text-sm font-black text-[#111410] font-mono uppercase tracking-wide">
+                          {group.name}
+                        </h3>
+                        <span className="px-2 py-0.5 bg-white border border-[#111410] text-[10px] font-mono font-black text-[#42281D]">
+                          {group.roots.length} {group.roots.length === 1 ? 'ROOT' : 'ROOTS'}
+                        </span>
+                      </div>
+                      <p className="text-xs text-[#62685E] font-sans mt-0.5">
+                        {group.description}
+                      </p>
+                    </div>
                   </div>
 
-                  <h3 className="text-base font-black text-[#111410] font-sans uppercase">
-                    "{root.core_meaning}"
-                  </h3>
-                  <p className="text-xs text-[#62685E] italic font-serif mt-1">
-                    "{root.mnemonic}"
-                  </p>
-
-                  {/* Progress Bar & Stat (Kiwi Green against Soft Cream Track) */}
-                  <div className="mt-4 space-y-1.5">
-                    <div className="flex items-center justify-between text-[11px] font-mono font-bold uppercase">
-                      <span className="text-[#62685E]">Progress:</span>
-                      <span className={isFullMastery ? 'text-[#2F441E] font-black' : 'text-[#111410]'}>
-                        {root.mastered_words} / {root.total_words} WORDS ({root.mastery_percentage}%)
-                      </span>
+                  <div className="flex items-center space-x-3 shrink-0 font-mono text-xs">
+                    <div className="text-right">
+                      <div className="text-[10px] text-[#62685E] uppercase font-bold">Group Mastery</div>
+                      <div className="font-black text-[#2F441E]">{groupMastered}/{groupTotalWords} Words ({groupAccuracy}%)</div>
                     </div>
-                    {/* Linear Bar Meter in Kiwi Green against Cream Track */}
-                    <div className="w-full h-3 bg-[#EFE8DF] border-2 border-[#111410] overflow-hidden">
+                    <div className="w-16 h-2 bg-[#EFE8DF] border border-[#111410] overflow-hidden hidden sm:block">
                       <div
-                        className={`h-full transition-all duration-500 ${
-                          isFullMastery ? 'bg-[#7BB33B]' : 'bg-[#84C341]'
-                        }`}
-                        style={{ width: `${root.mastery_percentage}%` }}
+                        className="h-full bg-[#7BB33B] transition-all"
+                        style={{ width: `${groupAccuracy}%` }}
                       />
                     </div>
                   </div>
-
-                  {/* Words Pill List */}
-                  <div className="mt-4 pt-3 border-t border-[#111410]/20 flex flex-wrap gap-1.5">
-                    {root.words && root.words.map((w) => (
-                      <span
-                        key={w.id}
-                        className={`text-[10px] font-mono font-bold uppercase px-2 py-0.5 border border-[#111410] flex items-center space-x-1 ${
-                          w.is_mastered
-                            ? 'bg-[#EDF5E5] text-[#2F441E]'
-                            : 'bg-white text-[#62685E]'
-                        }`}
-                      >
-                        {w.is_mastered ? <CheckCircle2 className="w-3 h-3 text-[#7BB33B]" /> : <span className="w-1.5 h-1.5 bg-[#42281D]" />}
-                        <span>{w.word}</span>
-                      </span>
-                    ))}
-                  </div>
                 </div>
 
-                {/* Bottom Action */}
-                <div className="mt-5 pt-3 border-t border-[#111410]/20">
-                  <button
-                    onClick={() => onSelectRoot(root.id)}
-                    className="w-full py-2 bg-white hover:bg-[#7BB33B] hover:text-white text-[#111410] border-2 border-[#111410] shadow-[2px_2px_0px_0px_#111410] text-xs font-mono font-black uppercase flex items-center justify-center space-x-1.5 transition active:translate-x-[1px] active:translate-y-[1px]"
-                  >
-                    <span>Launch Root Cards</span>
-                    <ArrowRight className="w-3.5 h-3.5" />
-                  </button>
+                {/* Matrix Grid of Roots for this Group */}
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
+                  {group.roots.map((root) => {
+                    const isFullMastery = root.mastered_words === root.total_words && root.total_words > 0;
+                    return (
+                      <div
+                        key={root.id}
+                        className="bg-[#FAFBF8] border-2 border-[#111410] shadow-[3px_3px_0px_0px_#111410] p-5 flex flex-col justify-between"
+                      >
+                        <div>
+                          {/* Card Header */}
+                          <div className="flex items-center justify-between mb-2 font-mono">
+                            <span className="px-2 py-0.5 text-xs font-black bg-white text-[#111410] border border-[#111410]">
+                              [{root.morpheme.toUpperCase()}]
+                            </span>
+                            <span className="text-[10px] font-bold text-[#42281D] uppercase">
+                              {root.language}
+                            </span>
+                          </div>
+
+                          <h3 className="text-base font-black text-[#111410] font-sans uppercase">
+                            "{root.core_meaning}"
+                          </h3>
+                          <p className="text-xs text-[#62685E] italic font-serif mt-1">
+                            "{root.mnemonic}"
+                          </p>
+
+                          {/* Badges for thematic_cluster and sat_tier */}
+                          <div className="flex flex-wrap items-center gap-1.5 mt-3">
+                            {root.thematic_cluster && (
+                              <span className="px-2 py-0.5 bg-[#EDF5E5] text-[#2F441E] border border-[#111410] text-[9px] font-mono font-bold uppercase flex items-center space-x-1">
+                                <span>🧠</span>
+                                <span>{root.thematic_cluster}</span>
+                              </span>
+                            )}
+                            {root.sat_tier && (
+                              <span className="px-2 py-0.5 bg-[#FAF3DD] text-[#42281D] border border-[#111410] text-[9px] font-mono font-bold uppercase flex items-center space-x-1">
+                                <span>⚡</span>
+                                <span>{root.sat_tier}</span>
+                              </span>
+                            )}
+                          </div>
+
+                          {/* Progress Bar & Stat (Kiwi Green against Soft Cream Track) */}
+                          <div className="mt-4 space-y-1.5">
+                            <div className="flex items-center justify-between text-[11px] font-mono font-bold uppercase">
+                              <span className="text-[#62685E]">Progress:</span>
+                              <span className={isFullMastery ? 'text-[#2F441E] font-black' : 'text-[#111410]'}>
+                                {root.mastered_words} / {root.total_words} WORDS ({root.mastery_percentage}%)
+                              </span>
+                            </div>
+                            {/* Linear Bar Meter in Kiwi Green against Cream Track */}
+                            <div className="w-full h-3 bg-[#EFE8DF] border-2 border-[#111410] overflow-hidden">
+                              <div
+                                className={`h-full transition-all duration-500 ${
+                                  isFullMastery ? 'bg-[#7BB33B]' : 'bg-[#84C341]'
+                                }`}
+                                style={{ width: `${root.mastery_percentage}%` }}
+                              />
+                            </div>
+                          </div>
+
+                          {/* Words Pill List */}
+                          <div className="mt-4 pt-3 border-t border-[#111410]/20 flex flex-wrap gap-1.5">
+                            {root.words && root.words.map((w) => (
+                              <span
+                                key={w.id}
+                                className={`text-[10px] font-mono font-bold uppercase px-2 py-0.5 border border-[#111410] flex items-center space-x-1 ${
+                                  w.is_mastered
+                                    ? 'bg-[#EDF5E5] text-[#2F441E]'
+                                    : 'bg-white text-[#62685E]'
+                                }`}
+                              >
+                                {w.is_mastered ? <CheckCircle2 className="w-3 h-3 text-[#7BB33B]" /> : <span className="w-1.5 h-1.5 bg-[#42281D]" />}
+                                <span>{w.word}</span>
+                              </span>
+                            ))}
+                          </div>
+                        </div>
+
+                        {/* Bottom Action */}
+                        <div className="mt-5 pt-3 border-t border-[#111410]/20">
+                          <button
+                            onClick={() => onSelectRoot(root.id)}
+                            className="w-full py-2 bg-white hover:bg-[#7BB33B] hover:text-white text-[#111410] border-2 border-[#111410] shadow-[2px_2px_0px_0px_#111410] text-xs font-mono font-black uppercase flex items-center justify-center space-x-1.5 transition active:translate-x-[1px] active:translate-y-[1px]"
+                          >
+                            <span>Launch Root Cards</span>
+                            <ArrowRight className="w-3.5 h-3.5" />
+                          </button>
+                        </div>
+                      </div>
+                    );
+                  })}
                 </div>
               </div>
             );

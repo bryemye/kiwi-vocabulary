@@ -7,10 +7,39 @@ class Root(models.Model):
         ('Greek', 'Greek'),
     ]
 
+    THEMATIC_CLUSTERS = [
+        ('Movement', 'Movement'),
+        ('Communication', 'Communication'),
+        ('Cognition', 'Cognition'),
+        ('Emotion', 'Emotion'),
+        ('Power & Conflict', 'Power & Conflict'),
+        ('Law & Morality', 'Law & Morality'),
+        ('Form & Nature', 'Form & Nature'),
+        ('Quantity & Relation', 'Quantity & Relation'),
+    ]
+
+    SAT_TIERS = [
+        ('Tier 1 High-Yield', 'Tier 1 High-Yield'),
+        ('Tier 2 Multipliers', 'Tier 2 Multipliers'),
+        ('Tier 3 Advanced', 'Tier 3 Advanced'),
+    ]
+
     morpheme = models.CharField(max_length=50)
     language = models.CharField(max_length=20, choices=LANGUAGE_CHOICES, default='Latin')
     core_meaning = models.CharField(max_length=200)
     mnemonic = models.TextField(blank=True, default='')
+    thematic_cluster = models.CharField(
+        max_length=100,
+        choices=THEMATIC_CLUSTERS,
+        default='Movement',
+        blank=True
+    )
+    sat_tier = models.CharField(
+        max_length=50,
+        choices=SAT_TIERS,
+        default='Tier 1 High-Yield',
+        blank=True
+    )
 
     def __str__(self):
         return f"{self.morpheme} ({self.language}) - {self.core_meaning}"

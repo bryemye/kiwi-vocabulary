@@ -3,6 +3,9 @@ import Navbar from './components/Navbar';
 import VocabView from './components/VocabView';
 import PoemsView from './components/PoemsView';
 import AdminReviewBar from './components/AdminReviewBar';
+import CelestialTrajectoryRibbon from './components/CelestialTrajectoryRibbon';
+import CelestialFlightLogModal from './components/CelestialFlightLogModal';
+import { useCelestialTrajectory } from './context/CelestialTrajectoryContext';
 // Dormant standalone module imports preserved for future activation
 import MathView from './components/MathView';
 import ReadingView from './components/ReadingView';
@@ -58,6 +61,116 @@ export default function App() {
   const [user, setUser] = useState(null);
   const [isAuthModalOpen, setIsAuthModalOpen] = useState(false);
   const [verifyToken, setVerifyToken] = useState(null);
+
+  // Celestial History & Fast Travel Restorations
+  const [externalMorphemeView, setExternalMorphemeView] = useState(null);
+  const [initialPoemId, setInitialPoemId] = useState(null);
+  const { recordWaypoint, registerNavigator, setIsFlightLogOpen } = useCelestialTrajectory();
+
+  // Register master fast-travel navigator
+  useEffect(() => {
+    registerNavigator((state) => {
+      if (state.app === 'poems') {
+        if (state.poemId) setInitialPoemId(state.poemId);
+        setActiveApp('poems');
+        setActiveTab('poems');
+        if (window.history && window.history.pushState) {
+          window.history.pushState({}, document.title, '/poems');
+        }
+      } else if (state.app === 'platform') {
+        setActiveApp('platform');
+      } else {
+        setActiveApp('vocab');
+        if (state.tab) {
+          setActiveTab(state.tab);
+          if (window.history && window.history.replaceState) {
+            window.history.replaceState({}, document.title, `#${state.tab}`);
+          }
+        }
+        if (state.rootId !== undefined) {
+          setSelectedRootId(state.rootId);
+        }
+        if (state.morphemeData) {
+          setExternalMorphemeView(state.morphemeData);
+        } else {
+          setExternalMorphemeView(null);
+        }
+      }
+    });
+  }, [registerNavigator]);
+
+  // Global hotkey 'H' to toggle Celestial Flight Log
+  useEffect(() => {
+    const handleKeyDown = (e) => {
+      if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA') return;
+      if (e.key === 'h' || e.key === 'H') {
+        setIsFlightLogOpen((prev) => !prev);
+      }
+    };
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [setIsFlightLogOpen]);
+
+  // Record top-level navigation changes into Celestial Trajectory
+  useEffect(() => {
+    if (activeApp === 'platform') {
+      recordWaypoint({
+        type: 'SECTOR',
+        title: 'BASE COMMAND',
+        subtitle: 'PLATFORM DASHBOARD & GLOBAL TELEMETRY',
+        system: 'Platform Command Core',
+        depth: 0,
+        state: { app: 'platform' },
+      });
+    } else if (activeApp === 'poems') {
+      recordWaypoint({
+        type: 'ANOMALY',
+        title: 'POETRY CINEMA',
+        subtitle: 'CINEMATIC TEXT RUNNER',
+        system: 'Poetry Cinema',
+        depth: 1,
+        state: { app: 'poems' },
+      });
+    } else if (activeApp === 'vocab' && !externalMorphemeView) {
+      if (activeTab === 'study') {
+        recordWaypoint({
+          type: 'STAR_SYSTEM',
+          title: 'STUDY DECK',
+          subtitle: 'SPACED REPETITION FLASHCARDS',
+          system: 'Vocab Mastery',
+          depth: 1,
+          state: { app: 'vocab', tab: 'study' },
+        });
+      } else if (activeTab === 'explorer') {
+        recordWaypoint({
+          type: 'STAR_SYSTEM',
+          title: 'ARCHIVE EXPLORER',
+          subtitle: 'ROOT & MORPHEME DICTIONARY',
+          system: 'Vocab Mastery',
+          depth: 1,
+          state: { app: 'vocab', tab: 'explorer' },
+        });
+      } else if (activeTab === 'graph') {
+        recordWaypoint({
+          type: 'STAR_SYSTEM',
+          title: 'CAVERN OF MIND',
+          subtitle: 'VOCABULARY CONSTELLATION GRAPH',
+          system: 'Vocab Mastery',
+          depth: 1,
+          state: { app: 'vocab', tab: 'graph' },
+        });
+      } else if (activeTab === 'progress') {
+        recordWaypoint({
+          type: 'STAR_SYSTEM',
+          title: 'PROGRESS TELEMETRY',
+          subtitle: 'ACCURACY & MASTERY TELEMETRY',
+          system: 'Vocab Mastery',
+          depth: 1,
+          state: { app: 'vocab', tab: 'progress' },
+        });
+      }
+    }
+  }, [activeApp, activeTab, externalMorphemeView, recordWaypoint]);
 
   // Editorial Reviewer / Admin Mode State
   const [isAdminMode, setIsAdminMode] = useState(getStoredAdminMode);
@@ -330,7 +443,18 @@ export default function App() {
 
   // Dedicated Cinematic Poetry Engine Route (/poems)
   if (activeApp === 'poems') {
-    return <PoemsView onNavigateHome={() => handleNavigateApp('vocab')} />;
+    return (
+      <div className="min-h-screen bg-black flex flex-col font-sans">
+        <CelestialTrajectoryRibbon />
+        <CelestialFlightLogModal />
+        <div className="flex-1 flex flex-col">
+          <PoemsView
+            onNavigateHome={() => handleNavigateApp('vocab')}
+            initialPoemId={initialPoemId}
+          />
+        </div>
+      </div>
+    );
   }
 
   return (
@@ -347,6 +471,9 @@ export default function App() {
         isAdminMode={isAdminMode}
         onToggleAdminMode={handleToggleAdminMode}
       />
+
+      {/* Celestial Trajectory & Orbital Telemetry Navigation Bar */}
+      <CelestialTrajectoryRibbon />
 
       {/* Editorial / Admin Review Mode Status Toolbar */}
       <AdminReviewBar
@@ -417,9 +544,14 @@ export default function App() {
             onNavigateDashboard={() => setActiveApp('platform')}
             isAdminMode={isAdminMode}
             onUpdateWordReview={handleUpdateWordReview}
+            externalMorphemeView={externalMorphemeView}
+            onClearExternalMorphemeView={() => setExternalMorphemeView(null)}
           />
         )}
       </main>
+
+      {/* Celestial Flight Log & Cartography Modal */}
+      <CelestialFlightLogModal />
 
       {/* Neo-Brutalist Technical Footer */}
       <footer className="border-t-2 border-[#111410] bg-white py-6 text-center text-xs font-mono uppercase text-[#42281D]">

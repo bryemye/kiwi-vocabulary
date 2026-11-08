@@ -33,11 +33,24 @@ import VocabGraphView from '../views/VocabGraphView';
 import StudyDeck from './StudyDeck';
 import CustomPracticeModal from './CustomPracticeModal';
 import EditorialReviewModal from './EditorialReviewModal';
+import PathwayToggle from './PathwayToggle';
+import {
+  getStoredPathway,
+  setStoredPathway,
+  groupRootsByPathway,
+  getClusterMeta,
+  getTierMeta,
+  PATHWAYS,
+  PATHWAY_THEMATIC,
+  PATHWAY_YIELD,
+  PATHWAY_CHANGE_EVENT,
+} from '../services/pathwayService';
 import {
   recordWordAttempt,
   shuffleWithMorphemeVariety,
   SESSION_SIZE
 } from '../services/studySessionService';
+import { useCelestialTrajectory } from '../context/CelestialTrajectoryContext';
 
 export default function VocabView({
   words = [],
@@ -51,8 +64,12 @@ export default function VocabView({
   onSubTabChange,
   onNavigateDashboard,
   isAdminMode = false,
-  onUpdateWordReview
+  onUpdateWordReview,
+  externalMorphemeView,
+  onClearExternalMorphemeView
 }) {
+  const { recordWaypoint } = useCelestialTrajectory();
+
   // Navigation Sub-tab state
   const [subTab, setSubTab] = useState(initialSubTab);
 
@@ -67,16 +84,62 @@ export default function VocabView({
   const handleSubTabChange = useCallback((newTab) => {
     setSubTab(newTab);
     setActiveMorphemeView(null);
+    if (onClearExternalMorphemeView) onClearExternalMorphemeView();
     if (onTabChange) {
       onTabChange(newTab);
     } else if (onSubTabChange) {
       onSubTabChange(newTab);
     }
-  }, [onTabChange, onSubTabChange]);
+  }, [onTabChange, onSubTabChange, onClearExternalMorphemeView]);
 
   // Dedicated Morpheme Detail & Subset Practice States
   const [activeMorphemeView, setActiveMorphemeView] = useState(null);
   const [subsetPracticeInfo, setSubsetPracticeInfo] = useState(null);
+
+  // Sync externalMorphemeView from celestial trajectory fast-travel
+  useEffect(() => {
+    if (externalMorphemeView !== undefined) {
+      setActiveMorphemeView(externalMorphemeView);
+    }
+  }, [externalMorphemeView]);
+
+  // Record Root Node when a morpheme detail is opened
+  useEffect(() => {
+    if (activeMorphemeView) {
+      recordWaypoint({
+        type: 'PRIMARY_STAR',
+        title: activeMorphemeView.title || `[${activeMorphemeView.cleanToken?.toUpperCase()}]`,
+        subtitle: activeMorphemeView.meaning ? `"${activeMorphemeView.meaning.slice(0, 35)}..."` : 'ROOT MORPHEME NODE',
+        system: `${activeMorphemeView.language || 'Core'} Morphemes`,
+        language: activeMorphemeView.language,
+        depth: 2,
+        state: {
+          app: 'vocab',
+          tab: subTab,
+          morphemeData: activeMorphemeView,
+          morphemeToken: activeMorphemeView.cleanToken,
+        },
+      });
+    }
+  }, [activeMorphemeView, recordWaypoint, subTab]);
+
+  // Record Session Node when subset practice is active
+  useEffect(() => {
+    if (subsetPracticeInfo) {
+      recordWaypoint({
+        type: 'ANOMALY',
+        title: subsetPracticeInfo.title ? subsetPracticeInfo.title.toUpperCase() : 'SUBSET PRACTICE',
+        subtitle: `${subsetPracticeInfo.totalCount || 5} Words · Targeted Run`,
+        system: 'Practice Session',
+        depth: 2,
+        state: {
+          app: 'vocab',
+          tab: 'study',
+          subsetPracticeInfo,
+        },
+      });
+    }
+  }, [subsetPracticeInfo, recordWaypoint]);
 
   // Editorial Review Modal State
   const [editingReviewWord, setEditingReviewWord] = useState(null);
@@ -88,6 +151,25 @@ export default function VocabView({
   // Tab switch confirmation modal state (if leaving an active study session)
   const [pendingTab, setPendingTab] = useState(null);
   const [showTabConfirm, setShowTabConfirm] = useState(false);
+
+  // Dual Learning Pathway State & User Preference Persistence ('thematic' | 'yield')
+  const [learningPathway, setLearningPathway] = useState(getStoredPathway);
+
+  useEffect(() => {
+    const handlePathwaySync = (e) => {
+      const next = e.detail?.pathway;
+      if (next && (next === PATHWAY_THEMATIC || next === PATHWAY_YIELD)) {
+        setLearningPathway(next);
+      }
+    };
+    window.addEventListener(PATHWAY_CHANGE_EVENT, handlePathwaySync);
+    return () => window.removeEventListener(PATHWAY_CHANGE_EVENT, handlePathwaySync);
+  }, []);
+
+  const handlePathwayChange = useCallback((newPathway) => {
+    setLearningPathway(newPathway);
+    setStoredPathway(newPathway);
+  }, []);
 
   // Filter States
   const [selectedLanguage, setSelectedLanguage] = useState('ALL'); // 'ALL' | 'Latin' | 'Greek'
@@ -131,6 +213,30 @@ export default function VocabView({
     if (selectedLanguage === 'ALL') return roots;
     return roots.filter(r => r.language.toLowerCase() === selectedLanguage.toLowerCase());
   }, [roots, selectedLanguage]);
+
+  // Grouped roots for the Root select in Study tab (grouped by active pathway)
+  const groupedRootsForSelect = useMemo(() => {
+    return groupRootsByPathway(availableRoots, learningPathway);
+  }, [availableRoots, learningPathway]);
+
+  // Filtered roots for Explorer view
+  const filteredExplorerRoots = useMemo(() => {
+    return availableRoots.filter((root) => {
+      if (!searchTerm.trim()) return true;
+      const q = searchTerm.toLowerCase();
+      const mMatch = (root.morpheme || '').toLowerCase().includes(q);
+      const cMatch = (root.core_meaning || '').toLowerCase().includes(q);
+      const clusterMatch = (root.thematic_cluster || '').toLowerCase().includes(q);
+      const tierMatch = (root.sat_tier || '').toLowerCase().includes(q);
+      const wMatch = root.words?.some((w) => (w.word || '').toLowerCase().includes(q));
+      return mMatch || cMatch || clusterMatch || tierMatch || wMatch;
+    });
+  }, [availableRoots, searchTerm]);
+
+  // Grouped roots for Explorer bento grid (Thematic Clusters or Core Yield Tiers)
+  const groupedExplorerRoots = useMemo(() => {
+    return groupRootsByPathway(filteredExplorerRoots, learningPathway);
+  }, [filteredExplorerRoots, learningPathway]);
 
   const handleLanguageChange = (lang) => {
     setSelectedLanguage(lang);
@@ -347,6 +453,18 @@ export default function VocabView({
   // Select a single word to practice from the morpheme word list
   const handleSelectSingleWord = useCallback((wordItem) => {
     if (!wordItem) return;
+    recordWaypoint({
+      type: 'SATELLITE',
+      title: wordItem.word?.toUpperCase() || 'SPECIMEN',
+      subtitle: wordItem.definition ? `"${wordItem.definition.slice(0, 35)}..."` : 'WORD SPECIMEN NODE',
+      system: wordItem.root_details?.morpheme ? `Root [${wordItem.root_details.morpheme.toUpperCase()}]` : 'Vocab Domain',
+      depth: 3,
+      state: {
+        app: 'vocab',
+        tab: 'study',
+        wordName: wordItem.word,
+      },
+    });
     const remainingWords = words.filter(w => w.id !== wordItem.id);
     const customDeck = [wordItem, ...remainingWords.slice(0, SESSION_SIZE - 1)];
     setSubsetPracticeInfo({
@@ -506,7 +624,10 @@ export default function VocabView({
       <div className="max-w-6xl mx-auto px-4 py-6">
         <MorphemeDetailView
           morphemeData={activeMorphemeView}
-          onBack={() => setActiveMorphemeView(null)}
+          onBack={() => {
+            setActiveMorphemeView(null);
+            if (onClearExternalMorphemeView) onClearExternalMorphemeView();
+          }}
           onStartPractice={handleStartSubsetPractice}
           onSelectWordCard={handleSelectSingleWord}
         />
@@ -650,16 +771,22 @@ export default function VocabView({
 
           {/* FILTER & CUSTOM SESSION TOOLBAR */}
           <div className="bg-[#FAFBF8] border-2 border-[#111410] p-3 shadow-[3px_3px_0px_0px_#111410]">
-            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
-              {/* Origin Filter */}
-              <div className="flex items-center justify-between sm:justify-start space-x-1.5 font-mono text-xs w-full sm:w-auto">
-                <span className="text-[10px] font-black uppercase text-[#62685E] mr-1 hidden sm:inline">ORIGIN:</span>
-                <div className="flex items-center space-x-1 w-full sm:w-auto">
+            <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-3">
+              {/* Left: Dual Learning Pathway Segmented Control & Origin Filter */}
+              <div className="flex flex-wrap items-center gap-2">
+                <PathwayToggle
+                  currentPathway={learningPathway}
+                  onPathwayChange={handlePathwayChange}
+                  compact
+                />
+
+                <div className="flex items-center space-x-1 font-mono text-xs">
+                  <span className="text-[10px] font-black uppercase text-[#62685E] mr-1 hidden sm:inline">ORIGIN:</span>
                   {['ALL', 'Latin', 'Greek'].map((lang) => (
                     <button
                       key={lang}
                       onClick={() => handleLanguageChange(lang)}
-                      className={`flex-1 sm:flex-none px-3 py-1 font-black uppercase border-2 border-[#111410] text-center transition ${selectedLanguage.toLowerCase() === lang.toLowerCase()
+                      className={`px-2.5 py-1 font-black uppercase border-2 border-[#111410] text-center transition ${selectedLanguage.toLowerCase() === lang.toLowerCase()
                           ? 'bg-[#7BB33B] text-white shadow-[2px_2px_0px_0px_#111410]'
                           : 'bg-white text-[#111410] hover:bg-[#FAFBF8]'
                         }`}
@@ -671,20 +798,30 @@ export default function VocabView({
               </div>
 
               {/* Root Select, Search & Custom Session Trigger */}
-              <div className="flex flex-wrap sm:flex-nowrap items-center gap-2 flex-1 sm:justify-end">
-                <div className="bg-white border-2 border-[#111410] shadow-[2px_2px_0px_0px_#111410] px-2 py-1 flex items-center flex-1 sm:flex-none min-w-[130px]">
+              <div className="flex flex-wrap sm:flex-nowrap items-center gap-2 flex-1 lg:justify-end">
+                <div className="bg-white border-2 border-[#111410] shadow-[2px_2px_0px_0px_#111410] px-2 py-1 flex items-center flex-1 sm:flex-none min-w-[150px]">
                   <Filter className="w-3.5 h-3.5 text-[#42281D] mr-1.5 shrink-0" />
                   <select
                     value={selectedRootId}
                     onChange={(e) => setSelectedRootId(e.target.value)}
-                    className="bg-transparent text-[#111410] text-base sm:text-xs font-mono font-bold uppercase focus:outline-none cursor-pointer w-full max-w-full sm:max-w-[160px] truncate"
+                    className="bg-transparent text-[#111410] text-base sm:text-xs font-mono font-bold uppercase focus:outline-none cursor-pointer w-full max-w-full sm:max-w-[200px] truncate"
                   >
                     <option value="ALL">ALL ROOTS ({availableRoots.length})</option>
-                    {availableRoots.map((root) => (
-                      <option key={root.id} value={root.id}>
-                        [{root.morpheme.toUpperCase()}] {root.core_meaning.toUpperCase()}
-                      </option>
-                    ))}
+                    {groupedRootsForSelect.map((group) => {
+                      if (group.roots.length === 0) return null;
+                      return (
+                        <optgroup
+                          key={group.id}
+                          label={`${group.icon} ${group.name.toUpperCase()} (${group.roots.length})`}
+                        >
+                          {group.roots.map((root) => (
+                            <option key={root.id} value={root.id}>
+                              [{root.morpheme.toUpperCase()}] {root.core_meaning.toUpperCase()}
+                            </option>
+                          ))}
+                        </optgroup>
+                      );
+                    })}
                   </select>
                 </div>
 
@@ -765,22 +902,32 @@ export default function VocabView({
       {/* ---------------------------------------------------------------------- */}
       {subTab === 'explorer' && (
         <div className="space-y-6">
-          {/* Explorer Filter Bar */}
-          <div className="bg-white border-2 border-[#111410] shadow-[3px_3px_0px_0px_#111410] p-4 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
-            <div className="flex items-center space-x-2 font-mono text-xs">
-              <span className="font-black uppercase text-[#62685E]">ORIGIN:</span>
-              {['ALL', 'Latin', 'Greek'].map((lang) => (
-                <button
-                  key={lang}
-                  onClick={() => setSelectedLanguage(lang)}
-                  className={`px-3 py-1 font-black uppercase border-2 border-[#111410] transition ${selectedLanguage.toLowerCase() === lang.toLowerCase()
-                      ? 'bg-[#7BB33B] text-white shadow-[2px_2px_0px_0px_#111410]'
-                      : 'bg-[#FAFBF8] text-[#111410] hover:bg-white'
+          {/* Explorer Filter Bar with Pathway Segment Control */}
+          <div className="bg-white border-2 border-[#111410] shadow-[3px_3px_0px_0px_#111410] p-4 flex flex-col md:flex-row md:items-center justify-between gap-3">
+            <div className="flex flex-wrap items-center gap-3">
+              {/* Dual Learning Mode Pathway Segmented Control */}
+              <PathwayToggle
+                currentPathway={learningPathway}
+                onPathwayChange={handlePathwayChange}
+              />
+
+              {/* Origin Filter */}
+              <div className="flex items-center space-x-1 font-mono text-xs">
+                <span className="font-black uppercase text-[#62685E] mr-1 hidden sm:inline">ORIGIN:</span>
+                {['ALL', 'Latin', 'Greek'].map((lang) => (
+                  <button
+                    key={lang}
+                    onClick={() => setSelectedLanguage(lang)}
+                    className={`px-3 py-1 font-black uppercase border-2 border-[#111410] transition ${
+                      selectedLanguage.toLowerCase() === lang.toLowerCase()
+                        ? 'bg-[#7BB33B] text-white shadow-[2px_2px_0px_0px_#111410]'
+                        : 'bg-[#FAFBF8] text-[#111410] hover:bg-white'
                     }`}
-                >
-                  {lang.toUpperCase()}
-                </button>
-              ))}
+                  >
+                    {lang.toUpperCase()}
+                  </button>
+                ))}
+              </div>
             </div>
 
             <div className="relative max-w-sm w-full">
@@ -789,7 +936,7 @@ export default function VocabView({
                 type="text"
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
-                placeholder="SEARCH ROOTS, MEANINGS OR WORDS..."
+                placeholder="SEARCH ROOTS, CLUSTERS, TIERS OR WORDS..."
                 className="w-full bg-[#FAFBF8] text-[#111410] font-mono font-bold text-xs pl-9 pr-8 py-2 border-2 border-[#111410] shadow-[2px_2px_0px_0px_#111410] focus:outline-none uppercase"
               />
               {searchTerm && (
@@ -803,105 +950,241 @@ export default function VocabView({
             </div>
           </div>
 
-          {/* Root Family Cards Bento Grid */}
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
-            {availableRoots
-              .filter(root => {
-                if (!searchTerm.trim()) return true;
-                const q = searchTerm.toLowerCase();
-                const mMatch = root.morpheme.toLowerCase().includes(q);
-                const cMatch = root.core_meaning.toLowerCase().includes(q);
-                const wMatch = root.words?.some(w => w.word.toLowerCase().includes(q));
-                return mMatch || cMatch || wMatch;
-              })
-              .map((root) => {
-                const rootWords = words.filter(w => w.root === root.id || w.root_details?.id === root.id);
+          {/* Active Learning Mode Perspective Explanation Banner */}
+          {learningPathway === PATHWAY_THEMATIC ? (
+            <div className="bg-[#EDF5E5] border-2 border-[#111410] p-4 shadow-[4px_4px_0px_0px_#111410] flex flex-col sm:flex-row sm:items-center justify-between gap-3 animate-fade-in">
+              <div className="flex items-start sm:items-center space-x-3">
+                <div className="w-10 h-10 bg-white border-2 border-[#111410] shadow-[2px_2px_0px_0px_#111410] flex items-center justify-center shrink-0 text-xl">
+                  🧠
+                </div>
+                <div>
+                  <div className="flex items-center space-x-2">
+                    <h2 className="text-sm font-black font-sans uppercase text-[#2F441E] tracking-tight">
+                      Thematic Pathways · Semantic Network Perspective
+                    </h2>
+                    <span className="text-[9px] font-mono font-black uppercase px-1.5 py-0.2 bg-[#7BB33B] text-white border border-[#111410]">
+                      Active Mode
+                    </span>
+                  </div>
+                  <p className="text-xs font-mono text-[#42281D] mt-0.5">
+                    Root families grouped into semantic conceptual clusters (Movement, Communication, Cognition, Emotion, etc.) to build an interconnected narrative network.
+                  </p>
+                </div>
+              </div>
+              <div className="flex items-center space-x-2 shrink-0">
+                <span className="text-[11px] font-mono font-bold uppercase px-2.5 py-1 bg-white border border-[#111410] text-[#2F441E]">
+                  {filteredExplorerRoots.length} Roots · {groupedExplorerRoots.filter(g => g.roots.length > 0).length} Clusters
+                </span>
+              </div>
+            </div>
+          ) : (
+            <div className="bg-[#FFFBEB] border-2 border-[#111410] p-4 shadow-[4px_4px_0px_0px_#111410] flex flex-col sm:flex-row sm:items-center justify-between gap-3 animate-fade-in">
+              <div className="flex items-start sm:items-center space-x-3">
+                <div className="w-10 h-10 bg-white border-2 border-[#111410] shadow-[2px_2px_0px_0px_#111410] flex items-center justify-center shrink-0 text-xl">
+                  ⚡
+                </div>
+                <div>
+                  <div className="flex items-center space-x-2">
+                    <h2 className="text-sm font-black font-sans uppercase text-[#92400E] tracking-tight">
+                      Core Yield · 80/20 SAT & ACT Frequency Tiers
+                    </h2>
+                    <span className="text-[9px] font-mono font-black uppercase px-1.5 py-0.2 bg-[#F59E0B] text-black border border-[#111410]">
+                      Active Mode
+                    </span>
+                  </div>
+                  <p className="text-xs font-mono text-[#78350F] mt-0.5">
+                    Roots organized by SAT/ACT frequency tiers (Tier 1 High-Yield, Tier 2 Multipliers, Tier 3 Advanced) for a direct, high-leverage 80/20 test-prep strategy.
+                  </p>
+                </div>
+              </div>
+              <div className="flex items-center space-x-2 shrink-0">
+                <span className="text-[11px] font-mono font-bold uppercase px-2.5 py-1 bg-white border border-[#111410] text-[#92400E]">
+                  {filteredExplorerRoots.length} Roots · 3 Yield Tiers
+                </span>
+              </div>
+            </div>
+          )}
 
-                return (
-                  <div
-                    key={root.id}
-                    className="bg-white border-2 border-[#111410] shadow-[4px_4px_0px_0px_#111410] p-5 flex flex-col justify-between hover:translate-x-[-1px] hover:translate-y-[-1px] transition"
-                  >
-                    <div>
-                      {/* Card Header */}
-                      <div className="flex items-center justify-between border-b-2 border-[#111410] pb-2.5 mb-3">
-                        <span className="font-mono text-sm font-black text-[#111410] uppercase tracking-wider">
-                          [{root.morpheme.toUpperCase()}]
-                        </span>
-                        <div className="flex items-center space-x-1.5">
-                          <span className="text-[10px] font-mono px-2 py-0.5 bg-[#EDF5E5] text-[#2F441E] border border-[#111410] uppercase font-bold">
-                            {root.language}
-                          </span>
-                          <span className="text-[10px] font-mono px-2 py-0.5 bg-[#FAFBF8] border border-[#111410] font-bold text-[#62685E]">
-                            {rootWords.length} Words
-                          </span>
-                        </div>
-                      </div>
-
-                      {/* Core Meaning & Key */}
-                      <div className="space-y-2 mb-4">
-                        <p className="text-sm font-serif italic text-[#42281D] leading-snug">
-                          "{root.core_meaning}"
-                        </p>
-                        {root.mnemonic && (
-                          <div className="text-[11px] font-mono text-[#62685E] bg-[#FAFBF8] p-2 border border-[#111410]/30">
-                            <span className="font-bold text-[#2F441E] uppercase mr-1">Key:</span>
-                            {root.mnemonic}
-                          </div>
-                        )}
-                      </div>
-
-                      {/* Word Families Sample */}
-                      <div className="space-y-1.5">
-                        <span className="text-[9px] font-mono font-bold uppercase text-[#62685E] block">
-                          Family Derivatives:
-                        </span>
-                        <div className="flex flex-wrap gap-1">
-                          {rootWords.slice(0, 5).map((w, i) => (
-                            <button
-                              key={w.id || i}
-                              type="button"
-                              onClick={() => {
-                                if (isAdminMode) {
-                                  setEditingReviewWord(w);
-                                }
-                              }}
-                              className={`px-2 py-0.5 border text-[10px] font-mono font-bold uppercase transition ${
-                                isAdminMode 
-                                  ? 'hover:bg-[#EDF5E5] hover:border-[#7BB33B] cursor-pointer active:translate-x-[1px]' 
-                                  : 'cursor-default'
-                              } ${
-                                w.review?.verified
-                                  ? 'bg-[#EDF5E5] text-[#2F441E] border-[#7BB33B]'
-                                  : 'bg-[#FAFBF8] border-[#111410] text-[#111410]'
-                              }`}
-                              title={isAdminMode ? `Click to review and verify "${w.word}"` : undefined}
-                            >
-                              {w.review?.verified && <span className="mr-1 text-[#7BB33B]">✓</span>}
-                              {w.word}
-                            </button>
-                          ))}
-                          {rootWords.length > 5 && (
-                            <span className="px-1.5 py-0.5 text-[10px] font-mono text-[#62685E]">
-                              +{rootWords.length - 5} more
+          {/* Grouped Root Sections (Semantic Clusters or Yield Tiers) */}
+          {groupedExplorerRoots.filter(group => group.roots.length > 0).length === 0 ? (
+            <div className="bg-white border-2 border-[#111410] shadow-[4px_4px_0px_0px_#111410] p-10 text-center space-y-3">
+              <div className="w-12 h-12 bg-[#FAFBF8] border-2 border-[#111410] flex items-center justify-center mx-auto text-xl">
+                🔍
+              </div>
+              <h3 className="text-sm font-black font-mono uppercase text-[#111410]">
+                No Root Families Found
+              </h3>
+              <p className="text-xs font-mono text-[#62685E]">
+                No roots matched your search query "{searchTerm}" under the {selectedLanguage} origin filter.
+              </p>
+              <button
+                type="button"
+                onClick={() => {
+                  setSearchTerm('');
+                  setSelectedLanguage('ALL');
+                }}
+                className="px-4 py-2 bg-[#7BB33B] text-white font-mono text-xs font-black uppercase border-2 border-[#111410] shadow-[2px_2px_0px_0px_#111410]"
+              >
+                Clear Filters
+              </button>
+            </div>
+          ) : (
+            <div className="space-y-8">
+              {groupedExplorerRoots
+                .filter(group => group.roots.length > 0)
+                .map((group) => (
+                  <div key={group.id} className="space-y-4">
+                    {/* Group Header Banner */}
+                    <div className="bg-white border-2 border-[#111410] shadow-[4px_4px_0px_0px_#111410] p-4 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                      <div className="flex items-start sm:items-center space-x-3">
+                        <span className="text-2xl select-none shrink-0">{group.icon}</span>
+                        <div>
+                          <div className="flex items-center space-x-2">
+                            <h3 className="text-base font-black font-sans uppercase text-[#111410]">
+                              {group.name}
+                            </h3>
+                            <span className="text-[10px] font-mono font-bold px-2 py-0.5 bg-[#FAFBF8] border border-[#111410] uppercase text-[#62685E]">
+                              {group.roots.length} {group.roots.length === 1 ? 'Root Family' : 'Root Families'}
                             </span>
-                          )}
+                          </div>
+                          <p className="text-xs font-mono text-[#42281D] mt-0.5">
+                            {group.description}
+                          </p>
                         </div>
                       </div>
+
+                      {/* Quick Practice Launcher for this Group */}
+                      <button
+                        type="button"
+                        onClick={() => handleOpenCustomSession(group.roots.map(r => r.id))}
+                        className="flex items-center space-x-1.5 px-3 py-1.5 bg-[#FAFBF8] hover:bg-[#EDF5E5] text-[#111410] hover:text-[#2F441E] font-mono text-xs font-black uppercase border-2 border-[#111410] shadow-[2px_2px_0px_0px_#111410] active:translate-x-[1px] active:translate-y-[1px] transition shrink-0 self-start sm:self-auto"
+                        title={`Start custom practice with all ${group.roots.length} roots in this ${learningPathway === PATHWAY_THEMATIC ? 'cluster' : 'tier'}`}
+                      >
+                        <Sparkles className="w-3.5 h-3.5 text-[#7BB33B]" />
+                        <span>Practice {learningPathway === PATHWAY_THEMATIC ? 'Cluster' : 'Tier'} ({group.roots.length})</span>
+                      </button>
                     </div>
 
-                    {/* Launch Practice for this root */}
-                    <button
-                      onClick={() => handleLaunchRootPractice(root.id)}
-                      className="mt-5 w-full flex items-center justify-center space-x-2 py-2 bg-[#7BB33B] hover:bg-[#84C341] text-white border-2 border-[#111410] shadow-[2px_2px_0px_0px_#111410] font-mono text-xs font-black uppercase tracking-wider transition active:translate-x-[1px] active:translate-y-[1px]"
-                    >
-                      <Sparkles className="w-3.5 h-3.5" />
-                      <span>Study This Root</span>
-                    </button>
+                    {/* Root Bento Grid for this group */}
+                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
+                      {group.roots.map((root) => {
+                        const rootWords = words.filter(w => w.root === root.id || w.root_details?.id === root.id);
+
+                        return (
+                          <div
+                            key={root.id}
+                            className="bg-white border-2 border-[#111410] shadow-[4px_4px_0px_0px_#111410] p-5 flex flex-col justify-between hover:translate-x-[-1px] hover:translate-y-[-1px] transition"
+                          >
+                            <div>
+                              {/* Card Header with Morpheme, Origin, and Pathway Badges */}
+                              <div className="border-b-2 border-[#111410] pb-2.5 mb-3">
+                                <div className="flex items-center justify-between">
+                                  <span className="font-mono text-sm font-black text-[#111410] uppercase tracking-wider">
+                                    [{root.morpheme.toUpperCase()}]
+                                  </span>
+                                  <div className="flex items-center space-x-1.5">
+                                    <span className="text-[10px] font-mono px-2 py-0.5 bg-[#EDF5E5] text-[#2F441E] border border-[#111410] uppercase font-bold">
+                                      {root.language}
+                                    </span>
+                                    <span className="text-[10px] font-mono px-2 py-0.5 bg-[#FAFBF8] border border-[#111410] font-bold text-[#62685E]">
+                                      {rootWords.length} Words
+                                    </span>
+                                  </div>
+                                </div>
+
+                                {/* Pathway Dual Tagging Badges */}
+                                <div className="flex flex-wrap items-center gap-1.5 mt-2">
+                                  <span
+                                    className={`text-[9px] font-mono font-bold uppercase px-2 py-0.5 border border-[#111410] ${
+                                      learningPathway === PATHWAY_THEMATIC
+                                        ? 'bg-[#EDF5E5] text-[#2F441E] font-black'
+                                        : 'bg-[#FAFBF8] text-[#42281D]'
+                                    }`}
+                                    title={`Thematic Cluster: ${root.thematic_cluster}`}
+                                  >
+                                    🧠 {root.thematic_cluster || 'Movement'}
+                                  </span>
+                                  <span
+                                    className={`text-[9px] font-mono uppercase px-2 py-0.5 border border-[#111410] ${
+                                      learningPathway === PATHWAY_YIELD
+                                        ? 'bg-[#FFFBEB] text-[#92400E] font-black'
+                                        : 'bg-[#FAFBF8] text-[#62685E] font-bold'
+                                    }`}
+                                    title={`SAT/ACT Frequency Tier: ${root.sat_tier}`}
+                                  >
+                                    ⚡ {root.sat_tier || 'Tier 1 High-Yield'}
+                                  </span>
+                                </div>
+                              </div>
+
+                              {/* Core Meaning & Key */}
+                              <div className="space-y-2 mb-4">
+                                <p className="text-sm font-serif italic text-[#42281D] leading-snug">
+                                  "{root.core_meaning}"
+                                </p>
+                                {root.mnemonic && (
+                                  <div className="text-[11px] font-mono text-[#62685E] bg-[#FAFBF8] p-2 border border-[#111410]/30">
+                                    <span className="font-bold text-[#2F441E] uppercase mr-1">Key:</span>
+                                    {root.mnemonic}
+                                  </div>
+                                )}
+                              </div>
+
+                              {/* Word Families Sample */}
+                              <div className="space-y-1.5">
+                                <span className="text-[9px] font-mono font-bold uppercase text-[#62685E] block">
+                                  Family Derivatives:
+                                </span>
+                                <div className="flex flex-wrap gap-1">
+                                  {rootWords.slice(0, 5).map((w, i) => (
+                                    <button
+                                      key={w.id || i}
+                                      type="button"
+                                      onClick={() => {
+                                        if (isAdminMode) {
+                                          setEditingReviewWord(w);
+                                        }
+                                      }}
+                                      className={`px-2 py-0.5 border text-[10px] font-mono font-bold uppercase transition ${
+                                        isAdminMode
+                                          ? 'hover:bg-[#EDF5E5] hover:border-[#7BB33B] cursor-pointer active:translate-x-[1px]'
+                                          : 'cursor-default'
+                                      } ${
+                                        w.review?.verified
+                                          ? 'bg-[#EDF5E5] text-[#2F441E] border-[#7BB33B]'
+                                          : 'bg-[#FAFBF8] border-[#111410] text-[#111410]'
+                                      }`}
+                                      title={isAdminMode ? `Click to review and verify "${w.word}"` : undefined}
+                                    >
+                                      {w.review?.verified && <span className="mr-1 text-[#7BB33B]">✓</span>}
+                                      {w.word}
+                                    </button>
+                                  ))}
+                                  {rootWords.length > 5 && (
+                                    <span className="px-1.5 py-0.5 text-[10px] font-mono text-[#62685E]">
+                                      +{rootWords.length - 5} more
+                                    </span>
+                                  )}
+                                </div>
+                              </div>
+                            </div>
+
+                            {/* Launch Practice for this root */}
+                            <button
+                              onClick={() => handleLaunchRootPractice(root.id)}
+                              className="mt-5 w-full flex items-center justify-center space-x-2 py-2 bg-[#7BB33B] hover:bg-[#84C341] text-white border-2 border-[#111410] shadow-[2px_2px_0px_0px_#111410] font-mono text-xs font-black uppercase tracking-wider transition active:translate-x-[1px] active:translate-y-[1px]"
+                            >
+                              <Sparkles className="w-3.5 h-3.5" />
+                              <span>Study This Root</span>
+                            </button>
+                          </div>
+                        );
+                      })}
+                    </div>
                   </div>
-                );
-              })}
-          </div>
+                ))}
+            </div>
+          )}
         </div>
       )}
 
