@@ -318,7 +318,7 @@ export default function App() {
       setWords(wordsWithReviews);
     } catch (err) {
       console.error('Error loading Kiwi Learning data:', err);
-      setError('Unable to connect to platform API. Please ensure the backend is running on port 8000.');
+      setError(`Unable to connect to platform API: ${err.message || 'Please check server status and database migrations.'}`);
     } finally {
       setLoading(false);
     }

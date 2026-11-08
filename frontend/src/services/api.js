@@ -1,4 +1,4 @@
-const API_BASE = '/api';
+const API_BASE = (import.meta.env.VITE_API_BASE || '/api').replace(/\/$/, '');
 
 // --------------------------------------------------------------------------------
 // Kiwi Vocabulary Product APIs
@@ -6,7 +6,7 @@ const API_BASE = '/api';
 
 export async function fetchRoots() {
   const res = await fetch(`${API_BASE}/vocab/roots/`, { credentials: 'include' });
-  if (!res.ok) throw new Error('Failed to fetch roots');
+  if (!res.ok) throw new Error(`Failed to fetch roots (HTTP ${res.status})`);
   return res.json();
 }
 
@@ -14,7 +14,7 @@ export async function fetchWords(params = {}) {
   const query = new URLSearchParams(params).toString();
   const url = `${API_BASE}/vocab/words/${query ? `?${query}` : ''}`;
   const res = await fetch(url, { credentials: 'include' });
-  if (!res.ok) throw new Error('Failed to fetch vocabulary words');
+  if (!res.ok) throw new Error(`Failed to fetch vocabulary words (HTTP ${res.status})`);
   return res.json();
 }
 
@@ -22,13 +22,13 @@ export async function fetchWordSession(params = {}) {
   const query = new URLSearchParams(params).toString();
   const url = `${API_BASE}/vocab/session/${query ? `?${query}` : ''}`;
   const res = await fetch(url, { credentials: 'include' });
-  if (!res.ok) throw new Error('Failed to fetch vocabulary session');
+  if (!res.ok) throw new Error(`Failed to fetch vocabulary session (HTTP ${res.status})`);
   return res.json();
 }
 
 export async function fetchVocabStats() {
   const res = await fetch(`${API_BASE}/vocab/stats/`, { credentials: 'include' });
-  if (!res.ok) throw new Error('Failed to fetch vocabulary stats');
+  if (!res.ok) throw new Error(`Failed to fetch vocabulary stats (HTTP ${res.status})`);
   return res.json();
 }
 
@@ -44,7 +44,7 @@ export async function fetchQuestions(section = 'MATH') {
   if (!res.ok) {
     // Fallback if needed
     const fallback = await fetch(`${API_BASE}/questions/?section=${section}`, { credentials: 'include' });
-    if (!fallback.ok) throw new Error('Failed to fetch questions');
+    if (!fallback.ok) throw new Error(`Failed to fetch questions (HTTP ${fallback.status})`);
     return fallback.json();
   }
   return res.json();
@@ -52,7 +52,7 @@ export async function fetchQuestions(section = 'MATH') {
 
 export async function fetchReadingPassages() {
   const res = await fetch(`${API_BASE}/reading/passages/`, { credentials: 'include' });
-  if (!res.ok) throw new Error('Failed to fetch reading passages');
+  if (!res.ok) throw new Error(`Failed to fetch reading passages (HTTP ${res.status})`);
   return res.json();
 }
 
@@ -62,7 +62,7 @@ export async function fetchReadingPassages() {
 
 export async function fetchDashboardStats() {
   const res = await fetch(`${API_BASE}/platform/dashboard/stats/`, { credentials: 'include' });
-  if (!res.ok) throw new Error('Failed to fetch platform dashboard statistics');
+  if (!res.ok) throw new Error(`Failed to fetch platform dashboard statistics (HTTP ${res.status})`);
   return res.json();
 }
 
