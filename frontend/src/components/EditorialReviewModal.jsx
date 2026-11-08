@@ -39,6 +39,7 @@ export default function EditorialReviewModal({
   const [activeTabMode, setActiveTabMode] = useState('LEXICON'); // 'LEXICON' | 'CERTIFICATION'
   const [mobileView, setMobileView] = useState(() => (initialWord ? 'detail' : 'list'));
   const [isSavingWord, setIsSavingWord] = useState(false);
+  const [autoMarkVerified, setAutoMarkVerified] = useState(true);
   const [reviewFormData, setReviewFormData] = useState({
     verified: false,
     notes: '',
@@ -152,10 +153,59 @@ export default function EditorialReviewModal({
     }
   };
 
+  const handleQuickVerify = async (moveToNext = false) => {
+    if (!activeWord || isSavingWord) return;
+    setIsSavingWord(true);
+    try {
+      const isVerified = !reviewFormData.verified;
+      const updatedReview = {
+        verified: isVerified,
+        verifiedAt: isVerified ? new Date().toISOString() : null,
+        verifiedBy: (reviewFormData.verifiedBy || 'Admin').trim(),
+        notes: (reviewFormData.notes || '').trim()
+      };
+
+      const updated = await updateVocabularyWord(activeWord.id, { review: updatedReview });
+      const completeUpdatedWord = { ...activeWord, ...updated, review: updatedReview };
+
+      if (onUpdateWord) {
+        onUpdateWord(completeUpdatedWord);
+      }
+      saveWordReview(activeWord.word, updatedReview);
+      if (onSaveReview) {
+        onSaveReview(activeWord.word, updatedReview);
+      }
+      setReviewFormData(prev => ({ ...prev, verified: isVerified }));
+      setSaveToast(isVerified ? `"${activeWord.word}" marked as verified!` : `"${activeWord.word}" marked unverified`);
+      setTimeout(() => setSaveToast(null), 3000);
+
+      if (moveToNext) {
+        const currentIndex = filteredWords.findIndex(w => w.word === activeWord.word);
+        if (currentIndex !== -1 && currentIndex < filteredWords.length - 1) {
+          setSelectedWordName(filteredWords[currentIndex + 1].word);
+        }
+      }
+    } catch (err) {
+      alert(`Failed to verify word: ${err.message}`);
+    } finally {
+      setIsSavingWord(false);
+    }
+  };
+
   const handleSaveWordDetails = async (moveToNext = false) => {
     if (!activeWord || isSavingWord) return;
     setIsSavingWord(true);
     try {
+      const isVerified = autoMarkVerified || Boolean(reviewFormData.verified);
+      const updatedReview = {
+        verified: isVerified,
+        verifiedAt: isVerified 
+          ? (activeWord.review?.verifiedAt || new Date().toISOString())
+          : null,
+        verifiedBy: (reviewFormData.verifiedBy || 'Admin').trim(),
+        notes: (reviewFormData.notes || '').trim()
+      };
+
       const payload = {
         word: (wordFormData.word || '').trim(),
         prefix: (wordFormData.prefix || '').trim(),
@@ -166,12 +216,22 @@ export default function EditorialReviewModal({
         connotation: wordFormData.connotation,
         part_of_speech: (wordFormData.part_of_speech || '').trim(),
         pronunciation: (wordFormData.pronunciation || '').trim(),
+        review: updatedReview,
       };
+
       const updated = await updateVocabularyWord(activeWord.id, payload);
+      const completeUpdatedWord = { ...activeWord, ...updated, review: updatedReview };
+
       if (onUpdateWord) {
-        onUpdateWord(updated);
+        onUpdateWord(completeUpdatedWord);
       }
-      setSaveToast(`Saved changes for "${updated.word}"!`);
+      saveWordReview(activeWord.word, updatedReview);
+      if (onSaveReview) {
+        onSaveReview(activeWord.word, updatedReview);
+      }
+      setReviewFormData(prev => ({ ...prev, verified: isVerified }));
+
+      setSaveToast(isVerified ? `Saved & verified "${updated.word}"!` : `Saved changes for "${updated.word}"!`);
       setTimeout(() => setSaveToast(null), 3000);
 
       if (moveToNext) {
@@ -382,14 +442,52 @@ export default function EditorialReviewModal({
                         {activeWord.word}
                       </h1>
                       {reviewFormData.verified ? (
-                        <span className="px-2 sm:px-2.5 py-0.5 sm:py-1 bg-[#EDF5E5] text-[#2F441E] border-2 border-[#111410] text-[10px] font-mono font-black uppercase shadow-[2px_2px_0px_0px_#111410]">
-                          ✓ VERIFIED
-                        </span>
+                        <div className="flex items-center space-x-1.5">
+                          <span className="px-2 sm:px-2.5 py-0.5 sm:py-1 bg-[#EDF5E5] text-[#2F441E] border-2 border-[#111410] text-[10px] font-mono font-black uppercase shadow-[2px_2px_0px_0px_#111410]">
+                            ✓ VERIFIED
+                          </span>
+                          <button
+                            type="button"
+                            onClick={() => handleQuickVerify(false)}
+                            disabled={isSavingWord}
+                            className="text-[10px] font-mono underline text-[#62685E] hover:text-[#991B1B] ml-1"
+                            title="Click to unmark verification"
+                          >
+                            Unverify
+                          </button>
+                        </div>
                       ) : (
                         <span className="px-2 sm:px-2.5 py-0.5 sm:py-1 bg-[#FEF3C7] text-[#92400E] border-2 border-[#111410] text-[10px] font-mono font-black uppercase shadow-[2px_2px_0px_0px_#111410]">
                           ⚠ UNREVIEWED
                         </span>
                       )}
+
+                      {/* 1-Click Quick Verification Actions */}
+                      <div className="flex items-center space-x-1.5 ml-0 sm:ml-2">
+                        {!reviewFormData.verified && (
+                          <button
+                            type="button"
+                            onClick={() => handleQuickVerify(false)}
+                            disabled={isSavingWord}
+                            className="flex items-center space-x-1 px-2.5 py-1 bg-[#7BB33B] hover:bg-[#84C341] text-white border-2 border-[#111410] text-[10px] font-mono font-black uppercase shadow-[2px_2px_0px_0px_#111410] active:translate-x-[1px] active:translate-y-[1px] transition"
+                            title="Verify this word as-is without making edits"
+                          >
+                            <Check className="w-3.5 h-3.5" />
+                            <span>Mark Verified</span>
+                          </button>
+                        )}
+                        <button
+                          type="button"
+                          onClick={() => handleQuickVerify(true)}
+                          disabled={isSavingWord}
+                          className="flex items-center space-x-1 px-2.5 py-1 bg-[#FAFBF8] hover:bg-white text-[#111410] border-2 border-[#111410] text-[10px] font-mono font-bold uppercase shadow-[2px_2px_0px_0px_#111410] active:translate-x-[1px] active:translate-y-[1px] transition"
+                          title="Verify this word and jump immediately to the next word in the list"
+                        >
+                          <Check className="w-3.5 h-3.5 text-[#7BB33B]" />
+                          <span>Verify &amp; Next</span>
+                          <ArrowRight className="w-3 h-3 ml-0.5" />
+                        </button>
+                      </div>
                     </div>
 
                     <div className="flex items-center space-x-2 mt-1.5 font-mono text-xs text-[#62685E]">
@@ -581,8 +679,24 @@ export default function EditorialReviewModal({
                       </div>
                     </div>
 
+                    {/* Auto-verification toggle */}
+                    <div className="pt-2 border-t border-[#111410]/15 flex items-center justify-between">
+                      <label className="flex items-center space-x-2 text-xs font-mono font-bold cursor-pointer select-none text-[#111410]">
+                        <input
+                          type="checkbox"
+                          checked={autoMarkVerified}
+                          onChange={(e) => setAutoMarkVerified(e.target.checked)}
+                          className="w-4 h-4 text-[#7BB33B] border-2 border-[#111410] rounded-none focus:ring-0 accent-[#7BB33B] cursor-pointer"
+                        />
+                        <span>Mark as Verified when saving</span>
+                      </label>
+                      <span className="text-[10px] font-mono text-[#62685E] hidden sm:inline">
+                        {autoMarkVerified ? '✓ Word will be certified' : 'Word will remain unreviewed'}
+                      </span>
+                    </div>
+
                     {/* Word Save Action Buttons */}
-                    <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2 pt-2 border-t border-[#111410]/15">
+                    <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2 pt-1">
                       <button
                         type="button"
                         onClick={() => handleSaveWordDetails(false)}
@@ -594,7 +708,7 @@ export default function EditorialReviewModal({
                         ) : (
                           <Check className="w-4 h-4" />
                         )}
-                        <span>{isSavingWord ? 'Saving to Database...' : 'Save Word to Database'}</span>
+                        <span>{isSavingWord ? 'Saving & Verifying...' : (autoMarkVerified ? 'Save & Verify Word' : 'Save Word Changes')}</span>
                       </button>
 
                       <button
@@ -603,7 +717,7 @@ export default function EditorialReviewModal({
                         disabled={isSavingWord}
                         className="flex-1 flex items-center justify-center space-x-2 px-4 py-3 sm:py-2.5 bg-[#EDF5E5] hover:bg-[#DCEDD0] text-[#2F441E] border-2 border-[#111410] shadow-[2px_2px_0px_0px_#111410] font-mono text-xs font-black uppercase tracking-wider transition active:translate-x-[1px] active:translate-y-[1px] min-h-[44px] disabled:opacity-50"
                       >
-                        <span>Save &amp; Next Word</span>
+                        <span>{autoMarkVerified ? 'Save, Verify & Next' : 'Save & Next Word'}</span>
                         <ArrowRight className="w-4 h-4" />
                       </button>
                     </div>
