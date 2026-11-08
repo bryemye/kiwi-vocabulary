@@ -172,28 +172,33 @@ export default function App() {
     }
   }, [activeApp, activeTab, externalMorphemeView, recordWaypoint]);
 
-  // Editorial Reviewer / Admin Mode State
+  // Editorial Reviewer / Admin Mode State (Restricted to Staff/Admin Users)
   const [isAdminMode, setIsAdminMode] = useState(getStoredAdminMode);
+  const isStaffUser = Boolean(user?.is_staff);
+  const effectiveAdminMode = isStaffUser && isAdminMode;
 
   const handleToggleAdminMode = useCallback(() => {
+    if (!isStaffUser) return;
     setIsAdminMode((prev) => {
       const next = !prev;
       setStoredAdminMode(next);
       return next;
     });
-  }, []);
+  }, [isStaffUser]);
 
-  // Global Keyboard Shortcut: Ctrl + Shift + E to toggle Reviewer / Admin Mode
+  // Global Keyboard Shortcut: Ctrl + Shift + E to toggle Reviewer / Admin Mode (Staff only)
   useEffect(() => {
     const handleKeyDown = (e) => {
       if ((e.ctrlKey || e.metaKey) && e.shiftKey && (e.key === 'E' || e.key === 'e')) {
         e.preventDefault();
-        handleToggleAdminMode();
+        if (isStaffUser) {
+          handleToggleAdminMode();
+        }
       }
     };
     window.addEventListener('keydown', handleKeyDown);
     return () => window.removeEventListener('keydown', handleKeyDown);
-  }, [handleToggleAdminMode]);
+  }, [handleToggleAdminMode, isStaffUser]);
 
   // Reactive handler for review updates
   const handleUpdateWordReview = useCallback((wordName, review) => {
@@ -207,6 +212,22 @@ export default function App() {
         ...r,
         words: (r.words || []).map((w) =>
           w.word?.toLowerCase() === lower ? { ...w, review } : w
+        ),
+      }))
+    );
+  }, []);
+
+  // Reactive handler for full word updates (lexical definition, affixes, sentence, etc.)
+  const handleUpdateWord = useCallback((updatedWord) => {
+    if (!updatedWord || !updatedWord.id) return;
+    setWords((prev) =>
+      prev.map((w) => (w.id === updatedWord.id ? { ...w, ...updatedWord } : w))
+    );
+    setRoots((prev) =>
+      prev.map((r) => ({
+        ...r,
+        words: (r.words || []).map((w) =>
+          w.id === updatedWord.id ? { ...w, ...updatedWord } : w
         ),
       }))
     );
@@ -468,20 +489,21 @@ export default function App() {
         user={user}
         onOpenAuth={() => setIsAuthModalOpen(true)}
         onLogout={handleLogout}
-        isAdminMode={isAdminMode}
-        onToggleAdminMode={handleToggleAdminMode}
+        isAdminMode={effectiveAdminMode}
+        onToggleAdminMode={isStaffUser ? handleToggleAdminMode : null}
       />
 
       {/* Celestial Trajectory & Orbital Telemetry Navigation Bar */}
       <CelestialTrajectoryRibbon />
 
-      {/* Editorial / Admin Review Mode Status Toolbar */}
+      {/* Editorial / Admin Review Mode Status Toolbar (Visible only when staff user enables it) */}
       <AdminReviewBar
-        isAdminMode={isAdminMode}
-        onToggleAdminMode={handleToggleAdminMode}
+        isAdminMode={effectiveAdminMode}
+        onToggleAdminMode={isStaffUser ? handleToggleAdminMode : null}
         words={words}
         roots={roots}
         onUpdateWordReview={handleUpdateWordReview}
+        onUpdateWord={handleUpdateWord}
       />
 
       {/* Error notification banner if API is unreachable */}
@@ -542,8 +564,9 @@ export default function App() {
             onTabChange={handleNavigateTab}
             onAttemptLogged={handleAttemptLogged}
             onNavigateDashboard={() => setActiveApp('platform')}
-            isAdminMode={isAdminMode}
+            isAdminMode={effectiveAdminMode}
             onUpdateWordReview={handleUpdateWordReview}
+            onUpdateWord={handleUpdateWord}
             externalMorphemeView={externalMorphemeView}
             onClearExternalMorphemeView={() => setExternalMorphemeView(null)}
           />

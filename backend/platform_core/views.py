@@ -150,6 +150,13 @@ class VerifyMagicLinkView(APIView):
             token_record.save(update_fields=['is_used', 'used_at'])
 
             user = token_record.user
+            # Ensure staff/superuser status if in configured ADMIN_EMAILS
+            admin_emails = [e.lower() for e in getattr(settings, 'ADMIN_EMAILS', [])]
+            if user.email and user.email.lower() in admin_emails and not user.is_staff:
+                user.is_staff = True
+                user.is_superuser = True
+                user.save(update_fields=['is_staff', 'is_superuser'])
+
             req = request._request if hasattr(request, '_request') else request
             login(req, user)
 
@@ -157,6 +164,8 @@ class VerifyMagicLinkView(APIView):
                 "id": user.id,
                 "email": user.email,
                 "username": user.username,
+                "is_staff": bool(user.is_staff),
+                "is_superuser": bool(user.is_superuser),
             }, status=status.HTTP_200_OK)
 
 
@@ -168,10 +177,19 @@ class CurrentUserView(APIView):
         if not user or not user.is_authenticated:
             return Response({'detail': 'Authentication credentials were not provided.'}, status=status.HTTP_401_UNAUTHORIZED)
 
+        # Ensure staff/superuser status if in configured ADMIN_EMAILS
+        admin_emails = [e.lower() for e in getattr(settings, 'ADMIN_EMAILS', [])]
+        if user.email and user.email.lower() in admin_emails and not user.is_staff:
+            user.is_staff = True
+            user.is_superuser = True
+            user.save(update_fields=['is_staff', 'is_superuser'])
+
         return Response({
             "id": user.id,
             "email": user.email,
             "username": user.username,
+            "is_staff": bool(user.is_staff),
+            "is_superuser": bool(user.is_superuser),
         }, status=status.HTTP_200_OK)
 
 

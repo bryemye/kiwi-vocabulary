@@ -23,6 +23,11 @@ CSRF_TRUSTED_ORIGINS = [
     ).split(',') if origin.strip()
 ]
 
+# Admin users permitted for editorial/staff capabilities
+ADMIN_EMAILS = [
+    'brian.c.miles@gmail.com',
+]
+
 INSTALLED_APPS = [
     'django.contrib.admin',
     'django.contrib.auth',

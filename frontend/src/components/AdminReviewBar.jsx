@@ -18,7 +18,8 @@ export default function AdminReviewBar({
   onToggleAdminMode, 
   words = [], 
   roots = [],
-  onUpdateWordReview
+  onUpdateWordReview,
+  onUpdateWord
 }) {
   const [exportNotice, setExportNotice] = useState(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -154,6 +155,7 @@ export default function AdminReviewBar({
         roots={roots}
         initialWord={selectedWordToEdit || 'intermittent'}
         onSaveReview={onUpdateWordReview}
+        onUpdateWord={onUpdateWord}
       />
     </>
   );

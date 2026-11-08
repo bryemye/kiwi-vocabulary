@@ -186,3 +186,24 @@ export async function logoutUser() {
   }
   return data;
 }
+
+// --------------------------------------------------------------------------------
+// Vocabulary Word Management APIs (Staff / Admin Only)
+// --------------------------------------------------------------------------------
+
+export async function updateVocabularyWord(id, wordData) {
+  const res = await fetch(`${API_BASE}/vocab/words/${id}/`, {
+    method: 'PATCH',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    credentials: 'include',
+    body: JSON.stringify(wordData),
+  });
+
+  const data = await res.json().catch(() => ({}));
+  if (!res.ok) {
+    throw new Error(data.detail || data.error || 'Failed to update vocabulary word');
+  }
+  return data;
+}

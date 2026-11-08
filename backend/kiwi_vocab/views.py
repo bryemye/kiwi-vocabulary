@@ -87,13 +87,18 @@ class RootViewSet(viewsets.ReadOnlyModelViewSet):
         return queryset
 
 
-class VocabularyWordViewSet(viewsets.ReadOnlyModelViewSet):
+class VocabularyWordViewSet(viewsets.ModelViewSet):
     """
     Explore and filter vocabulary words by root, origin language, connotation, or search query.
+    Allows staff/admin users to create, update, or patch word definitions, affixes, and metadata.
     """
     queryset = VocabularyWord.objects.select_related('root').all()
     serializer_class = VocabularyWordSerializer
-    permission_classes = [permissions.AllowAny]
+
+    def get_permissions(self):
+        if self.action in ['create', 'update', 'partial_update', 'destroy']:
+            return [permissions.IsAdminUser()]
+        return [permissions.AllowAny()]
 
     def get_queryset(self):
         queryset = super().get_queryset()

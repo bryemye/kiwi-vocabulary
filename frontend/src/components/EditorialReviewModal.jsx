@@ -10,9 +10,13 @@ import {
   Sparkles,
   BookOpen,
   Filter,
-  CheckCircle2
+  CheckCircle2,
+  Edit3,
+  Database,
+  Loader2
 } from 'lucide-react';
 import { saveWordReview, getWordReview } from '../services/editorialService';
+import { updateVocabularyWord } from '../services/api';
 
 export default function EditorialReviewModal({
   isOpen,
@@ -20,7 +24,8 @@ export default function EditorialReviewModal({
   words = [],
   roots = [],
   initialWord = null,
-  onSaveReview
+  onSaveReview,
+  onUpdateWord
 }) {
   const [selectedWordName, setSelectedWordName] = useState(() => {
     if (initialWord) {
@@ -31,11 +36,24 @@ export default function EditorialReviewModal({
 
   const [searchTerm, setSearchTerm] = useState('');
   const [filterMode, setFilterMode] = useState('ALL'); // 'ALL' | 'UNREVIEWED' | 'VERIFIED'
+  const [activeTabMode, setActiveTabMode] = useState('LEXICON'); // 'LEXICON' | 'CERTIFICATION'
   const [mobileView, setMobileView] = useState(() => (initialWord ? 'detail' : 'list'));
+  const [isSavingWord, setIsSavingWord] = useState(false);
   const [reviewFormData, setReviewFormData] = useState({
     verified: false,
     notes: '',
     verifiedBy: 'Admin'
+  });
+  const [wordFormData, setWordFormData] = useState({
+    word: '',
+    prefix: '',
+    suffix: '',
+    root: '',
+    definition: '',
+    sat_sentence: '',
+    connotation: 'neutral',
+    part_of_speech: 'adjective',
+    pronunciation: '',
   });
   const [saveToast, setSaveToast] = useState(null);
 
@@ -63,6 +81,17 @@ export default function EditorialReviewModal({
         verified: Boolean(rev?.verified),
         notes: rev?.notes || '',
         verifiedBy: rev?.verifiedBy || 'Admin'
+      });
+      setWordFormData({
+        word: activeWord.word || '',
+        prefix: activeWord.prefix || '',
+        suffix: activeWord.suffix || '',
+        root: activeWord.root || activeWord.root_details?.id || '',
+        definition: activeWord.definition || '',
+        sat_sentence: activeWord.sat_sentence || '',
+        connotation: activeWord.connotation || 'neutral',
+        part_of_speech: activeWord.part_of_speech || 'adjective',
+        pronunciation: activeWord.pronunciation || '',
       });
     }
   }, [activeWord]);
@@ -120,6 +149,41 @@ export default function EditorialReviewModal({
       if (currentIndex !== -1 && currentIndex < filteredWords.length - 1) {
         setSelectedWordName(filteredWords[currentIndex + 1].word);
       }
+    }
+  };
+
+  const handleSaveWordDetails = async (moveToNext = false) => {
+    if (!activeWord || isSavingWord) return;
+    setIsSavingWord(true);
+    try {
+      const payload = {
+        word: (wordFormData.word || '').trim(),
+        prefix: (wordFormData.prefix || '').trim(),
+        suffix: (wordFormData.suffix || '').trim(),
+        root: Number(wordFormData.root),
+        definition: (wordFormData.definition || '').trim(),
+        sat_sentence: (wordFormData.sat_sentence || '').trim(),
+        connotation: wordFormData.connotation,
+        part_of_speech: (wordFormData.part_of_speech || '').trim(),
+        pronunciation: (wordFormData.pronunciation || '').trim(),
+      };
+      const updated = await updateVocabularyWord(activeWord.id, payload);
+      if (onUpdateWord) {
+        onUpdateWord(updated);
+      }
+      setSaveToast(`Saved changes for "${updated.word}"!`);
+      setTimeout(() => setSaveToast(null), 3000);
+
+      if (moveToNext) {
+        const currentIndex = filteredWords.findIndex(w => w.word === activeWord.word);
+        if (currentIndex !== -1 && currentIndex < filteredWords.length - 1) {
+          setSelectedWordName(filteredWords[currentIndex + 1].word);
+        }
+      }
+    } catch (err) {
+      alert(`Failed to save word to database: ${err.message}`);
+    } finally {
+      setIsSavingWord(false);
     }
   };
 
@@ -350,133 +414,288 @@ export default function EditorialReviewModal({
                   )}
                 </div>
 
-                {/* Morpheme & Etymology Reference Box */}
-                <div className="p-3 sm:p-3.5 bg-[#FAFBF8] border-2 border-[#111410] shadow-[2px_2px_0px_0px_#111410]">
-                  <span className="text-[10px] font-mono font-black uppercase text-[#62685E] block mb-1.5">
-                    Morpheme Deconstruction &amp; Root Origin
-                  </span>
-                  <div className="flex flex-wrap items-center gap-1.5 font-mono text-xs">
-                    {activeWord.prefix && (
-                      <span className="px-2 py-0.5 bg-white border border-[#111410] font-bold text-[#42281D]">
-                        [{activeWord.prefix}]
-                      </span>
-                    )}
-                    {parentRoot && (
-                      <span className="px-2 sm:px-2.5 py-0.5 bg-[#EFE8DF] border-2 border-[#111410] font-black text-[#111410]">
-                        [{parentRoot.morpheme}] ({parentRoot.language} · "{parentRoot.core_meaning}")
-                      </span>
-                    )}
-                    {activeWord.suffix && (
-                      <span className="px-2 py-0.5 bg-white border border-[#111410] font-bold text-[#42281D]">
-                        [{activeWord.suffix}]
-                      </span>
-                    )}
-                  </div>
+                {/* Sub-Tab Switcher: Word Lexicon Editor vs Editorial Certification */}
+                <div className="flex border-b-2 border-[#111410] font-mono text-xs bg-[#FAFBF8]">
+                  <button
+                    type="button"
+                    onClick={() => setActiveTabMode('LEXICON')}
+                    className={`flex-1 sm:flex-none px-4 py-2.5 font-black uppercase flex items-center justify-center space-x-2 border-r-2 border-[#111410] transition ${
+                      activeTabMode === 'LEXICON'
+                        ? 'bg-[#7BB33B] text-white shadow-[inset_0_-2px_0_0_#111410]'
+                        : 'text-[#111410] hover:bg-white'
+                    }`}
+                  >
+                    <Edit3 className="w-3.5 h-3.5" />
+                    <span>Edit Lexicon &amp; Affixes</span>
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setActiveTabMode('CERTIFICATION')}
+                    className={`flex-1 sm:flex-none px-4 py-2.5 font-black uppercase flex items-center justify-center space-x-2 transition ${
+                      activeTabMode === 'CERTIFICATION'
+                        ? 'bg-[#7BB33B] text-white shadow-[inset_0_-2px_0_0_#111410]'
+                        : 'text-[#111410] hover:bg-white'
+                    }`}
+                  >
+                    <ShieldCheck className="w-3.5 h-3.5" />
+                    <span>Certification &amp; Notes</span>
+                  </button>
                 </div>
 
-                {/* Lexical Definition & Sentence Exemplar */}
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-3 sm:gap-4">
-                  <div className="p-3 sm:p-3.5 bg-white border-2 border-[#111410] shadow-[2px_2px_0px_0px_#111410]">
-                    <span className="text-[10px] font-mono font-black uppercase text-[#62685E] block mb-1">
-                      Lexical Definition
-                    </span>
-                    <p className="text-xs sm:text-sm font-sans font-bold text-[#111410] leading-snug">
-                      {activeWord.definition}
-                    </p>
-                  </div>
-
-                  <div className="p-3 sm:p-3.5 bg-white border-2 border-[#111410] shadow-[2px_2px_0px_0px_#111410]">
-                    <span className="text-[10px] font-mono font-black uppercase text-[#62685E] block mb-1">
-                      Contextual SAT Exemplar
-                    </span>
-                    <p className="text-xs sm:text-sm font-serif italic text-[#111410] leading-snug">
-                      "{activeWord.sat_sentence}"
-                    </p>
-                  </div>
-                </div>
-
-                {/* EDITORIAL CERTIFICATION FORM (Interactive Form) */}
-                <div className="p-3.5 sm:p-5 bg-[#FAFBF8] border-2 border-[#111410] shadow-[3px_3px_0px_0px_#111410] sm:shadow-[4px_4px_0px_0px_#111410] space-y-3.5 sm:space-y-4">
-                  <div className="flex items-center justify-between border-b border-[#111410]/20 pb-2">
-                    <div className="flex items-center space-x-2 text-xs font-mono font-black uppercase text-[#111410]">
-                      <ShieldCheck className="w-4 h-4 text-[#7BB33B]" />
-                      <span>EDITORIAL VERIFICATION</span>
-                    </div>
-                    {activeWord.review?.verifiedAt && (
+                {/* TAB 1: INTERACTIVE WORD LEXICON & AFFIXES EDITOR */}
+                {activeTabMode === 'LEXICON' && (
+                  <div className="p-3.5 sm:p-5 bg-[#FAFBF8] border-2 border-[#111410] shadow-[3px_3px_0px_0px_#111410] sm:shadow-[4px_4px_0px_0px_#111410] space-y-4 animate-fade-in">
+                    <div className="border-b border-[#111410]/20 pb-2 flex items-center justify-between">
+                      <div className="flex items-center space-x-2 text-xs font-mono font-black uppercase text-[#111410]">
+                        <Database className="w-4 h-4 text-[#7BB33B]" />
+                        <span>MANUAL WORD ADJUSTMENTS · DATABASE PERSISTED</span>
+                      </div>
                       <span className="text-[10px] font-mono text-[#62685E]">
-                        {new Date(activeWord.review.verifiedAt).toLocaleDateString()}
-                      </span>
-                    )}
-                  </div>
-
-                  {/* 1. Checkbox: Mark as Independently Verified */}
-                  <label className="flex items-start space-x-3 cursor-pointer select-none bg-white p-3 border-2 border-[#111410] shadow-[2px_2px_0px_0px_#111410] hover:bg-[#FAFBF8] transition">
-                    <input
-                      type="checkbox"
-                      checked={reviewFormData.verified}
-                      onChange={(e) => setReviewFormData(prev => ({ ...prev, verified: e.target.checked }))}
-                      className="mt-0.5 w-5 h-5 text-[#7BB33B] border-2 border-[#111410] rounded-none focus:ring-0 accent-[#7BB33B] cursor-pointer shrink-0"
-                    />
-                    <div>
-                      <span className="text-xs sm:text-sm font-mono font-black uppercase text-[#111410] block">
-                        Mark as Independently Verified by Editor
-                      </span>
-                      <span className="text-[11px] sm:text-xs font-mono text-[#62685E] leading-relaxed block mt-0.5">
-                        Certifies definition accuracy, morpheme formula decomposition, and SAT/ACT relevance.
+                        Staff / Editor Mode
                       </span>
                     </div>
-                  </label>
 
-                  {/* 2. Reviewer Name Input */}
-                  <div>
-                    <label className="text-[10px] font-mono font-black uppercase text-[#62685E] block mb-1">
-                      Verified By (Editor Name / Affiliation)
+                    {/* Morpheme Formula Row: Prefix, Root, Suffix */}
+                    <div>
+                      <span className="text-[10px] font-mono font-black uppercase text-[#62685E] block mb-1">
+                        Morpheme Formula Deconstruction
+                      </span>
+                      <div className="grid grid-cols-1 sm:grid-cols-3 gap-2.5">
+                        {/* Prefix Input */}
+                        <div>
+                          <label className="text-[9px] font-mono font-bold uppercase text-[#42281D] block mb-0.5">
+                            Prefix (with gloss)
+                          </label>
+                          <input
+                            type="text"
+                            value={wordFormData.prefix}
+                            onChange={(e) => setWordFormData(prev => ({ ...prev, prefix: e.target.value }))}
+                            placeholder="e.g. dis- (apart, away)"
+                            className="w-full text-xs font-mono px-2.5 py-1.5 bg-white border-2 border-[#111410] focus:outline-none focus:ring-1 focus:ring-[#7BB33B]"
+                          />
+                        </div>
+
+                        {/* Root Dropdown */}
+                        <div>
+                          <label className="text-[9px] font-mono font-bold uppercase text-[#42281D] block mb-0.5">
+                            Root Family
+                          </label>
+                          <select
+                            value={wordFormData.root}
+                            onChange={(e) => setWordFormData(prev => ({ ...prev, root: e.target.value }))}
+                            className="w-full text-xs font-mono px-2 py-1.5 bg-white border-2 border-[#111410] focus:outline-none focus:ring-1 focus:ring-[#7BB33B]"
+                          >
+                            {roots.map(r => (
+                              <option key={r.id} value={r.id}>
+                                [{r.morpheme.toUpperCase()}] ({r.language} · {r.core_meaning})
+                              </option>
+                            ))}
+                          </select>
+                        </div>
+
+                        {/* Suffix Input */}
+                        <div>
+                          <label className="text-[9px] font-mono font-bold uppercase text-[#42281D] block mb-0.5">
+                            Suffix (with gloss)
+                          </label>
+                          <input
+                            type="text"
+                            value={wordFormData.suffix}
+                            onChange={(e) => setWordFormData(prev => ({ ...prev, suffix: e.target.value }))}
+                            placeholder="e.g. -ous (full of)"
+                            className="w-full text-xs font-mono px-2.5 py-1.5 bg-white border-2 border-[#111410] focus:outline-none focus:ring-1 focus:ring-[#7BB33B]"
+                          />
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* Lexical Definition Textarea */}
+                    <div>
+                      <label className="text-[10px] font-mono font-black uppercase text-[#62685E] block mb-1">
+                        Lexical Definition
+                      </label>
+                      <textarea
+                        rows={3}
+                        value={wordFormData.definition}
+                        onChange={(e) => setWordFormData(prev => ({ ...prev, definition: e.target.value }))}
+                        placeholder="Definition formatted cleanly for SAT/ACT students..."
+                        className="w-full text-xs font-sans font-bold p-2.5 bg-white border-2 border-[#111410] focus:outline-none focus:ring-2 focus:ring-[#7BB33B] resize-y"
+                      />
+                    </div>
+
+                    {/* SAT Exemplar Sentence Textarea */}
+                    <div>
+                      <label className="text-[10px] font-mono font-black uppercase text-[#62685E] block mb-1">
+                        Contextual SAT Exemplar Sentence
+                      </label>
+                      <textarea
+                        rows={3}
+                        value={wordFormData.sat_sentence}
+                        onChange={(e) => setWordFormData(prev => ({ ...prev, sat_sentence: e.target.value }))}
+                        placeholder="SAT sentence demonstrating usage and context clues..."
+                        className="w-full text-xs font-serif italic p-2.5 bg-white border-2 border-[#111410] focus:outline-none focus:ring-2 focus:ring-[#7BB33B] resize-y"
+                      />
+                    </div>
+
+                    {/* Additional Linguistic Metadata */}
+                    <div className="grid grid-cols-1 sm:grid-cols-3 gap-2.5">
+                      <div>
+                        <label className="text-[9px] font-mono font-bold uppercase text-[#42281D] block mb-0.5">
+                          Part of Speech
+                        </label>
+                        <input
+                          type="text"
+                          value={wordFormData.part_of_speech}
+                          onChange={(e) => setWordFormData(prev => ({ ...prev, part_of_speech: e.target.value }))}
+                          placeholder="adjective, noun, verb"
+                          className="w-full text-xs font-mono px-2.5 py-1.5 bg-white border-2 border-[#111410] focus:outline-none focus:ring-1 focus:ring-[#7BB33B]"
+                        />
+                      </div>
+
+                      <div>
+                        <label className="text-[9px] font-mono font-bold uppercase text-[#42281D] block mb-0.5">
+                          Emotional Connotation
+                        </label>
+                        <select
+                          value={wordFormData.connotation}
+                          onChange={(e) => setWordFormData(prev => ({ ...prev, connotation: e.target.value }))}
+                          className="w-full text-xs font-mono px-2 py-1.5 bg-white border-2 border-[#111410] focus:outline-none focus:ring-1 focus:ring-[#7BB33B]"
+                        >
+                          <option value="neutral">Neutral</option>
+                          <option value="positive">Positive</option>
+                          <option value="negative">Negative</option>
+                        </select>
+                      </div>
+
+                      <div>
+                        <label className="text-[9px] font-mono font-bold uppercase text-[#42281D] block mb-0.5">
+                          Phonetic Pronunciation
+                        </label>
+                        <input
+                          type="text"
+                          value={wordFormData.pronunciation}
+                          onChange={(e) => setWordFormData(prev => ({ ...prev, pronunciation: e.target.value }))}
+                          placeholder="/fəˈnɛtɪk/"
+                          className="w-full text-xs font-mono px-2.5 py-1.5 bg-white border-2 border-[#111410] focus:outline-none focus:ring-1 focus:ring-[#7BB33B]"
+                        />
+                      </div>
+                    </div>
+
+                    {/* Word Save Action Buttons */}
+                    <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2 pt-2 border-t border-[#111410]/15">
+                      <button
+                        type="button"
+                        onClick={() => handleSaveWordDetails(false)}
+                        disabled={isSavingWord}
+                        className="flex-1 flex items-center justify-center space-x-2 px-4 py-3 sm:py-2.5 bg-[#7BB33B] hover:bg-[#84C341] text-white border-2 border-[#111410] shadow-[2px_2px_0px_0px_#111410] font-mono text-xs font-black uppercase tracking-wider transition active:translate-x-[1px] active:translate-y-[1px] min-h-[44px] disabled:opacity-50"
+                      >
+                        {isSavingWord ? (
+                          <Loader2 className="w-4 h-4 animate-spin" />
+                        ) : (
+                          <Check className="w-4 h-4" />
+                        )}
+                        <span>{isSavingWord ? 'Saving to Database...' : 'Save Word to Database'}</span>
+                      </button>
+
+                      <button
+                        type="button"
+                        onClick={() => handleSaveWordDetails(true)}
+                        disabled={isSavingWord}
+                        className="flex-1 flex items-center justify-center space-x-2 px-4 py-3 sm:py-2.5 bg-[#EDF5E5] hover:bg-[#DCEDD0] text-[#2F441E] border-2 border-[#111410] shadow-[2px_2px_0px_0px_#111410] font-mono text-xs font-black uppercase tracking-wider transition active:translate-x-[1px] active:translate-y-[1px] min-h-[44px] disabled:opacity-50"
+                      >
+                        <span>Save &amp; Next Word</span>
+                        <ArrowRight className="w-4 h-4" />
+                      </button>
+                    </div>
+                  </div>
+                )}
+
+                {/* TAB 2: EDITORIAL CERTIFICATION FORM */}
+                {activeTabMode === 'CERTIFICATION' && (
+                  <div className="p-3.5 sm:p-5 bg-[#FAFBF8] border-2 border-[#111410] shadow-[3px_3px_0px_0px_#111410] sm:shadow-[4px_4px_0px_0px_#111410] space-y-3.5 sm:space-y-4 animate-fade-in">
+                    <div className="flex items-center justify-between border-b border-[#111410]/20 pb-2">
+                      <div className="flex items-center space-x-2 text-xs font-mono font-black uppercase text-[#111410]">
+                        <ShieldCheck className="w-4 h-4 text-[#7BB33B]" />
+                        <span>EDITORIAL VERIFICATION &amp; ATTESTATION</span>
+                      </div>
+                      {activeWord.review?.verifiedAt && (
+                        <span className="text-[10px] font-mono text-[#62685E]">
+                          {new Date(activeWord.review.verifiedAt).toLocaleDateString()}
+                        </span>
+                      )}
+                    </div>
+
+                    {/* 1. Checkbox: Mark as Independently Verified */}
+                    <label className="flex items-start space-x-3 cursor-pointer select-none bg-white p-3 border-2 border-[#111410] shadow-[2px_2px_0px_0px_#111410] hover:bg-[#FAFBF8] transition">
+                      <input
+                        type="checkbox"
+                        checked={reviewFormData.verified}
+                        onChange={(e) => setReviewFormData(prev => ({ ...prev, verified: e.target.checked }))}
+                        className="mt-0.5 w-5 h-5 text-[#7BB33B] border-2 border-[#111410] rounded-none focus:ring-0 accent-[#7BB33B] cursor-pointer shrink-0"
+                      />
+                      <div>
+                        <span className="text-xs sm:text-sm font-mono font-black uppercase text-[#111410] block">
+                          Mark as Independently Verified by Editor
+                        </span>
+                        <span className="text-[11px] sm:text-xs font-mono text-[#62685E] leading-relaxed block mt-0.5">
+                          Certifies definition accuracy, morpheme formula decomposition, and SAT/ACT relevance.
+                        </span>
+                      </div>
                     </label>
-                    <input
-                      type="text"
-                      value={reviewFormData.verifiedBy}
-                      onChange={(e) => setReviewFormData(prev => ({ ...prev, verifiedBy: e.target.value }))}
-                      placeholder="e.g. Admin, Senior Lexicographer"
-                      className="w-full text-base sm:text-xs font-mono px-3 py-2 bg-white border-2 border-[#111410] focus:outline-none focus:ring-2 focus:ring-[#7BB33B]"
-                    />
-                  </div>
 
-                  {/* 3. Text area: Editorial Notes / Source Attestation */}
-                  <div>
-                    <label className="text-[10px] font-mono font-black uppercase text-[#62685E] block mb-1">
-                      Editorial Notes / Source Attestation
-                    </label>
-                    <textarea
-                      rows={3}
-                      value={reviewFormData.notes}
-                      onChange={(e) => setReviewFormData(prev => ({ ...prev, notes: e.target.value }))}
-                      placeholder="e.g. Checked against Merriam-Webster Unabridged; Latin root and etymology verified."
-                      className="w-full text-base sm:text-xs font-sans p-2.5 sm:p-3 bg-white border-2 border-[#111410] focus:outline-none focus:ring-2 focus:ring-[#7BB33B] resize-y"
-                    />
-                    <span className="text-[10px] font-mono text-[#62685E] mt-1 block">
-                      Internal editorial notes are strictly hidden from student views and preserved in exports.
-                    </span>
-                  </div>
+                    {/* 2. Reviewer Name Input */}
+                    <div>
+                      <label className="text-[10px] font-mono font-black uppercase text-[#62685E] block mb-1">
+                        Verified By (Editor Name / Affiliation)
+                      </label>
+                      <input
+                        type="text"
+                        value={reviewFormData.verifiedBy}
+                        onChange={(e) => setReviewFormData(prev => ({ ...prev, verifiedBy: e.target.value }))}
+                        placeholder="e.g. Admin, Senior Lexicographer"
+                        className="w-full text-base sm:text-xs font-mono px-3 py-2 bg-white border-2 border-[#111410] focus:outline-none focus:ring-2 focus:ring-[#7BB33B]"
+                      />
+                    </div>
 
-                  {/* Commit Action Buttons */}
-                  <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2 pt-2">
-                    <button
-                      onClick={() => handleSave(false)}
-                      className="flex-1 flex items-center justify-center space-x-2 px-4 py-3 sm:py-2.5 bg-[#7BB33B] hover:bg-[#84C341] text-white border-2 border-[#111410] shadow-[2px_2px_0px_0px_#111410] sm:shadow-[3px_3px_0px_0px_#111410] font-mono text-xs font-black uppercase tracking-wider transition active:translate-x-[1px] active:translate-y-[1px] min-h-[44px]"
-                    >
-                      <Check className="w-4 h-4" />
-                      <span>Save Verification</span>
-                    </button>
+                    {/* 3. Text area: Editorial Notes / Source Attestation */}
+                    <div>
+                      <label className="text-[10px] font-mono font-black uppercase text-[#62685E] block mb-1">
+                        Editorial Notes / Source Attestation
+                      </label>
+                      <textarea
+                        rows={3}
+                        value={reviewFormData.notes}
+                        onChange={(e) => setReviewFormData(prev => ({ ...prev, notes: e.target.value }))}
+                        placeholder="e.g. Checked against Merriam-Webster Unabridged; Latin root and etymology verified."
+                        className="w-full text-base sm:text-xs font-sans p-2.5 sm:p-3 bg-white border-2 border-[#111410] focus:outline-none focus:ring-2 focus:ring-[#7BB33B] resize-y"
+                      />
+                      <span className="text-[10px] font-mono text-[#62685E] mt-1 block">
+                        Internal editorial notes are strictly hidden from student views and preserved in exports.
+                      </span>
+                    </div>
 
-                    <button
-                      onClick={() => handleSave(true)}
-                      className="flex-1 flex items-center justify-center space-x-2 px-4 py-3 sm:py-2.5 bg-[#EDF5E5] hover:bg-[#DCEDD0] text-[#2F441E] border-2 border-[#111410] shadow-[2px_2px_0px_0px_#111410] sm:shadow-[3px_3px_0px_0px_#111410] font-mono text-xs font-black uppercase tracking-wider transition active:translate-x-[1px] active:translate-y-[1px] min-h-[44px]"
-                    >
-                      <span>Save &amp; Next Word</span>
-                      <ArrowRight className="w-4 h-4" />
-                    </button>
+                    {/* Commit Action Buttons */}
+                    <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2 pt-2 border-t border-[#111410]/15">
+                      <button
+                        type="button"
+                        onClick={() => handleSave(false)}
+                        className="flex-1 flex items-center justify-center space-x-2 px-4 py-3 sm:py-2.5 bg-[#7BB33B] hover:bg-[#84C341] text-white border-2 border-[#111410] shadow-[2px_2px_0px_0px_#111410] font-mono text-xs font-black uppercase tracking-wider transition active:translate-x-[1px] active:translate-y-[1px] min-h-[44px]"
+                      >
+                        <Check className="w-4 h-4" />
+                        <span>Save Verification</span>
+                      </button>
+
+                      <button
+                        type="button"
+                        onClick={() => handleSave(true)}
+                        className="flex-1 flex items-center justify-center space-x-2 px-4 py-3 sm:py-2.5 bg-[#EDF5E5] hover:bg-[#DCEDD0] text-[#2F441E] border-2 border-[#111410] shadow-[2px_2px_0px_0px_#111410] font-mono text-xs font-black uppercase tracking-wider transition active:translate-x-[1px] active:translate-y-[1px] min-h-[44px]"
+                      >
+                        <span>Save &amp; Next Word</span>
+                        <ArrowRight className="w-4 h-4" />
+                      </button>
+                    </div>
                   </div>
-                </div>
+                )}
               </>
             ) : (
               <div className="p-8 sm:p-12 text-center text-xs font-mono text-[#62685E]">

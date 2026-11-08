@@ -68,6 +68,7 @@ export default function VocabView({
   onNavigateDashboard,
   isAdminMode = false,
   onUpdateWordReview,
+  onUpdateWord,
   externalMorphemeView,
   onClearExternalMorphemeView
 }) {
@@ -1688,6 +1689,7 @@ export default function VocabView({
             onUpdateWordReview(wordKey, review);
           }
         }}
+        onUpdateWord={onUpdateWord}
       />
 
     </div>
