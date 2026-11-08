@@ -101,6 +101,8 @@ class VocabularyWordViewSet(viewsets.ReadOnlyModelViewSet):
         language = self.request.query_params.get('language')
         cluster = self.request.query_params.get('cluster') or self.request.query_params.get('thematic_cluster')
         tier = self.request.query_params.get('tier') or self.request.query_params.get('sat_tier')
+        prefix = self.request.query_params.get('prefix')
+        suffix = self.request.query_params.get('suffix')
         search = self.request.query_params.get('search')
         connotation = self.request.query_params.get('connotation')
 
@@ -112,10 +114,18 @@ class VocabularyWordViewSet(viewsets.ReadOnlyModelViewSet):
             queryset = queryset.filter(root__thematic_cluster__iexact=cluster)
         if tier and tier.upper() != 'ALL':
             queryset = queryset.filter(root__sat_tier__iexact=tier)
+        if prefix:
+            queryset = queryset.filter(prefix__icontains=prefix.strip())
+        if suffix:
+            queryset = queryset.filter(suffix__icontains=suffix.strip())
         if search:
             search = search.strip()
             queryset = queryset.filter(
-                Q(word__icontains=search) | Q(definition__icontains=search)
+                Q(word__icontains=search) |
+                Q(definition__icontains=search) |
+                Q(prefix__icontains=search) |
+                Q(suffix__icontains=search) |
+                Q(root__morpheme__icontains=search)
             )
         if connotation:
             queryset = queryset.filter(connotation=connotation)
@@ -167,10 +177,16 @@ class VocabSessionView(APIView):
         qs = VocabularyWord.objects.select_related('root').all()
         root_id = request.query_params.get('root')
         language = request.query_params.get('language')
+        prefix = request.query_params.get('prefix')
+        suffix = request.query_params.get('suffix')
         if root_id:
             qs = qs.filter(root_id=root_id)
         if language and language.upper() != 'ALL':
             qs = qs.filter(root__language__iexact=language)
+        if prefix:
+            qs = qs.filter(prefix__icontains=prefix.strip())
+        if suffix:
+            qs = qs.filter(suffix__icontains=suffix.strip())
 
         deck = get_vocab_session_deck(qs, user=user, count=count)
         serializer = VocabularyWordSerializer(deck, many=True)

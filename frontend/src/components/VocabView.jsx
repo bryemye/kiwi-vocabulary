@@ -48,7 +48,10 @@ import {
 import {
   recordWordAttempt,
   shuffleWithMorphemeVariety,
-  SESSION_SIZE
+  SESSION_SIZE,
+  extractMorphemesFromWords,
+  wordMatchesPrefix,
+  wordMatchesSuffix
 } from '../services/studySessionService';
 import { useCelestialTrajectory } from '../context/CelestialTrajectoryContext';
 
@@ -147,6 +150,16 @@ export default function VocabView({
   // Custom Practice Session Modal State
   const [isCustomModalOpen, setIsCustomModalOpen] = useState(false);
   const [customModalInitialRoots, setCustomModalInitialRoots] = useState([]);
+  const [customModalInitialMorpheme, setCustomModalInitialMorpheme] = useState(null);
+  const [customModalInitialMorphemes, setCustomModalInitialMorphemes] = useState([]);
+
+  // Morpheme Explorer Sub-type State ('ROOT' | 'PREFIX' | 'SUFFIX')
+  const [explorerMorphemeType, setExplorerMorphemeType] = useState('ROOT');
+
+  // Extract all catalog morphemes
+  const allMorphemes = useMemo(() => extractMorphemesFromWords(words, roots), [words, roots]);
+  const prefixMorphemes = useMemo(() => allMorphemes.filter(m => m.type === 'prefix'), [allMorphemes]);
+  const suffixMorphemes = useMemo(() => allMorphemes.filter(m => m.type === 'suffix'), [allMorphemes]);
 
   // Tab switch confirmation modal state (if leaving an active study session)
   const [pendingTab, setPendingTab] = useState(null);
@@ -233,6 +246,30 @@ export default function VocabView({
     });
   }, [availableRoots, searchTerm]);
 
+  // Filtered prefixes for Explorer view
+  const filteredExplorerPrefixes = useMemo(() => {
+    return prefixMorphemes.filter(p => {
+      if (!searchTerm.trim()) return true;
+      const q = searchTerm.toLowerCase();
+      const mMatch = p.morpheme.toLowerCase().includes(q);
+      const cMatch = p.core_meaning.toLowerCase().includes(q);
+      const wMatch = p.words?.some(w => w.word.toLowerCase().includes(q));
+      return mMatch || cMatch || wMatch;
+    });
+  }, [prefixMorphemes, searchTerm]);
+
+  // Filtered suffixes for Explorer view
+  const filteredExplorerSuffixes = useMemo(() => {
+    return suffixMorphemes.filter(s => {
+      if (!searchTerm.trim()) return true;
+      const q = searchTerm.toLowerCase();
+      const mMatch = s.morpheme.toLowerCase().includes(q);
+      const cMatch = s.core_meaning.toLowerCase().includes(q);
+      const wMatch = s.words?.some(w => w.word.toLowerCase().includes(q));
+      return mMatch || cMatch || wMatch;
+    });
+  }, [suffixMorphemes, searchTerm]);
+
   // Grouped roots for Explorer bento grid (Thematic Clusters or Core Yield Tiers)
   const groupedExplorerRoots = useMemo(() => {
     return groupRootsByPathway(filteredExplorerRoots, learningPathway);
@@ -240,7 +277,7 @@ export default function VocabView({
 
   const handleLanguageChange = (lang) => {
     setSelectedLanguage(lang);
-    if (selectedRootId !== 'ALL') {
+    if (selectedRootId !== 'ALL' && !String(selectedRootId).startsWith('prefix:') && !String(selectedRootId).startsWith('suffix:')) {
       const rootBelongs = roots.find(r => r.id === Number(selectedRootId) && (lang === 'ALL' || r.language.toLowerCase() === lang.toLowerCase()));
       if (!rootBelongs) {
         setSelectedRootId('ALL');
@@ -248,7 +285,7 @@ export default function VocabView({
     }
   };
 
-  // Build filtered master list
+  // Build filtered master list (supporting root, prefix, and suffix filtering)
   const filteredWords = useMemo(() => {
     return words.filter((w) => {
       if (selectedLanguage !== 'ALL') {
@@ -257,15 +294,25 @@ export default function VocabView({
           return false;
         }
       }
-      if (selectedRootId !== 'ALL' && w.root !== Number(selectedRootId)) {
-        return false;
+      if (selectedRootId !== 'ALL') {
+        if (String(selectedRootId).startsWith('prefix:')) {
+          const pToken = String(selectedRootId).slice(7);
+          if (!wordMatchesPrefix(w, pToken)) return false;
+        } else if (String(selectedRootId).startsWith('suffix:')) {
+          const sToken = String(selectedRootId).slice(7);
+          if (!wordMatchesSuffix(w, sToken)) return false;
+        } else if (w.root !== Number(selectedRootId)) {
+          return false;
+        }
       }
       if (searchTerm.trim()) {
         const query = searchTerm.toLowerCase();
         const wordMatch = w.word.toLowerCase().includes(query);
         const defMatch = w.definition.toLowerCase().includes(query);
         const rootMatch = w.root_details?.morpheme?.toLowerCase().includes(query);
-        if (!wordMatch && !defMatch && !rootMatch) {
+        const prefixMatch = w.prefix && w.prefix.toLowerCase().includes(query);
+        const suffixMatch = w.suffix && w.suffix.toLowerCase().includes(query);
+        if (!wordMatch && !defMatch && !rootMatch && !prefixMatch && !suffixMatch) {
           return false;
         }
       }
@@ -388,9 +435,21 @@ export default function VocabView({
     });
   }, [roots, words, subTab]);
 
-  // Open Custom Practice Session Modal
-  const handleOpenCustomSession = useCallback((initialRootIds = []) => {
-    setCustomModalInitialRoots(initialRootIds);
+  // Open Custom Practice Session Modal (supports root IDs or morpheme descriptors)
+  const handleOpenCustomSession = useCallback((config = []) => {
+    if (Array.isArray(config)) {
+      setCustomModalInitialRoots(config);
+      setCustomModalInitialMorpheme(null);
+      setCustomModalInitialMorphemes([]);
+    } else if (config && typeof config === 'object') {
+      setCustomModalInitialRoots(config.rootIds || []);
+      setCustomModalInitialMorpheme(config.morpheme || config.morphemeData || null);
+      setCustomModalInitialMorphemes(config.morphemes || []);
+    } else {
+      setCustomModalInitialRoots([]);
+      setCustomModalInitialMorpheme(null);
+      setCustomModalInitialMorphemes([]);
+    }
     setIsCustomModalOpen(true);
   }, []);
 
@@ -419,18 +478,21 @@ export default function VocabView({
   const handleStartSubsetPractice = useCallback((subsetWords, subsetTitle, morphemeData) => {
     const rootId = morphemeData?.rootId || morphemeData?.root?.id;
     if (rootId) {
-      handleOpenCustomSession([Number(rootId)]);
-    } else if (morphemeData?.cleanToken) {
-      const match = roots.find(r => r.morpheme.toLowerCase() === morphemeData.cleanToken.toLowerCase());
-      if (match) {
-        handleOpenCustomSession([Number(match.id)]);
-      } else {
-        handleOpenCustomSession([]);
-      }
+      handleOpenCustomSession({ rootIds: [Number(rootId)], morpheme: morphemeData });
+    } else if (morphemeData) {
+      handleOpenCustomSession({ morpheme: morphemeData });
     } else {
       handleOpenCustomSession([]);
     }
-  }, [roots, handleOpenCustomSession]);
+  }, [handleOpenCustomSession]);
+
+  const handleLaunchPrefixPractice = useCallback((prefixToken) => {
+    handleOpenCustomSession({ morpheme: { type: 'prefix', cleanToken: prefixToken } });
+  }, [handleOpenCustomSession]);
+
+  const handleLaunchSuffixPractice = useCallback((suffixToken) => {
+    handleOpenCustomSession({ morpheme: { type: 'suffix', cleanToken: suffixToken } });
+  }, [handleOpenCustomSession]);
 
   // Exit targeted subset practice and restore full 15-card session
   const handleClearSubsetPractice = useCallback(() => {
@@ -633,10 +695,16 @@ export default function VocabView({
         />
         <CustomPracticeModal
           isOpen={isCustomModalOpen}
-          onClose={() => setIsCustomModalOpen(false)}
+          onClose={() => {
+            setIsCustomModalOpen(false);
+            setCustomModalInitialMorpheme(null);
+            setCustomModalInitialMorphemes([]);
+          }}
           roots={roots}
           words={words}
           initialSelectedRootIds={customModalInitialRoots}
+          initialSelectedMorphemes={customModalInitialMorphemes}
+          initialMorpheme={customModalInitialMorpheme}
           onLaunchSession={handleLaunchCustomSession}
         />
       </div>
@@ -806,7 +874,7 @@ export default function VocabView({
                     onChange={(e) => setSelectedRootId(e.target.value)}
                     className="bg-transparent text-[#111410] text-base sm:text-xs font-mono font-bold uppercase focus:outline-none cursor-pointer w-full max-w-full sm:max-w-[200px] truncate"
                   >
-                    <option value="ALL">ALL ROOTS ({availableRoots.length})</option>
+                    <option value="ALL">ALL MORPHEMES ({availableRoots.length} ROOTS)</option>
                     {groupedRootsForSelect.map((group) => {
                       if (group.roots.length === 0) return null;
                       return (
@@ -822,6 +890,24 @@ export default function VocabView({
                         </optgroup>
                       );
                     })}
+                    {prefixMorphemes.length > 0 && (
+                      <optgroup label={`🧩 PREFIXES (${prefixMorphemes.slice(0, 15).length})`}>
+                        {prefixMorphemes.slice(0, 15).map((p) => (
+                          <option key={p.id} value={`prefix:${p.cleanToken}`}>
+                            PREFIX {p.cleanToken} ({p.wordCount} WORDS)
+                          </option>
+                        ))}
+                      </optgroup>
+                    )}
+                    {suffixMorphemes.length > 0 && (
+                      <optgroup label={`🏷️ SUFFIXES (${suffixMorphemes.slice(0, 15).length})`}>
+                        {suffixMorphemes.slice(0, 15).map((s) => (
+                          <option key={s.id} value={`suffix:${s.cleanToken}`}>
+                            SUFFIX {s.cleanToken} ({s.wordCount} WORDS)
+                          </option>
+                        ))}
+                      </optgroup>
+                    )}
                   </select>
                 </div>
 
@@ -847,7 +933,17 @@ export default function VocabView({
                 {/* Primary Launcher Button: Custom Practice Session */}
                 <button
                   type="button"
-                  onClick={() => handleOpenCustomSession(selectedRootId !== 'ALL' ? [Number(selectedRootId)] : [])}
+                  onClick={() => {
+                    if (String(selectedRootId).startsWith('prefix:')) {
+                      handleOpenCustomSession({ morpheme: { type: 'prefix', cleanToken: String(selectedRootId).slice(7) } });
+                    } else if (String(selectedRootId).startsWith('suffix:')) {
+                      handleOpenCustomSession({ morpheme: { type: 'suffix', cleanToken: String(selectedRootId).slice(7) } });
+                    } else if (selectedRootId !== 'ALL') {
+                      handleOpenCustomSession([Number(selectedRootId)]);
+                    } else {
+                      handleOpenCustomSession([]);
+                    }
+                  }}
                   className="flex items-center justify-center space-x-1.5 px-3 py-1.5 bg-[#7BB33B] hover:bg-[#84C341] text-white font-mono font-black text-xs uppercase tracking-wider border-2 border-[#111410] shadow-[2px_2px_0px_0px_#111410] active:translate-x-[1px] active:translate-y-[1px] transition shrink-0"
                   title="Configure custom 15-card practice session"
                 >
@@ -898,36 +994,62 @@ export default function VocabView({
       )}
 
       {/* ---------------------------------------------------------------------- */}
-      {/* TAB 2: ETYMOLOGY ROOT EXPLORER */}
+      {/* TAB 2: MORPHEME EXPLORER (ROOTS, PREFIXES, SUFFIXES) */}
       {/* ---------------------------------------------------------------------- */}
       {subTab === 'explorer' && (
         <div className="space-y-6">
-          {/* Explorer Filter Bar with Pathway Segment Control */}
+          {/* Explorer Filter Bar with Morpheme Switcher, Pathway & Search */}
           <div className="bg-white border-2 border-[#111410] shadow-[3px_3px_0px_0px_#111410] p-4 flex flex-col md:flex-row md:items-center justify-between gap-3">
             <div className="flex flex-wrap items-center gap-3">
-              {/* Dual Learning Mode Pathway Segmented Control */}
-              <PathwayToggle
-                currentPathway={learningPathway}
-                onPathwayChange={handlePathwayChange}
-              />
-
-              {/* Origin Filter */}
+              {/* Morpheme Type Switcher (Roots / Prefixes / Suffixes) */}
               <div className="flex items-center space-x-1 font-mono text-xs">
-                <span className="font-black uppercase text-[#62685E] mr-1 hidden sm:inline">ORIGIN:</span>
-                {['ALL', 'Latin', 'Greek'].map((lang) => (
+                {[
+                  { key: 'ROOT', label: 'ROOTS', count: filteredExplorerRoots.length },
+                  { key: 'PREFIX', label: 'PREFIXES', count: filteredExplorerPrefixes.length },
+                  { key: 'SUFFIX', label: 'SUFFIXES', count: filteredExplorerSuffixes.length },
+                ].map((f) => (
                   <button
-                    key={lang}
-                    onClick={() => setSelectedLanguage(lang)}
-                    className={`px-3 py-1 font-black uppercase border-2 border-[#111410] transition ${
-                      selectedLanguage.toLowerCase() === lang.toLowerCase()
+                    key={f.key}
+                    type="button"
+                    onClick={() => setExplorerMorphemeType(f.key)}
+                    className={`px-3 py-1.5 font-black uppercase border-2 border-[#111410] transition ${
+                      explorerMorphemeType === f.key
                         ? 'bg-[#7BB33B] text-white shadow-[2px_2px_0px_0px_#111410]'
                         : 'bg-[#FAFBF8] text-[#111410] hover:bg-white'
                     }`}
                   >
-                    {lang.toUpperCase()}
+                    {f.label} ({f.count})
                   </button>
                 ))}
               </div>
+
+              {explorerMorphemeType === 'ROOT' && (
+                <>
+                  {/* Dual Learning Mode Pathway Segmented Control */}
+                  <PathwayToggle
+                    currentPathway={learningPathway}
+                    onPathwayChange={handlePathwayChange}
+                  />
+
+                  {/* Origin Filter */}
+                  <div className="flex items-center space-x-1 font-mono text-xs">
+                    <span className="font-black uppercase text-[#62685E] mr-1 hidden sm:inline">ORIGIN:</span>
+                    {['ALL', 'Latin', 'Greek'].map((lang) => (
+                      <button
+                        key={lang}
+                        onClick={() => setSelectedLanguage(lang)}
+                        className={`px-3 py-1 font-black uppercase border-2 border-[#111410] transition ${
+                          selectedLanguage.toLowerCase() === lang.toLowerCase()
+                            ? 'bg-[#7BB33B] text-white shadow-[2px_2px_0px_0px_#111410]'
+                            : 'bg-[#FAFBF8] text-[#111410] hover:bg-white'
+                        }`}
+                      >
+                        {lang.toUpperCase()}
+                      </button>
+                    ))}
+                  </div>
+                </>
+              )}
             </div>
 
             <div className="relative max-w-sm w-full">
@@ -936,11 +1058,12 @@ export default function VocabView({
                 type="text"
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
-                placeholder="SEARCH ROOTS, CLUSTERS, TIERS OR WORDS..."
+                placeholder="SEARCH ROOTS, PREFIXES, SUFFIXES, OR WORDS..."
                 className="w-full bg-[#FAFBF8] text-[#111410] font-mono font-bold text-xs pl-9 pr-8 py-2 border-2 border-[#111410] shadow-[2px_2px_0px_0px_#111410] focus:outline-none uppercase"
               />
               {searchTerm && (
                 <button
+                  type="button"
                   onClick={() => setSearchTerm('')}
                   className="absolute right-2.5 top-2.5 text-[#42281D]"
                 >
@@ -950,7 +1073,236 @@ export default function VocabView({
             </div>
           </div>
 
-          {/* Active Learning Mode Perspective Explanation Banner */}
+          {/* VIEW 1: PREFIX EXPLORER */}
+          {explorerMorphemeType === 'PREFIX' && (
+            <div className="space-y-6 animate-fade-in">
+              <div className="bg-[#EDF5E5] border-2 border-[#111410] p-4 shadow-[4px_4px_0px_0px_#111410] flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                <div className="flex items-start sm:items-center space-x-3">
+                  <div className="w-10 h-10 bg-white border-2 border-[#111410] shadow-[2px_2px_0px_0px_#111410] flex items-center justify-center shrink-0 text-xl">
+                    🧩
+                  </div>
+                  <div>
+                    <div className="flex items-center space-x-2">
+                      <h2 className="text-sm font-black font-sans uppercase text-[#2F441E] tracking-tight">
+                        Prefix Morphemes · Direction, Negation & Intensity
+                      </h2>
+                      <span className="text-[9px] font-mono font-black uppercase px-1.5 py-0.2 bg-[#7BB33B] text-white border border-[#111410]">
+                        Prefix Lexicon
+                      </span>
+                    </div>
+                    <p className="text-xs font-mono text-[#42281D] mt-0.5">
+                      Prefixes attach to the front of base roots to convey direction, negation, or intensity. Click "Study This Prefix" to practice flashcards for its words.
+                    </p>
+                  </div>
+                </div>
+                <div className="flex items-center space-x-2 shrink-0">
+                  <span className="text-[11px] font-mono font-bold uppercase px-2.5 py-1 bg-white border border-[#111410] text-[#2F441E]">
+                    {filteredExplorerPrefixes.length} Prefixes
+                  </span>
+                </div>
+              </div>
+
+              {filteredExplorerPrefixes.length === 0 ? (
+                <div className="bg-white border-2 border-[#111410] shadow-[4px_4px_0px_0px_#111410] p-10 text-center space-y-3">
+                  <div className="w-12 h-12 bg-[#FAFBF8] border-2 border-[#111410] flex items-center justify-center mx-auto text-xl">
+                    🔍
+                  </div>
+                  <h3 className="text-sm font-black font-mono uppercase text-[#111410]">
+                    No Prefixes Found
+                  </h3>
+                  <p className="text-xs font-mono text-[#62685E]">
+                    No prefixes matched your search query "{searchTerm}".
+                  </p>
+                  <button
+                    type="button"
+                    onClick={() => setSearchTerm('')}
+                    className="px-4 py-2 bg-[#7BB33B] text-white font-mono text-xs font-black uppercase border-2 border-[#111410] shadow-[2px_2px_0px_0px_#111410]"
+                  >
+                    Clear Filter
+                  </button>
+                </div>
+              ) : (
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
+                  {filteredExplorerPrefixes.map(p => (
+                    <div
+                      key={p.id}
+                      className="bg-white border-2 border-[#111410] shadow-[4px_4px_0px_0px_#111410] p-5 flex flex-col justify-between hover:translate-x-[-1px] hover:translate-y-[-1px] transition"
+                    >
+                      <div>
+                        <div className="border-b-2 border-[#111410] pb-2.5 mb-3 flex items-center justify-between">
+                          <span className="font-mono text-base font-black text-[#111410] uppercase tracking-wider">
+                            {p.title}
+                          </span>
+                          <div className="flex items-center space-x-1.5">
+                            <span className="text-[10px] font-mono px-2 py-0.5 bg-[#EDF5E5] text-[#2F441E] border border-[#111410] uppercase font-bold">
+                              PREFIX
+                            </span>
+                            <span className="text-[10px] font-mono px-2 py-0.5 bg-[#FAFBF8] border border-[#111410] font-bold text-[#62685E]">
+                              {p.wordCount} Words
+                            </span>
+                          </div>
+                        </div>
+
+                        <div className="space-y-2 mb-4">
+                          <p className="text-sm font-serif italic text-[#42281D] leading-snug">
+                            "{p.core_meaning}"
+                          </p>
+                        </div>
+
+                        <div className="space-y-1.5">
+                          <span className="text-[9px] font-mono font-bold uppercase text-[#62685E] block">
+                            Derivative Words:
+                          </span>
+                          <div className="flex flex-wrap gap-1">
+                            {p.words.slice(0, 6).map((w, i) => (
+                              <span
+                                key={w.id || i}
+                                className="px-2 py-0.5 bg-[#FAFBF8] border border-[#111410] text-[10px] font-mono font-bold uppercase text-[#111410]"
+                              >
+                                {w.word}
+                              </span>
+                            ))}
+                            {p.words.length > 6 && (
+                              <span className="px-1.5 py-0.5 text-[10px] font-mono text-[#62685E]">
+                                +{p.words.length - 6} more
+                              </span>
+                            )}
+                          </div>
+                        </div>
+                      </div>
+
+                      <button
+                        type="button"
+                        onClick={() => handleLaunchPrefixPractice(p.cleanToken)}
+                        className="mt-5 w-full flex items-center justify-center space-x-2 py-2 bg-[#7BB33B] hover:bg-[#84C341] text-white border-2 border-[#111410] shadow-[2px_2px_0px_0px_#111410] font-mono text-xs font-black uppercase tracking-wider transition active:translate-x-[1px] active:translate-y-[1px]"
+                      >
+                        <Sparkles className="w-3.5 h-3.5" />
+                        <span>Study This Prefix ({p.wordCount})</span>
+                      </button>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+          )}
+
+          {/* VIEW 2: SUFFIX EXPLORER */}
+          {explorerMorphemeType === 'SUFFIX' && (
+            <div className="space-y-6 animate-fade-in">
+              <div className="bg-[#FAFBF8] border-2 border-[#111410] p-4 shadow-[4px_4px_0px_0px_#111410] flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                <div className="flex items-start sm:items-center space-x-3">
+                  <div className="w-10 h-10 bg-white border-2 border-[#111410] shadow-[2px_2px_0px_0px_#111410] flex items-center justify-center shrink-0 text-xl">
+                    🏷️
+                  </div>
+                  <div>
+                    <div className="flex items-center space-x-2">
+                      <h2 className="text-sm font-black font-sans uppercase text-[#111410] tracking-tight">
+                        Suffix Morphemes · Grammatical Roles & Nuance
+                      </h2>
+                      <span className="text-[9px] font-mono font-black uppercase px-1.5 py-0.2 bg-[#111410] text-white border border-[#111410]">
+                        Suffix Lexicon
+                      </span>
+                    </div>
+                    <p className="text-xs font-mono text-[#42281D] mt-0.5">
+                      Suffixes govern grammatical parts of speech (noun, adjective, verb) or convey condition, degree, or capacity. Click "Study This Suffix" to practice flashcards for its words.
+                    </p>
+                  </div>
+                </div>
+                <div className="flex items-center space-x-2 shrink-0">
+                  <span className="text-[11px] font-mono font-bold uppercase px-2.5 py-1 bg-white border border-[#111410] text-[#111410]">
+                    {filteredExplorerSuffixes.length} Suffixes
+                  </span>
+                </div>
+              </div>
+
+              {filteredExplorerSuffixes.length === 0 ? (
+                <div className="bg-white border-2 border-[#111410] shadow-[4px_4px_0px_0px_#111410] p-10 text-center space-y-3">
+                  <div className="w-12 h-12 bg-[#FAFBF8] border-2 border-[#111410] flex items-center justify-center mx-auto text-xl">
+                    🔍
+                  </div>
+                  <h3 className="text-sm font-black font-mono uppercase text-[#111410]">
+                    No Suffixes Found
+                  </h3>
+                  <p className="text-xs font-mono text-[#62685E]">
+                    No suffixes matched your search query "{searchTerm}".
+                  </p>
+                  <button
+                    type="button"
+                    onClick={() => setSearchTerm('')}
+                    className="px-4 py-2 bg-[#7BB33B] text-white font-mono text-xs font-black uppercase border-2 border-[#111410] shadow-[2px_2px_0px_0px_#111410]"
+                  >
+                    Clear Filter
+                  </button>
+                </div>
+              ) : (
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
+                  {filteredExplorerSuffixes.map(s => (
+                    <div
+                      key={s.id}
+                      className="bg-white border-2 border-[#111410] shadow-[4px_4px_0px_0px_#111410] p-5 flex flex-col justify-between hover:translate-x-[-1px] hover:translate-y-[-1px] transition"
+                    >
+                      <div>
+                        <div className="border-b-2 border-[#111410] pb-2.5 mb-3 flex items-center justify-between">
+                          <span className="font-mono text-base font-black text-[#111410] uppercase tracking-wider">
+                            {s.title}
+                          </span>
+                          <div className="flex items-center space-x-1.5">
+                            <span className="text-[10px] font-mono px-2 py-0.5 bg-[#FAFBF8] text-[#111410] border border-[#111410] uppercase font-bold">
+                              SUFFIX
+                            </span>
+                            <span className="text-[10px] font-mono px-2 py-0.5 bg-[#EDF5E5] text-[#2F441E] border border-[#111410] font-bold">
+                              {s.wordCount} Words
+                            </span>
+                          </div>
+                        </div>
+
+                        <div className="space-y-2 mb-4">
+                          <p className="text-sm font-serif italic text-[#42281D] leading-snug">
+                            "{s.core_meaning}"
+                          </p>
+                        </div>
+
+                        <div className="space-y-1.5">
+                          <span className="text-[9px] font-mono font-bold uppercase text-[#62685E] block">
+                            Derivative Words:
+                          </span>
+                          <div className="flex flex-wrap gap-1">
+                            {s.words.slice(0, 6).map((w, i) => (
+                              <span
+                                key={w.id || i}
+                                className="px-2 py-0.5 bg-[#FAFBF8] border border-[#111410] text-[10px] font-mono font-bold uppercase text-[#111410]"
+                              >
+                                {w.word}
+                              </span>
+                            ))}
+                            {s.words.length > 6 && (
+                              <span className="px-1.5 py-0.5 text-[10px] font-mono text-[#62685E]">
+                                +{s.words.length - 6} more
+                              </span>
+                            )}
+                          </div>
+                        </div>
+                      </div>
+
+                      <button
+                        type="button"
+                        onClick={() => handleLaunchSuffixPractice(s.cleanToken)}
+                        className="mt-5 w-full flex items-center justify-center space-x-2 py-2 bg-[#7BB33B] hover:bg-[#84C341] text-white border-2 border-[#111410] shadow-[2px_2px_0px_0px_#111410] font-mono text-xs font-black uppercase tracking-wider transition active:translate-x-[1px] active:translate-y-[1px]"
+                      >
+                        <Sparkles className="w-3.5 h-3.5" />
+                        <span>Study This Suffix ({s.wordCount})</span>
+                      </button>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+          )}
+
+          {/* VIEW 3: ROOTS EXPLORER */}
+          {explorerMorphemeType === 'ROOT' && (
+            <div className="space-y-6 animate-fade-in">
+              {/* Active Learning Mode Perspective Explanation Banner */}
           {learningPathway === PATHWAY_THEMATIC ? (
             <div className="bg-[#EDF5E5] border-2 border-[#111410] p-4 shadow-[4px_4px_0px_0px_#111410] flex flex-col sm:flex-row sm:items-center justify-between gap-3 animate-fade-in">
               <div className="flex items-start sm:items-center space-x-3">
@@ -1185,6 +1537,8 @@ export default function VocabView({
                 ))}
             </div>
           )}
+              </div>
+            )}
         </div>
       )}
 
@@ -1309,10 +1663,16 @@ export default function VocabView({
       {/* CONFIGURABLE CUSTOM PRACTICE SESSION MODAL */}
       <CustomPracticeModal
         isOpen={isCustomModalOpen}
-        onClose={() => setIsCustomModalOpen(false)}
+        onClose={() => {
+          setIsCustomModalOpen(false);
+          setCustomModalInitialMorpheme(null);
+          setCustomModalInitialMorphemes([]);
+        }}
         roots={roots}
         words={words}
         initialSelectedRootIds={customModalInitialRoots}
+        initialSelectedMorphemes={customModalInitialMorphemes}
+        initialMorpheme={customModalInitialMorpheme}
         onLaunchSession={handleLaunchCustomSession}
       />
 

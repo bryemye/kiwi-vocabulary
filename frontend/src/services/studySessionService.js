@@ -9,6 +9,187 @@ const STORAGE_KEY_PROGRESS = 'kiwi_word_progress';
 
 export const SESSION_SIZE = 15;
 export const MAX_SELECTED_ROOTS = 5;
+export const MAX_SELECTED_MORPHEMES = 5;
+
+/**
+ * Parse an affix string into clean token, alphanumeric base, and meaning.
+ * e.g. "dis- (apart, away)" -> { cleanToken: "dis-", base: "dis", meaning: "apart, away" }
+ * e.g. "-ous (full of)" -> { cleanToken: "-ous", base: "ous", meaning: "full of" }
+ */
+export function parseAffixToken(raw = '') {
+  if (!raw) return { cleanToken: '', base: '', meaning: '' };
+  const str = String(raw).trim();
+  const parenMatch = str.match(/^([^(]+)\s*(?:\(([^)]+)\))?/);
+  const tokenPart = (parenMatch ? parenMatch[1] : str).trim();
+  const meaning = parenMatch?.[2]?.trim() || '';
+  const base = tokenPart.toLowerCase().replace(/[^a-z0-9]/g, '');
+  return {
+    cleanToken: tokenPart,
+    base,
+    meaning
+  };
+}
+
+/**
+ * Check if a word item matches a prefix token or base string.
+ */
+export function wordMatchesPrefix(word, targetPrefix) {
+  if (!word || !word.prefix || !targetPrefix) return false;
+  const targetParsed = parseAffixToken(targetPrefix);
+  const targetBase = targetParsed.base;
+  const targetClean = targetParsed.cleanToken.toLowerCase().replace(/-$/, '');
+
+  const wRaw = word.prefix.toLowerCase();
+  const wParsed = parseAffixToken(word.prefix);
+
+  if (wParsed.base && targetBase && wParsed.base === targetBase) return true;
+  if (targetClean && wRaw.startsWith(targetClean)) return true;
+  if (targetBase && targetBase.length >= 2 && word.word?.toLowerCase().startsWith(targetBase)) return true;
+  return false;
+}
+
+/**
+ * Check if a word item matches a suffix token or base string.
+ */
+export function wordMatchesSuffix(word, targetSuffix) {
+  if (!word || !word.suffix || !targetSuffix) return false;
+  const targetParsed = parseAffixToken(targetSuffix);
+  const targetBase = targetParsed.base;
+  const targetClean = targetParsed.cleanToken.toLowerCase().replace(/^-/, '');
+
+  const sRaw = word.suffix.toLowerCase();
+  const sParsed = parseAffixToken(word.suffix);
+
+  if (sParsed.base && targetBase && sParsed.base === targetBase) return true;
+  if (targetClean && sRaw.startsWith(targetClean)) return true;
+  if (targetBase && targetBase.length >= 2 && word.word?.toLowerCase().endsWith(targetBase)) return true;
+  return false;
+}
+
+/**
+ * Extract and aggregate all morphemes (Roots, Prefixes, Suffixes) from words and roots.
+ */
+export function extractMorphemesFromWords(words = [], roots = []) {
+  const result = [];
+
+  // 1. Add Roots
+  roots.forEach(r => {
+    const rootWords = words.filter(w => Number(w.root || w.root_details?.id) === Number(r.id));
+    result.push({
+      id: `root_${r.id}`,
+      key: `root_${r.id}`,
+      numericId: Number(r.id),
+      type: 'root',
+      morpheme: r.morpheme,
+      title: `[${r.morpheme.toUpperCase()}]`,
+      cleanToken: r.morpheme,
+      core_meaning: r.core_meaning || '',
+      language: r.language || 'Latin',
+      thematic_cluster: r.thematic_cluster || '',
+      sat_tier: r.sat_tier || '',
+      mnemonic: r.mnemonic || '',
+      words: rootWords,
+      wordCount: rootWords.length,
+      wordIds: new Set(rootWords.map(w => w.id))
+    });
+  });
+
+  // 2. Aggregate Prefixes from Words
+  const prefixMap = new Map();
+  words.forEach(w => {
+    if (!w.prefix) return;
+    const parsed = parseAffixToken(w.prefix);
+    if (!parsed.cleanToken) return;
+
+    let token = parsed.cleanToken.toLowerCase();
+    if (!token.endsWith('-')) token += '-';
+
+    if (!prefixMap.has(token)) {
+      prefixMap.set(token, {
+        meanings: new Set(),
+        words: [],
+        wordIds: new Set()
+      });
+    }
+    const entry = prefixMap.get(token);
+    if (parsed.meaning) entry.meanings.add(parsed.meaning);
+    if (!entry.wordIds.has(w.id)) {
+      entry.wordIds.add(w.id);
+      entry.words.push(w);
+    }
+  });
+
+  Array.from(prefixMap.entries())
+    .sort((a, b) => b[1].words.length - a[1].words.length)
+    .forEach(([token, data]) => {
+      const meaningsList = Array.from(data.meanings);
+      const meaningStr = meaningsList.slice(0, 3).join(', ') || 'derivational prefix';
+      result.push({
+        id: `prefix_${token}`,
+        key: `prefix_${token}`,
+        type: 'prefix',
+        morpheme: token,
+        title: token,
+        cleanToken: token,
+        core_meaning: meaningStr,
+        language: 'Affix',
+        thematic_cluster: '',
+        sat_tier: '',
+        words: data.words,
+        wordCount: data.words.length,
+        wordIds: data.wordIds
+      });
+    });
+
+  // 3. Aggregate Suffixes from Words
+  const suffixMap = new Map();
+  words.forEach(w => {
+    if (!w.suffix) return;
+    const parsed = parseAffixToken(w.suffix);
+    if (!parsed.cleanToken) return;
+
+    let token = parsed.cleanToken.toLowerCase();
+    if (!token.startsWith('-')) token = '-' + token;
+
+    if (!suffixMap.has(token)) {
+      suffixMap.set(token, {
+        meanings: new Set(),
+        words: [],
+        wordIds: new Set()
+      });
+    }
+    const entry = suffixMap.get(token);
+    if (parsed.meaning) entry.meanings.add(parsed.meaning);
+    if (!entry.wordIds.has(w.id)) {
+      entry.wordIds.add(w.id);
+      entry.words.push(w);
+    }
+  });
+
+  Array.from(suffixMap.entries())
+    .sort((a, b) => b[1].words.length - a[1].words.length)
+    .forEach(([token, data]) => {
+      const meaningsList = Array.from(data.meanings);
+      const meaningStr = meaningsList.slice(0, 3).join(', ') || 'derivational ending';
+      result.push({
+        id: `suffix_${token}`,
+        key: `suffix_${token}`,
+        type: 'suffix',
+        morpheme: token,
+        title: token,
+        cleanToken: token,
+        core_meaning: meaningStr,
+        language: 'Affix',
+        thematic_cluster: '',
+        sat_tier: '',
+        words: data.words,
+        wordCount: data.words.length,
+        wordIds: data.wordIds
+      });
+    });
+
+  return result;
+}
 
 // Classic high-yield SAT/ACT Latin & Greek root morphemes
 export const HIGH_FREQUENCY_TIER1_MORPHEMES = [
@@ -169,28 +350,33 @@ export function shuffleWithMorphemeVariety(cards) {
 }
 
 /**
- * Balance word sampling across a list of selected roots up to targetCount
+ * Balance word sampling across candidate pools up to targetCount
  */
-function drawBalancedSampleFromRoots(selectedRootsWordsMap, targetCount = SESSION_SIZE) {
-  const rootKeys = Object.keys(selectedRootsWordsMap).filter(k => selectedRootsWordsMap[k].length > 0);
-  if (rootKeys.length === 0) return [];
+export function drawBalancedSampleFromPools(wordsMap, targetCount = SESSION_SIZE) {
+  const keys = Object.keys(wordsMap).filter(k => wordsMap[k]?.length > 0);
+  if (keys.length === 0) return [];
 
   // Deep clone candidate pools
   const pools = {};
-  rootKeys.forEach(k => {
-    pools[k] = [...selectedRootsWordsMap[k]].sort(() => 0.5 - Math.random());
+  keys.forEach(k => {
+    pools[k] = [...wordsMap[k]].sort(() => 0.5 - Math.random());
   });
 
   const selected = [];
+  const chosenWordIds = new Set();
   let index = 0;
 
-  // Round-robin selection across available roots to maintain exact balance
+  // Round-robin selection across available pools
   while (selected.length < targetCount) {
-    const availableRoots = rootKeys.filter(k => pools[k].length > 0);
-    if (availableRoots.length === 0) break; // Exhausted all words across selected roots
+    const availableKeys = keys.filter(k => pools[k].length > 0);
+    if (availableKeys.length === 0) break; // Exhausted all pools
 
-    const currentKey = availableRoots[index % availableRoots.length];
-    selected.push(pools[currentKey].pop());
+    const currentKey = availableKeys[index % availableKeys.length];
+    const candidate = pools[currentKey].pop();
+    if (candidate && !chosenWordIds.has(candidate.id)) {
+      chosenWordIds.add(candidate.id);
+      selected.push(candidate);
+    }
     index++;
   }
 
@@ -198,71 +384,131 @@ function drawBalancedSampleFromRoots(selectedRootsWordsMap, targetCount = SESSIO
 }
 
 /**
- * Generate Deck - Option A: "Root Family Focus"
- * - 1 to 5 root families
+ * Generate Deck - Option A: "Morpheme Focus" (Roots, Prefixes, Suffixes)
+ * - 1 to 5 selected morphemes (roots, prefixes, or suffixes)
  * - Balanced sample of up to 15 words
- * - Backfill related roots if < 15 and requested
+ * - Backfill related words if < 15 and requested
  */
-export function generateRootFamilyDeck({
+export function generateMorphemeDeck({
+  selectedMorphemes = [],
+  selectedMorphemeIds = [],
   selectedRootIds = [],
   allWords = [],
   allRoots = [],
+  allMorphemes = null,
   backfillRelated = true,
   targetCount = SESSION_SIZE
 }) {
-  const rootIdSet = new Set(selectedRootIds.map(Number));
-  
-  // Group matching words by root
-  const wordsByRoot = {};
-  selectedRootIds.forEach(id => {
-    wordsByRoot[id] = [];
-  });
-
-  allWords.forEach(w => {
-    const rId = Number(w.root || w.root_details?.id);
-    if (rootIdSet.has(rId)) {
-      if (!wordsByRoot[rId]) wordsByRoot[rId] = [];
-      wordsByRoot[rId].push(w);
+  const morphemeCatalog = allMorphemes || extractMorphemesFromWords(allWords, allRoots);
+  const catalogMap = new Map();
+  morphemeCatalog.forEach(m => {
+    catalogMap.set(m.id, m);
+    catalogMap.set(m.key, m);
+    if (m.type === 'root') {
+      catalogMap.set(String(m.numericId), m);
+      catalogMap.set(`root:${m.numericId}`, m);
+    } else if (m.type === 'prefix') {
+      catalogMap.set(m.cleanToken.toLowerCase(), m);
+      catalogMap.set(`prefix:${m.cleanToken.toLowerCase()}`, m);
+    } else if (m.type === 'suffix') {
+      catalogMap.set(m.cleanToken.toLowerCase(), m);
+      catalogMap.set(`suffix:${m.cleanToken.toLowerCase()}`, m);
     }
   });
 
-  const totalEligible = Object.values(wordsByRoot).reduce((sum, arr) => sum + arr.length, 0);
+  // Resolve all requested morphemes
+  const resolvedMorphemes = [];
+  const resolvedIds = new Set();
 
+  // 1. From selectedMorphemes objects
+  selectedMorphemes.forEach(m => {
+    if (m && m.id && !resolvedIds.has(m.id)) {
+      resolvedIds.add(m.id);
+      resolvedMorphemes.push(m);
+    }
+  });
+
+  // 2. From selectedMorphemeIds
+  selectedMorphemeIds.forEach(id => {
+    const found = catalogMap.get(String(id));
+    if (found && !resolvedIds.has(found.id)) {
+      resolvedIds.add(found.id);
+      resolvedMorphemes.push(found);
+    }
+  });
+
+  // 3. From selectedRootIds (backward compatibility)
+  selectedRootIds.forEach(rId => {
+    const found = catalogMap.get(String(rId)) || catalogMap.get(`root_${rId}`);
+    if (found && !resolvedIds.has(found.id)) {
+      resolvedIds.add(found.id);
+      resolvedMorphemes.push(found);
+    }
+  });
+
+  // Group candidate words for each selected morpheme
+  const wordsByMorpheme = {};
+  const allEligibleWordIds = new Set();
+
+  resolvedMorphemes.forEach(m => {
+    let pool = [];
+    if (m.words && m.words.length > 0) {
+      pool = m.words;
+    } else if (m.type === 'root') {
+      pool = allWords.filter(w => Number(w.root || w.root_details?.id) === Number(m.numericId || m.id));
+    } else if (m.type === 'prefix') {
+      pool = allWords.filter(w => wordMatchesPrefix(w, m.cleanToken || m.morpheme));
+    } else if (m.type === 'suffix') {
+      pool = allWords.filter(w => wordMatchesSuffix(w, m.cleanToken || m.morpheme));
+    }
+
+    wordsByMorpheme[m.id] = pool;
+    pool.forEach(w => allEligibleWordIds.add(w.id));
+  });
+
+  const totalEligible = allEligibleWordIds.size;
   let chosenWords = [];
 
   if (totalEligible >= targetCount) {
-    // Draw balanced sample across roots
-    chosenWords = drawBalancedSampleFromRoots(wordsByRoot, targetCount);
+    chosenWords = drawBalancedSampleFromPools(wordsByMorpheme, targetCount);
   } else {
-    // Take all eligible words from selected roots
-    Object.values(wordsByRoot).forEach(arr => {
-      chosenWords.push(...arr);
+    // Collect all words across selected pools without duplicates
+    const chosenIds = new Set();
+    Object.values(wordsByMorpheme).forEach(arr => {
+      arr.forEach(w => {
+        if (!chosenIds.has(w.id)) {
+          chosenIds.add(w.id);
+          chosenWords.push(w);
+        }
+      });
     });
 
     // If backfill is requested and we have room
     if (backfillRelated && chosenWords.length < targetCount) {
+      const needed = targetCount - chosenWords.length;
       const chosenWordIds = new Set(chosenWords.map(w => w.id));
-      
-      // Determine dominant language of selected roots
-      const selectedRootsObjs = allRoots.filter(r => rootIdSet.has(Number(r.id)));
-      const dominantLanguage = selectedRootsObjs[0]?.language || 'Latin';
 
-      // Find related roots in same language
-      const relatedCandidates = allWords.filter(w => {
+      // Attempt to backfill with words sharing similar morphemes / roots
+      const hasRoot = resolvedMorphemes.some(m => m.type === 'root');
+      const dominantLanguage = resolvedMorphemes.find(m => m.type === 'root')?.language || 'Latin';
+
+      let relatedCandidates = allWords.filter(w => {
         if (chosenWordIds.has(w.id)) return false;
-        const wLang = w.root_details?.language || allRoots.find(r => r.id === w.root)?.language;
-        return wLang && wLang.toLowerCase() === dominantLanguage.toLowerCase();
+        if (hasRoot) {
+          const wLang = w.root_details?.language || allRoots.find(r => r.id === w.root)?.language;
+          return wLang && wLang.toLowerCase() === dominantLanguage.toLowerCase();
+        }
+        return true;
       }).sort(() => 0.5 - Math.random());
 
-      const needed = targetCount - chosenWords.length;
       chosenWords.push(...relatedCandidates.slice(0, needed));
 
-      // If still under targetCount, fill with any remaining words
+      // If still under targetCount, fill with general remaining words
       if (chosenWords.length < targetCount) {
         const stillNeeded = targetCount - chosenWords.length;
-        const remainingChosenIds = new Set(chosenWords.map(w => w.id));
+        const currentChosenIds = new Set(chosenWords.map(w => w.id));
         const generalFill = allWords
-          .filter(w => !remainingChosenIds.has(w.id))
+          .filter(w => !currentChosenIds.has(w.id))
           .sort(() => 0.5 - Math.random())
           .slice(0, stillNeeded);
         chosenWords.push(...generalFill);
@@ -274,8 +520,14 @@ export function generateRootFamilyDeck({
     deck: shuffleWithMorphemeVariety(chosenWords),
     totalEligible,
     exactCountUsed: !backfillRelated && totalEligible < targetCount,
+    resolvedMorphemes
   };
 }
+
+/**
+ * Backward compatibility alias for generateRootFamilyDeck
+ */
+export const generateRootFamilyDeck = generateMorphemeDeck;
 
 /**
  * Generate Deck - Option B: "Smart Review (Spaced Repetition / Missed Words)"

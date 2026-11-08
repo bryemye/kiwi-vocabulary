@@ -1,4 +1,4 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useEffect } from 'react';
 import { 
   X, 
   Layers, 
@@ -16,10 +16,13 @@ import {
 } from 'lucide-react';
 import { 
   SESSION_SIZE, 
-  MAX_SELECTED_ROOTS, 
+  MAX_SELECTED_ROOTS,
+  MAX_SELECTED_MORPHEMES,
   HIGH_FREQUENCY_TIER1_MORPHEMES,
   getWordProgressMap,
   getReviewEligibleWords,
+  extractMorphemesFromWords,
+  generateMorphemeDeck,
   generateRootFamilyDeck,
   generateSmartReviewDeck,
   generateTier1Deck,
@@ -32,6 +35,8 @@ export default function CustomPracticeModal({
   roots = [],
   words = [],
   initialSelectedRootIds = [],
+  initialSelectedMorphemes = [],
+  initialMorpheme = null,
   onLaunchSession
 }) {
   if (!isOpen) return null;
@@ -39,59 +44,118 @@ export default function CustomPracticeModal({
   // Selected mode: 'root_family' | 'smart_review' | 'tier1'
   const [mode, setMode] = useState('root_family');
 
+  // Extract all available morphemes (roots, prefixes, suffixes)
+  const allMorphemes = useMemo(() => extractMorphemesFromWords(words, roots), [words, roots]);
+
   // Option A States
-  const [selectedRootIds, setSelectedRootIds] = useState(() => {
-    if (initialSelectedRootIds && initialSelectedRootIds.length > 0) {
-      return initialSelectedRootIds.slice(0, MAX_SELECTED_ROOTS).map(Number);
+  const [selectedMorphemeIds, setSelectedMorphemeIds] = useState(() => {
+    // 1. If explicit initialSelectedMorphemes provided
+    if (initialSelectedMorphemes && initialSelectedMorphemes.length > 0) {
+      const ids = initialSelectedMorphemes.map(m => typeof m === 'object' ? (m.id || m.key) : String(m));
+      return ids.slice(0, MAX_SELECTED_MORPHEMES);
     }
+
+    // 2. If single initialMorpheme provided (e.g. from MorphemeDetailView)
+    if (initialMorpheme) {
+      const targetType = initialMorpheme.type?.toLowerCase();
+      const targetToken = (initialMorpheme.cleanToken || initialMorpheme.morpheme || initialMorpheme.title || '').toLowerCase().trim();
+      const targetRootId = initialMorpheme.rootId || initialMorpheme.root?.id;
+
+      const found = allMorphemes.find(m => {
+        if (targetType && m.type !== targetType) return false;
+        if (targetType === 'root' && targetRootId) {
+          return Number(m.numericId) === Number(targetRootId);
+        }
+        const mToken = (m.cleanToken || m.morpheme || '').toLowerCase();
+        return mToken === targetToken || mToken.replace(/[^a-z0-9]/g, '') === targetToken.replace(/[^a-z0-9]/g, '');
+      });
+      if (found) return [found.id];
+    }
+
+    // 3. If initialSelectedRootIds provided
+    if (initialSelectedRootIds && initialSelectedRootIds.length > 0) {
+      const rootIds = initialSelectedRootIds.slice(0, MAX_SELECTED_MORPHEMES).map(rId => `root_${rId}`);
+      return rootIds;
+    }
+
     // Default to first root if available
-    return roots.length > 0 ? [roots[0].id] : [];
+    return allMorphemes.length > 0 ? [allMorphemes[0].id] : [];
   });
-  const [rootSearchTerm, setRootSearchTerm] = useState('');
+
+  const [morphemeTypeFilter, setMorphemeTypeFilter] = useState('ALL'); // 'ALL' | 'ROOT' | 'PREFIX' | 'SUFFIX'
+  const [morphemeSearchTerm, setMorphemeSearchTerm] = useState('');
   const [selectedLanguageFilter, setSelectedLanguageFilter] = useState('ALL');
   const [backfillRelatedRoots, setBackfillRelatedRoots] = useState(true);
 
   // Option B States
   const [backfillUnstudiedReview, setBackfillUnstudiedReview] = useState(true);
 
-  // Root word counts lookup
-  const rootWordCounts = useMemo(() => {
-    const counts = {};
-    words.forEach(w => {
-      const rId = Number(w.root || w.root_details?.id);
-      if (rId) {
-        counts[rId] = (counts[rId] || 0) + 1;
-      }
-    });
-    return counts;
-  }, [words]);
+  // Sync if initialMorpheme changes while modal opens
+  useEffect(() => {
+    if (initialMorpheme) {
+      const targetType = initialMorpheme.type?.toLowerCase();
+      const targetToken = (initialMorpheme.cleanToken || initialMorpheme.morpheme || initialMorpheme.title || '').toLowerCase().trim();
+      const targetRootId = initialMorpheme.rootId || initialMorpheme.root?.id;
 
-  // Filtered roots for search in Option A
-  const filteredRoots = useMemo(() => {
-    return roots.filter(r => {
-      if (selectedLanguageFilter !== 'ALL' && r.language.toLowerCase() !== selectedLanguageFilter.toLowerCase()) {
+      const found = allMorphemes.find(m => {
+        if (targetType && m.type !== targetType) return false;
+        if (targetType === 'root' && targetRootId) {
+          return Number(m.numericId) === Number(targetRootId);
+        }
+        const mToken = (m.cleanToken || m.morpheme || '').toLowerCase();
+        return mToken === targetToken || mToken.replace(/[^a-z0-9]/g, '') === targetToken.replace(/[^a-z0-9]/g, '');
+      });
+      if (found) {
+        setSelectedMorphemeIds([found.id]);
+        if (targetType === 'prefix') setMorphemeTypeFilter('PREFIX');
+        else if (targetType === 'suffix') setMorphemeTypeFilter('SUFFIX');
+        else if (targetType === 'root') setMorphemeTypeFilter('ROOT');
+      }
+    }
+  }, [initialMorpheme, allMorphemes]);
+
+  // Filtered morphemes for search in Option A
+  const filteredMorphemes = useMemo(() => {
+    return allMorphemes.filter(m => {
+      // Type filter
+      if (morphemeTypeFilter !== 'ALL' && m.type.toUpperCase() !== morphemeTypeFilter) {
         return false;
       }
-      if (rootSearchTerm.trim()) {
-        const q = rootSearchTerm.toLowerCase();
-        const morphMatch = (r.morpheme || '').toLowerCase().includes(q);
-        const meanMatch = (r.core_meaning || '').toLowerCase().includes(q);
-        if (!morphMatch && !meanMatch) return false;
+      // Language filter (only applies to roots)
+      if (selectedLanguageFilter !== 'ALL' && m.type === 'root' && m.language.toLowerCase() !== selectedLanguageFilter.toLowerCase()) {
+        return false;
+      }
+      // Search query
+      if (morphemeSearchTerm.trim()) {
+        const q = morphemeSearchTerm.toLowerCase();
+        const morphMatch = (m.morpheme || '').toLowerCase().includes(q);
+        const tokenMatch = (m.cleanToken || '').toLowerCase().includes(q);
+        const meanMatch = (m.core_meaning || '').toLowerCase().includes(q);
+        const clusterMatch = (m.thematic_cluster || '').toLowerCase().includes(q);
+        const tierMatch = (m.sat_tier || '').toLowerCase().includes(q);
+        const wordMatch = m.words?.some(w => w.word.toLowerCase().includes(q));
+        if (!morphMatch && !tokenMatch && !meanMatch && !clusterMatch && !tierMatch && !wordMatch) {
+          return false;
+        }
       }
       return true;
     });
-  }, [roots, selectedLanguageFilter, rootSearchTerm]);
+  }, [allMorphemes, morphemeTypeFilter, selectedLanguageFilter, morphemeSearchTerm]);
 
-  // Selected roots objects & total eligible words for Option A
-  const selectedRootsObjects = useMemo(() => {
-    const set = new Set(selectedRootIds);
-    return roots.filter(r => set.has(r.id));
-  }, [roots, selectedRootIds]);
+  // Selected morpheme objects
+  const selectedMorphemesObjects = useMemo(() => {
+    const set = new Set(selectedMorphemeIds);
+    return allMorphemes.filter(m => set.has(m.id));
+  }, [allMorphemes, selectedMorphemeIds]);
 
-  const totalEligibleRootWords = useMemo(() => {
-    const set = new Set(selectedRootIds);
-    return words.filter(w => set.has(Number(w.root || w.root_details?.id))).length;
-  }, [words, selectedRootIds]);
+  // Total unique eligible words across selected morphemes
+  const totalEligibleMorphemeWords = useMemo(() => {
+    const set = new Set();
+    selectedMorphemesObjects.forEach(m => {
+      m.words?.forEach(w => set.add(w.id));
+    });
+    return set.size;
+  }, [selectedMorphemesObjects]);
 
   // Review status calculations for Option B
   const progressMap = useMemo(() => getWordProgressMap(), []);
@@ -108,21 +172,21 @@ export default function CustomPracticeModal({
     return { struggling, learning, total: reviewWords.length };
   }, [reviewWords, progressMap]);
 
-  // Toggle root selection for Option A
-  const handleToggleRoot = (rootId) => {
-    const id = Number(rootId);
-    if (selectedRootIds.includes(id)) {
-      setSelectedRootIds(prev => prev.filter(r => r !== id));
+  // Toggle morpheme selection for Option A
+  const handleToggleMorpheme = (morphemeId) => {
+    const id = String(morphemeId);
+    if (selectedMorphemeIds.includes(id)) {
+      setSelectedMorphemeIds(prev => prev.filter(r => r !== id));
     } else {
-      if (selectedRootIds.length >= MAX_SELECTED_ROOTS) {
+      if (selectedMorphemeIds.length >= MAX_SELECTED_MORPHEMES) {
         return; // Max 5 cap enforced
       }
-      setSelectedRootIds(prev => [...prev, id]);
+      setSelectedMorphemeIds(prev => [...prev, id]);
     }
   };
 
-  const handleRemoveChip = (rootId) => {
-    setSelectedRootIds(prev => prev.filter(r => r !== Number(rootId)));
+  const handleRemoveChip = (morphemeId) => {
+    setSelectedMorphemeIds(prev => prev.filter(r => r !== String(morphemeId)));
   };
 
   // Launch handlers
@@ -130,22 +194,37 @@ export default function CustomPracticeModal({
     let sessionData = null;
 
     if (mode === 'root_family') {
-      if (selectedRootIds.length === 0) return;
-      const gen = generateRootFamilyDeck({
-        selectedRootIds,
+      if (selectedMorphemeIds.length === 0) return;
+      const gen = generateMorphemeDeck({
+        selectedMorphemes: selectedMorphemesObjects,
+        selectedMorphemeIds,
         allWords: words,
         allRoots: roots,
+        allMorphemes,
         backfillRelated: backfillRelatedRoots,
         targetCount: SESSION_SIZE
       });
 
-      const titleList = selectedRootsObjects.map(r => `[${r.morpheme.toUpperCase()}]`).join(' + ');
+      // Construct descriptive title based on selected morpheme types
+      const types = new Set(selectedMorphemesObjects.map(m => m.type));
+      let modeLabel = 'Morpheme Focus';
+      if (types.size === 1) {
+        if (types.has('prefix')) modeLabel = 'Prefix Focus';
+        else if (types.has('suffix')) modeLabel = 'Suffix Focus';
+        else if (types.has('root')) modeLabel = 'Root Family Focus';
+      }
+
+      const titleList = selectedMorphemesObjects.map(m => {
+        if (m.type === 'root') return `[${m.morpheme.toUpperCase()}]`;
+        return m.title;
+      }).join(' + ');
+
       sessionData = {
         deck: gen.deck,
-        title: `Root Focus: ${titleList}`,
+        title: `${modeLabel}: ${titleList}`,
         mode: 'root_family',
-        modeLabel: 'Root Family Focus',
-        details: `${selectedRootIds.length} roots selected (${gen.deck.length} words)`
+        modeLabel,
+        details: `${selectedMorphemesObjects.length} morphemes selected (${gen.deck.length} words)`
       };
     } else if (mode === 'smart_review') {
       const gen = generateSmartReviewDeck({
@@ -201,16 +280,16 @@ export default function CustomPracticeModal({
   // Calculate target card count for button label
   const estimatedCardCount = useMemo(() => {
     if (mode === 'root_family') {
-      if (selectedRootIds.length === 0) return 0;
-      if (totalEligibleRootWords >= SESSION_SIZE) return SESSION_SIZE;
-      return backfillRelatedRoots ? SESSION_SIZE : totalEligibleRootWords;
+      if (selectedMorphemeIds.length === 0) return 0;
+      if (totalEligibleMorphemeWords >= SESSION_SIZE) return SESSION_SIZE;
+      return backfillRelatedRoots ? SESSION_SIZE : totalEligibleMorphemeWords;
     }
     if (mode === 'smart_review') {
       if (reviewWords.length >= SESSION_SIZE) return SESSION_SIZE;
       return backfillUnstudiedReview ? SESSION_SIZE : reviewWords.length;
     }
     return SESSION_SIZE;
-  }, [mode, selectedRootIds, totalEligibleRootWords, backfillRelatedRoots, reviewWords, backfillUnstudiedReview]);
+  }, [mode, selectedMorphemeIds, totalEligibleMorphemeWords, backfillRelatedRoots, reviewWords, backfillUnstudiedReview]);
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-2 sm:p-4 bg-[#111410]/70 backdrop-blur-xs animate-fade-in">
@@ -274,8 +353,8 @@ export default function CustomPracticeModal({
                 </span>
               </div>
               <div className="font-sans font-bold text-[10px] sm:text-sm text-[#111410] truncate">
-                <span className="hidden sm:inline">Root Family Focus</span>
-                <span className="sm:hidden">Roots</span>
+                <span className="hidden sm:inline">Roots & Affixes</span>
+                <span className="sm:hidden">Morphemes</span>
               </div>
             </div>
           </button>
@@ -331,7 +410,7 @@ export default function CustomPracticeModal({
         <div className="p-4 sm:p-6 overflow-y-auto space-y-4">
 
           {/* ------------------------------------------------------------- */}
-          {/* MODE A: ROOT FAMILY FOCUS */}
+          {/* MODE A: MORPHEME FOCUS (ROOTS, PREFIXES, SUFFIXES) */}
           {/* ------------------------------------------------------------- */}
           {mode === 'root_family' && (
             <div className="space-y-4">
@@ -339,40 +418,49 @@ export default function CustomPracticeModal({
               <div className="p-3.5 bg-[#FAFBF8] border-2 border-[#111410] shadow-[2px_2px_0px_0px_#111410] flex flex-col sm:flex-row sm:items-center justify-between gap-2">
                 <div className="flex items-center space-x-2 font-mono text-xs">
                   <span className={`px-2.5 py-1 font-black uppercase border border-[#111410] ${
-                    selectedRootIds.length > 0 ? 'bg-[#7BB33B] text-white' : 'bg-[#EFE8DF] text-[#42281D]'
+                    selectedMorphemeIds.length > 0 ? 'bg-[#7BB33B] text-white' : 'bg-[#EFE8DF] text-[#42281D]'
                   }`}>
-                    Selected: {selectedRootIds.length} / {MAX_SELECTED_ROOTS} roots
+                    Selected: {selectedMorphemeIds.length} / {MAX_SELECTED_MORPHEMES} morphemes
                   </span>
                   <span className="font-bold text-[#111410]">
-                    ({totalEligibleRootWords} total eligible words)
+                    ({totalEligibleMorphemeWords} total eligible words)
                   </span>
                 </div>
 
                 <div className="text-[11px] font-mono text-[#62685E]">
-                  {selectedRootIds.length >= MAX_SELECTED_ROOTS ? (
+                  {selectedMorphemeIds.length >= MAX_SELECTED_MORPHEMES ? (
                     <span className="text-[#C29B78] font-bold">Max cap reached (5/5)</span>
                   ) : (
-                    <span>Choose 1 to 5 root families</span>
+                    <span>Choose 1 to 5 roots, prefixes, or suffixes</span>
                   )}
                 </div>
               </div>
 
-              {/* Selected Roots Chips */}
-              {selectedRootsObjects.length > 0 && (
+              {/* Selected Morphemes Chips */}
+              {selectedMorphemesObjects.length > 0 && (
                 <div className="flex flex-wrap items-center gap-1.5 p-2.5 bg-[#EDF5E5] border border-[#111410]">
-                  <span className="text-[10px] font-mono font-black uppercase text-[#2F441E] mr-1">Active Roots:</span>
-                  {selectedRootsObjects.map(r => (
+                  <span className="text-[10px] font-mono font-black uppercase text-[#2F441E] mr-1">Active Morphemes:</span>
+                  {selectedMorphemesObjects.map(m => (
                     <span 
-                      key={r.id}
+                      key={m.id}
                       className="inline-flex items-center space-x-1.5 px-2 py-0.5 bg-white border border-[#111410] shadow-[1px_1px_0px_0px_#111410] text-xs font-mono font-bold text-[#111410]"
                     >
-                      <span>[{r.morpheme.toUpperCase()}]</span>
-                      <span className="text-[10px] text-[#62685E]">({rootWordCounts[r.id] || 0}w)</span>
+                      <span className={`text-[8px] font-mono font-black uppercase px-1 py-0.2 border border-[#111410] ${
+                        m.type === 'prefix'
+                          ? 'bg-[#EDF5E5] text-[#2F441E]'
+                          : m.type === 'suffix'
+                          ? 'bg-[#FAFBF8] text-[#111410]'
+                          : 'bg-[#EFE8DF] text-[#42281D]'
+                      }`}>
+                        {m.type}
+                      </span>
+                      <span>{m.type === 'root' ? `[${m.morpheme.toUpperCase()}]` : m.title}</span>
+                      <span className="text-[10px] text-[#62685E]">({m.wordCount}w)</span>
                       <button
                         type="button"
-                        onClick={() => handleRemoveChip(r.id)}
+                        onClick={() => handleRemoveChip(m.id)}
                         className="hover:text-red-600 transition"
-                        title="Remove root"
+                        title="Remove morpheme"
                       >
                         <X className="w-3 h-3" />
                       </button>
@@ -380,7 +468,7 @@ export default function CustomPracticeModal({
                   ))}
                   <button
                     type="button"
-                    onClick={() => setSelectedRootIds([])}
+                    onClick={() => setSelectedMorphemeIds([])}
                     className="text-[10px] font-mono font-bold text-[#42281D] hover:underline ml-2"
                   >
                     Clear All
@@ -388,62 +476,91 @@ export default function CustomPracticeModal({
                 </div>
               )}
 
-              {/* Search & Origin Filter Bar */}
-              <div className="flex flex-col sm:flex-row gap-2">
-                <div className="relative flex-1">
-                  <Search className="w-3.5 h-3.5 absolute left-3 top-3 text-[#62685E]" />
-                  <input
-                    type="text"
-                    value={rootSearchTerm}
-                    onChange={(e) => setRootSearchTerm(e.target.value)}
-                    placeholder="SEARCH ROOTS OR CORE MEANINGS..."
-                    className="w-full bg-white text-[#111410] font-mono text-base sm:text-xs font-bold pl-8 pr-7 py-2 border-2 border-[#111410] shadow-[2px_2px_0px_0px_#111410] focus:outline-none uppercase placeholder:text-[#A8AAA6]"
-                  />
-                  {rootSearchTerm && (
-                    <button
-                      type="button"
-                      onClick={() => setRootSearchTerm('')}
-                      className="absolute right-2.5 top-2.5 text-[#62685E] hover:text-[#111410]"
-                    >
-                      <X className="w-3.5 h-3.5" />
-                    </button>
-                  )}
+              {/* Search & Morpheme Type / Origin Filter Bar */}
+              <div className="space-y-2">
+                <div className="flex flex-col sm:flex-row gap-2">
+                  <div className="relative flex-1">
+                    <Search className="w-3.5 h-3.5 absolute left-3 top-3 text-[#62685E]" />
+                    <input
+                      type="text"
+                      value={morphemeSearchTerm}
+                      onChange={(e) => setMorphemeSearchTerm(e.target.value)}
+                      placeholder="SEARCH ROOTS, PREFIXES, SUFFIXES, OR MEANINGS..."
+                      className="w-full bg-white text-[#111410] font-mono text-base sm:text-xs font-bold pl-8 pr-7 py-2 border-2 border-[#111410] shadow-[2px_2px_0px_0px_#111410] focus:outline-none uppercase placeholder:text-[#A8AAA6]"
+                    />
+                    {morphemeSearchTerm && (
+                      <button
+                        type="button"
+                        onClick={() => setMorphemeSearchTerm('')}
+                        className="absolute right-2.5 top-2.5 text-[#62685E] hover:text-[#111410]"
+                      >
+                        <X className="w-3.5 h-3.5" />
+                      </button>
+                    )}
+                  </div>
+
+                  {/* Morpheme Type Switcher */}
+                  <div className="flex items-center space-x-1 font-mono text-xs w-full sm:w-auto">
+                    {[
+                      { key: 'ALL', label: 'ALL' },
+                      { key: 'ROOT', label: 'ROOTS' },
+                      { key: 'PREFIX', label: 'PREFIXES' },
+                      { key: 'SUFFIX', label: 'SUFFIXES' }
+                    ].map(f => (
+                      <button
+                        key={f.key}
+                        type="button"
+                        onClick={() => setMorphemeTypeFilter(f.key)}
+                        className={`flex-1 sm:flex-none px-2.5 py-2 font-black uppercase border-2 border-[#111410] transition ${
+                          morphemeTypeFilter === f.key
+                            ? 'bg-[#7BB33B] text-white shadow-[2px_2px_0px_0px_#111410]'
+                            : 'bg-white text-[#111410] hover:bg-[#FAFBF8]'
+                        }`}
+                      >
+                        {f.label}
+                      </button>
+                    ))}
+                  </div>
                 </div>
 
-                <div className="flex items-center space-x-1 font-mono text-xs w-full sm:w-auto">
-                  {['ALL', 'Latin', 'Greek'].map(lang => (
-                    <button
-                      key={lang}
-                      type="button"
-                      onClick={() => setSelectedLanguageFilter(lang)}
-                      className={`flex-1 sm:flex-none px-3 py-2 font-black uppercase border-2 border-[#111410] transition ${
-                        selectedLanguageFilter.toLowerCase() === lang.toLowerCase()
-                          ? 'bg-[#7BB33B] text-white shadow-[2px_2px_0px_0px_#111410]'
-                          : 'bg-white text-[#111410] hover:bg-[#FAFBF8]'
-                      }`}
-                    >
-                      {lang.toUpperCase()}
-                    </button>
-                  ))}
-                </div>
+                {/* Sub-bar for Language Filter if Roots are visible */}
+                {(morphemeTypeFilter === 'ALL' || morphemeTypeFilter === 'ROOT') && (
+                  <div className="flex items-center space-x-1.5 font-mono text-[11px] text-[#62685E] pt-0.5">
+                    <span className="font-bold uppercase text-[10px]">Root Origin:</span>
+                    {['ALL', 'Latin', 'Greek'].map(lang => (
+                      <button
+                        key={lang}
+                        type="button"
+                        onClick={() => setSelectedLanguageFilter(lang)}
+                        className={`px-2 py-0.5 border font-bold uppercase transition ${
+                          selectedLanguageFilter.toLowerCase() === lang.toLowerCase()
+                            ? 'bg-[#111410] text-white border-[#111410]'
+                            : 'bg-white text-[#111410] border-[#111410]/30 hover:border-[#111410]'
+                        }`}
+                      >
+                        {lang}
+                      </button>
+                    ))}
+                  </div>
+                )}
               </div>
 
-              {/* Roots List / Selection Grid */}
+              {/* Morphemes List / Selection Grid */}
               <div className="border-2 border-[#111410] bg-white max-h-56 overflow-y-auto divide-y divide-[#111410]/20">
-                {filteredRoots.length === 0 ? (
+                {filteredMorphemes.length === 0 ? (
                   <div className="p-6 text-center text-xs font-mono text-[#62685E] uppercase">
-                    No roots match your search query.
+                    No morphemes match your search query.
                   </div>
                 ) : (
-                  filteredRoots.map(r => {
-                    const isSelected = selectedRootIds.includes(r.id);
-                    const isCapReached = selectedRootIds.length >= MAX_SELECTED_ROOTS && !isSelected;
-                    const count = rootWordCounts[r.id] || 0;
+                  filteredMorphemes.map(m => {
+                    const isSelected = selectedMorphemeIds.includes(m.id);
+                    const isCapReached = selectedMorphemeIds.length >= MAX_SELECTED_MORPHEMES && !isSelected;
+                    const count = m.wordCount || m.words?.length || 0;
 
                     return (
                       <div
-                        key={r.id}
-                        onClick={() => !isCapReached && handleToggleRoot(r.id)}
+                        key={m.id}
+                        onClick={() => !isCapReached && handleToggleMorpheme(m.id)}
                         className={`p-2.5 sm:p-3 flex items-center justify-between transition cursor-pointer ${
                           isSelected
                             ? 'bg-[#EDF5E5] hover:bg-[#E2F0D5]'
@@ -457,30 +574,44 @@ export default function CustomPracticeModal({
                             type="checkbox"
                             checked={isSelected}
                             disabled={isCapReached}
-                            onChange={() => !isCapReached && handleToggleRoot(r.id)}
+                            onChange={() => !isCapReached && handleToggleMorpheme(m.id)}
                             className="w-4 h-4 accent-[#7BB33B] border-2 border-[#111410] cursor-pointer"
                           />
                           <div className="min-w-0">
                             <div className="flex items-center space-x-2 flex-wrap gap-y-0.5">
+                              {/* Type Badge */}
+                              <span className={`text-[9px] font-mono px-1.5 py-0.2 border border-[#111410] uppercase font-bold ${
+                                m.type === 'prefix'
+                                  ? 'bg-[#EDF5E5] text-[#2F441E]'
+                                  : m.type === 'suffix'
+                                  ? 'bg-[#FAFBF8] text-[#111410]'
+                                  : 'bg-[#EFE8DF] text-[#42281D]'
+                              }`}>
+                                {m.type}
+                              </span>
+
                               <span className="font-mono text-xs font-black uppercase text-[#111410]">
-                                [{r.morpheme.toUpperCase()}]
+                                {m.type === 'root' ? `[${m.morpheme.toUpperCase()}]` : m.title}
                               </span>
-                              <span className="text-[9px] font-mono px-1.5 py-0.2 bg-white text-[#2F441E] border border-[#111410] uppercase font-bold">
-                                {r.language}
-                              </span>
-                              {r.thematic_cluster && (
-                                <span className="text-[8px] font-mono px-1 py-0.2 bg-white border border-[#111410] uppercase">
-                                  🧠 {r.thematic_cluster}
+
+                              {m.type === 'root' && (
+                                <span className="text-[9px] font-mono px-1 py-0.2 bg-white text-[#2F441E] border border-[#111410] uppercase font-bold">
+                                  {m.language}
                                 </span>
                               )}
-                              {r.sat_tier && (
+                              {m.thematic_cluster && (
+                                <span className="text-[8px] font-mono px-1 py-0.2 bg-white border border-[#111410] uppercase">
+                                  🧠 {m.thematic_cluster}
+                                </span>
+                              )}
+                              {m.sat_tier && (
                                 <span className="text-[8px] font-mono px-1 py-0.2 bg-[#FFFBEB] text-[#92400E] border border-[#111410] uppercase font-bold">
-                                  ⚡ {r.sat_tier}
+                                  ⚡ {m.sat_tier}
                                 </span>
                               )}
                             </div>
                             <p className="text-xs font-serif italic text-[#42281D] truncate">
-                              "{r.core_meaning}"
+                              "{m.core_meaning}"
                             </p>
                           </div>
                         </div>
@@ -498,19 +629,19 @@ export default function CustomPracticeModal({
 
               {/* Sub-options for Option A (Sampling & Backfill rule) */}
               <div className="p-3 bg-[#FAFBF8] border-2 border-[#111410] space-y-2 text-xs font-mono">
-                {totalEligibleRootWords > SESSION_SIZE ? (
+                {totalEligibleMorphemeWords > SESSION_SIZE ? (
                   <div className="flex items-start space-x-2 text-[#2F441E]">
                     <CheckCircle2 className="w-4 h-4 shrink-0 mt-0.5 text-[#7BB33B]" />
                     <p>
-                      Selected roots contain <strong>{totalEligibleRootWords} words</strong>. The engine will draw a balanced random sample of <strong>15 words</strong> across these roots with morpheme variety interleaving.
+                      Selected morphemes contain <strong>{totalEligibleMorphemeWords} words</strong>. The engine will draw a balanced random sample of <strong>15 words</strong> across these morphemes with variety interleaving.
                     </p>
                   </div>
-                ) : totalEligibleRootWords > 0 ? (
+                ) : totalEligibleMorphemeWords > 0 ? (
                   <div className="space-y-2">
                     <div className="flex items-start space-x-2 text-[#42281D]">
                       <Info className="w-4 h-4 shrink-0 mt-0.5 text-[#C29B78]" />
                       <p>
-                        Selected roots contain <strong>{totalEligibleRootWords} words</strong> (fewer than the standard 15-card session).
+                        Selected morphemes contain <strong>{totalEligibleMorphemeWords} words</strong> (fewer than the standard 15-card session).
                       </p>
                     </div>
 
@@ -522,18 +653,18 @@ export default function CustomPracticeModal({
                         className="w-4 h-4 accent-[#7BB33B] border-2 border-[#111410] cursor-pointer"
                       />
                       <span className="text-[#111410] font-bold">
-                        Fill remaining slots ({SESSION_SIZE - totalEligibleRootWords} cards) with closely related root families to make a full 15-card session
+                        Fill remaining slots ({SESSION_SIZE - totalEligibleMorphemeWords} cards) with related morphemes to make a full 15-card session
                       </span>
                     </label>
                     {!backfillRelatedRoots && (
                       <p className="text-[11px] text-[#62685E] pl-6 italic">
-                        Unchecked: Practice session will run with exact count of {totalEligibleRootWords} cards.
+                        Unchecked: Practice session will run with exact count of {totalEligibleMorphemeWords} cards.
                       </p>
                     )}
                   </div>
                 ) : (
                   <p className="text-[#991B1B] font-bold">
-                    Please select at least 1 root family from the list above.
+                    Please select at least 1 root, prefix, or suffix from the list above.
                   </p>
                 )}
               </div>
@@ -735,9 +866,9 @@ export default function CustomPracticeModal({
           <button
             type="button"
             onClick={handleStartSession}
-            disabled={mode === 'root_family' && selectedRootIds.length === 0}
+            disabled={mode === 'root_family' && selectedMorphemeIds.length === 0}
             className={`w-full sm:w-auto px-5 sm:px-6 py-3 sm:py-2.5 font-mono font-black text-xs uppercase tracking-wider border-2 border-[#111410] transition flex items-center justify-center space-x-2 order-1 sm:order-2 ${
-              mode === 'root_family' && selectedRootIds.length === 0
+              mode === 'root_family' && selectedMorphemeIds.length === 0
                 ? 'bg-[#EFE8DF] text-[#A8AAA6] cursor-not-allowed shadow-none'
                 : 'bg-[#7BB33B] hover:bg-[#84C341] text-white shadow-[3px_3px_0px_0px_#111410] sm:shadow-[4px_4px_0px_0px_#111410] active:translate-x-[2px] active:translate-y-[2px]'
             }`}
