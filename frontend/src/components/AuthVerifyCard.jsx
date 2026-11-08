@@ -151,7 +151,7 @@ export default function AuthVerifyCard({ token: initialToken, onSuccess, onOpenA
                   {errorMessage}
                 </div>
                 <p className="mt-2 text-[11px] font-mono text-[#62685E] text-left">
-                  Note: If copying from terminal, look for the un-wrapped single-line banner labelled <strong>KIWI MAGIC LOGIN LINK</strong>.
+                  If your email client didn't open the link automatically, you can paste the full link or verification token below.
                 </p>
               </div>
 
