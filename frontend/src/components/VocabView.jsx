@@ -277,9 +277,10 @@ export default function VocabView({
       sourceWord: word?.word || '',
       matchedWords,
       rootId: rootObj?.id || null,
-      root: rootObj
+      root: rootObj,
+      sourceTab: subTab,
     });
-  }, [roots, words]);
+  }, [roots, words, subTab]);
 
   // Open Custom Practice Session Modal
   const handleOpenCustomSession = useCallback((initialRootIds = []) => {
@@ -1018,6 +1019,7 @@ export default function VocabView({
           onSelectRootPractice={(rootId) => {
             handleOpenCustomSession([Number(rootId)]);
           }}
+          onOpenMorpheme={handleOpenMorpheme}
         />
       )}
 

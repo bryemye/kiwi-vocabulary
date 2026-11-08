@@ -344,7 +344,8 @@ export default function VocabGraphView({
   onNavigateExplorer, 
   initialRoots = [],
   isAdminMode = false,
-  onUpdateWordReview
+  onUpdateWordReview,
+  onOpenMorpheme
 }) {
   // Data States
   const [rootsData, setRootsData] = useState(() => mergeReviewsIntoRoots(initialRoots));
@@ -1435,8 +1436,12 @@ export default function VocabGraphView({
   // ---------------------------------------------------------------------------
   // 8. STUDY ATTEMPT & MINI-FLASHCARD HANDLER
   // ---------------------------------------------------------------------------
-  const handleOpenMiniFlashcard = (wordData) => {
-    setStudyWordModal(wordData);
+  const handleOpenMiniFlashcard = (wordData, parentRoot = null) => {
+    const rootDetails = wordData?.root_details || parentRoot || (selectedNode?.type === 'word' ? selectedNode.parentRoot : null);
+    setStudyWordModal({
+      ...wordData,
+      root_details: rootDetails
+    });
     setFlashcardFlipped(false);
     setCardStartTime(Date.now());
   };
@@ -1829,7 +1834,7 @@ export default function VocabGraphView({
                     <span className="text-[10px] font-mono text-[#62685E]">Click to inspect</span>
                   </div>
 
-                  <div className="space-y-2">
+                  <div className="space-y-2.5">
                     {(selectedNode.data?.words || []).map(w => {
                       const isMastered = masteredWordIds.has(w.id);
                       return (
@@ -1839,25 +1844,125 @@ export default function VocabGraphView({
                             const wordNode = graphData.nodes.find(n => n.id === `word-${w.id}`);
                             if (wordNode) smoothPanToNode(wordNode);
                           }}
-                          className="p-3 bg-white hover:bg-[#EDF5E5] border-2 border-[#111410] shadow-[2px_2px_0px_0px_#111410] cursor-pointer transition flex items-center justify-between group"
+                          className="p-3 bg-white hover:bg-[#FAFBF8] border-2 border-[#111410] shadow-[2px_2px_0px_0px_#111410] transition group"
                         >
-                          <div>
-                            <div className="flex items-center space-x-2">
-                              <span className="font-sans font-bold text-sm text-[#111410] group-hover:text-[#2F441E]">
-                                {w.word}
-                              </span>
-                              {isMastered && (
-                                <span className="w-2 h-2 rounded-full bg-[#7BB33B] border border-[#111410]" title="Mastered" />
-                              )}
-                              <span className="text-[10px] font-mono text-[#62685E]">
-                                {w.part_of_speech}
-                              </span>
+                          <div 
+                            className="flex items-start justify-between cursor-pointer"
+                            onClick={() => {
+                              const wordNode = graphData.nodes.find(n => n.id === `word-${w.id}`);
+                              if (wordNode) smoothPanToNode(wordNode);
+                            }}
+                          >
+                            <div>
+                              <div className="flex items-center space-x-2">
+                                <span className="font-sans font-black text-sm text-[#111410] group-hover:text-[#2F441E]">
+                                  {w.word}
+                                </span>
+                                {isMastered && (
+                                  <span className="w-2 h-2 rounded-full bg-[#7BB33B] border border-[#111410]" title="Mastered" />
+                                )}
+                                <span className="text-[10px] font-mono text-[#62685E]">
+                                  {w.part_of_speech}
+                                </span>
+                              </div>
+                              <p className="text-xs text-[#42281D] line-clamp-1 mt-0.5 font-sans">
+                                {w.definition}
+                              </p>
                             </div>
-                            <p className="text-xs text-[#42281D] line-clamp-1 mt-0.5 font-sans">
-                              {w.definition}
-                            </p>
+                            <ChevronRight className="w-4 h-4 text-[#111410] group-hover:translate-x-1 transition-transform shrink-0 ml-2 mt-0.5" />
                           </div>
-                          <ChevronRight className="w-4 h-4 text-[#111410] group-hover:translate-x-1 transition-transform" />
+
+                          {/* Clickable Morphology Decomposition */}
+                          <div 
+                            className="mt-2.5 pt-2 border-t border-[#111410]/15 flex flex-wrap items-center gap-1.5"
+                            onClick={(e) => e.stopPropagation()}
+                          >
+                            <span className="text-[9px] font-mono font-bold uppercase text-[#62685E] mr-0.5 shrink-0">
+                              Morphemes:
+                            </span>
+
+                            {w.prefix && (
+                              <button
+                                type="button"
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  if (onOpenMorpheme) {
+                                    onOpenMorpheme({
+                                      type: 'prefix',
+                                      raw: w.prefix,
+                                      word: { ...w, root_details: selectedNode.data },
+                                    });
+                                  }
+                                }}
+                                className="px-2 py-0.5 bg-[#EDF5E5] hover:bg-[#DCEDD0] text-[#2F441E] border border-[#111410] shadow-[1px_1px_0px_0px_#111410] hover:shadow-[2px_2px_0px_0px_#111410] active:translate-y-0 transition cursor-pointer text-left group/chip"
+                                title={`Click to explore Prefix "${w.prefix}"`}
+                              >
+                                <div className="flex items-center space-x-1">
+                                  <span className="text-[8px] uppercase font-mono font-bold text-[#2F441E]/70 block leading-none">Prefix</span>
+                                  <span className="text-[8px] opacity-60 group-hover/chip:opacity-100 font-mono">↗</span>
+                                </div>
+                                <span className="font-mono font-black text-xs leading-tight">
+                                  {w.prefix}
+                                </span>
+                              </button>
+                            )}
+
+                            {w.prefix && <span className="text-[#111410] font-black font-mono text-xs">+</span>}
+
+                            <button
+                              type="button"
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                if (onOpenMorpheme) {
+                                  onOpenMorpheme({
+                                    type: 'root',
+                                    root: selectedNode.data,
+                                    word: { ...w, root_details: selectedNode.data },
+                                  });
+                                }
+                              }}
+                              className="px-2 py-0.5 bg-[#EFE8DF] hover:bg-[#E5DCD1] text-[#42281D] border border-[#111410] shadow-[1px_1px_0px_0px_#111410] hover:shadow-[2px_2px_0px_0px_#111410] active:translate-y-0 transition cursor-pointer text-left group/chip"
+                              title={`Click to explore Root "[${selectedNode.morpheme?.toUpperCase()}]"`}
+                            >
+                              <div className="flex items-center space-x-1">
+                                <span className="text-[8px] uppercase font-mono font-bold text-[#42281D]/70 block leading-none">
+                                  Root ({selectedNode.language || 'Latin'})
+                                </span>
+                                <span className="text-[8px] opacity-60 group-hover/chip:opacity-100 font-mono">↗</span>
+                              </div>
+                              <span className="font-mono font-black text-xs text-[#42281D] leading-tight">
+                                [{selectedNode.morpheme?.toUpperCase()}]
+                              </span>
+                            </button>
+
+                            {w.suffix && <span className="text-[#111410] font-black font-mono text-xs">+</span>}
+
+                            {w.suffix && (
+                              <button
+                                type="button"
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  if (onOpenMorpheme) {
+                                    onOpenMorpheme({
+                                      type: 'suffix',
+                                      raw: w.suffix,
+                                      word: { ...w, root_details: selectedNode.data },
+                                    });
+                                  }
+                                }}
+                                className="px-2 py-0.5 bg-white hover:bg-[#FAFBF8] text-[#111410] border border-[#111410] shadow-[1px_1px_0px_0px_#111410] hover:shadow-[2px_2px_0px_0px_#111410] active:translate-y-0 transition cursor-pointer text-left group/chip"
+                                title={`Click to explore Suffix "${w.suffix}"`}
+                              >
+                                <div className="flex items-center space-x-1">
+                                  <span className="text-[8px] uppercase font-mono font-bold text-[#62685E] block leading-none">Suffix</span>
+                                  <span className="text-[8px] opacity-60 group-hover/chip:opacity-100 font-mono">↗</span>
+                                </div>
+                                <span className="font-mono font-black text-xs leading-tight">
+                                  {w.suffix}
+                                </span>
+                              </button>
+                            )}
+                          </div>
                         </div>
                       );
                     })}
@@ -2052,36 +2157,124 @@ export default function VocabGraphView({
 
                 {/* Morpheme Decomposition Formula */}
                 <div className="p-3.5 bg-white border-2 border-[#111410] shadow-[3px_3px_0px_0px_#111410]">
-                  <span className="text-[10px] font-mono font-black uppercase text-[#62685E] block mb-2">
-                    Morpheme Formula Deconstruction
-                  </span>
+                  <div className="flex items-center justify-between mb-2.5">
+                    <span className="text-[10px] font-mono font-black uppercase text-[#62685E] flex items-center space-x-1.5">
+                      <Layers className="w-3.5 h-3.5 text-[#7BB33B]" />
+                      <span>Morpheme Decomposition Formula</span>
+                    </span>
+                    <span className="text-[9px] font-mono text-[#62685E] uppercase hidden sm:inline">
+                      Click piece to inspect
+                    </span>
+                  </div>
                   
-                  <div className="flex flex-wrap items-center gap-1.5 font-mono text-xs">
+                  <div className="flex flex-wrap items-center gap-1.5 sm:gap-2">
                     {selectedNode.data?.prefix && (
-                      <>
-                        <span className="px-2 py-1 bg-[#FAFBF8] border border-[#111410] font-bold text-[#42281D]">
-                          [{selectedNode.data.prefix}-]
-                        </span>
-                        <span className="font-black text-[#111410]">+</span>
-                      </>
+                      <button
+                        type="button"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          if (onOpenMorpheme) {
+                            onOpenMorpheme({
+                              type: 'prefix',
+                              raw: selectedNode.data.prefix,
+                              word: {
+                                ...selectedNode.data,
+                                root_details: selectedNode.parentRoot,
+                              },
+                            });
+                          }
+                        }}
+                        className="px-2.5 sm:px-3 py-1.5 bg-[#EDF5E5] hover:bg-[#DCEDD0] text-[#2F441E] border-2 border-[#111410] shadow-[2px_2px_0px_0px_#111410] hover:shadow-[3px_3px_0px_0px_#111410] active:translate-y-0 transition cursor-pointer text-left group"
+                        title={`Click to explore Prefix "${selectedNode.data.prefix}" & practice subset`}
+                      >
+                        <div className="flex items-center justify-between space-x-1">
+                          <span className="text-[9px] block uppercase font-mono font-bold text-[#2F441E]/70">Prefix</span>
+                          <span className="text-[9px] font-mono font-bold opacity-60 group-hover:opacity-100">↗</span>
+                        </div>
+                        <span className="font-mono font-extrabold text-xs">{selectedNode.data.prefix}</span>
+                      </button>
                     )}
 
-                    <span className="px-2.5 py-1 bg-[#EFE8DF] border-2 border-[#111410] font-black text-[#111410] shadow-[1px_1px_0px_0px_#111410]">
-                      [{selectedNode.parentRoot?.morpheme || 'root'}]
-                    </span>
+                    {selectedNode.data?.prefix && <span className="text-[#111410] font-black font-mono text-base">+</span>}
+
+                    <button
+                      type="button"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        if (onOpenMorpheme) {
+                          onOpenMorpheme({
+                            type: 'root',
+                            root: selectedNode.parentRoot,
+                            word: {
+                              ...selectedNode.data,
+                              root_details: selectedNode.parentRoot,
+                            },
+                          });
+                        }
+                      }}
+                      className="px-2.5 sm:px-3 py-1.5 bg-[#EFE8DF] hover:bg-[#E5DCD1] text-[#42281D] border-2 border-[#111410] shadow-[2px_2px_0px_0px_#111410] hover:shadow-[3px_3px_0px_0px_#111410] active:translate-y-0 transition cursor-pointer text-left group"
+                      title={`Click to explore Root "[${selectedNode.parentRoot?.morpheme?.toUpperCase()}]" & practice subset`}
+                    >
+                      <div className="flex items-center justify-between space-x-1">
+                        <span className="text-[9px] block uppercase font-mono font-bold text-[#42281D]/70">
+                          Root ({selectedNode.parentRoot?.language || 'Latin'})
+                        </span>
+                        <span className="text-[9px] font-mono font-bold opacity-60 group-hover:opacity-100">↗</span>
+                      </div>
+                      <span className="font-mono font-black text-xs text-[#42281D]">
+                        [{selectedNode.parentRoot?.morpheme?.toUpperCase() || 'ROOT'}]
+                      </span>
+                      {selectedNode.parentRoot?.core_meaning && (
+                        <span className="text-[#42281D] text-xs ml-1.5 font-sans font-bold">
+                          = "{selectedNode.parentRoot.core_meaning}"
+                        </span>
+                      )}
+                    </button>
+
+                    {selectedNode.data?.suffix && <span className="text-[#111410] font-black font-mono text-base">+</span>}
 
                     {selectedNode.data?.suffix && (
-                      <>
-                        <span className="font-black text-[#111410]">+</span>
-                        <span className="px-2 py-1 bg-[#FAFBF8] border border-[#111410] font-bold text-[#42281D]">
-                          [-{selectedNode.data.suffix}]
-                        </span>
-                      </>
+                      <button
+                        type="button"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          if (onOpenMorpheme) {
+                            onOpenMorpheme({
+                              type: 'suffix',
+                              raw: selectedNode.data.suffix,
+                              word: {
+                                ...selectedNode.data,
+                                root_details: selectedNode.parentRoot,
+                              },
+                            });
+                          }
+                        }}
+                        className="px-2.5 sm:px-3 py-1.5 bg-white hover:bg-[#FAFBF8] text-[#111410] border-2 border-[#111410] shadow-[2px_2px_0px_0px_#111410] hover:shadow-[3px_3px_0px_0px_#111410] active:translate-y-0 transition cursor-pointer text-left group"
+                        title={`Click to explore Suffix "${selectedNode.data.suffix}" & practice subset`}
+                      >
+                        <div className="flex items-center justify-between space-x-1">
+                          <span className="text-[9px] block uppercase font-mono font-bold text-[#62685E]">Suffix</span>
+                          <span className="text-[9px] font-mono font-bold opacity-60 group-hover:opacity-100">↗</span>
+                        </div>
+                        <span className="font-mono font-extrabold text-xs">{selectedNode.data.suffix}</span>
+                      </button>
                     )}
                   </div>
 
-                  <div className="mt-2 text-[11px] font-mono text-[#62685E]">
-                    Parent Root: <strong>{selectedNode.parentRoot?.morpheme}</strong> ({selectedNode.parentRoot?.language} · "{selectedNode.parentRoot?.core_meaning}")
+                  <div className="mt-2.5 pt-2 border-t border-[#111410]/20 flex items-center justify-between text-[11px] font-mono text-[#62685E]">
+                    <span>
+                      Parent Root: <strong className="text-[#111410]">{selectedNode.parentRoot?.morpheme}</strong> ({selectedNode.parentRoot?.language} · "{selectedNode.parentRoot?.core_meaning}")
+                    </span>
+                    <button
+                      type="button"
+                      onClick={() => {
+                        const rootNode = graphData.nodes.find(n => n.id === selectedNode.rootNodeId);
+                        if (rootNode) focusRoot(rootNode);
+                      }}
+                      className="text-[#2F441E] font-bold hover:underline flex items-center gap-1"
+                    >
+                      Focus Root →
+                    </button>
                   </div>
                 </div>
 
@@ -2123,7 +2316,7 @@ export default function VocabGraphView({
                 {/* Quick Action: Study Flashcard Button */}
                 <div className="pt-2 space-y-2">
                   <button
-                    onClick={() => handleOpenMiniFlashcard(selectedNode.data)}
+                    onClick={() => handleOpenMiniFlashcard(selectedNode.data, selectedNode.parentRoot)}
                     className="w-full flex items-center justify-center space-x-2 px-4 py-3 bg-[#7BB33B] hover:bg-[#84C341] text-white border-2 border-[#111410] shadow-[3px_3px_0px_0px_#111410] font-mono text-xs font-black uppercase tracking-wider transition active:translate-x-[1px] active:translate-y-[1px]"
                   >
                     <Sparkles className="w-4 h-4 text-white" />
@@ -2226,6 +2419,91 @@ export default function VocabGraphView({
                       "{studyWordModal.sat_sentence}"
                     </p>
                   )}
+
+                  {/* Morpheme Decomposition in Mini-Flashcard */}
+                  <div className="pt-3 border-t border-[#111410]/20" onClick={(e) => e.stopPropagation()}>
+                    <span className="text-[10px] font-mono font-black uppercase text-[#62685E] block mb-1.5">
+                      Morpheme Decomposition:
+                    </span>
+                    <div className="flex flex-wrap items-center gap-1.5">
+                      {studyWordModal.prefix && (
+                        <button
+                          type="button"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            const targetWord = studyWordModal;
+                            setStudyWordModal(null);
+                            if (onOpenMorpheme) {
+                              onOpenMorpheme({
+                                type: 'prefix',
+                                raw: targetWord.prefix,
+                                word: targetWord,
+                              });
+                            }
+                          }}
+                          className="px-2 py-1 bg-[#EDF5E5] hover:bg-[#DCEDD0] text-[#2F441E] border border-[#111410] shadow-[1px_1px_0px_0px_#111410] text-left group cursor-pointer"
+                          title={`Explore Prefix "${studyWordModal.prefix}"`}
+                        >
+                          <span className="text-[8px] uppercase font-mono font-bold text-[#2F441E]/70 block leading-none">Prefix</span>
+                          <span className="font-mono font-black text-xs leading-tight flex items-center gap-0.5">
+                            {studyWordModal.prefix} <span className="text-[8px] opacity-60 group-hover:opacity-100">↗</span>
+                          </span>
+                        </button>
+                      )}
+                      {studyWordModal.prefix && <span className="text-[#111410] font-black font-mono text-xs">+</span>}
+                      {studyWordModal.root_details && (
+                        <button
+                          type="button"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            const targetWord = studyWordModal;
+                            setStudyWordModal(null);
+                            if (onOpenMorpheme) {
+                              onOpenMorpheme({
+                                type: 'root',
+                                root: targetWord.root_details,
+                                word: targetWord,
+                              });
+                            }
+                          }}
+                          className="px-2 py-1 bg-[#EFE8DF] hover:bg-[#E5DCD1] text-[#42281D] border border-[#111410] shadow-[1px_1px_0px_0px_#111410] text-left group cursor-pointer"
+                          title={`Explore Root "[${studyWordModal.root_details.morpheme?.toUpperCase()}]"`}
+                        >
+                          <span className="text-[8px] uppercase font-mono font-bold text-[#42281D]/70 block leading-none">
+                            Root ({studyWordModal.root_details.language || 'Latin'})
+                          </span>
+                          <span className="font-mono font-black text-xs text-[#42281D] leading-tight flex items-center gap-0.5">
+                            [{studyWordModal.root_details.morpheme?.toUpperCase()}] <span className="text-[8px] opacity-60 group-hover:opacity-100">↗</span>
+                          </span>
+                        </button>
+                      )}
+                      {studyWordModal.suffix && <span className="text-[#111410] font-black font-mono text-xs">+</span>}
+                      {studyWordModal.suffix && (
+                        <button
+                          type="button"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            const targetWord = studyWordModal;
+                            setStudyWordModal(null);
+                            if (onOpenMorpheme) {
+                              onOpenMorpheme({
+                                type: 'suffix',
+                                raw: targetWord.suffix,
+                                word: targetWord,
+                              });
+                            }
+                          }}
+                          className="px-2 py-1 bg-white hover:bg-[#FAFBF8] text-[#111410] border border-[#111410] shadow-[1px_1px_0px_0px_#111410] text-left group cursor-pointer"
+                          title={`Explore Suffix "${studyWordModal.suffix}"`}
+                        >
+                          <span className="text-[8px] uppercase font-mono font-bold text-[#62685E] block leading-none">Suffix</span>
+                          <span className="font-mono font-black text-xs leading-tight flex items-center gap-0.5">
+                            {studyWordModal.suffix} <span className="text-[8px] opacity-60 group-hover:opacity-100">↗</span>
+                          </span>
+                        </button>
+                      )}
+                    </div>
+                  </div>
                 </div>
               )}
             </div>

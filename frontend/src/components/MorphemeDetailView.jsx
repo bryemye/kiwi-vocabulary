@@ -95,7 +95,7 @@ export default function MorphemeDetailView({
           className="flex items-center space-x-2 px-3 py-1.5 bg-white hover:bg-[#FAFBF8] border-2 border-[#111410] shadow-[2px_2px_0px_0px_#111410] text-xs font-mono font-bold uppercase transition active:translate-x-[1px] active:translate-y-[1px]"
         >
           <ArrowLeft className="w-3.5 h-3.5 text-[#111410]" />
-          <span>Back to Flashcard Deck</span>
+          <span>{morphemeData.sourceTab === 'graph' ? 'Back to Root Graph' : 'Back to Flashcard Deck'}</span>
         </button>
 
         {sourceWord && (
