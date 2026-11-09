@@ -4,9 +4,7 @@
       "morpheme": "ced / cess",
       "language": "Latin",
       "core_meaning": "to go, yield, withdraw",
-      "mnemonic": "Think 'precede' (go before) or 'concede' (yield to)",
-      "thematic_cluster": "Movement",
-      "sat_tier": "Tier 1 High-Yield"
+      "mnemonic": "Think 'precede' (go before) or 'concede' (yield to)"
     },
     "words": [
       {
@@ -72,9 +70,7 @@
       "morpheme": "cur / curs / cour",
       "language": "Latin",
       "core_meaning": "to run, course, flow",
-      "mnemonic": "Think 'current' (running flow) or 'courier' (runner)",
-      "thematic_cluster": "Movement",
-      "sat_tier": "Tier 1 High-Yield"
+      "mnemonic": "Think 'current' (running flow) or 'courier' (runner)"
     },
     "words": [
       {
@@ -118,12 +114,12 @@
         "connotation": "negative"
       },
       {
-        "word": "succumb",
-        "prefix": "sub- (under)",
-        "suffix": "",
-        "definition": "To fail to resist pressure, temptation, or illness; to surrender.",
-        "sat_sentence": "Weakened by dehydration, the explorer finally succumbed to heat exhaustion.",
-        "connotation": "negative"
+        "word": "excursion",
+        "prefix": "ex- (out, outward)",
+        "suffix": "-ion (noun)",
+        "definition": "A short journey or trip, especially one taken for pleasure; a brief deviation from a main topic or course.",
+        "sat_sentence": "The biology seminar included a weekend excursion to observe tidal pool biodiversity.",
+        "connotation": "positive"
       },
       {
         "word": "recur",
@@ -140,9 +136,7 @@
       "morpheme": "grad / gress",
       "language": "Latin",
       "core_meaning": "to step, walk, go",
-      "mnemonic": "Think 'progress' (step forward) or 'gradual' (step by step)",
-      "thematic_cluster": "Movement",
-      "sat_tier": "Tier 1 High-Yield"
+      "mnemonic": "Think 'progress' (step forward) or 'gradual' (step by step)"
     },
     "words": [
       {
@@ -208,9 +202,7 @@
       "morpheme": "mot / mov",
       "language": "Latin",
       "core_meaning": "to move, stir, set in motion",
-      "mnemonic": "Think 'motion' or 'motivate' (stir to action)",
-      "thematic_cluster": "Movement",
-      "sat_tier": "Tier 1 High-Yield"
+      "mnemonic": "Think 'motion' or 'motivate' (stir to action)"
     },
     "words": [
       {
@@ -276,9 +268,7 @@
       "morpheme": "tract",
       "language": "Latin",
       "core_meaning": "to pull, drag, draw",
-      "mnemonic": "Think 'tractor' (pulling vehicle) or 'extract' (draw out)",
-      "thematic_cluster": "Movement",
-      "sat_tier": "Tier 1 High-Yield"
+      "mnemonic": "Think 'tractor' (pulling vehicle) or 'extract' (draw out)"
     },
     "words": [
       {
@@ -344,9 +334,7 @@
       "morpheme": "fer / lat",
       "language": "Latin",
       "core_meaning": "to carry, bear, bring",
-      "mnemonic": "Think 'transfer' (carry across) or 'ferry' (carry people)",
-      "thematic_cluster": "Movement",
-      "sat_tier": "Tier 1 High-Yield"
+      "mnemonic": "Think 'transfer' (carry across) or 'ferry' (carry people)"
     },
     "words": [
       {
@@ -412,9 +400,7 @@
       "morpheme": "pel / puls",
       "language": "Latin",
       "core_meaning": "to drive, push, urge",
-      "mnemonic": "Think 'propel' (push forward) or 'impulse' (inner drive)",
-      "thematic_cluster": "Movement",
-      "sat_tier": "Tier 1 High-Yield"
+      "mnemonic": "Think 'propel' (push forward) or 'impulse' (inner drive)"
     },
     "words": [
       {
@@ -480,9 +466,7 @@
       "morpheme": "jac / ject",
       "language": "Latin",
       "core_meaning": "to throw, cast, hurl",
-      "mnemonic": "Think 'eject' (throw out) or 'projectile' (hurled object)",
-      "thematic_cluster": "Movement",
-      "sat_tier": "Tier 1 High-Yield"
+      "mnemonic": "Think 'eject' (throw out) or 'projectile' (hurled object)"
     },
     "words": [
       {
@@ -548,9 +532,7 @@
       "morpheme": "pugn / pug",
       "language": "Latin",
       "core_meaning": "to fight, fist, combat",
-      "mnemonic": "Think 'pugilist' (boxer) or 'pugnacious' (ready to fight)",
-      "thematic_cluster": "Power & Conflict",
-      "sat_tier": "Tier 2 Multipliers"
+      "mnemonic": "Think 'pugilist' (boxer) or 'pugnacious' (ready to fight)"
     },
     "words": [
       {
@@ -616,9 +598,7 @@
       "morpheme": "bell / belli",
       "language": "Latin",
       "core_meaning": "war, fighting, hostility",
-      "mnemonic": "Think 'belligerent' (warlike) or 'antebellum' (before the war)",
-      "thematic_cluster": "Power & Conflict",
-      "sat_tier": "Tier 2 Multipliers"
+      "mnemonic": "Think 'belligerent' (warlike) or 'antebellum' (before the war)"
     },
     "words": [
       {
@@ -684,9 +664,7 @@
       "morpheme": "rupt",
       "language": "Latin",
       "core_meaning": "to break, burst, shatter",
-      "mnemonic": "Think 'rupture' (burst) or 'interrupt' (break between)",
-      "thematic_cluster": "Power & Conflict",
-      "sat_tier": "Tier 2 Multipliers"
+      "mnemonic": "Think 'rupture' (burst) or 'interrupt' (break between)"
     },
     "words": [
       {
@@ -752,9 +730,7 @@
       "morpheme": "tort / tors",
       "language": "Latin",
       "core_meaning": "to twist, wind, bend",
-      "mnemonic": "Think 'contort' (twist together) or 'torture' (twisting pain)",
-      "thematic_cluster": "Form & Nature",
-      "sat_tier": "Tier 2 Multipliers"
+      "mnemonic": "Think 'contort' (twist together) or 'torture' (twisting pain)"
     },
     "words": [
       {
@@ -820,9 +796,7 @@
       "morpheme": "fract / frag",
       "language": "Latin",
       "core_meaning": "to break, shatter, split",
-      "mnemonic": "Think 'fracture' (bone break) or 'fragment' (broken piece)",
-      "thematic_cluster": "Form & Nature",
-      "sat_tier": "Tier 2 Multipliers"
+      "mnemonic": "Think 'fracture' (bone break) or 'fragment' (broken piece)"
     },
     "words": [
       {
@@ -888,9 +862,7 @@
       "morpheme": "sec / sect / seg",
       "language": "Latin",
       "core_meaning": "to cut, divide, slice",
-      "mnemonic": "Think 'dissect' (cut apart) or 'segment' (cut slice)",
-      "thematic_cluster": "Form & Nature",
-      "sat_tier": "Tier 2 Multipliers"
+      "mnemonic": "Think 'dissect' (cut apart) or 'segment' (cut slice)"
     },
     "words": [
       {
@@ -956,9 +928,7 @@
       "morpheme": "mit / miss",
       "language": "Latin",
       "core_meaning": "to send, let go, discharge",
-      "mnemonic": "Think 'transmit' (send across) or 'mission' (sent task)",
-      "thematic_cluster": "Movement",
-      "sat_tier": "Tier 1 High-Yield"
+      "mnemonic": "Think 'transmit' (send across) or 'mission' (sent task)"
     },
     "words": [
       {
@@ -1024,9 +994,7 @@
       "morpheme": "ven / vent",
       "language": "Latin",
       "core_meaning": "to come, arrive",
-      "mnemonic": "Think 'convene' (come together) or 'advent' (arrival)",
-      "thematic_cluster": "Movement",
-      "sat_tier": "Tier 1 High-Yield"
+      "mnemonic": "Think 'convene' (come together) or 'advent' (arrival)"
     },
     "words": [
       {
@@ -1092,9 +1060,7 @@
       "morpheme": "vad / vas",
       "language": "Latin",
       "core_meaning": "to go, walk, rush",
-      "mnemonic": "Think 'evade' (go away from) or 'invade' (rush into)",
-      "thematic_cluster": "Movement",
-      "sat_tier": "Tier 2 Multipliers"
+      "mnemonic": "Think 'evade' (go away from) or 'invade' (rush into)"
     },
     "words": [
       {
@@ -1160,9 +1126,7 @@
       "morpheme": "flu / flux",
       "language": "Latin",
       "core_meaning": "to flow, glide, stream",
-      "mnemonic": "Think 'fluid' or 'influx' (flowing in)",
-      "thematic_cluster": "Movement",
-      "sat_tier": "Tier 1 High-Yield"
+      "mnemonic": "Think 'fluid' or 'influx' (flowing in)"
     },
     "words": [
       {
@@ -1228,9 +1192,7 @@
       "morpheme": "fus / fund",
       "language": "Latin",
       "core_meaning": "to pour, melt, spread",
-      "mnemonic": "Think 'diffuse' (pour out) or 'fusion' (melting together)",
-      "thematic_cluster": "Form & Nature",
-      "sat_tier": "Tier 2 Multipliers"
+      "mnemonic": "Think 'diffuse' (pour out) or 'fusion' (melting together)"
     },
     "words": [
       {
@@ -1296,9 +1258,7 @@
       "morpheme": "cid / cis",
       "language": "Latin",
       "core_meaning": "to cut, kill, sever",
-      "mnemonic": "Think 'incision' (surgical cut) or 'homicide' (killing)",
-      "thematic_cluster": "Form & Nature",
-      "sat_tier": "Tier 2 Multipliers"
+      "mnemonic": "Think 'incision' (surgical cut) or 'homicide' (killing)"
     },
     "words": [
       {
@@ -1364,9 +1324,7 @@
       "morpheme": "scend / scent",
       "language": "Latin",
       "core_meaning": "to climb, leap, mount",
-      "mnemonic": "Think 'ascend' (climb up) or 'descend' (climb down)",
-      "thematic_cluster": "Movement",
-      "sat_tier": "Tier 2 Multipliers"
+      "mnemonic": "Think 'ascend' (climb up) or 'descend' (climb down)"
     },
     "words": [
       {
@@ -1432,9 +1390,7 @@
       "morpheme": "cliv / clin",
       "language": "Latin",
       "core_meaning": "to slope, lean, incline",
-      "mnemonic": "Think 'incline' (slope up) or 'recline' (lean back)",
-      "thematic_cluster": "Movement",
-      "sat_tier": "Tier 2 Multipliers"
+      "mnemonic": "Think 'incline' (slope up) or 'recline' (lean back)"
     },
     "words": [
       {
@@ -1500,9 +1456,7 @@
       "morpheme": "vert / vers",
       "language": "Latin",
       "core_meaning": "to turn, reverse, alter",
-      "mnemonic": "Think 'reverse' (turn back) or 'convert' (turn around)",
-      "thematic_cluster": "Movement",
-      "sat_tier": "Tier 1 High-Yield"
+      "mnemonic": "Think 'reverse' (turn back) or 'convert' (turn around)"
     },
     "words": [
       {
@@ -1568,9 +1522,7 @@
       "morpheme": "err",
       "language": "Latin",
       "core_meaning": "to wander, stray, make a mistake",
-      "mnemonic": "Think 'error' (mistake) or 'erratic' (wandering unpredictably)",
-      "thematic_cluster": "Movement",
-      "sat_tier": "Tier 2 Multipliers"
+      "mnemonic": "Think 'error' (mistake) or 'erratic' (wandering unpredictably)"
     },
     "words": [
       {
@@ -1636,9 +1588,7 @@
       "morpheme": "her / hes",
       "language": "Latin",
       "core_meaning": "to stick, cling, adhere",
-      "mnemonic": "Think 'adhesive' (sticking) or 'coherent' (sticking together)",
-      "thematic_cluster": "Quantity & Relation",
-      "sat_tier": "Tier 2 Multipliers"
+      "mnemonic": "Think 'adhesive' (sticking) or 'coherent' (sticking together)"
     },
     "words": [
       {
@@ -1704,9 +1654,7 @@
       "morpheme": "string / strict",
       "language": "Latin",
       "core_meaning": "to bind, draw tight, compress",
-      "mnemonic": "Think 'strict' (tight rule) or 'constrict' (tighten together)",
-      "thematic_cluster": "Quantity & Relation",
-      "sat_tier": "Tier 2 Multipliers"
+      "mnemonic": "Think 'strict' (tight rule) or 'constrict' (tighten together)"
     },
     "words": [
       {
@@ -1772,9 +1720,7 @@
       "morpheme": "pend / pens",
       "language": "Latin",
       "core_meaning": "to hang, weigh, pay",
-      "mnemonic": "Think 'pendant' (hanging jewel) or 'suspend' (hang under)",
-      "thematic_cluster": "Quantity & Relation",
-      "sat_tier": "Tier 2 Multipliers"
+      "mnemonic": "Think 'pendant' (hanging jewel) or 'suspend' (hang under)"
     },
     "words": [
       {
@@ -1840,9 +1786,7 @@
       "morpheme": "tend / tens / tent",
       "language": "Latin",
       "core_meaning": "to stretch, aim, strain",
-      "mnemonic": "Think 'tension' (stretched tight) or 'extend' (stretch out)",
-      "thematic_cluster": "Quantity & Relation",
-      "sat_tier": "Tier 2 Multipliers"
+      "mnemonic": "Think 'tension' (stretched tight) or 'extend' (stretch out)"
     },
     "words": [
       {
@@ -1908,9 +1852,7 @@
       "morpheme": "sta / sist / stit",
       "language": "Latin",
       "core_meaning": "to stand, halt, set firmly",
-      "mnemonic": "Think 'stationary' (standing still) or 'resist' (stand against)",
-      "thematic_cluster": "Quantity & Relation",
-      "sat_tier": "Tier 1 High-Yield"
+      "mnemonic": "Think 'stationary' (standing still) or 'resist' (stand against)"
     },
     "words": [
       {
@@ -1976,9 +1918,7 @@
       "morpheme": "kin / kinet",
       "language": "Greek",
       "core_meaning": "movement, motion, speed",
-      "mnemonic": "Think 'kinetic' energy (energy of motion) or 'cinema' (moving pictures)",
-      "thematic_cluster": "Movement",
-      "sat_tier": "Tier 2 Multipliers"
+      "mnemonic": "Think 'kinetic' energy (energy of motion) or 'cinema' (moving pictures)"
     },
     "words": [
       {
@@ -2044,9 +1984,7 @@
       "morpheme": "stroph",
       "language": "Greek",
       "core_meaning": "to turn, twist, bend",
-      "mnemonic": "Think 'catastrophe' (a downturn) or 'apostrophe' (turning away)",
-      "thematic_cluster": "Movement",
-      "sat_tier": "Tier 3 Advanced"
+      "mnemonic": "Think 'catastrophe' (a downturn) or 'apostrophe' (turning away)"
     },
     "words": [
       {
@@ -2112,9 +2050,7 @@
       "morpheme": "agon",
       "language": "Greek",
       "core_meaning": "contest, struggle, trial",
-      "mnemonic": "Think 'agony' (pain of struggle) or 'antagonist' (struggler against)",
-      "thematic_cluster": "Power & Conflict",
-      "sat_tier": "Tier 3 Advanced"
+      "mnemonic": "Think 'agony' (pain of struggle) or 'antagonist' (struggler against)"
     },
     "words": [
       {
@@ -2180,9 +2116,7 @@
       "morpheme": "polem",
       "language": "Greek",
       "core_meaning": "war, dispute, hostility",
-      "mnemonic": "Think 'polemic' (war of words) or 'polemical' (argumentative)",
-      "thematic_cluster": "Power & Conflict",
-      "sat_tier": "Tier 3 Advanced"
+      "mnemonic": "Think 'polemic' (war of words) or 'polemical' (argumentative)"
     },
     "words": [
       {
@@ -2248,9 +2182,7 @@
       "morpheme": "ball / bol",
       "language": "Greek",
       "core_meaning": "to throw, cast, put",
-      "mnemonic": "Think 'ballistic' (thrown through air) or 'symbol' (thrown together)",
-      "thematic_cluster": "Movement",
-      "sat_tier": "Tier 2 Multipliers"
+      "mnemonic": "Think 'ballistic' (thrown through air) or 'symbol' (thrown together)"
     },
     "words": [
       {
@@ -2316,9 +2248,7 @@
       "morpheme": "tach / tachy",
       "language": "Greek",
       "core_meaning": "swift, rapid, fast",
-      "mnemonic": "Think 'tachometer' (measures rapid engine revs)",
-      "thematic_cluster": "Movement",
-      "sat_tier": "Tier 3 Advanced"
+      "mnemonic": "Think 'tachometer' (measures rapid engine revs)"
     },
     "words": [
       {
@@ -2381,12 +2311,54 @@
   },
   {
     "root": {
+      "morpheme": "cub / cumb",
+      "language": "Latin",
+      "core_meaning": "to lie down, recline, yield",
+      "mnemonic": "Think 'incumbent' (leaning on an office) or 'succumb' (yield / lie down under)",
+      "thematic_cluster": "Power & Conflict",
+      "sat_tier": "Tier 1 High-Yield"
+    },
+    "words": [
+      {
+        "word": "succumb",
+        "prefix": "sub- (under)",
+        "suffix": "",
+        "definition": "To fail to resist pressure, temptation, or illness; to surrender or yield.",
+        "sat_sentence": "Weakened by dehydration, the explorer finally succumbed to heat exhaustion.",
+        "connotation": "negative"
+      },
+      {
+        "word": "incumbent",
+        "prefix": "in- (upon, on)",
+        "suffix": "-ent (adjective)",
+        "definition": "Currently holding an office; obligatory as a moral or legal duty.",
+        "sat_sentence": "It is incumbent upon elected representatives to justify significant tax reforms to constituents.",
+        "connotation": "neutral"
+      },
+      {
+        "word": "recumbent",
+        "prefix": "re- (back)",
+        "suffix": "-ent (adjective)",
+        "definition": "Lying down, especially in a position of comfort or rest; reclining.",
+        "sat_sentence": "The museum featured a Roman marble sculpture of a recumbent nymph beside a sacred spring.",
+        "connotation": "neutral"
+      },
+      {
+        "word": "incubate",
+        "prefix": "in- (upon)",
+        "suffix": "-ate (verb)",
+        "definition": "To maintain favorable conditions for developing; to hatch or nurture ideas slowly.",
+        "sat_sentence": "The university established an innovation accelerator to incubate promising clean-energy technologies.",
+        "connotation": "positive"
+      }
+    ]
+  },
+  {
+    "root": {
       "morpheme": "cogn / gnos",
       "language": "Latin",
       "core_meaning": "to know, recognize, learn",
-      "mnemonic": "Think 'cognition' (mental processing) or 'diagnosis' (knowing through symptoms)",
-      "thematic_cluster": "Cognition",
-      "sat_tier": "Tier 1 High-Yield"
+      "mnemonic": "Think 'cognition' (mental processing) or 'diagnosis' (knowing through symptoms)"
     },
     "words": [
       {
@@ -2452,9 +2424,7 @@
       "morpheme": "sci",
       "language": "Latin",
       "core_meaning": "to know, understand",
-      "mnemonic": "Think 'science' (knowledge) or 'conscious' (knowing within)",
-      "thematic_cluster": "Cognition",
-      "sat_tier": "Tier 1 High-Yield"
+      "mnemonic": "Think 'science' (knowledge) or 'conscious' (knowing within)"
     },
     "words": [
       {
@@ -2520,9 +2490,7 @@
       "morpheme": "spec / spic",
       "language": "Latin",
       "core_meaning": "to look, see, watch",
-      "mnemonic": "Think 'spectator' (one who looks) or 'inspect' (look into)",
-      "thematic_cluster": "Cognition",
-      "sat_tier": "Tier 1 High-Yield"
+      "mnemonic": "Think 'spectator' (one who looks) or 'inspect' (look into)"
     },
     "words": [
       {
@@ -2588,9 +2556,7 @@
       "morpheme": "vid / vis",
       "language": "Latin",
       "core_meaning": "to see, look, perceive",
-      "mnemonic": "Think 'visible' (can be seen) or 'vision' (act of seeing)",
-      "thematic_cluster": "Cognition",
-      "sat_tier": "Tier 1 High-Yield"
+      "mnemonic": "Think 'visible' (can be seen) or 'vision' (act of seeing)"
     },
     "words": [
       {
@@ -2656,9 +2622,7 @@
       "morpheme": "sent / sens",
       "language": "Latin",
       "core_meaning": "to feel, perceive, think",
-      "mnemonic": "Think 'sentiment' (feeling) or 'sensation' (perception)",
-      "thematic_cluster": "Cognition",
-      "sat_tier": "Tier 1 High-Yield"
+      "mnemonic": "Think 'sentiment' (feeling) or 'sensation' (perception)"
     },
     "words": [
       {
@@ -2724,9 +2688,7 @@
       "morpheme": "path",
       "language": "Greek",
       "core_meaning": "feeling, suffering, emotion, disease",
-      "mnemonic": "Think 'sympathy' (feeling with) or 'pathology' (study of suffering/disease)",
-      "thematic_cluster": "Emotion",
-      "sat_tier": "Tier 1 High-Yield"
+      "mnemonic": "Think 'sympathy' (feeling with) or 'pathology' (study of suffering/disease)"
     },
     "words": [
       {
@@ -2792,9 +2754,7 @@
       "morpheme": "anim",
       "language": "Latin",
       "core_meaning": "mind, soul, breath, spirit",
-      "mnemonic": "Think 'animate' (breathe life into) or 'unanimous' (one mind)",
-      "thematic_cluster": "Emotion",
-      "sat_tier": "Tier 1 High-Yield"
+      "mnemonic": "Think 'animate' (breathe life into) or 'unanimous' (one mind)"
     },
     "words": [
       {
@@ -2860,9 +2820,7 @@
       "morpheme": "mem / mne",
       "language": "Latin / Greek",
       "core_meaning": "memory, mindful, remembering",
-      "mnemonic": "Think 'memory' or 'mnemonic' (memory aid device)",
-      "thematic_cluster": "Cognition",
-      "sat_tier": "Tier 2 Multipliers"
+      "mnemonic": "Think 'memory' or 'mnemonic' (memory aid device)"
     },
     "words": [
       {
@@ -2928,9 +2886,7 @@
       "morpheme": "loqu / loc",
       "language": "Latin",
       "core_meaning": "to speak, talk, converse",
-      "mnemonic": "Think 'eloquent' (speaking well) or 'loquacious' (talkative)",
-      "thematic_cluster": "Communication",
-      "sat_tier": "Tier 1 High-Yield"
+      "mnemonic": "Think 'eloquent' (speaking well) or 'loquacious' (talkative)"
     },
     "words": [
       {
@@ -2996,9 +2952,7 @@
       "morpheme": "voc / vok",
       "language": "Latin",
       "core_meaning": "voice, to call, summon",
-      "mnemonic": "Think 'vocal' (voice) or 'invoke' (call upon)",
-      "thematic_cluster": "Communication",
-      "sat_tier": "Tier 1 High-Yield"
+      "mnemonic": "Think 'vocal' (voice) or 'invoke' (call upon)"
     },
     "words": [
       {
@@ -3064,9 +3018,7 @@
       "morpheme": "dict",
       "language": "Latin",
       "core_meaning": "to say, speak, declare",
-      "mnemonic": "Think 'dictate' (say aloud) or 'predict' (say beforehand)",
-      "thematic_cluster": "Communication",
-      "sat_tier": "Tier 1 High-Yield"
+      "mnemonic": "Think 'dictate' (say aloud) or 'predict' (say beforehand)"
     },
     "words": [
       {
@@ -3132,9 +3084,7 @@
       "morpheme": "clam / claim",
       "language": "Latin",
       "core_meaning": "to shout, cry out, call",
-      "mnemonic": "Think 'clamor' (loud shout) or 'exclaim' (cry out)",
-      "thematic_cluster": "Communication",
-      "sat_tier": "Tier 2 Multipliers"
+      "mnemonic": "Think 'clamor' (loud shout) or 'exclaim' (cry out)"
     },
     "words": [
       {
@@ -3200,9 +3150,7 @@
       "morpheme": "phon",
       "language": "Greek",
       "core_meaning": "sound, voice, speech",
-      "mnemonic": "Think 'telephone' (distant sound) or 'phonics' (sounds of letters)",
-      "thematic_cluster": "Communication",
-      "sat_tier": "Tier 2 Multipliers"
+      "mnemonic": "Think 'telephone' (distant sound) or 'phonics' (sounds of letters)"
     },
     "words": [
       {
@@ -3268,9 +3216,7 @@
       "morpheme": "aud",
       "language": "Latin",
       "core_meaning": "to hear, listen",
-      "mnemonic": "Think 'audio' (sound you hear) or 'auditorium' (place for hearing)",
-      "thematic_cluster": "Communication",
-      "sat_tier": "Tier 1 High-Yield"
+      "mnemonic": "Think 'audio' (sound you hear) or 'auditorium' (place for hearing)"
     },
     "words": [
       {
@@ -3336,9 +3282,7 @@
       "morpheme": "tact / tang / ting",
       "language": "Latin",
       "core_meaning": "to touch, handle",
-      "mnemonic": "Think 'tangible' (touchable) or 'tactile' (felt by touch)",
-      "thematic_cluster": "Form & Nature",
-      "sat_tier": "Tier 2 Multipliers"
+      "mnemonic": "Think 'tangible' (touchable) or 'tactile' (felt by touch)"
     },
     "words": [
       {
@@ -3404,9 +3348,7 @@
       "morpheme": "sap / sag",
       "language": "Latin",
       "core_meaning": "to taste, perceive, be wise",
-      "mnemonic": "Think 'sage' (wise person) or 'sapient' (wise/perceptive)",
-      "thematic_cluster": "Cognition",
-      "sat_tier": "Tier 3 Advanced"
+      "mnemonic": "Think 'sage' (wise person) or 'sapient' (wise/perceptive)"
     },
     "words": [
       {
@@ -3472,9 +3414,7 @@
       "morpheme": "gust",
       "language": "Latin",
       "core_meaning": "taste, flavor, relish",
-      "mnemonic": "Think 'gusto' (enthusiastic relish) or 'disgust' (bad taste)",
-      "thematic_cluster": "Form & Nature",
-      "sat_tier": "Tier 3 Advanced"
+      "mnemonic": "Think 'gusto' (enthusiastic relish) or 'disgust' (bad taste)"
     },
     "words": [
       {
@@ -3540,9 +3480,7 @@
       "morpheme": "olfact / odor",
       "language": "Latin",
       "core_meaning": "smell, scent, fragrance",
-      "mnemonic": "Think 'olfactory' (sense of smell) or 'malodorous' (bad smelling)",
-      "thematic_cluster": "Form & Nature",
-      "sat_tier": "Tier 3 Advanced"
+      "mnemonic": "Think 'olfactory' (sense of smell) or 'malodorous' (bad smelling)"
     },
     "words": [
       {
@@ -3608,9 +3546,7 @@
       "morpheme": "luc / lum / lus",
       "language": "Latin",
       "core_meaning": "light, shine, clear, bright",
-      "mnemonic": "Think 'lucid' (clear as light) or 'illuminate' (light up)",
-      "thematic_cluster": "Form & Nature",
-      "sat_tier": "Tier 1 High-Yield"
+      "mnemonic": "Think 'lucid' (clear as light) or 'illuminate' (light up)"
     },
     "words": [
       {
@@ -3676,9 +3612,7 @@
       "morpheme": "umbr",
       "language": "Latin",
       "core_meaning": "shade, shadow, obscure",
-      "mnemonic": "Think 'umbrella' (little shadow) or 'umbrage' (shadow of offense)",
-      "thematic_cluster": "Form & Nature",
-      "sat_tier": "Tier 2 Multipliers"
+      "mnemonic": "Think 'umbrella' (little shadow) or 'umbrage' (shadow of offense)"
     },
     "words": [
       {
@@ -3744,9 +3678,7 @@
       "morpheme": "cand",
       "language": "Latin",
       "core_meaning": "white, glowing, pure, shining",
-      "mnemonic": "Think 'candle' (glowing light) or 'candor' (pure frankness)",
-      "thematic_cluster": "Form & Nature",
-      "sat_tier": "Tier 2 Multipliers"
+      "mnemonic": "Think 'candle' (glowing light) or 'candor' (pure frankness)"
     },
     "words": [
       {
@@ -3812,9 +3744,7 @@
       "morpheme": "cord / card",
       "language": "Latin / Greek",
       "core_meaning": "heart, mind, courage",
-      "mnemonic": "Think 'cardiac' (heart) or 'cordial' (from the heart)",
-      "thematic_cluster": "Emotion",
-      "sat_tier": "Tier 2 Multipliers"
+      "mnemonic": "Think 'cardiac' (heart) or 'cordial' (from the heart)"
     },
     "words": [
       {
@@ -3880,9 +3810,7 @@
       "morpheme": "cred",
       "language": "Latin",
       "core_meaning": "to believe, trust",
-      "mnemonic": "Think 'credible' (believable) or 'creed' (statement of belief)",
-      "thematic_cluster": "Law & Morality",
-      "sat_tier": "Tier 1 High-Yield"
+      "mnemonic": "Think 'credible' (believable) or 'creed' (statement of belief)"
     },
     "words": [
       {
@@ -3948,9 +3876,7 @@
       "morpheme": "fid",
       "language": "Latin",
       "core_meaning": "faith, trust, loyalty",
-      "mnemonic": "Think 'fidelity' (faithfulness) or 'confide' (trust with secrets)",
-      "thematic_cluster": "Law & Morality",
-      "sat_tier": "Tier 1 High-Yield"
+      "mnemonic": "Think 'fidelity' (faithfulness) or 'confide' (trust with secrets)"
     },
     "words": [
       {
@@ -4016,9 +3942,7 @@
       "morpheme": "fatu",
       "language": "Latin",
       "core_meaning": "foolish, silly, empty",
-      "mnemonic": "Think 'fatuous' (foolish/silly) or 'infatuation' (foolish obsession)",
-      "thematic_cluster": "Emotion",
-      "sat_tier": "Tier 3 Advanced"
+      "mnemonic": "Think 'fatuous' (foolish/silly) or 'infatuation' (foolish obsession)"
     },
     "words": [
       {
@@ -4084,9 +4008,7 @@
       "morpheme": "soph",
       "language": "Greek",
       "core_meaning": "wise, wisdom, knowledge",
-      "mnemonic": "Think 'philosophy' (love of wisdom) or 'sophisticated' (worldly wise)",
-      "thematic_cluster": "Cognition",
-      "sat_tier": "Tier 2 Multipliers"
+      "mnemonic": "Think 'philosophy' (love of wisdom) or 'sophisticated' (worldly wise)"
     },
     "words": [
       {
@@ -4152,9 +4074,7 @@
       "morpheme": "phil",
       "language": "Greek",
       "core_meaning": "love, friendship, affection",
-      "mnemonic": "Think 'philanthropy' (love of humanity) or 'philosophy' (love of wisdom)",
-      "thematic_cluster": "Emotion",
-      "sat_tier": "Tier 2 Multipliers"
+      "mnemonic": "Think 'philanthropy' (love of humanity) or 'philosophy' (love of wisdom)"
     },
     "words": [
       {
@@ -4220,9 +4140,7 @@
       "morpheme": "phob",
       "language": "Greek",
       "core_meaning": "fear, dread, terror, aversion",
-      "mnemonic": "Think 'phobia' (irrational fear) or 'claustrophobia' (fear of confined spaces)",
-      "thematic_cluster": "Emotion",
-      "sat_tier": "Tier 2 Multipliers"
+      "mnemonic": "Think 'phobia' (irrational fear) or 'claustrophobia' (fear of confined spaces)"
     },
     "words": [
       {
@@ -4288,9 +4206,7 @@
       "morpheme": "mania",
       "language": "Greek",
       "core_meaning": "madness, frenzy, obsessive passion",
-      "mnemonic": "Think 'maniac' (mad person) or 'megalomania' (obsession with power)",
-      "thematic_cluster": "Emotion",
-      "sat_tier": "Tier 3 Advanced"
+      "mnemonic": "Think 'maniac' (mad person) or 'megalomania' (obsession with power)"
     },
     "words": [
       {
@@ -4356,9 +4272,7 @@
       "morpheme": "psych",
       "language": "Greek",
       "core_meaning": "mind, soul, spirit, mental",
-      "mnemonic": "Think 'psychology' (study of mind) or 'psychic' (mental sensitivity)",
-      "thematic_cluster": "Cognition",
-      "sat_tier": "Tier 2 Multipliers"
+      "mnemonic": "Think 'psychology' (study of mind) or 'psychic' (mental sensitivity)"
     },
     "words": [
       {
@@ -4424,9 +4338,7 @@
       "morpheme": "dox / dog",
       "language": "Greek",
       "core_meaning": "opinion, belief, praise, teaching",
-      "mnemonic": "Think 'orthodox' (straight belief) or 'dogmatic' (rigid in opinion)",
-      "thematic_cluster": "Cognition",
-      "sat_tier": "Tier 2 Multipliers"
+      "mnemonic": "Think 'orthodox' (straight belief) or 'dogmatic' (rigid in opinion)"
     },
     "words": [
       {
@@ -4492,9 +4404,7 @@
       "morpheme": "crit / cris",
       "language": "Greek",
       "core_meaning": "judge, decide, separate",
-      "mnemonic": "Think 'critical' (judging carefully) or 'crisis' (decisive turning point)",
-      "thematic_cluster": "Cognition",
-      "sat_tier": "Tier 2 Multipliers"
+      "mnemonic": "Think 'critical' (judging carefully) or 'crisis' (decisive turning point)"
     },
     "words": [
       {
@@ -4560,9 +4470,7 @@
       "morpheme": "leg / lect / log",
       "language": "Greek / Latin",
       "core_meaning": "to read, gather, choose, speak",
-      "mnemonic": "Think 'legible' (readable) or 'dialogue' (speaking across)",
-      "thematic_cluster": "Communication",
-      "sat_tier": "Tier 2 Multipliers"
+      "mnemonic": "Think 'legible' (readable) or 'dialogue' (speaking across)"
     },
     "words": [
       {
@@ -4628,9 +4536,7 @@
       "morpheme": "nom / nym",
       "language": "Greek / Latin",
       "core_meaning": "name, word, term",
-      "mnemonic": "Think 'pseudonym' (false name) or 'synonym' (same name/meaning)",
-      "thematic_cluster": "Communication",
-      "sat_tier": "Tier 2 Multipliers"
+      "mnemonic": "Think 'pseudonym' (false name) or 'synonym' (same name/meaning)"
     },
     "words": [
       {
@@ -4696,9 +4602,7 @@
       "morpheme": "mon / monit",
       "language": "Latin",
       "core_meaning": "to warn, advise, remind",
-      "mnemonic": "Think 'admonish' (warn gently) or 'monitor' (watch and warn)",
-      "thematic_cluster": "Communication",
-      "sat_tier": "Tier 2 Multipliers"
+      "mnemonic": "Think 'admonish' (warn gently) or 'monitor' (watch and warn)"
     },
     "words": [
       {
@@ -4764,9 +4668,7 @@
       "morpheme": "bene / bon",
       "language": "Latin",
       "core_meaning": "good, well, favorable",
-      "mnemonic": "Think 'benefit' (good result) or 'benevolent' (wishing good)",
-      "thematic_cluster": "Law & Morality",
-      "sat_tier": "Tier 1 High-Yield"
+      "mnemonic": "Think 'benefit' (good result) or 'benevolent' (wishing good)"
     },
     "words": [
       {
@@ -4832,9 +4734,7 @@
       "morpheme": "mal / mis",
       "language": "Latin / Old French",
       "core_meaning": "bad, evil, wrong, ill",
-      "mnemonic": "Think 'malicious' (evil-minded) or 'mistake' (wrong step)",
-      "thematic_cluster": "Law & Morality",
-      "sat_tier": "Tier 1 High-Yield"
+      "mnemonic": "Think 'malicious' (evil-minded) or 'mistake' (wrong step)"
     },
     "words": [
       {
@@ -4900,9 +4800,7 @@
       "morpheme": "pac / peac",
       "language": "Latin",
       "core_meaning": "peace, calm, appease",
-      "mnemonic": "Think 'pacify' (make peaceful) or 'Pacific' (peaceful ocean)",
-      "thematic_cluster": "Law & Morality",
-      "sat_tier": "Tier 1 High-Yield"
+      "mnemonic": "Think 'pacify' (make peaceful) or 'Pacific' (peaceful ocean)"
     },
     "words": [
       {
@@ -4968,9 +4866,7 @@
       "morpheme": "pot / poss",
       "language": "Latin",
       "core_meaning": "powerful, able, master",
-      "mnemonic": "Think 'potent' (powerful) or 'omnipotent' (all-powerful)",
-      "thematic_cluster": "Power & Conflict",
-      "sat_tier": "Tier 1 High-Yield"
+      "mnemonic": "Think 'potent' (powerful) or 'omnipotent' (all-powerful)"
     },
     "words": [
       {
@@ -5036,9 +4932,7 @@
       "morpheme": "val / vail",
       "language": "Latin",
       "core_meaning": "strength, worth, health, to be strong",
-      "mnemonic": "Think 'valor' (strength of bravery) or 'prevail' (prove stronger)",
-      "thematic_cluster": "Power & Conflict",
-      "sat_tier": "Tier 1 High-Yield"
+      "mnemonic": "Think 'valor' (strength of bravery) or 'prevail' (prove stronger)"
     },
     "words": [
       {
@@ -5096,9 +4990,7 @@
       "morpheme": "mut",
       "language": "Latin",
       "core_meaning": "to change, alter, exchange",
-      "mnemonic": "Think 'mutate' (change form) or 'immutable' (unchangeable)",
-      "thematic_cluster": "Form & Nature",
-      "sat_tier": "Tier 1 High-Yield"
+      "mnemonic": "Think 'mutate' (change form) or 'immutable' (unchangeable)"
     },
     "words": [
       {
@@ -5164,9 +5056,7 @@
       "morpheme": "morph",
       "language": "Greek",
       "core_meaning": "form, shape, structure",
-      "mnemonic": "Think 'metamorphosis' (change of form) or 'amorphous' (shapeless)",
-      "thematic_cluster": "Form & Nature",
-      "sat_tier": "Tier 2 Multipliers"
+      "mnemonic": "Think 'metamorphosis' (change of form) or 'amorphous' (shapeless)"
     },
     "words": [
       {
@@ -5232,9 +5122,7 @@
       "morpheme": "gen",
       "language": "Latin / Greek",
       "core_meaning": "birth, origin, race, kind, generate",
-      "mnemonic": "Think 'genesis' (origin) or 'generate' (give birth to)",
-      "thematic_cluster": "Form & Nature",
-      "sat_tier": "Tier 1 High-Yield"
+      "mnemonic": "Think 'genesis' (origin) or 'generate' (give birth to)"
     },
     "words": [
       {
@@ -5300,9 +5188,7 @@
       "morpheme": "plic / plex / ply",
       "language": "Latin",
       "core_meaning": "to fold, bend, intertwine, weave",
-      "mnemonic": "Think 'complicate' (fold together) or 'duplicity' (two-folded deceit)",
-      "thematic_cluster": "Form & Nature",
-      "sat_tier": "Tier 1 High-Yield"
+      "mnemonic": "Think 'complicate' (fold together) or 'duplicity' (two-folded deceit)"
     },
     "words": [
       {
@@ -5368,9 +5254,7 @@
       "morpheme": "chron",
       "language": "Greek",
       "core_meaning": "time",
-      "mnemonic": "Think 'chronological' (in order of time) or 'chronic' (lasting over time)",
-      "thematic_cluster": "Quantity & Relation",
-      "sat_tier": "Tier 1 High-Yield"
+      "mnemonic": "Think 'chronological' (in order of time) or 'chronic' (lasting over time)"
     },
     "words": [
       {
@@ -5436,9 +5320,7 @@
       "morpheme": "temp / tempor",
       "language": "Latin",
       "core_meaning": "time, season, moderation, restraint",
-      "mnemonic": "Think 'temporary' (for a short time) or 'temperate' (moderate/restrained)",
-      "thematic_cluster": "Quantity & Relation",
-      "sat_tier": "Tier 2 Multipliers"
+      "mnemonic": "Think 'temporary' (for a short time) or 'temperate' (moderate/restrained)"
     },
     "words": [
       {
@@ -5504,9 +5386,7 @@
       "morpheme": "magn / maj",
       "language": "Latin",
       "core_meaning": "great, large, elevated",
-      "mnemonic": "Think 'magnify' (make large) or 'majestic' (grand/great)",
-      "thematic_cluster": "Quantity & Relation",
-      "sat_tier": "Tier 1 High-Yield"
+      "mnemonic": "Think 'magnify' (make large) or 'majestic' (grand/great)"
     },
     "words": [
       {
@@ -5572,9 +5452,7 @@
       "morpheme": "brev",
       "language": "Latin",
       "core_meaning": "short, brief",
-      "mnemonic": "Think 'brevity' (shortness) or 'abbreviate' (make shorter)",
-      "thematic_cluster": "Quantity & Relation",
-      "sat_tier": "Tier 1 High-Yield"
+      "mnemonic": "Think 'brevity' (shortness) or 'abbreviate' (make shorter)"
     },
     "words": [
       {
@@ -5640,9 +5518,7 @@
       "morpheme": "hyper",
       "language": "Greek",
       "core_meaning": "over, above, excessive, beyond",
-      "mnemonic": "Think 'hyperactive' (excessively active) or 'hyperbole' (overstatement)",
-      "thematic_cluster": "Quantity & Relation",
-      "sat_tier": "Tier 2 Multipliers"
+      "mnemonic": "Think 'hyperactive' (excessively active) or 'hyperbole' (overstatement)"
     },
     "words": [
       {
@@ -5700,9 +5576,7 @@
       "morpheme": "hypo",
       "language": "Greek",
       "core_meaning": "under, below, deficient",
-      "mnemonic": "Think 'hypothesis' (supposition placed under) or 'hypodermic' (under the skin)",
-      "thematic_cluster": "Quantity & Relation",
-      "sat_tier": "Tier 2 Multipliers"
+      "mnemonic": "Think 'hypothesis' (supposition placed under) or 'hypodermic' (under the skin)"
     },
     "words": [
       {
@@ -5760,9 +5634,7 @@
       "morpheme": "auto",
       "language": "Greek",
       "core_meaning": "self, same, one's own",
-      "mnemonic": "Think 'autonomy' (self-rule) or 'automatic' (self-moving)",
-      "thematic_cluster": "Quantity & Relation",
-      "sat_tier": "Tier 2 Multipliers"
+      "mnemonic": "Think 'autonomy' (self-rule) or 'automatic' (self-moving)"
     },
     "words": [
       {
@@ -5828,9 +5700,7 @@
       "morpheme": "anti / ant",
       "language": "Greek",
       "core_meaning": "against, opposite, counteracting",
-      "mnemonic": "Think 'antidote' (against poison) or 'antithesis' (opposite thesis)",
-      "thematic_cluster": "Quantity & Relation",
-      "sat_tier": "Tier 1 High-Yield"
+      "mnemonic": "Think 'antidote' (against poison) or 'antithesis' (opposite thesis)"
     },
     "words": [
       {
@@ -5880,9 +5750,7 @@
       "morpheme": "syn / sym",
       "language": "Greek",
       "core_meaning": "together, with, united",
-      "mnemonic": "Think 'synthesis' (putting together) or 'symphony' (sounding together)",
-      "thematic_cluster": "Quantity & Relation",
-      "sat_tier": "Tier 1 High-Yield"
+      "mnemonic": "Think 'synthesis' (putting together) or 'symphony' (sounding together)"
     },
     "words": [
       {
@@ -5940,9 +5808,7 @@
       "morpheme": "anthrop",
       "language": "Greek",
       "core_meaning": "human, mankind",
-      "mnemonic": "Think 'anthropology' (study of human cultures) or 'philanthropy' (love of humans)",
-      "thematic_cluster": "Quantity & Relation",
-      "sat_tier": "Tier 2 Multipliers"
+      "mnemonic": "Think 'anthropology' (study of human cultures) or 'philanthropy' (love of humans)"
     },
     "words": [
       {
@@ -5984,9 +5850,7 @@
       "morpheme": "jur / jud / just",
       "language": "Latin",
       "core_meaning": "law, swear, right, judge",
-      "mnemonic": "Think 'jury' (group sworn to judge) or 'judicious' (wise in judgment)",
-      "thematic_cluster": "Law & Morality",
-      "sat_tier": "Tier 1 High-Yield"
+      "mnemonic": "Think 'jury' (group sworn to judge) or 'judicious' (wise in judgment)"
     },
     "words": [
       {
@@ -6052,9 +5916,7 @@
       "morpheme": "ver / veri",
       "language": "Latin",
       "core_meaning": "true, truth",
-      "mnemonic": "Think 'verify' (prove true) or 'veracity' (truthfulness)",
-      "thematic_cluster": "Law & Morality",
-      "sat_tier": "Tier 1 High-Yield"
+      "mnemonic": "Think 'verify' (prove true) or 'veracity' (truthfulness)"
     },
     "words": [
       {
@@ -6112,9 +5974,7 @@
       "morpheme": "rect",
       "language": "Latin",
       "core_meaning": "straight, right, upright, rule",
-      "mnemonic": "Think 'rectify' (make right) or 'rectitude' (upright morality)",
-      "thematic_cluster": "Law & Morality",
-      "sat_tier": "Tier 1 High-Yield"
+      "mnemonic": "Think 'rectify' (make right) or 'rectitude' (upright morality)"
     },
     "words": [
       {
@@ -6180,9 +6040,7 @@
       "morpheme": "aequ / equi",
       "language": "Latin",
       "core_meaning": "equal, even, fair, level",
-      "mnemonic": "Think 'equilibrium' (equal balance) or 'equitable' (fair and equal)",
-      "thematic_cluster": "Law & Morality",
-      "sat_tier": "Tier 1 High-Yield"
+      "mnemonic": "Think 'equilibrium' (equal balance) or 'equitable' (fair and equal)"
     },
     "words": [
       {
@@ -6232,9 +6090,7 @@
       "morpheme": "grav / griev",
       "language": "Latin",
       "core_meaning": "heavy, serious, weighty, burdened",
-      "mnemonic": "Think 'gravity' (heaviness/weight) or 'aggravate' (make heavier/worse)",
-      "thematic_cluster": "Quantity & Relation",
-      "sat_tier": "Tier 2 Multipliers"
+      "mnemonic": "Think 'gravity' (heaviness/weight) or 'aggravate' (make heavier/worse)"
     },
     "words": [
       {
@@ -6300,9 +6156,7 @@
       "morpheme": "lev",
       "language": "Latin",
       "core_meaning": "light, to lift, raise, rise",
-      "mnemonic": "Think 'levitate' (rise lightly) or 'alleviate' (lighten pain)",
-      "thematic_cluster": "Quantity & Relation",
-      "sat_tier": "Tier 2 Multipliers"
+      "mnemonic": "Think 'levitate' (rise lightly) or 'alleviate' (lighten pain)"
     },
     "words": [
       {
@@ -6368,9 +6222,7 @@
       "morpheme": "plen / plet",
       "language": "Latin",
       "core_meaning": "full, abundance, to fill",
-      "mnemonic": "Think 'plenty' (abundance) or 'replenish' (fill again)",
-      "thematic_cluster": "Quantity & Relation",
-      "sat_tier": "Tier 2 Multipliers"
+      "mnemonic": "Think 'plenty' (abundance) or 'replenish' (fill again)"
     },
     "words": [
       {
@@ -6436,9 +6288,7 @@
       "morpheme": "vac / van / void",
       "language": "Latin",
       "core_meaning": "empty, hollow, unoccupied",
-      "mnemonic": "Think 'vacant' (empty) or 'devoid' (completely empty)",
-      "thematic_cluster": "Quantity & Relation",
-      "sat_tier": "Tier 2 Multipliers"
+      "mnemonic": "Think 'vacant' (empty) or 'devoid' (completely empty)"
     },
     "words": [
       {
@@ -6504,9 +6354,7 @@
       "morpheme": "nov / neo",
       "language": "Latin / Greek",
       "core_meaning": "new, fresh, recent",
-      "mnemonic": "Think 'novel' (new/fresh) or 'neophyte' (new beginner)",
-      "thematic_cluster": "Quantity & Relation",
-      "sat_tier": "Tier 1 High-Yield"
+      "mnemonic": "Think 'novel' (new/fresh) or 'neophyte' (new beginner)"
     },
     "words": [
       {
@@ -6572,9 +6420,7 @@
       "morpheme": "prim / proto",
       "language": "Latin / Greek",
       "core_meaning": "first, earliest, primary, original",
-      "mnemonic": "Think 'primary' (first) or 'prototype' (first model)",
-      "thematic_cluster": "Quantity & Relation",
-      "sat_tier": "Tier 2 Multipliers"
+      "mnemonic": "Think 'primary' (first) or 'prototype' (first model)"
     },
     "words": [
       {
@@ -6632,9 +6478,7 @@
       "morpheme": "omni",
       "language": "Latin",
       "core_meaning": "all, every, everywhere",
-      "mnemonic": "Think 'omniscient' (all-knowing) or 'omnipresent' (everywhere present)",
-      "thematic_cluster": "Quantity & Relation",
-      "sat_tier": "Tier 2 Multipliers"
+      "mnemonic": "Think 'omniscient' (all-knowing) or 'omnipresent' (everywhere present)"
     },
     "words": [
       {
@@ -6684,9 +6528,7 @@
       "morpheme": "pan",
       "language": "Greek",
       "core_meaning": "all, whole, entire, universal",
-      "mnemonic": "Think 'panacea' (cure for all) or 'panorama' (view of all)",
-      "thematic_cluster": "Quantity & Relation",
-      "sat_tier": "Tier 2 Multipliers"
+      "mnemonic": "Think 'panacea' (cure for all) or 'panorama' (view of all)"
     },
     "words": [
       {
@@ -6752,9 +6594,7 @@
       "morpheme": "arch / archi",
       "language": "Greek",
       "core_meaning": "chief, ruler, origin, ancient",
-      "mnemonic": "Think 'monarch' (sole ruler) or 'archaic' (ancient origin)",
-      "thematic_cluster": "Power & Conflict",
-      "sat_tier": "Tier 2 Multipliers"
+      "mnemonic": "Think 'monarch' (sole ruler) or 'archaic' (ancient origin)"
     },
     "words": [
       {
@@ -6820,9 +6660,7 @@
       "morpheme": "crat / cracy",
       "language": "Greek",
       "core_meaning": "rule, power, governance, strength",
-      "mnemonic": "Think 'democracy' (rule of the people) or 'autocrat' (self-ruler)",
-      "thematic_cluster": "Power & Conflict",
-      "sat_tier": "Tier 2 Multipliers"
+      "mnemonic": "Think 'democracy' (rule of the people) or 'autocrat' (self-ruler)"
     },
     "words": [
       {
@@ -6880,9 +6718,7 @@
       "morpheme": "dem / demo",
       "language": "Greek",
       "core_meaning": "people, populace, common folk",
-      "mnemonic": "Think 'democracy' (people power) or 'demographic' (study of human populations)",
-      "thematic_cluster": "Quantity & Relation",
-      "sat_tier": "Tier 2 Multipliers"
+      "mnemonic": "Think 'democracy' (people power) or 'demographic' (study of human populations)"
     },
     "words": [
       {
@@ -6940,9 +6776,7 @@
       "morpheme": "dur",
       "language": "Latin",
       "core_meaning": "hard, strong, lasting, to endure",
-      "mnemonic": "Think 'durable' (lasting/hard) or 'endure' (bear through hardships)",
-      "thematic_cluster": "Power & Conflict",
-      "sat_tier": "Tier 2 Multipliers"
+      "mnemonic": "Think 'durable' (lasting/hard) or 'endure' (bear through hardships)"
     },
     "words": [
       {
@@ -7008,9 +6842,7 @@
       "morpheme": "cap / cept / cip",
       "language": "Latin",
       "core_meaning": "to take, seize, hold, catch",
-      "mnemonic": "Think 'capture' (seize by force) or 'intercept' (catch in transit)",
-      "thematic_cluster": "Power & Conflict",
-      "sat_tier": "Tier 1 High-Yield"
+      "mnemonic": "Think 'capture' (seize by force) or 'intercept' (catch in transit)"
     },
     "words": [
       {
@@ -7111,9 +6943,7 @@
       "morpheme": "scrib / script",
       "language": "Latin",
       "core_meaning": "to write, record, draw",
-      "mnemonic": "Think 'inscribe' (carve or write into) or 'manuscript' (written document)",
-      "thematic_cluster": "Communication",
-      "sat_tier": "Tier 1 High-Yield"
+      "mnemonic": "Think 'inscribe' (carve or write into) or 'manuscript' (written document)"
     },
     "words": [
       {
@@ -7214,9 +7044,7 @@
       "morpheme": "vinc / vict",
       "language": "Latin",
       "core_meaning": "to conquer, overcome, win",
-      "mnemonic": "Think 'victory' (triumph) or 'invincible' (incapable of being defeated)",
-      "thematic_cluster": "Power & Conflict",
-      "sat_tier": "Tier 2 Multipliers"
+      "mnemonic": "Think 'victory' (triumph) or 'invincible' (incapable of being defeated)"
     },
     "words": [
       {
@@ -7317,9 +7145,7 @@
       "morpheme": "duc / duct",
       "language": "Latin",
       "core_meaning": "to lead, guide, bring",
-      "mnemonic": "Think 'conduct' (lead along) or 'induce' (lead into a state)",
-      "thematic_cluster": "Movement",
-      "sat_tier": "Tier 1 High-Yield"
+      "mnemonic": "Think 'conduct' (lead along) or 'induce' (lead into a state)"
     },
     "words": [
       {
@@ -7420,9 +7246,7 @@
       "morpheme": "pon / pos / posit",
       "language": "Latin",
       "core_meaning": "to place, put, set",
-      "mnemonic": "Think 'deposit' (put down) or 'posture' (manner of placing oneself)",
-      "thematic_cluster": "Quantity & Relation",
-      "sat_tier": "Tier 1 High-Yield"
+      "mnemonic": "Think 'deposit' (put down) or 'posture' (manner of placing oneself)"
     },
     "words": [
       {
@@ -7523,9 +7347,7 @@
       "morpheme": "ten / tin / tain",
       "language": "Latin",
       "core_meaning": "to hold, keep, maintain",
-      "mnemonic": "Think 'tenant' (one who holds property) or 'tenacious' (holding firmly)",
-      "thematic_cluster": "Quantity & Relation",
-      "sat_tier": "Tier 1 High-Yield"
+      "mnemonic": "Think 'tenant' (one who holds property) or 'tenacious' (holding firmly)"
     },
     "words": [
       {
@@ -7626,9 +7448,7 @@
       "morpheme": "doc / doct",
       "language": "Latin",
       "core_meaning": "to teach, instruct, prove",
-      "mnemonic": "Think 'doctor' (originally one qualified to teach) or 'indoctrinate' (teach beliefs)",
-      "thematic_cluster": "Cognition",
-      "sat_tier": "Tier 2 Multipliers"
+      "mnemonic": "Think 'doctor' (originally one qualified to teach) or 'indoctrinate' (teach beliefs)"
     },
     "words": [
       {
@@ -7729,9 +7549,7 @@
       "morpheme": "sed / sid / sess",
       "language": "Latin",
       "core_meaning": "to sit, settle, reside",
-      "mnemonic": "Think 'sedentary' (sitting still) or 'president' (one who sits before and leads)",
-      "thematic_cluster": "Quantity & Relation",
-      "sat_tier": "Tier 2 Multipliers"
+      "mnemonic": "Think 'sedentary' (sitting still) or 'president' (one who sits before and leads)"
     },
     "words": [
       {
@@ -7832,9 +7650,7 @@
       "morpheme": "greg",
       "language": "Latin",
       "core_meaning": "flock, herd, gather",
-      "mnemonic": "Think 'congregate' (gather into a flock) or 'gregarious' (flocking in social groups)",
-      "thematic_cluster": "Quantity & Relation",
-      "sat_tier": "Tier 2 Multipliers"
+      "mnemonic": "Think 'congregate' (gather into a flock) or 'gregarious' (flocking in social groups)"
     },
     "words": [
       {
@@ -7935,9 +7751,7 @@
       "morpheme": "theo / the",
       "language": "Greek",
       "core_meaning": "god, deity, divine",
-      "mnemonic": "Think 'theology' (study of religion/god) or 'monotheism' (one god)",
-      "thematic_cluster": "Law & Morality",
-      "sat_tier": "Tier 2 Multipliers"
+      "mnemonic": "Think 'theology' (study of religion/god) or 'monotheism' (one god)"
     },
     "words": [
       {
@@ -8051,9 +7865,7 @@
       "morpheme": "clud / clus / claus",
       "language": "Latin",
       "core_meaning": "to shut, close",
-      "mnemonic": "Think 'exclude' (shut out) or 'conclude' (close together)",
-      "thematic_cluster": "Quantity & Relation",
-      "sat_tier": "Tier 1 High-Yield"
+      "mnemonic": "Think 'exclude' (shut out) or 'conclude' (close together)"
     },
     "words": [
       {
@@ -8154,9 +7966,7 @@
       "morpheme": "fac / fec / fic / fect",
       "language": "Latin",
       "core_meaning": "to make, do, produce",
-      "mnemonic": "Think 'factory' (place of making) or 'efficient' (doing thoroughly)",
-      "thematic_cluster": "Form & Nature",
-      "sat_tier": "Tier 1 High-Yield"
+      "mnemonic": "Think 'factory' (place of making) or 'efficient' (doing thoroughly)"
     },
     "words": [
       {
@@ -8257,9 +8067,7 @@
       "morpheme": "mor / mort",
       "language": "Latin",
       "core_meaning": "death, dead, dying",
-      "mnemonic": "Think 'mortal' (subject to death) or 'mortician' (undertaker)",
-      "thematic_cluster": "Form & Nature",
-      "sat_tier": "Tier 2 Multipliers"
+      "mnemonic": "Think 'mortal' (subject to death) or 'mortician' (undertaker)"
     },
     "words": [
       {
@@ -8360,9 +8168,7 @@
       "morpheme": "plac / placat",
       "language": "Latin",
       "core_meaning": "to please, calm, appease",
-      "mnemonic": "Think 'placate' (calm down) or 'placid' (peaceful and calm)",
-      "thematic_cluster": "Emotion",
-      "sat_tier": "Tier 1 High-Yield"
+      "mnemonic": "Think 'placate' (calm down) or 'placid' (peaceful and calm)"
     },
     "words": [
       {
@@ -8463,9 +8269,7 @@
       "morpheme": "am / amat / amor",
       "language": "Latin",
       "core_meaning": "love, affection, friendship",
-      "mnemonic": "Think 'amorous' (loving) or 'amiable' (friendly and warm)",
-      "thematic_cluster": "Emotion",
-      "sat_tier": "Tier 2 Multipliers"
+      "mnemonic": "Think 'amorous' (loving) or 'amiable' (friendly and warm)"
     },
     "words": [
       {
@@ -8566,9 +8370,7 @@
       "morpheme": "grat / grac",
       "language": "Latin",
       "core_meaning": "thankful, pleasing, favor",
-      "mnemonic": "Think 'gratitude' (thankfulness) or 'gratify' (give pleasure)",
-      "thematic_cluster": "Emotion",
-      "sat_tier": "Tier 2 Multipliers"
+      "mnemonic": "Think 'gratitude' (thankfulness) or 'gratify' (give pleasure)"
     },
     "words": [
       {
@@ -8669,9 +8471,7 @@
       "morpheme": "corp / corpor",
       "language": "Latin",
       "core_meaning": "body, flesh, physical substance",
-      "mnemonic": "Think 'corpse' (dead body) or 'corporation' (a legally formed body)",
-      "thematic_cluster": "Form & Nature",
-      "sat_tier": "Tier 2 Multipliers"
+      "mnemonic": "Think 'corpse' (dead body) or 'corporation' (a legally formed body)"
     },
     "words": [
       {
@@ -8772,9 +8572,7 @@
       "morpheme": "vor / vour",
       "language": "Latin",
       "core_meaning": "to eat, swallow, devour",
-      "mnemonic": "Think 'voracious' (eating greedily) or 'devour' (swallow down greedily)",
-      "thematic_cluster": "Form & Nature",
-      "sat_tier": "Tier 3 Advanced"
+      "mnemonic": "Think 'voracious' (eating greedily) or 'devour' (swallow down greedily)"
     },
     "words": [
       {
@@ -8875,9 +8673,7 @@
       "morpheme": "ambul",
       "language": "Latin",
       "core_meaning": "to walk, move about, wander",
-      "mnemonic": "Think 'ambulatory' (able to walk) or 'preamble' (walking before to introduce)",
-      "thematic_cluster": "Movement",
-      "sat_tier": "Tier 3 Advanced"
+      "mnemonic": "Think 'ambulatory' (able to walk) or 'preamble' (walking before to introduce)"
     },
     "words": [
       {
@@ -8978,9 +8774,7 @@
       "morpheme": "crypt / cryph",
       "language": "Greek",
       "core_meaning": "hidden, secret, concealed",
-      "mnemonic": "Think 'cryptic' (having hidden meaning) or 'encrypt' (hide with code)",
-      "thematic_cluster": "Cognition",
-      "sat_tier": "Tier 2 Multipliers"
+      "mnemonic": "Think 'cryptic' (having hidden meaning) or 'encrypt' (hide with code)"
     },
     "words": [
       {
@@ -9081,9 +8875,7 @@
       "morpheme": "acri / acr / acer",
       "language": "Latin",
       "core_meaning": "sharp, bitter, sour, stinging",
-      "mnemonic": "Think 'acrid' (stinging bitter smell) or 'acerbic' (sharp sour tone)",
-      "thematic_cluster": "Form & Nature",
-      "sat_tier": "Tier 3 Advanced"
+      "mnemonic": "Think 'acrid' (stinging bitter smell) or 'acerbic' (sharp sour tone)"
     },
     "words": [
       {
@@ -9184,9 +8976,7 @@
       "morpheme": "fall / fals",
       "language": "Latin",
       "core_meaning": "to deceive, trick, err",
-      "mnemonic": "Think 'fallacy' (deceptive mistaken belief) or 'falsify' (alter deceptively)",
-      "thematic_cluster": "Cognition",
-      "sat_tier": "Tier 1 High-Yield"
+      "mnemonic": "Think 'fallacy' (deceptive mistaken belief) or 'falsify' (alter deceptively)"
     },
     "words": [
       {
@@ -9287,9 +9077,7 @@
       "morpheme": "quer / quest / quir / quis",
       "language": "Latin",
       "core_meaning": "to seek, ask, inquire",
-      "mnemonic": "Think 'inquire' (ask into) or 'quest' (search or journey of seeking)",
-      "thematic_cluster": "Cognition",
-      "sat_tier": "Tier 1 High-Yield"
+      "mnemonic": "Think 'inquire' (ask into) or 'quest' (search or journey of seeking)"
     },
     "words": [
       {
@@ -9390,9 +9178,7 @@
       "morpheme": "pung / punct",
       "language": "Latin",
       "core_meaning": "to prick, pierce, point, sting",
-      "mnemonic": "Think 'puncture' (pierce a hole) or 'punctual' (right on the sharp point of time)",
-      "thematic_cluster": "Form & Nature",
-      "sat_tier": "Tier 3 Advanced"
+      "mnemonic": "Think 'puncture' (pierce a hole) or 'punctual' (right on the sharp point of time)"
     },
     "words": [
       {
@@ -9493,9 +9279,7 @@
       "morpheme": "tac / tic",
       "language": "Latin",
       "core_meaning": "silent, quiet",
-      "mnemonic": "Think 'tacit' (unspoken agreement) or 'taciturn' (habitually silent)",
-      "thematic_cluster": "Communication",
-      "sat_tier": "Tier 3 Advanced"
+      "mnemonic": "Think 'tacit' (unspoken agreement) or 'taciturn' (habitually silent)"
     },
     "words": [
       {
@@ -9596,9 +9380,7 @@
       "morpheme": "prob / prov",
       "language": "Latin",
       "core_meaning": "to prove, test, upright, good",
-      "mnemonic": "Think 'probity' (proven integrity) or 'approbation' (proven praise)",
-      "thematic_cluster": "Cognition",
-      "sat_tier": "Tier 2 Multipliers"
+      "mnemonic": "Think 'probity' (proven integrity) or 'approbation' (proven praise)"
     },
     "words": [
       {
@@ -9699,9 +9481,7 @@
       "morpheme": "turb",
       "language": "Latin",
       "core_meaning": "confusion, disturbance, turmoil, whirl",
-      "mnemonic": "Think 'turbulent' (stormy turmoil) or 'perturb' (disturb deeply)",
-      "thematic_cluster": "Power & Conflict",
-      "sat_tier": "Tier 2 Multipliers"
+      "mnemonic": "Think 'turbulent' (stormy turmoil) or 'perturb' (disturb deeply)"
     },
     "words": [
       {
@@ -9802,9 +9582,7 @@
       "morpheme": "ann / enn",
       "language": "Latin",
       "core_meaning": "year",
-      "mnemonic": "Think 'annual' (occurring yearly) or 'perennial' (lasting through the years)",
-      "thematic_cluster": "Quantity & Relation",
-      "sat_tier": "Tier 2 Multipliers"
+      "mnemonic": "Think 'annual' (occurring yearly) or 'perennial' (lasting through the years)"
     },
     "words": [
       {
@@ -9905,9 +9683,7 @@
       "morpheme": "poly",
       "language": "Greek",
       "core_meaning": "many, multiple, much",
-      "mnemonic": "Think 'polyglot' (speaking many languages) or 'polygon' (figure with many angles)",
-      "thematic_cluster": "Quantity & Relation",
-      "sat_tier": "Tier 2 Multipliers"
+      "mnemonic": "Think 'polyglot' (speaking many languages) or 'polygon' (figure with many angles)"
     },
     "words": [
       {
@@ -10008,9 +9784,7 @@
       "morpheme": "bio",
       "language": "Greek",
       "core_meaning": "life, living organisms",
-      "mnemonic": "Think 'biology' (study of living things) or 'biodiversity' (variety of life)",
-      "thematic_cluster": "Form & Nature",
-      "sat_tier": "Tier 2 Multipliers"
+      "mnemonic": "Think 'biology' (study of living things) or 'biodiversity' (variety of life)"
     },
     "words": [
       {
@@ -10111,9 +9885,7 @@
       "morpheme": "culp",
       "language": "Latin",
       "core_meaning": "blame, fault, guilt",
-      "mnemonic": "Think 'culprit' (one who committed the fault) or 'exculpate' (free from blame)",
-      "thematic_cluster": "Law & Morality",
-      "sat_tier": "Tier 2 Multipliers"
+      "mnemonic": "Think 'culprit' (one who committed the fault) or 'exculpate' (free from blame)"
     },
     "words": [
       {
@@ -10214,9 +9986,7 @@
       "morpheme": "noc / noxi / noce",
       "language": "Latin",
       "core_meaning": "harm, hurt, injure",
-      "mnemonic": "Think 'innocuous' (doing no harm) or 'noxious' (harmful/poisonous)",
-      "thematic_cluster": "Law & Morality",
-      "sat_tier": "Tier 3 Advanced"
+      "mnemonic": "Think 'innocuous' (doing no harm) or 'noxious' (harmful/poisonous)"
     },
     "words": [
       {
@@ -10317,9 +10087,7 @@
       "morpheme": "oner / onus",
       "language": "Latin",
       "core_meaning": "burden, load, duty",
-      "mnemonic": "Think 'onerous' (burdensome) or 'onus' (burden of responsibility)",
-      "thematic_cluster": "Quantity & Relation",
-      "sat_tier": "Tier 3 Advanced"
+      "mnemonic": "Think 'onerous' (burdensome) or 'onus' (burden of responsibility)"
     },
     "words": [
       {
@@ -10420,9 +10188,7 @@
       "morpheme": "flect / flex",
       "language": "Latin",
       "core_meaning": "to bend, curve",
-      "mnemonic": "Think 'deflect' (bend away from) or 'flexible' (able to bend easily)",
-      "thematic_cluster": "Form & Nature",
-      "sat_tier": "Tier 3 Advanced"
+      "mnemonic": "Think 'deflect' (bend away from) or 'flexible' (able to bend easily)"
     },
     "words": [
       {
@@ -10523,9 +10289,7 @@
       "morpheme": "son",
       "language": "Latin",
       "core_meaning": "sound",
-      "mnemonic": "Think 'sonorous' (deep, rich sound) or 'dissonant' (harsh conflicting sound)",
-      "thematic_cluster": "Communication",
-      "sat_tier": "Tier 3 Advanced"
+      "mnemonic": "Think 'sonorous' (deep, rich sound) or 'dissonant' (harsh conflicting sound)"
     },
     "words": [
       {
@@ -10626,9 +10390,7 @@
       "morpheme": "pecc",
       "language": "Latin",
       "core_meaning": "sin, fault, stumble, err",
-      "mnemonic": "Think 'impeccable' (flawless, without fault) or 'peccadillo' (minor fault/peccancy)",
-      "thematic_cluster": "Law & Morality",
-      "sat_tier": "Tier 3 Advanced"
+      "mnemonic": "Think 'impeccable' (flawless, without fault) or 'peccadillo' (minor fault/peccancy)"
     },
     "words": [
       {
@@ -10729,9 +10491,7 @@
       "morpheme": "pass / pati",
       "language": "Latin",
       "core_meaning": "to suffer, endure, feel, allow",
-      "mnemonic": "Think 'compassion' (suffering/feeling with) or 'impassive' (enduring without emotion)",
-      "thematic_cluster": "Emotion",
-      "sat_tier": "Tier 3 Advanced"
+      "mnemonic": "Think 'compassion' (suffering/feeling with) or 'impassive' (enduring without emotion)"
     },
     "words": [
       {
@@ -10832,9 +10592,7 @@
       "morpheme": "ferv",
       "language": "Latin",
       "core_meaning": "to boil, glow, burn with zeal",
-      "mnemonic": "Think 'fervent' (burning with passion) or 'effervescent' (bubbling over with vitality)",
-      "thematic_cluster": "Emotion",
-      "sat_tier": "Tier 3 Advanced"
+      "mnemonic": "Think 'fervent' (burning with passion) or 'effervescent' (bubbling over with vitality)"
     },
     "words": [
       {
@@ -10935,9 +10693,7 @@
       "morpheme": "di / dia",
       "language": "Greek",
       "core_meaning": "through, across, between",
-      "mnemonic": "Think 'diameter' (measuring across) or 'diaphanous' (translucent, light shining through)",
-      "thematic_cluster": "Quantity & Relation",
-      "sat_tier": "Tier 3 Advanced"
+      "mnemonic": "Think 'diameter' (measuring across) or 'diaphanous' (translucent, light shining through)"
     },
     "words": [
       {
@@ -11038,9 +10794,7 @@
       "morpheme": "torp",
       "language": "Latin",
       "core_meaning": "numb, sluggish, inactive, dull",
-      "mnemonic": "Think 'torpid' (sluggish/inactive) or 'torpor' (state of dormant lethargy)",
-      "thematic_cluster": "Emotion",
-      "sat_tier": "Tier 3 Advanced"
+      "mnemonic": "Think 'torpid' (sluggish/inactive) or 'torpor' (state of dormant lethargy)"
     },
     "words": [
       {
@@ -11141,9 +10895,7 @@
       "morpheme": "sanct / sacr",
       "language": "Latin",
       "core_meaning": "sacred, holy, solemnly decree",
-      "mnemonic": "Think 'sanctuary' (sacred refuge) or 'sacrosanct' (too holy to be violated)",
-      "thematic_cluster": "Law & Morality",
-      "sat_tier": "Tier 3 Advanced"
+      "mnemonic": "Think 'sanctuary' (sacred refuge) or 'sacrosanct' (too holy to be violated)"
     },
     "words": [
       {
@@ -11244,9 +10996,7 @@
       "morpheme": "mit / miti",
       "language": "Latin",
       "core_meaning": "mild, soft, gentle, calm",
-      "mnemonic": "Think 'mitigate' (make milder or less severe) or 'unmitigated' (pure/not softened)",
-      "thematic_cluster": "Law & Morality",
-      "sat_tier": "Tier 3 Advanced"
+      "mnemonic": "Think 'mitigate' (make milder or less severe) or 'unmitigated' (pure/not softened)"
     },
     "words": [
       {
@@ -11347,9 +11097,7 @@
       "morpheme": "trep",
       "language": "Latin",
       "core_meaning": "tremble, shake, fear, alarm",
-      "mnemonic": "Think 'trepidation' (trembling fear) or 'intrepid' (without trembling/fearless)",
-      "thematic_cluster": "Emotion",
-      "sat_tier": "Tier 3 Advanced"
+      "mnemonic": "Think 'trepidation' (trembling fear) or 'intrepid' (without trembling/fearless)"
     },
     "words": [
       {
@@ -11450,9 +11198,7 @@
       "morpheme": "mend",
       "language": "Latin",
       "core_meaning": "fault, flaw, defect, lie",
-      "mnemonic": "Think 'mendacious' (habitually dishonest) or 'emend' (correct defects in a text)",
-      "thematic_cluster": "Law & Morality",
-      "sat_tier": "Tier 3 Advanced"
+      "mnemonic": "Think 'mendacious' (habitually dishonest) or 'emend' (correct defects in a text)"
     },
     "words": [
       {
@@ -11553,9 +11299,7 @@
       "morpheme": "pet / petit",
       "language": "Latin",
       "core_meaning": "to seek, rush at, strive for, aim",
-      "mnemonic": "Think 'impetuous' (rushing impulsively) or 'petulant' (peevishly aggressive)",
-      "thematic_cluster": "Movement",
-      "sat_tier": "Tier 3 Advanced"
+      "mnemonic": "Think 'impetuous' (rushing impulsively) or 'petulant' (peevishly aggressive)"
     },
     "words": [
       {
@@ -11656,9 +11400,7 @@
       "morpheme": "verb",
       "language": "Latin",
       "core_meaning": "word",
-      "mnemonic": "Think 'verbose' (too many words) or 'verbatim' (word for word)",
-      "thematic_cluster": "Communication",
-      "sat_tier": "Tier 3 Advanced"
+      "mnemonic": "Think 'verbose' (too many words) or 'verbatim' (word for word)"
     },
     "words": [
       {
@@ -11759,9 +11501,7 @@
       "morpheme": "lit / litig",
       "language": "Latin",
       "core_meaning": "dispute, lawsuit, contend, quarrel",
-      "mnemonic": "Think 'litigation' (legal court lawsuit) or 'litigious' (prone to arguing/suing)",
-      "thematic_cluster": "Power & Conflict",
-      "sat_tier": "Tier 3 Advanced"
+      "mnemonic": "Think 'litigation' (legal court lawsuit) or 'litigious' (prone to arguing/suing)"
     },
     "words": [
       {
@@ -11862,9 +11602,7 @@
       "morpheme": "man / manu",
       "language": "Latin",
       "core_meaning": "hand",
-      "mnemonic": "Think 'manipulate' (handle skillfully) or 'manumit' (release from the hand/free)",
-      "thematic_cluster": "Form & Nature",
-      "sat_tier": "Tier 3 Advanced"
+      "mnemonic": "Think 'manipulate' (handle skillfully) or 'manumit' (release from the hand/free)"
     },
     "words": [
       {
@@ -11965,9 +11703,7 @@
       "morpheme": "pyr / pyro",
       "language": "Greek",
       "core_meaning": "fire, heat",
-      "mnemonic": "Think 'pyrotechnics' (fireworks display) or 'pyre' (ceremonial fire)",
-      "thematic_cluster": "Form & Nature",
-      "sat_tier": "Tier 3 Advanced"
+      "mnemonic": "Think 'pyrotechnics' (fireworks display) or 'pyre' (ceremonial fire)"
     },
     "words": [
       {
@@ -12068,9 +11804,7 @@
       "morpheme": "dorm",
       "language": "Latin",
       "core_meaning": "sleep",
-      "mnemonic": "Think 'dormant' (sleeping/inactive) or 'dormitory' (sleeping hall)",
-      "thematic_cluster": "Form & Nature",
-      "sat_tier": "Tier 3 Advanced"
+      "mnemonic": "Think 'dormant' (sleeping/inactive) or 'dormitory' (sleeping hall)"
     },
     "words": [
       {
@@ -12171,9 +11905,7 @@
       "morpheme": "palp",
       "language": "Latin",
       "core_meaning": "to touch, stroke, feel gently",
-      "mnemonic": "Think 'palpable' (able to be touched/felt) or 'palpitate' (heart fluttering)",
-      "thematic_cluster": "Form & Nature",
-      "sat_tier": "Tier 3 Advanced"
+      "mnemonic": "Think 'palpable' (able to be touched/felt) or 'palpitate' (heart fluttering)"
     },
     "words": [
       {
@@ -12274,9 +12006,7 @@
       "morpheme": "quie / quit",
       "language": "Latin",
       "core_meaning": "quiet, rest, calm",
-      "mnemonic": "Think 'quiescent' (at quiet rest) or 'acquiesce' (quietly yield to)",
-      "thematic_cluster": "Form & Nature",
-      "sat_tier": "Tier 3 Advanced"
+      "mnemonic": "Think 'quiescent' (at quiet rest) or 'acquiesce' (quietly yield to)"
     },
     "words": [
       {
@@ -12377,9 +12107,7 @@
       "morpheme": "clar",
       "language": "Latin",
       "core_meaning": "clear, bright, loud",
-      "mnemonic": "Think 'clarity' (clearness of thought) or 'clarion' (clear, ringing trumpet call)",
-      "thematic_cluster": "Communication",
-      "sat_tier": "Tier 3 Advanced"
+      "mnemonic": "Think 'clarity' (clearness of thought) or 'clarion' (clear, ringing trumpet call)"
     },
     "words": [
       {
@@ -12480,9 +12208,7 @@
       "morpheme": "sinu",
       "language": "Latin",
       "core_meaning": "curve, winding, fold, bend",
-      "mnemonic": "Think 'sinuous' (full of winding curves) or 'insinuate' (wind deviously into)",
-      "thematic_cluster": "Form & Nature",
-      "sat_tier": "Tier 3 Advanced"
+      "mnemonic": "Think 'sinuous' (full of winding curves) or 'insinuate' (wind deviously into)"
     },
     "words": [
       {
@@ -12583,9 +12309,7 @@
       "morpheme": "sal / sil / sult",
       "language": "Latin",
       "core_meaning": "to leap, jump, spring forward",
-      "mnemonic": "Think 'salient' (leaping out/prominent) or 'resilient' (leaping back from adversity)",
-      "thematic_cluster": "Movement",
-      "sat_tier": "Tier 3 Advanced"
+      "mnemonic": "Think 'salient' (leaping out/prominent) or 'resilient' (leaping back from adversity)"
     },
     "words": [
       {
@@ -12686,9 +12410,7 @@
       "morpheme": "und / unda",
       "language": "Latin",
       "core_meaning": "wave, flow, overflow",
-      "mnemonic": "Think 'inundate' (overflow with waves/deluge) or 'undulate' (move with wave-like curves)",
-      "thematic_cluster": "Movement",
-      "sat_tier": "Tier 3 Advanced"
+      "mnemonic": "Think 'inundate' (overflow with waves/deluge) or 'undulate' (move with wave-like curves)"
     },
     "words": [
       {
@@ -12789,9 +12511,7 @@
       "morpheme": "fulg / flagr",
       "language": "Latin",
       "core_meaning": "shine, flash, blaze, burn",
-      "mnemonic": "Think 'refulgent' (shining radiantly) or 'conflagration' (destructive blaze)",
-      "thematic_cluster": "Form & Nature",
-      "sat_tier": "Tier 3 Advanced"
+      "mnemonic": "Think 'refulgent' (shining radiantly) or 'conflagration' (destructive blaze)"
     },
     "words": [
       {
@@ -12892,9 +12612,7 @@
       "morpheme": "moll",
       "language": "Latin",
       "core_meaning": "soft, supple, to soften",
-      "mnemonic": "Think 'mollify' (soften anger/soothe) or 'emollient' (skin-softening cream)",
-      "thematic_cluster": "Form & Nature",
-      "sat_tier": "Tier 3 Advanced"
+      "mnemonic": "Think 'mollify' (soften anger/soothe) or 'emollient' (skin-softening cream)"
     },
     "words": [
       {
@@ -12995,9 +12713,7 @@
       "morpheme": "av / avar",
       "language": "Latin",
       "core_meaning": "eager, craving, greedy",
-      "mnemonic": "Think 'avarice' (greed for wealth) or 'avid' (eagerly craving/keen)",
-      "thematic_cluster": "Emotion",
-      "sat_tier": "Tier 3 Advanced"
+      "mnemonic": "Think 'avarice' (greed for wealth) or 'avid' (eagerly craving/keen)"
     },
     "words": [
       {
@@ -13098,9 +12814,7 @@
       "morpheme": "vet / veter",
       "language": "Latin",
       "core_meaning": "old, seasoned, long-standing",
-      "mnemonic": "Think 'inveterate' (deep-rooted by long habit) or 'veteran' (experienced through years)",
-      "thematic_cluster": "Quantity & Relation",
-      "sat_tier": "Tier 3 Advanced"
+      "mnemonic": "Think 'inveterate' (deep-rooted by long habit) or 'veteran' (experienced through years)"
     },
     "words": [
       {
@@ -13201,9 +12915,7 @@
       "morpheme": "ard / ars",
       "language": "Latin",
       "core_meaning": "to burn, glow, passion",
-      "mnemonic": "Think 'ardent' (burning with passion) or 'arson' (deliberate burning)",
-      "thematic_cluster": "Emotion",
-      "sat_tier": "Tier 3 Advanced"
+      "mnemonic": "Think 'ardent' (burning with passion) or 'arson' (deliberate burning)"
     },
     "words": [
       {
@@ -13304,9 +13016,7 @@
       "morpheme": "queri / querul",
       "language": "Latin",
       "core_meaning": "to complain, lament, dispute",
-      "mnemonic": "Think 'querulous' (habitually whining/complaining) or 'quarrel' (angry dispute)",
-      "thematic_cluster": "Communication",
-      "sat_tier": "Tier 3 Advanced"
+      "mnemonic": "Think 'querulous' (habitually whining/complaining) or 'quarrel' (angry dispute)"
     },
     "words": [
       {
@@ -13407,9 +13117,7 @@
       "morpheme": "hetero",
       "language": "Greek",
       "core_meaning": "other, different, diverse",
-      "mnemonic": "Think 'heterogeneous' (diverse components) or 'heteroclite' (departing from standard rules)",
-      "thematic_cluster": "Quantity & Relation",
-      "sat_tier": "Tier 3 Advanced"
+      "mnemonic": "Think 'heterogeneous' (diverse components) or 'heteroclite' (departing from standard rules)"
     },
     "words": [
       {
@@ -13510,9 +13218,7 @@
       "morpheme": "homo / homeo",
       "language": "Greek",
       "core_meaning": "same, similar, uniform",
-      "mnemonic": "Think 'homologous' (similar in structure/origin) or 'homeostasis' (maintaining internal equilibrium)",
-      "thematic_cluster": "Quantity & Relation",
-      "sat_tier": "Tier 3 Advanced"
+      "mnemonic": "Think 'homologous' (similar in structure/origin) or 'homeostasis' (maintaining internal equilibrium)"
     },
     "words": [
       {
@@ -13613,9 +13319,7 @@
       "morpheme": "cast / chast",
       "language": "Latin",
       "core_meaning": "pure, cut off from fault, correct, punish",
-      "mnemonic": "Think 'castigate' (punish severely to correct) or 'chaste' (pure/unstained)",
-      "thematic_cluster": "Power & Conflict",
-      "sat_tier": "Tier 3 Advanced"
+      "mnemonic": "Think 'castigate' (punish severely to correct) or 'chaste' (pure/unstained)"
     },
     "words": [
       {
@@ -13716,9 +13420,7 @@
       "morpheme": "pau / pauc",
       "language": "Latin",
       "core_meaning": "few, little, small quantity",
-      "mnemonic": "Think 'paucity' (scarcity, small number) or 'pauper' (person with few resources)",
-      "thematic_cluster": "Quantity & Relation",
-      "sat_tier": "Tier 3 Advanced"
+      "mnemonic": "Think 'paucity' (scarcity, small number) or 'pauper' (person with few resources)"
     },
     "words": [
       {
@@ -13819,9 +13521,7 @@
       "morpheme": "scintill",
       "language": "Latin",
       "core_meaning": "spark, glimmer, flash",
-      "mnemonic": "Think 'scintillating' (sparkling brilliantly) or 'scintilla' (a tiny spark/trace)",
-      "thematic_cluster": "Form & Nature",
-      "sat_tier": "Tier 3 Advanced"
+      "mnemonic": "Think 'scintillating' (sparkling brilliantly) or 'scintilla' (a tiny spark/trace)"
     },
     "words": [
       {
@@ -13922,9 +13622,7 @@
       "morpheme": "peri",
       "language": "Greek",
       "core_meaning": "around, about, enclosing, near",
-      "mnemonic": "Think 'periphery' (boundary around) or 'peripatetic' (walking around)",
-      "thematic_cluster": "Quantity & Relation",
-      "sat_tier": "Tier 3 Advanced"
+      "mnemonic": "Think 'periphery' (boundary around) or 'peripatetic' (walking around)"
     },
     "words": [
       {
@@ -14025,9 +13723,7 @@
       "morpheme": "cata",
       "language": "Greek",
       "core_meaning": "down, against, completely, thoroughly",
-      "mnemonic": "Think 'cataclysm' (violent down-wash) or 'catalyst' (completely breaks down energy barrier)",
-      "thematic_cluster": "Quantity & Relation",
-      "sat_tier": "Tier 3 Advanced"
+      "mnemonic": "Think 'cataclysm' (violent down-wash) or 'catalyst' (completely breaks down energy barrier)"
     },
     "words": [
       {
@@ -14128,9 +13824,7 @@
       "morpheme": "lucr",
       "language": "Latin",
       "core_meaning": "gain, profit, wealth",
-      "mnemonic": "Think 'lucrative' (yielding great financial profit) or 'filthy lucre' (illicit financial gain)",
-      "thematic_cluster": "Quantity & Relation",
-      "sat_tier": "Tier 3 Advanced"
+      "mnemonic": "Think 'lucrative' (yielding great financial profit) or 'filthy lucre' (illicit financial gain)"
     },
     "words": [
       {

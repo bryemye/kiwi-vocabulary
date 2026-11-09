@@ -40,14 +40,17 @@ class Command(BaseCommand):
             words_list = []
             for w in root.words.order_by('id'):
                 total_words += 1
-                words_list.append({
+                word_dict = {
                     "word": w.word,
                     "prefix": w.prefix,
                     "suffix": w.suffix,
                     "definition": w.definition,
                     "sat_sentence": w.sat_sentence,
                     "connotation": w.connotation,
-                })
+                }
+                if w.review and (w.review.get("verified") or w.review.get("notes")):
+                    word_dict["review"] = w.review
+                words_list.append(word_dict)
 
             exported_data.append({
                 "root": root_dict,

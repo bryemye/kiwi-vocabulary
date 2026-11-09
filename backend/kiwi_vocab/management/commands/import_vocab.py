@@ -56,8 +56,18 @@ class Command(BaseCommand):
                 roots_created += 1
 
             for w in entry.get("words", []):
+                word_clean = w["word"].lower().strip()
+                existing_word = VocabularyWord.objects.filter(word=word_clean).first()
+
+                # Protect existing editorial reviews on PythonAnywhere / DB
+                incoming_review = w.get("review") or {}
+                if existing_word and existing_word.review and not incoming_review:
+                    effective_review = existing_word.review
+                else:
+                    effective_review = incoming_review
+
                 _, w_created = VocabularyWord.objects.update_or_create(
-                    word=w["word"].lower().strip(),
+                    word=word_clean,
                     defaults={
                         "root": root,
                         "prefix": w.get("prefix", ""),
@@ -67,7 +77,7 @@ class Command(BaseCommand):
                         "connotation": w.get("connotation", "neutral"),
                         "pronunciation": w.get("pronunciation", ""),
                         "part_of_speech": w.get("part_of_speech") or w.get("partOfSpeech", "adjective"),
-                        "review": w.get("review", {}),
+                        "review": effective_review,
                     }
                 )
                 if w_created:

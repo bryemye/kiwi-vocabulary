@@ -119,12 +119,12 @@ ROOTS_PART1 = [
                 "connotation": "negative"
             },
             {
-                "word": "succumb",
-                "prefix": "sub- (under)",
-                "suffix": "-cumb (yield / fall under)",
-                "definition": "To fail to resist pressure, temptation, or illness; to surrender.",
-                "sat_sentence": "Weakened by dehydration, the explorer finally succumbed to heat exhaustion.",
-                "connotation": "negative"
+                "word": "excursion",
+                "prefix": "ex- (out, outward)",
+                "suffix": "-ion (noun)",
+                "definition": "A short journey or trip, especially one taken for pleasure; a brief deviation from a main topic or course.",
+                "sat_sentence": "The biology seminar included a weekend excursion to observe tidal pool biodiversity.",
+                "connotation": "positive"
             },
             {
                 "word": "recur",
@@ -2311,6 +2311,50 @@ ROOTS_PART1 = [
                 "definition": "Rapidly diminishing response to successive doses of a drug.",
                 "sat_sentence": "Nasal decongestant sprays often cause tachyphylaxis after several consecutive days of use.",
                 "connotation": "negative"
+            }
+        ]
+    },
+    {
+        "root": {
+            "morpheme": "cub / cumb",
+            "language": "Latin",
+            "core_meaning": "to lie down, recline, yield",
+            "mnemonic": "Think 'incumbent' (leaning on an office) or 'succumb' (yield / lie down under)",
+            "thematic_cluster": "Power & Conflict",
+            "sat_tier": "Tier 1 High-Yield"
+        },
+        "words": [
+            {
+                "word": "succumb",
+                "prefix": "sub- (under)",
+                "suffix": "",
+                "definition": "To fail to resist pressure, temptation, or illness; to surrender or yield.",
+                "sat_sentence": "Weakened by dehydration, the explorer finally succumbed to heat exhaustion.",
+                "connotation": "negative"
+            },
+            {
+                "word": "incumbent",
+                "prefix": "in- (upon, on)",
+                "suffix": "-ent (adjective)",
+                "definition": "Currently holding an office; obligatory as a moral or legal duty.",
+                "sat_sentence": "It is incumbent upon elected representatives to justify significant tax reforms to constituents.",
+                "connotation": "neutral"
+            },
+            {
+                "word": "recumbent",
+                "prefix": "re- (back)",
+                "suffix": "-ent (adjective)",
+                "definition": "Lying down, especially in a position of comfort or rest; reclining.",
+                "sat_sentence": "The museum featured a Roman marble sculpture of a recumbent nymph beside a sacred spring.",
+                "connotation": "neutral"
+            },
+            {
+                "word": "incubate",
+                "prefix": "in- (upon)",
+                "suffix": "-ate (verb)",
+                "definition": "To maintain favorable conditions for developing; to hatch or nurture ideas slowly.",
+                "sat_sentence": "The university established an innovation accelerator to incubate promising clean-energy technologies.",
+                "connotation": "positive"
             }
         ]
     }

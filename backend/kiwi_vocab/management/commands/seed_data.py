@@ -75,8 +75,16 @@ class Command(BaseCommand):
             )
             created_roots_count += 1
             for w_item in r_item["words"]:
+                word_clean = w_item["word"].lower().strip()
+                existing_word = VocabularyWord.objects.filter(word=word_clean).first()
+                incoming_review = w_item.get("review") or {}
+                if existing_word and existing_word.review and not incoming_review:
+                    effective_review = existing_word.review
+                else:
+                    effective_review = incoming_review
+
                 VocabularyWord.objects.update_or_create(
-                    word=w_item["word"].lower().strip(),
+                    word=word_clean,
                     defaults={
                         "root": root_obj,
                         "prefix": w_item.get("prefix", ""),
@@ -86,6 +94,7 @@ class Command(BaseCommand):
                         "connotation": w_item.get("connotation", "neutral"),
                         "pronunciation": w_item.get("pronunciation", ""),
                         "part_of_speech": w_item.get("part_of_speech", "adjective"),
+                        "review": effective_review,
                     }
                 )
                 created_words_count += 1
