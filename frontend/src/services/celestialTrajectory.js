@@ -9,29 +9,6 @@ const STORAGE_KEY = 'kiwi_navigation_trajectory_v1';
 const MAX_TRAJECTORY_LENGTH = 30;
 
 /**
- * Deterministic hash to generate consistent coordinates for any title/id
- */
-function hashString(str = '') {
-  let hash = 0;
-  for (let i = 0; i < str.length; i++) {
-    hash = (hash << 5) - hash + str.charCodeAt(i);
-    hash |= 0;
-  }
-  return Math.abs(hash);
-}
-
-/**
- * Generates a clean technical node coordinate string
- * e.g. "COORD [412, 680] · LEVEL 2"
- */
-export function generateNodeCoordinates(key = '', depth = 1) {
-  const hash = hashString(key);
-  const gridX = (hash % 900) + 100;
-  const gridY = ((hash >> 4) % 900) + 100;
-  return `COORD [${gridX}, ${gridY}] · LEVEL ${depth}`;
-}
-
-/**
  * Determines clean node classification based on type and metadata
  */
 export function getNodeClassification(type, language = '') {
@@ -105,7 +82,9 @@ export function loadStoredTrajectory() {
     const raw = localStorage.getItem(STORAGE_KEY);
     if (!raw) return [];
     const parsed = JSON.parse(raw);
-    return Array.isArray(parsed) ? parsed : [];
+    if (!Array.isArray(parsed)) return [];
+    // Strip any legacy coordinates from stored waypoints
+    return parsed.map(({ coordinates, ...rest }) => rest);
   } catch (err) {
     console.warn('Failed to load navigation trajectory:', err);
     return [];
@@ -137,7 +116,6 @@ export function createCelestialWaypoint({
   language = '',
   state = {},
 }) {
-  const coordinateKey = `${type}-${title}-${system}`;
   return {
     id: `node_${Date.now()}_${Math.random().toString(36).substring(2, 7)}`,
     timestamp: Date.now(),
@@ -147,7 +125,6 @@ export function createCelestialWaypoint({
     system,
     depth, // 0: Domain, 1: System, 2: Root, 3: Word, 4: Session
     language,
-    coordinates: generateNodeCoordinates(coordinateKey, depth),
     state: { ...state },
   };
 }

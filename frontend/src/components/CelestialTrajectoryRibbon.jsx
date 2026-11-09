@@ -113,17 +113,21 @@ export default function CelestialTrajectoryRibbon() {
             </span>
           </div>
 
-          {/* Current Node Coordinate */}
+          {/* Current Node Info */}
           <div className="hidden md:flex items-center space-x-1.5 text-[#62685E] text-[10px] truncate">
             <span className="text-[#111410]/30">|</span>
             <span className="text-[#7BB33B] font-bold">●</span>
-            <span className="truncate">
-              {currentWaypoint ? currentWaypoint.coordinates : 'TRAJECTORY READY'}
+            <span className="truncate text-[#111410] font-black uppercase">
+              {currentWaypoint ? currentWaypoint.title : 'READY'}
             </span>
-            <span className="text-[#111410]/30">|</span>
-            <span className="text-[#42281D]">
-              LEVEL {currentWaypoint ? currentWaypoint.depth : 0}: {currentWaypoint ? currentWaypoint.subtitle : 'HOME'}
-            </span>
+            {currentWaypoint && (
+              <>
+                <span className="text-[#111410]/30">|</span>
+                <span className="text-[#42281D] truncate">
+                  LEVEL {currentWaypoint.depth}: {currentWaypoint.subtitle}
+                </span>
+              </>
+            )}
           </div>
         </div>
 
@@ -278,8 +282,8 @@ export default function CelestialTrajectoryRibbon() {
                           <span className="text-[#FAFBF8] font-bold">{waypoint.system}</span>
                         </div>
                         <div className="flex justify-between">
-                          <span className="text-[#62685E]">COORDINATE:</span>
-                          <span className="text-[#84C341]">{waypoint.coordinates}</span>
+                          <span className="text-[#62685E]">DEPTH:</span>
+                          <span className="text-[#84C341] font-bold">LEVEL {waypoint.depth}</span>
                         </div>
                       </div>
 

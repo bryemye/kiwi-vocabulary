@@ -63,8 +63,7 @@ export default function CelestialFlightLogModal() {
       (w) =>
         w.title?.toLowerCase().includes(q) ||
         w.subtitle?.toLowerCase().includes(q) ||
-        w.system?.toLowerCase().includes(q) ||
-        w.coordinates?.toLowerCase().includes(q)
+        w.system?.toLowerCase().includes(q)
     );
   }, [trajectory, searchTerm]);
 
@@ -149,7 +148,7 @@ export default function CelestialFlightLogModal() {
               type="text"
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
-              placeholder="Filter visited nodes, titles, or coords..."
+              placeholder="Filter visited nodes, titles, or sections..."
               className="w-full pl-9 pr-3 py-1.5 text-xs bg-[#FAFBF8] border-2 border-[#111410] focus:outline-none focus:border-[#7BB33B] font-mono"
             />
             {searchTerm && (
@@ -229,8 +228,6 @@ export default function CelestialFlightLogModal() {
 
                       <div className="flex items-center space-x-3 text-[10px] text-[#62685E] mt-1">
                         <span>SECTION: <strong className="text-[#111410]">{waypoint.system}</strong></span>
-                        <span>•</span>
-                        <span className="text-[#7BB33B] font-bold">{waypoint.coordinates}</span>
                         <span>•</span>
                         <span>{formatTimestamp(waypoint.timestamp)}</span>
                       </div>
