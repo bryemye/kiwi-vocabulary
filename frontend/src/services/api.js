@@ -26,6 +26,86 @@ export async function fetchWordSession(params = {}) {
   return res.json();
 }
 
+/**
+ * Returns YYYY-MM-DD based on the user's local device midnight clock.
+ */
+export function getLocalDateString() {
+  const now = new Date();
+  const year = now.getFullYear();
+  const month = String(now.getMonth() + 1).padStart(2, '0');
+  const day = String(now.getDate()).padStart(2, '0');
+  return `${year}-${month}-${day}`;
+}
+
+/**
+ * Fetch the deterministic daily 15-word challenge deck for guest users.
+ */
+export async function fetchDailyDeck(dateStr = getLocalDateString()) {
+  return fetchWordSession({ count: 15, daily: 1, date: dateStr });
+}
+
+// --------------------------------------------------------------------------------
+// Instant Cache & Guest Persistence Helpers (localStorage)
+// --------------------------------------------------------------------------------
+
+export function getCachedDailyDeck(dateStr = getLocalDateString()) {
+  if (typeof window === 'undefined') return null;
+  try {
+    const raw = localStorage.getItem(`kiwi_daily_deck_${dateStr}`);
+    return raw ? JSON.parse(raw) : null;
+  } catch (e) {
+    return null;
+  }
+}
+
+export function setCachedDailyDeck(dateStr, deck) {
+  if (typeof window === 'undefined') return;
+  try {
+    localStorage.setItem(`kiwi_daily_deck_${dateStr}`, JSON.stringify(deck));
+  } catch (e) {}
+}
+
+export function getGuestSession(dateStr = getLocalDateString()) {
+  if (typeof window === 'undefined') return null;
+  try {
+    const raw = localStorage.getItem(`kiwi_guest_session_${dateStr}`);
+    return raw ? JSON.parse(raw) : null;
+  } catch (e) {
+    return null;
+  }
+}
+
+export function saveGuestSession(dateStr, sessionData) {
+  if (typeof window === 'undefined') return;
+  try {
+    localStorage.setItem(`kiwi_guest_session_${dateStr}`, JSON.stringify(sessionData));
+  } catch (e) {}
+}
+
+export function clearGuestSession(dateStr = getLocalDateString()) {
+  if (typeof window === 'undefined') return;
+  try {
+    localStorage.removeItem(`kiwi_guest_session_${dateStr}`);
+  } catch (e) {}
+}
+
+export function getCachedUserDeck(userId) {
+  if (typeof window === 'undefined' || !userId) return null;
+  try {
+    const raw = localStorage.getItem(`kiwi_user_deck_${userId}`);
+    return raw ? JSON.parse(raw) : null;
+  } catch (e) {
+    return null;
+  }
+}
+
+export function setCachedUserDeck(userId, deck) {
+  if (typeof window === 'undefined' || !userId) return;
+  try {
+    localStorage.setItem(`kiwi_user_deck_${userId}`, JSON.stringify(deck));
+  } catch (e) {}
+}
+
 export async function fetchVocabStats() {
   const res = await fetch(`${API_BASE}/vocab/stats/`, { credentials: 'include' });
   if (!res.ok) throw new Error(`Failed to fetch vocabulary stats (HTTP ${res.status})`);

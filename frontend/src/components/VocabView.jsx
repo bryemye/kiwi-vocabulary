@@ -70,7 +70,13 @@ export default function VocabView({
   onUpdateWordReview,
   onUpdateWord,
   externalMorphemeView,
-  onClearExternalMorphemeView
+  onClearExternalMorphemeView,
+  preloadedDeck = [],
+  isGuestMode = false,
+  dailyDateFormatted = '',
+  initialGuestSession = null,
+  onSaveGuestSession = null,
+  onOpenAuth = null,
 }) {
   const { recordWaypoint } = useCelestialTrajectory();
 
@@ -190,16 +196,31 @@ export default function VocabView({
   const [selectedRootId, setSelectedRootId] = useState(initialRootId || 'ALL');
   const [searchTerm, setSearchTerm] = useState('');
 
+  // Track whether we are using an instant preloaded deck or restored guest session
+  const hasInitializedFromPreloadedRef = useRef(Boolean(preloadedDeck?.length || initialGuestSession?.deck?.length));
+
   // Deck & Session States (Study Deck)
-  const [sessionDeck, setSessionDeck] = useState([]);
-  const [currentIndex, setCurrentIndex] = useState(0);
+  const [sessionDeck, setSessionDeck] = useState(() => {
+    if (initialGuestSession?.deck?.length) return initialGuestSession.deck;
+    if (preloadedDeck && preloadedDeck.length > 0) return preloadedDeck;
+    return [];
+  });
+  const [currentIndex, setCurrentIndex] = useState(() => initialGuestSession?.currentIndex || 0);
   const [isFlipped, setIsFlipped] = useState(false);
   const [submitting, setSubmitting] = useState(false);
   const [feedback, setFeedback] = useState(null);
   const [cardStartTime, setCardStartTime] = useState(Date.now());
   const [sessionRound, setSessionRound] = useState(1);
-  const [roundStats, setRoundStats] = useState({ correct: 0, total: 0 });
-  const [isSessionComplete, setIsSessionComplete] = useState(false);
+  const [roundStats, setRoundStats] = useState(() => initialGuestSession?.roundStats || { correct: 0, total: 0 });
+  const [isSessionComplete, setIsSessionComplete] = useState(() => initialGuestSession?.isSessionComplete || false);
+
+  // Sync preloadedDeck when it becomes available or changes
+  useEffect(() => {
+    if (preloadedDeck && preloadedDeck.length > 0 && !hasInitializedFromPreloadedRef.current) {
+      setSessionDeck(preloadedDeck);
+      hasInitializedFromPreloadedRef.current = true;
+    }
+  }, [preloadedDeck]);
 
   // Dedicated Vocab Stats from backend
   const [vocabStats, setVocabStats] = useState(null);
@@ -574,8 +595,11 @@ export default function VocabView({
   }, []);
 
   useEffect(() => {
+    if (hasInitializedFromPreloadedRef.current && sessionDeck.length > 0) {
+      return;
+    }
     initializeSession(false);
-  }, [initializeSession]);
+  }, [initializeSession, sessionDeck.length]);
 
   const currentWord = sessionDeck[currentIndex] || null;
 
@@ -618,10 +642,12 @@ export default function VocabView({
         onAttemptLogged();
       }
 
-      setRoundStats(prev => ({
-        correct: prev.correct + (isKnown ? 1 : 0),
-        total: prev.total + 1
-      }));
+      const updatedRoundStats = {
+        correct: roundStats.correct + (isKnown ? 1 : 0),
+        total: roundStats.total + 1
+      };
+
+      setRoundStats(updatedRoundStats);
 
       setFeedback({
         type: isKnown ? 'success' : 'review',
@@ -634,6 +660,9 @@ export default function VocabView({
 
       setTimeout(() => {
         setFeedback(null);
+        const nextIndex = currentIndex < sessionDeck.length - 1 ? currentIndex + 1 : currentIndex;
+        const complete = currentIndex >= sessionDeck.length - 1;
+
         if (currentIndex < sessionDeck.length - 1) {
           setCurrentIndex(prev => prev + 1);
         } else {
@@ -645,13 +674,22 @@ export default function VocabView({
             colors: ['#7BB33B', '#84C341', '#2F441E', '#C29B78']
           });
         }
+
+        if (isGuestMode && onSaveGuestSession) {
+          onSaveGuestSession({
+            currentIndex: nextIndex,
+            roundStats: updatedRoundStats,
+            isSessionComplete: complete,
+            deck: sessionDeck
+          });
+        }
       }, 1000);
     } catch (err) {
       console.error('Error logging study attempt:', err);
     } finally {
       setSubmitting(false);
     }
-  }, [currentWord, submitting, isSessionComplete, cardStartTime, onAttemptLogged, isFlipped, currentIndex, sessionDeck.length]);
+  }, [currentWord, submitting, isSessionComplete, cardStartTime, onAttemptLogged, isFlipped, currentIndex, sessionDeck, roundStats, isGuestMode, onSaveGuestSession]);
 
   // Global Keyboard Shortcuts
   useEffect(() => {
@@ -973,18 +1011,34 @@ export default function VocabView({
             isSessionComplete={isSessionComplete}
             roundStats={roundStats}
             sessionRound={sessionRound}
+            isGuestMode={isGuestMode}
+            dailyDateFormatted={dailyDateFormatted}
+            onOpenAuth={onOpenAuth}
             onNextRound={() => initializeSession(true)}
             onRestartSession={() => {
               setCurrentIndex(0);
               setIsFlipped(false);
               setIsSessionComplete(false);
-              setRoundStats({ correct: 0, total: 0 });
-              setSessionDeck(prev => shuffleWithMorphemeVariety(prev));
+              const resetStats = { correct: 0, total: 0 };
+              setRoundStats(resetStats);
+              if (isGuestMode) {
+                if (onSaveGuestSession) {
+                  onSaveGuestSession({
+                    currentIndex: 0,
+                    roundStats: resetStats,
+                    isSessionComplete: false,
+                    deck: sessionDeck
+                  });
+                }
+              } else {
+                setSessionDeck(prev => shuffleWithMorphemeVariety(prev));
+              }
             }}
             onReviewProgress={() => handleAttemptTabChange('progress')}
             onOpenCustomModal={() => handleOpenCustomSession(selectedRootId !== 'ALL' ? [Number(selectedRootId)] : [])}
             onExitSession={handleClearSubsetPractice}
             onResetFilters={() => {
+              hasInitializedFromPreloadedRef.current = false;
               setSelectedLanguage('ALL');
               setSelectedRootId('ALL');
               setSearchTerm('');

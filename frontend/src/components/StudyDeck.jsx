@@ -38,6 +38,9 @@ export default function StudyDeck({
   onOpenCustomModal,
   onExitSession,
   onResetFilters,
+  isGuestMode = false,
+  dailyDateFormatted = '',
+  onOpenAuth = null,
 }) {
   // Confirmation dialog state for backing out of an active session
   const [showExitConfirm, setShowExitConfirm] = useState(false);
@@ -259,6 +262,30 @@ export default function StudyDeck({
             </div>
           </div>
 
+          {/* Guest completion call-to-action */}
+          {isGuestMode && onOpenAuth && (
+            <div className="my-5 p-4 sm:p-5 bg-[#EDF5E5] border-2 border-[#111410] shadow-[3px_3px_0px_0px_#111410] text-left flex flex-col sm:flex-row items-center justify-between gap-4">
+              <div>
+                <span className="text-[10px] font-mono font-black uppercase tracking-wider px-2 py-0.5 bg-white text-[#2F441E] border border-[#111410] inline-block mb-1">
+                  ⚡ GUEST CHALLENGE FINISHED
+                </span>
+                <h4 className="text-sm sm:text-base font-black font-sans uppercase text-[#111410]">
+                  Save your streak & unlock personalized spaced repetition
+                </h4>
+                <p className="text-xs font-mono text-[#42281D] mt-0.5">
+                  Sign in with your email to log your accuracy, review words you missed, and track root mastery rings.
+                </p>
+              </div>
+              <button
+                type="button"
+                onClick={onOpenAuth}
+                className="shrink-0 px-4 py-2.5 bg-[#7BB33B] hover:bg-[#6FA334] text-white border-2 border-[#111410] shadow-[3px_3px_0px_0px_#111410] text-xs font-mono font-black uppercase transition-all cursor-pointer"
+              >
+                Sign In To Save Progress &rarr;
+              </button>
+            </div>
+          )}
+
           <div className="flex flex-col sm:flex-row items-center justify-center gap-3 sm:gap-4 mt-6">
             <button
               onClick={onRestartSession}
@@ -307,6 +334,28 @@ export default function StudyDeck({
         </div>
       ) : (
         <>
+          {/* Guest Mode Indicator Header */}
+          {isGuestMode && (
+            <div className="mb-3 px-3 py-2 bg-[#EDF5E5] border-2 border-[#111410] shadow-[2px_2px_0px_0px_#111410] flex items-center justify-between text-xs font-mono">
+              <div className="flex items-center space-x-2">
+                <span className="w-2.5 h-2.5 rounded-full bg-[#7BB33B] animate-pulse shrink-0" />
+                <span className="font-black text-[#2F441E] uppercase tracking-wide">
+                  DAILY GUEST CHALLENGE {dailyDateFormatted ? `· ${dailyDateFormatted}` : ''}
+                </span>
+              </div>
+              {onOpenAuth && (
+                <button
+                  type="button"
+                  onClick={onOpenAuth}
+                  className="text-[11px] font-bold text-[#42281D] hover:underline uppercase flex items-center space-x-1 cursor-pointer"
+                >
+                  <span>Sign in to save progress</span>
+                  <span>&rarr;</span>
+                </button>
+              )}
+            </div>
+          )}
+
           {/* Progress Bar & Header */}
           <div className="flex items-center justify-between text-xs font-mono font-bold text-[#111410] uppercase">
             <div className="flex items-center space-x-2 sm:space-x-3">

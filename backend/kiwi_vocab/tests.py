@@ -63,6 +63,14 @@ class KiwiVocabTests(TestCase):
         self.assertEqual(res.status_code, status.HTTP_200_OK)
         self.assertEqual(len(res.data), 2)  # 2 words exist, both returned
 
+    def test_vocab_daily_guest_session_endpoint(self):
+        res1 = self.client.get('/api/vocab/session/?daily=1&date=2026-11-09')
+        self.assertEqual(res1.status_code, status.HTTP_200_OK)
+        self.assertTrue(len(res1.data) > 0)
+        # Deterministic: Same date yields same word sequence
+        res2 = self.client.get('/api/vocab/session/?daily=1&date=2026-11-09')
+        self.assertEqual([w['id'] for w in res1.data], [w['id'] for w in res2.data])
+
     def test_vocab_stats_endpoint(self):
         res = self.client.get('/api/vocab/stats/')
         self.assertEqual(res.status_code, status.HTTP_200_OK)

@@ -12,12 +12,22 @@ import ReadingView from './components/ReadingView';
 import DashboardView from './components/DashboardView';
 import AuthModal from './components/AuthModal';
 import AuthVerifyCard from './components/AuthVerifyCard';
+import HomeIntroOverlay from './components/HomeIntroOverlay';
 import {
   fetchDashboardStats,
   fetchRoots,
   fetchWords,
   fetchCurrentUser,
-  logoutUser
+  logoutUser,
+  fetchWordSession,
+  fetchDailyDeck,
+  getLocalDateString,
+  getCachedDailyDeck,
+  setCachedDailyDeck,
+  getGuestSession,
+  saveGuestSession,
+  getCachedUserDeck,
+  setCachedUserDeck,
 } from './services/api';
 import {
   getStoredAdminMode,
@@ -61,6 +71,25 @@ export default function App() {
   const [user, setUser] = useState(null);
   const [isAuthModalOpen, setIsAuthModalOpen] = useState(false);
   const [verifyToken, setVerifyToken] = useState(null);
+
+  // Guest Mode & Introductory Overlay States
+  const [isGuestMode, setIsGuestMode] = useState(false);
+  const [showIntroOverlay, setShowIntroOverlay] = useState(false);
+  const [preloadedDeck, setPreloadedDeck] = useState([]);
+  const [guestSession, setGuestSession] = useState(null);
+  const [todayDateStr, setTodayDateStr] = useState(() => getLocalDateString());
+  const [todayFormatted, setTodayFormatted] = useState(() => {
+    try {
+      return new Intl.DateTimeFormat('en-US', {
+        weekday: 'short',
+        month: 'short',
+        day: 'numeric',
+        year: 'numeric'
+      }).format(new Date());
+    } catch (e) {
+      return '';
+    }
+  });
 
   // Celestial History & Fast Travel Restorations
   const [externalMorphemeView, setExternalMorphemeView] = useState(null);
@@ -300,18 +329,117 @@ export default function App() {
     }
   }, []);
 
-  // Fetch current authenticated user session on mount
+  // Fast-path initial session & 15-card sequence loader
   useEffect(() => {
-    fetchCurrentUser()
-      .then((userData) => {
+    let isMounted = true;
+    const localDate = getLocalDateString();
+    setTodayDateStr(localDate);
+
+    const savedGuestSession = getGuestSession(localDate);
+    const cachedDaily = getCachedDailyDeck(localDate);
+
+    const init = async () => {
+      try {
+        const userData = await fetchCurrentUser();
+        if (!isMounted) return;
+
         if (userData) {
           setUser(userData);
+          setIsGuestMode(false);
+          setShowIntroOverlay(false);
+
+          // Fast 0ms render from cached user deck if available
+          const cachedUser = getCachedUserDeck(userData.id);
+          if (cachedUser && cachedUser.length > 0) {
+            setPreloadedDeck(cachedUser);
+            setLoading(false);
+          }
+
+          // Fetch prioritized 15-word spaced repetition queue from backend
+          const userDeck = await fetchWordSession({ count: 15 });
+          if (isMounted && userDeck?.length > 0) {
+            setPreloadedDeck(userDeck);
+            setCachedUserDeck(userData.id, userDeck);
+          }
+        } else {
+          setUser(null);
+          if (savedGuestSession && savedGuestSession.deck?.length > 0) {
+            // Returning guest from earlier today: restore session without overlay
+            setIsGuestMode(true);
+            setShowIntroOverlay(false);
+            setGuestSession(savedGuestSession);
+            setPreloadedDeck(savedGuestSession.deck);
+          } else {
+            // New visitor: show introductory overlay
+            setShowIntroOverlay(true);
+            if (cachedDaily && cachedDaily.length > 0) {
+              setPreloadedDeck(cachedDaily);
+            } else {
+              // Pre-load today's daily 15 challenge deck in background so it's ready on click
+              const dailyDeck = await fetchDailyDeck(localDate);
+              if (isMounted && dailyDeck?.length > 0) {
+                setPreloadedDeck(dailyDeck);
+                setCachedDailyDeck(localDate, dailyDeck);
+              }
+            }
+          }
         }
-      })
-      .catch((err) => {
-        console.warn('Session verification error:', err);
-      });
+      } catch (err) {
+        console.warn('Initial session init notice:', err);
+        if (isMounted) {
+          setShowIntroOverlay(true);
+          if (cachedDaily && cachedDaily.length > 0) {
+            setPreloadedDeck(cachedDaily);
+          }
+        }
+      } finally {
+        if (isMounted) {
+          setLoading(false);
+        }
+      }
+    };
+
+    init();
+
+    return () => {
+      isMounted = false;
+    };
   }, []);
+
+  // Background non-blocking lazy loader for full dictionary (roots, words, telemetry stats)
+  useEffect(() => {
+    let isMounted = true;
+    const timer = setTimeout(async () => {
+      try {
+        const [rootsData, wordsData, statsData] = await Promise.all([
+          fetchRoots().catch(err => { console.warn('Roots background sync note:', err); return []; }),
+          fetchWords().catch(err => { console.warn('Words background sync note:', err); return []; }),
+          fetchDashboardStats().catch(err => { console.warn('Dashboard stats sync note:', err); return null; }),
+        ]);
+
+        if (!isMounted) return;
+
+        if (wordsData && wordsData.length > 0) {
+          const wordsWithReviews = mergeReviewsIntoWords(wordsData);
+          setWords(wordsWithReviews);
+        }
+        if (rootsData && rootsData.length > 0) {
+          const rootsWithReviews = mergeReviewsIntoRoots(rootsData);
+          setRoots(rootsWithReviews);
+        }
+        if (statsData) {
+          setStats(statsData);
+        }
+      } catch (err) {
+        console.warn('Background data sync note:', err);
+      }
+    }, 150);
+
+    return () => {
+      isMounted = false;
+      clearTimeout(timer);
+    };
+  }, [user]);
 
   // Session timer
   useEffect(() => {
@@ -320,34 +448,6 @@ export default function App() {
     }, 1000);
     return () => clearInterval(timer);
   }, []);
-
-  const loadAllData = useCallback(async () => {
-    try {
-      setError(null);
-      // Fetch platform stats and vocabulary data only (Math & Reading endpoints isolated/disabled)
-      const [statsData, rootsData, wordsData] = await Promise.all([
-        fetchDashboardStats(),
-        fetchRoots(),
-        fetchWords(),
-      ]);
-
-      const wordsWithReviews = mergeReviewsIntoWords(wordsData);
-      const rootsWithReviews = mergeReviewsIntoRoots(rootsData);
-
-      setStats(statsData);
-      setRoots(rootsWithReviews);
-      setWords(wordsWithReviews);
-    } catch (err) {
-      console.error('Error loading Kiwi Learning data:', err);
-      setError(`Unable to connect to platform API: ${err.message || 'Please check server status and database migrations.'}`);
-    } finally {
-      setLoading(false);
-    }
-  }, []);
-
-  useEffect(() => {
-    loadAllData();
-  }, [loadAllData]);
 
   // Refresh stats whenever an attempt is logged in vocabulary mode
   const handleAttemptLogged = async () => {
@@ -422,6 +522,8 @@ export default function App() {
   // Auth Handlers
   const handleAuthSuccess = async (userData) => {
     setUser(userData);
+    setIsGuestMode(false);
+    setShowIntroOverlay(false);
     setIsAuthModalOpen(false);
     setVerifyToken(null);
 
@@ -431,10 +533,15 @@ export default function App() {
     }
 
     try {
+      const userDeck = await fetchWordSession({ count: 15 });
+      if (userDeck && userDeck.length > 0) {
+        setPreloadedDeck(userDeck);
+        setCachedUserDeck(userData.id, userDeck);
+      }
       const updatedStats = await fetchDashboardStats();
       setStats(updatedStats);
     } catch (err) {
-      console.error('Failed to refresh stats post-login:', err);
+      console.error('Failed to refresh data post-login:', err);
     }
   };
 
@@ -445,7 +552,13 @@ export default function App() {
       console.error('Error logging out:', err);
     } finally {
       setUser(null);
+      setIsGuestMode(false);
+      setShowIntroOverlay(true);
       try {
+        const dailyDeck = await fetchDailyDeck(todayDateStr);
+        if (dailyDeck && dailyDeck.length > 0) {
+          setPreloadedDeck(dailyDeck);
+        }
         const resetStats = await fetchDashboardStats();
         setStats(resetStats);
       } catch (err) {
@@ -491,6 +604,7 @@ export default function App() {
         onLogout={handleLogout}
         isAdminMode={effectiveAdminMode}
         onToggleAdminMode={isStaffUser ? handleToggleAdminMode : null}
+        isGuestMode={isGuestMode && !user}
       />
 
       {/* Celestial Trajectory & Orbital Telemetry Navigation Bar */}
@@ -539,6 +653,23 @@ export default function App() {
         onClose={() => setIsAuthModalOpen(false)}
       />
 
+      {/* Home Page Introductory Overlay: Sign In vs Start as Guest */}
+      <HomeIntroOverlay
+        isOpen={showIntroOverlay && !user}
+        todayFormatted={todayFormatted}
+        onStartAsGuest={() => {
+          setIsGuestMode(true);
+          setShowIntroOverlay(false);
+        }}
+        onOpenSignIn={() => {
+          setIsAuthModalOpen(true);
+        }}
+        onClose={() => {
+          setIsGuestMode(true);
+          setShowIntroOverlay(false);
+        }}
+      />
+
       {/* Main Workspace: Mutually Exclusive Full Views */}
       <main className="flex-1 pb-16">
         {loading ? (
@@ -569,6 +700,12 @@ export default function App() {
             onUpdateWord={handleUpdateWord}
             externalMorphemeView={externalMorphemeView}
             onClearExternalMorphemeView={() => setExternalMorphemeView(null)}
+            preloadedDeck={preloadedDeck}
+            isGuestMode={isGuestMode && !user}
+            dailyDateFormatted={todayFormatted}
+            initialGuestSession={guestSession}
+            onSaveGuestSession={(data) => saveGuestSession(todayDateStr, data)}
+            onOpenAuth={() => setIsAuthModalOpen(true)}
           />
         )}
       </main>

@@ -20,7 +20,8 @@ export default function Navbar({
   onOpenAuth,
   onLogout,
   isAdminMode = false,
-  onToggleAdminMode
+  onToggleAdminMode,
+  isGuestMode = false,
 }) {
   const [isSwitcherOpen, setIsSwitcherOpen] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
@@ -242,14 +243,22 @@ export default function Navbar({
                 </button>
               </div>
             ) : (
-              <button
-                onClick={onOpenAuth}
-                className="hidden sm:flex items-center space-x-1.5 px-3 py-1.5 bg-[#7BB33B] hover:bg-[#84C341] text-white border-2 border-[#111410] shadow-[2px_2px_0px_0px_#111410] text-xs font-mono font-black uppercase tracking-wider transition-all"
-              >
-                <Sparkles className="w-3.5 h-3.5" />
-                <span className="hidden md:inline">SIGN IN / REGISTER</span>
-                <span className="md:hidden">SIGN IN</span>
-              </button>
+              <div className="flex items-center space-x-2">
+                {isGuestMode && (
+                  <span className="hidden md:inline-flex items-center space-x-1 px-2.5 py-1 bg-[#EDF5E5] text-[#2F441E] border-2 border-[#111410] shadow-[2px_2px_0px_0px_#111410] text-[10px] font-mono font-black uppercase">
+                    <span className="w-2 h-2 rounded-full bg-[#7BB33B] animate-pulse" />
+                    <span>GUEST · DAILY 15</span>
+                  </span>
+                )}
+                <button
+                  onClick={onOpenAuth}
+                  className="hidden sm:flex items-center space-x-1.5 px-3 py-1.5 bg-[#7BB33B] hover:bg-[#84C341] text-white border-2 border-[#111410] shadow-[2px_2px_0px_0px_#111410] text-xs font-mono font-black uppercase tracking-wider transition-all cursor-pointer"
+                >
+                  <Sparkles className="w-3.5 h-3.5" />
+                  <span className="hidden md:inline">SIGN IN / REGISTER</span>
+                  <span className="md:hidden">SIGN IN</span>
+                </button>
+              </div>
             )}
 
             {/* Mobile Header Quick Auth Trigger (When logged out on mobile) */}

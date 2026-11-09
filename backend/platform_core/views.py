@@ -277,19 +277,43 @@ class PlatformDashboardStatsView(APIView):
         try:
             from kiwi_vocab.models import Root
             roots = Root.objects.prefetch_related('words').all()
+
+            # Optimize: Single-pass in-memory dictionary aggregation to eliminate ~3,000 N+1 queries
+            vocab_log_entries = list(
+                vocab_logs.values('word_id', 'word__root_id', 'is_correct', 'created_at')
+                .order_by('created_at')
+            )
+            latest_word_mastery = {}
+            root_attempts = {}
+            root_correct = {}
+
+            for entry in vocab_log_entries:
+                w_id = entry['word_id']
+                r_id = entry['word__root_id']
+                latest_word_mastery[w_id] = bool(entry['is_correct'])
+                if r_id:
+                    root_attempts[r_id] = root_attempts.get(r_id, 0) + 1
+                    if entry['is_correct']:
+                        root_correct[r_id] = root_correct.get(r_id, 0) + 1
+
             for root in roots:
                 root_words = root.words.all()
-                total_root_words = root_words.count()
-                root_logs = logs.filter(item_type='WORD', word__root=root)
-                r_attempts = root_logs.count()
-                r_correct = root_logs.filter(is_correct=True).count()
-                r_accuracy = round((r_correct / r_attempts * 100), 1) if r_attempts > 0 else 0.0
+                total_root_words = len(root_words)
+                r_attempts = root_attempts.get(root.id, 0)
+                r_corr = root_correct.get(root.id, 0)
+                r_accuracy = round((r_corr / r_attempts * 100), 1) if r_attempts > 0 else 0.0
 
+                words_data = []
                 words_mastered_count = 0
                 for w in root_words:
-                    w_logs = root_logs.filter(word=w).order_by('-created_at')
-                    if w_logs.exists() and w_logs.first().is_correct:
+                    is_m = latest_word_mastery.get(w.id, False)
+                    if is_m:
                         words_mastered_count += 1
+                    words_data.append({
+                        'id': w.id,
+                        'word': w.word,
+                        'is_mastered': is_m
+                    })
 
                 mastery_percentage = round((words_mastered_count / total_root_words * 100), 1) if total_root_words > 0 else 0.0
 
@@ -306,14 +330,7 @@ class PlatformDashboardStatsView(APIView):
                     'mastery_percentage': mastery_percentage,
                     'accuracy_percentage': r_accuracy,
                     'attempts': r_attempts,
-                    'words': [
-                        {
-                            'id': w.id,
-                            'word': w.word,
-                            'is_mastered': (root_logs.filter(word=w).order_by('-created_at').first().is_correct if root_logs.filter(word=w).exists() else False)
-                        }
-                        for w in root_words
-                    ]
+                    'words': words_data
                 })
 
             recommended_roots = sorted(
