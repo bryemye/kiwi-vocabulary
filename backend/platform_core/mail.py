@@ -75,21 +75,35 @@ def send_via_resend_api(to_email: str, subject: str, plain_message: str, html_me
         raise RuntimeError(error_msg) from exc
 
 
-def send_magic_link_email(to_email: str, magic_link: str) -> None:
+def send_magic_link_email(to_email: str, magic_link: str, match_code: str = None) -> None:
     """
     Dispatches magic link email using either Resend HTTPS API, Resend SMTP, or Console backend.
     Sends both clean plain-text and branded neo-brutalist HTML.
+    Supports optional 2-digit match code for cross-device confirmation.
     """
     subject = "Your Kiwi Learning Magic Login Link"
+
+    code_plain = f"\nVerification Code: {match_code}\nVerify that this code matches the screen on your computer.\n" if match_code else ""
 
     plain_message = (
         f"Hello,\n\n"
         f"Click the link below to sign in or complete your registration for Kiwi Learning:\n\n"
-        f"{magic_link}\n\n"
+        f"{magic_link}\n"
+        f"{code_plain}\n"
         f"This link expires in 15 minutes and can only be used once.\n\n"
         f"If you did not request this link, you can safely ignore this email.\n\n"
         f"-- The Kiwi Learning Team"
     )
+
+    code_html = f"""
+        <div style="background-color: #EDF5E5; border: 2px solid #111410; padding: 12px 16px; margin: 16px 0; font-family: monospace, Courier, sans-serif;">
+          <div style="font-size: 11px; text-transform: uppercase; font-weight: 800; color: #2F441E; letter-spacing: 1px;">Verification Match Code</div>
+          <div style="margin-top: 6px; display: flex; align-items: center;">
+            <span style="font-size: 20px; font-weight: 900; color: #111410; background-color: #FFFFFF; padding: 4px 12px; border: 2px solid #111410; letter-spacing: 2px;">{match_code}</span>
+            <span style="margin-left: 10px; font-size: 12px; color: #52594D;">Verify this matches your computer screen before confirming.</span>
+          </div>
+        </div>
+    """ if match_code else ""
 
     html_message = f"""<!DOCTYPE html>
 <html>
@@ -117,6 +131,7 @@ def send_magic_link_email(to_email: str, magic_link: str) -> None:
         <p style="margin: 0 0 20px 0;">
           Click the button below to sign in or complete your registration for Kiwi Learning. No password required.
         </p>
+        {code_html}
         <!-- High Contrast CTA Button -->
         <table border="0" cellpadding="0" cellspacing="0" style="margin: 24px 0;">
           <tr>
@@ -154,8 +169,8 @@ def send_magic_link_email(to_email: str, magic_link: str) -> None:
     api_key = getattr(settings, 'RESEND_API_KEY', '') or getattr(settings, 'EMAIL_HOST_PASSWORD', '')
     email_backend = str(getattr(settings, 'EMAIL_BACKEND', ''))
 
-    # If console backend is explicitly requested (e.g. in test suites), avoid external network call
-    if 'console' in email_backend.lower():
+    # If console/locmem/dummy backend is configured (e.g. in test suites or local dev), use standard send_mail
+    if any(k in email_backend.lower() for k in ('console', 'locmem', 'dummy', 'file')):
         send_mail(
             subject=subject,
             message=plain_message,
@@ -168,23 +183,27 @@ def send_magic_link_email(to_email: str, magic_link: str) -> None:
 
     # If a valid Resend API key is present, use the HTTPS REST API (guaranteed PythonAnywhere compatibility)
     if api_key and not api_key.startswith('re_your_'):
-        send_via_resend_api(
-            to_email=to_email,
-            subject=subject,
-            plain_message=plain_message,
-            html_message=html_message,
-            from_email=from_email,
-            api_key=api_key,
-        )
-    else:
-        # Fallback to standard Django mail backend (Console backend in local dev)
-        send_mail(
-            subject=subject,
-            message=plain_message,
-            from_email=from_email,
-            recipient_list=[to_email],
-            html_message=html_message,
-            fail_silently=False,
-        )
+        try:
+            send_via_resend_api(
+                to_email=to_email,
+                subject=subject,
+                plain_message=plain_message,
+                html_message=html_message,
+                from_email=from_email,
+                api_key=api_key,
+            )
+            return
+        except Exception as exc:
+            logger.warning("Resend API failed (%s), falling back to Django send_mail", exc)
+    
+    # Fallback to standard Django mail backend (Console backend in local dev)
+    send_mail(
+        subject=subject,
+        message=plain_message,
+        from_email=from_email,
+        recipient_list=[to_email],
+        html_message=html_message,
+        fail_silently=False,
+    )
 
 

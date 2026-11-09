@@ -71,6 +71,7 @@ export default function App() {
   const [user, setUser] = useState(null);
   const [isAuthModalOpen, setIsAuthModalOpen] = useState(false);
   const [verifyToken, setVerifyToken] = useState(null);
+  const [verifySessionId, setVerifySessionId] = useState(null);
 
   // Guest Mode & Introductory Overlay States
   const [isGuestMode, setIsGuestMode] = useState(false);
@@ -312,9 +313,11 @@ export default function App() {
 
       const searchParams = new URLSearchParams(window.location.search);
       let tokenInQuery = searchParams.get('token');
+      let sidInQuery = searchParams.get('sid') || searchParams.get('session_id');
       if (!tokenInQuery && window.location.hash) {
         const hashParams = new URLSearchParams(window.location.hash.replace(/^#\/?/, '?'));
         tokenInQuery = hashParams.get('token');
+        if (!sidInQuery) sidInQuery = hashParams.get('sid') || hashParams.get('session_id');
       }
 
       if (tokenInQuery) {
@@ -323,6 +326,9 @@ export default function App() {
         if (cleaned.startsWith('=3D')) cleaned = cleaned.slice(3);
         else if (cleaned.startsWith('3D') && cleaned.includes(':')) cleaned = cleaned.slice(2);
         setVerifyToken(cleaned);
+        if (sidInQuery) {
+          setVerifySessionId(sidInQuery.trim());
+        }
       }
     } catch (e) {
       console.error('Failed to parse URL search params:', e);
@@ -526,6 +532,7 @@ export default function App() {
     setShowIntroOverlay(false);
     setIsAuthModalOpen(false);
     setVerifyToken(null);
+    setVerifySessionId(null);
 
     if (window.history && window.history.replaceState) {
       const cleanUrl = window.location.pathname.replace(/\/auth\/verify\/?/, '') || '/';
@@ -569,6 +576,7 @@ export default function App() {
 
   const handleDismissVerify = () => {
     setVerifyToken(null);
+    setVerifySessionId(null);
     if (window.history && window.history.replaceState) {
       const cleanUrl = window.location.pathname.replace(/\/auth\/verify\/?/, '') || '/';
       window.history.replaceState({}, document.title, cleanUrl);
@@ -641,6 +649,7 @@ export default function App() {
       {verifyToken && (
         <AuthVerifyCard
           token={verifyToken}
+          sessionId={verifySessionId}
           onSuccess={handleAuthSuccess}
           onOpenAuthModal={() => setIsAuthModalOpen(true)}
           onDismiss={handleDismissVerify}
@@ -651,6 +660,7 @@ export default function App() {
       <AuthModal
         isOpen={isAuthModalOpen}
         onClose={() => setIsAuthModalOpen(false)}
+        onSuccess={handleAuthSuccess}
       />
 
       {/* Home Page Introductory Overlay: Sign In vs Start as Guest */}

@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { 
   X, 
   Mail, 
@@ -6,20 +6,40 @@ import {
   ArrowRight, 
   CheckCircle2, 
   AlertCircle, 
-  RefreshCw 
+  RefreshCw,
+  ShieldCheck,
+  Smartphone
 } from 'lucide-react';
-import { requestMagicLink } from '../services/api';
+import { requestMagicLink, pollMagicLinkStatus } from '../services/api';
 
-export default function AuthModal({ isOpen, onClose }) {
-  const [step, setStep] = useState(1); // 1 = Email Form, 2 = Check Inbox
+export default function AuthModal({ isOpen, onClose, onSuccess }) {
+  const [step, setStep] = useState(1); // 1 = Email Form, 2 = Check Inbox & Waiting for Phone
   const [email, setEmail] = useState('');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
 
-  if (!isOpen) return null;
+  // Cross-device pairing states
+  const [sessionId, setSessionId] = useState(null);
+  const [deviceSecret, setDeviceSecret] = useState(null);
+  const [matchCode, setMatchCode] = useState(null);
+  const [pollState, setPollState] = useState('waiting'); // 'waiting' | 'approved' | 'denied' | 'expired'
+
+  const handleReset = () => {
+    setStep(1);
+    setError(null);
+    setSessionId(null);
+    setDeviceSecret(null);
+    setMatchCode(null);
+    setPollState('waiting');
+  };
+
+  const handleModalClose = () => {
+    handleReset();
+    if (onClose) onClose();
+  };
 
   const handleSubmitEmail = async (e) => {
-    e.preventDefault();
+    if (e && e.preventDefault) e.preventDefault();
     if (!email || !email.trim()) {
       setError('Please enter your email address.');
       return;
@@ -28,7 +48,11 @@ export default function AuthModal({ isOpen, onClose }) {
     try {
       setLoading(true);
       setError(null);
-      await requestMagicLink(email.trim());
+      const data = await requestMagicLink(email.trim());
+      setSessionId(data.session_id || null);
+      setDeviceSecret(data.device_secret || null);
+      setMatchCode(data.match_code || null);
+      setPollState('waiting');
       setStep(2);
     } catch (err) {
       console.error('Magic link request failed:', err);
@@ -38,15 +62,61 @@ export default function AuthModal({ isOpen, onClose }) {
     }
   };
 
-  const handleReset = () => {
-    setStep(1);
-    setError(null);
-  };
+  // Cross-device polling effect: runs when in Step 2 on the initiating device
+  useEffect(() => {
+    if (step !== 2 || !sessionId || !deviceSecret || pollState === 'approved') return;
 
-  const handleModalClose = () => {
-    handleReset();
-    onClose();
-  };
+    let isCancelled = false;
+    let intervalId = null;
+
+    const checkStatus = async () => {
+      try {
+        const res = await pollMagicLinkStatus(sessionId, deviceSecret);
+        if (isCancelled) return;
+
+        if (res.status === 'APPROVED' && res.user) {
+          setPollState('approved');
+          if (intervalId) clearInterval(intervalId);
+          setTimeout(() => {
+            if (onSuccess) onSuccess(res.user);
+            handleModalClose();
+          }, 900);
+        } else if (res.status === 'DENIED') {
+          setPollState('denied');
+          setError('Sign-in request was rejected on your mobile device.');
+          if (intervalId) clearInterval(intervalId);
+        } else if (res.status === 'EXPIRED') {
+          setPollState('expired');
+          setError('Login link has expired. Please request a new link.');
+          if (intervalId) clearInterval(intervalId);
+        }
+      } catch (err) {
+        if (isCancelled) return;
+        if (err.status === 403) {
+          setPollState('denied');
+          setError('Sign-in request was rejected on your mobile device.');
+          if (intervalId) clearInterval(intervalId);
+        } else if (err.status === 400 && err.data?.status === 'EXPIRED') {
+          setPollState('expired');
+          setError('Login link has expired. Please request a new link.');
+          if (intervalId) clearInterval(intervalId);
+        }
+        // Transient network issues: keep polling
+      }
+    };
+
+    // Quick initial check, then poll every 2.5 seconds
+    const timeoutId = setTimeout(checkStatus, 1500);
+    intervalId = setInterval(checkStatus, 2500);
+
+    return () => {
+      isCancelled = true;
+      clearTimeout(timeoutId);
+      if (intervalId) clearInterval(intervalId);
+    };
+  }, [step, sessionId, deviceSecret, pollState]);
+
+  if (!isOpen) return null;
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-[#111410]/70 backdrop-blur-xs animate-in fade-in duration-150">
@@ -71,7 +141,7 @@ export default function AuthModal({ isOpen, onClose }) {
                 </span>
               </div>
               <p className="text-[11px] font-mono text-[#62685E]">
-                {step === 1 ? 'Instant registration & sign in via email' : 'Verification dispatch completed'}
+                {step === 1 ? 'Instant registration & sign in via email' : 'Cross-device verification active'}
               </p>
             </div>
           </div>
@@ -150,68 +220,89 @@ export default function AuthModal({ isOpen, onClose }) {
               </div>
             </form>
           ) : (
-            /* STEP 2: "Check your inbox" State */
-            <div className="space-y-4">
-              <div className="bg-[#EDF5E5] border-2 border-[#111410] shadow-[4px_4px_0px_0px_#111410] p-5 text-center flex flex-col items-center space-y-3">
-                <div className="w-12 h-12 bg-[#7BB33B] border-2 border-[#111410] shadow-[2px_2px_0px_0px_#111410] flex items-center justify-center text-white">
-                  <Mail className="w-6 h-6" />
+            /* STEP 2: "Check your inbox" & Waiting for Phone Confirmation */
+            <div>
+              {pollState === 'approved' ? (
+                <div className="space-y-4 py-4 text-center flex flex-col items-center animate-in zoom-in-95 duration-200">
+                  <div className="w-14 h-14 bg-[#7BB33B] border-2 border-[#111410] shadow-[3px_3px_0px_0px_#111410] flex items-center justify-center text-white">
+                    <CheckCircle2 className="w-8 h-8" />
+                  </div>
+                  <div>
+                    <h3 className="font-mono font-black text-base uppercase tracking-tight text-[#111410]">
+                      CONFIRMED FROM PHONE!
+                    </h3>
+                    <p className="mt-1 text-xs font-mono text-[#2F441E]">
+                      Session established. Redirecting to Kiwi Learning...
+                    </p>
+                  </div>
                 </div>
-                <div>
-                  <h3 className="font-mono font-black text-sm uppercase tracking-wide text-[#111410]">
-                    CHECK YOUR INBOX
-                  </h3>
-                  <p className="mt-1 text-xs font-mono text-[#2F441E]">
-                    We dispatched a secure magic login link to:
-                  </p>
-                  <p className="mt-1 text-xs font-mono font-bold bg-white border border-[#111410] px-2 py-1 text-[#111410] inline-block">
-                    {email}
-                  </p>
-                </div>
-              </div>
+              ) : (
+                <div className="space-y-4">
+                  {/* Sent-to email card */}
+                  <div className="bg-[#EDF5E5] border-2 border-[#111410] shadow-[3px_3px_0px_0px_#111410] p-4 text-center">
+                    <p className="text-xs font-mono text-[#2F441E]">
+                      Magic login link sent to:
+                    </p>
+                    <p className="mt-1 text-xs font-mono font-bold bg-white border border-[#111410] px-2 py-0.5 text-[#111410] inline-block">
+                      {email}
+                    </p>
+                  </div>
 
-              {/* Instructions Card */}
-              <div className="bg-white border-2 border-[#111410] shadow-[2px_2px_0px_0px_#111410] p-4 space-y-2">
-                <div className="text-xs font-mono font-bold uppercase tracking-wider text-[#111410] flex items-center space-x-1.5">
-                  <CheckCircle2 className="w-3.5 h-3.5 text-[#7BB33B]" />
-                  <span>INSTRUCTIONS</span>
-                </div>
-                <ul className="text-[11px] font-mono text-[#42281D] space-y-1.5 list-disc list-inside">
-                  <li>Open the email and click the verification link.</li>
-                  <li>The link is cryptographically signed and valid for <strong>15 minutes</strong>.</li>
-                  <li>Tokens are <strong>single-use</strong> and cannot be replayed.</li>
-                </ul>
-              </div>
+                  {/* 2-Digit Verification Match Code Card */}
+                  {matchCode && (
+                    <div className="bg-white border-2 border-[#111410] shadow-[4px_4px_0px_0px_#111410] p-4 text-center space-y-2">
+                      <div className="text-[10px] font-mono font-black uppercase tracking-wider text-[#62685E] flex items-center justify-center space-x-1.5">
+                        <ShieldCheck className="w-4 h-4 text-[#7BB33B]" />
+                        <span>VERIFICATION MATCH CODE</span>
+                      </div>
+                      <div className="inline-flex items-center justify-center bg-[#EDF5E5] border-2 border-[#111410] shadow-[3px_3px_0px_0px_#111410] px-6 py-2">
+                        <span className="text-3xl font-mono font-black tracking-widest text-[#111410]">
+                          {matchCode}
+                        </span>
+                      </div>
+                      <p className="text-[11px] font-mono text-[#52594D] max-w-xs mx-auto leading-relaxed">
+                        Open the email on your phone and tap the link. Verify that this <strong>2-digit code</strong> matches before tapping <strong>Approve</strong>.
+                      </p>
+                    </div>
+                  )}
 
-              {/* Inbox delivery info */}
-              <div className="bg-[#111410] border-2 border-[#111410] shadow-[2px_2px_0px_0px_#111410] p-3 text-white">
-                <div className="flex items-center space-x-1.5 text-[10px] font-mono font-bold uppercase tracking-wider text-[#84C341] mb-1">
-                  <Mail className="w-3.5 h-3.5" />
-                  <span>CHECK YOUR INBOX</span>
-                </div>
-                <p className="text-[11px] font-mono text-[#C4CDBC] leading-relaxed">
-                  Please check your inbox (and spam or promotions folder) for the login link.
-                </p>
-              </div>
+                  {/* Pulsing Active Pairing Status */}
+                  <div className="bg-[#FAFBF8] border-2 border-[#111410] p-3 flex items-center space-x-3 shadow-[2px_2px_0px_0px_#111410]">
+                    <div className="relative flex items-center justify-center w-5 h-5 shrink-0">
+                      <span className="w-3.5 h-3.5 bg-[#7BB33B] rounded-full animate-ping absolute opacity-75" />
+                      <span className="w-2.5 h-2.5 bg-[#7BB33B] rounded-full relative" />
+                    </div>
+                    <div className="flex-1 text-left">
+                      <div className="text-[11px] font-mono font-black uppercase text-[#111410]">
+                        WAITING FOR PHONE CONFIRMATION...
+                      </div>
+                      <div className="text-[10px] font-mono text-[#62685E] leading-tight mt-0.5">
+                        This computer will log in automatically without needing your email password here.
+                      </div>
+                    </div>
+                  </div>
 
-              {/* Action Buttons */}
-              <div className="pt-2 flex flex-col sm:flex-row gap-2">
-                <button
-                  type="button"
-                  onClick={handleSubmitEmail}
-                  disabled={loading}
-                  className="flex-1 flex items-center justify-center space-x-1.5 bg-[#FAFBF8] hover:bg-white text-[#111410] border-2 border-[#111410] shadow-[2px_2px_0px_0px_#111410] py-2 px-3 text-xs font-mono font-bold uppercase transition-all"
-                >
-                  <RefreshCw className={`w-3.5 h-3.5 ${loading ? 'animate-spin' : ''}`} />
-                  <span>RESEND LINK</span>
-                </button>
-                <button
-                  type="button"
-                  onClick={handleReset}
-                  className="flex-1 bg-white hover:bg-[#EDF5E5] text-[#2F441E] border-2 border-[#111410] shadow-[2px_2px_0px_0px_#111410] py-2 px-3 text-xs font-mono font-bold uppercase transition-all"
-                >
-                  USE DIFFERENT EMAIL
-                </button>
-              </div>
+                  {/* Action Buttons */}
+                  <div className="pt-1 flex flex-col sm:flex-row gap-2">
+                    <button
+                      type="button"
+                      onClick={handleSubmitEmail}
+                      disabled={loading}
+                      className="flex-1 flex items-center justify-center space-x-1.5 bg-[#FAFBF8] hover:bg-white text-[#111410] border-2 border-[#111410] shadow-[2px_2px_0px_0px_#111410] py-2 px-3 text-xs font-mono font-bold uppercase transition-all"
+                    >
+                      <RefreshCw className={`w-3.5 h-3.5 ${loading ? 'animate-spin' : ''}`} />
+                      <span>RESEND LINK</span>
+                    </button>
+                    <button
+                      type="button"
+                      onClick={handleReset}
+                      className="flex-1 bg-white hover:bg-[#EDF5E5] text-[#2F441E] border-2 border-[#111410] shadow-[2px_2px_0px_0px_#111410] py-2 px-3 text-xs font-mono font-bold uppercase transition-all"
+                    >
+                      USE DIFFERENT EMAIL
+                    </button>
+                  </div>
+                </div>
+              )}
             </div>
           )}
         </div>

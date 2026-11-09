@@ -215,19 +215,47 @@ export async function requestMagicLink(email) {
   return data;
 }
 
-export async function verifyMagicLink(token) {
+export async function verifyMagicLink(token, sessionId = null, action = 'verify') {
+  const payload = { token, action };
+  if (sessionId) {
+    payload.session_id = sessionId;
+  }
+
   const res = await fetch(`${API_BASE}/platform/auth/verify-magic-link/`, {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
     },
     credentials: 'include',
-    body: JSON.stringify({ token }),
+    body: JSON.stringify(payload),
   });
 
   const data = await res.json().catch(() => ({}));
   if (!res.ok) {
-    throw new Error(data.error || data.detail || 'Failed to verify magic link');
+    const error = new Error(data.error || data.detail || 'Failed to verify magic link');
+    error.status = res.status;
+    error.data = data;
+    throw error;
+  }
+  return data;
+}
+
+export async function pollMagicLinkStatus(sessionId, deviceSecret) {
+  const res = await fetch(`${API_BASE}/platform/auth/poll-status/`, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    credentials: 'include',
+    body: JSON.stringify({ session_id: sessionId, device_secret: deviceSecret }),
+  });
+
+  const data = await res.json().catch(() => ({}));
+  if (!res.ok) {
+    const error = new Error(data.error || 'Failed to poll login status');
+    error.status = res.status;
+    error.data = data;
+    throw error;
   }
   return data;
 }

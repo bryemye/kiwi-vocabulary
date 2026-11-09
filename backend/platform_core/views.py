@@ -1,5 +1,6 @@
 import random
 import secrets
+import uuid
 from urllib.parse import urlparse
 from django.conf import settings
 from django.contrib.auth import get_user_model, login, logout
@@ -84,9 +85,21 @@ class RequestMagicLinkView(APIView):
         payload = f"{user.id}:{nonce}"
         token = signer.sign(payload)
 
-        MagicLoginToken.objects.create(user=user, token=token)
+        # 3. Generate cross-device session pairing credentials
+        session_id = uuid.uuid4()
+        device_secret = secrets.token_urlsafe(32)
+        match_code = str(secrets.randbelow(90) + 10)  # 2-digit confirmation code: 10 - 99
 
-        # 3. Generate verification magic link matching the active client origin
+        MagicLoginToken.objects.create(
+            user=user,
+            token=token,
+            session_id=session_id,
+            device_secret=device_secret,
+            match_code=match_code,
+            status='PENDING'
+        )
+
+        # 4. Generate verification magic link matching the active client origin
         origin = request.META.get('HTTP_ORIGIN') or request.META.get('HTTP_REFERER')
         if origin:
             parsed = urlparse(origin)
@@ -94,24 +107,111 @@ class RequestMagicLinkView(APIView):
         else:
             frontend_url = getattr(settings, 'FRONTEND_URL', 'http://localhost:5173').rstrip('/')
 
-        magic_link = f"{frontend_url}/auth/verify?token={token}"
+        magic_link = f"{frontend_url}/auth/verify?token={token}&sid={session_id}"
 
-        # 4. Dispatch email via configured EMAIL_BACKEND (Resend SMTP or Console)
-        send_magic_link_email(to_email=user.email, magic_link=magic_link)
+        # 5. Dispatch email via configured EMAIL_BACKEND (Resend SMTP or Console)
+        send_magic_link_email(to_email=user.email, magic_link=magic_link, match_code=match_code)
 
-        print(f"\n{'='*80}\n[KIWI MAGIC LOGIN LINK] (DIRECT CLICK / SINGLE-LINE COPY):\n-> {magic_link}\n{'='*80}\n", flush=True)
+        print(f"\n{'='*80}\n[KIWI MAGIC LOGIN LINK] (DIRECT CLICK / SINGLE-LINE COPY):\n-> {magic_link}\n[MATCH CODE]: {match_code}\n{'='*80}\n", flush=True)
 
         return Response({
             "success": True,
-            "message": "Login link sent to your email."
+            "message": "Login link sent to your email.",
+            "session_id": str(session_id),
+            "device_secret": device_secret,
+            "match_code": match_code,
         }, status=status.HTTP_200_OK)
 
 
+class PollMagicLinkStatusView(APIView):
+    """
+    Polling endpoint used by the initiating device (e.g. computer/desktop)
+    to wait for confirmation from the secondary device (e.g. mobile phone).
+    Once APPROVED, logs in the initiating device and sets its session cookie.
+    """
+    permission_classes = [permissions.AllowAny]
+
+    def post(self, request):
+        session_id = request.data.get('session_id')
+        device_secret = request.data.get('device_secret')
+
+        if not session_id or not device_secret:
+            return Response({'error': 'session_id and device_secret are required.'}, status=status.HTTP_400_BAD_REQUEST)
+
+        try:
+            token_record = MagicLoginToken.objects.select_related('user').get(
+                session_id=session_id,
+                device_secret=device_secret
+            )
+        except (MagicLoginToken.DoesNotExist, ValidationError, ValueError):
+            return Response({'error': 'Invalid or unknown session.'}, status=status.HTTP_404_NOT_FOUND)
+
+        # Check expiration (15 minutes)
+        if (timezone.now() - token_record.created_at).total_seconds() > 15 * 60:
+            if token_record.status != 'EXPIRED':
+                token_record.status = 'EXPIRED'
+                token_record.save(update_fields=['status'])
+            return Response({'status': 'EXPIRED', 'error': 'Sign-in session expired. Please request a new link.'}, status=status.HTTP_400_BAD_REQUEST)
+
+        if token_record.status == 'PENDING':
+            return Response({'status': 'PENDING'}, status=status.HTTP_200_OK)
+
+        if token_record.status == 'DENIED':
+            return Response({'status': 'DENIED', 'error': 'Sign-in request was rejected.'}, status=status.HTTP_403_FORBIDDEN)
+
+        if token_record.status == 'APPROVED':
+            with transaction.atomic():
+                locked = MagicLoginToken.objects.select_for_update().get(id=token_record.id)
+                if locked.status != 'APPROVED':
+                    return Response({'error': 'Session status has changed.'}, status=status.HTTP_400_BAD_REQUEST)
+
+                locked.status = 'CONSUMED'
+                locked.is_used = True
+                locked.used_at = timezone.now()
+                locked.save(update_fields=['status', 'is_used', 'used_at'])
+
+                user = locked.user
+                admin_emails = [e.lower() for e in getattr(settings, 'ADMIN_EMAILS', [])]
+                if user.email and user.email.lower() in admin_emails and not user.is_staff:
+                    user.is_staff = True
+                    user.is_superuser = True
+                    user.save(update_fields=['is_staff', 'is_superuser'])
+
+                req = request._request if hasattr(request, '_request') else request
+                login(req, user)
+
+                return Response({
+                    "status": "APPROVED",
+                    "user": {
+                        "id": user.id,
+                        "email": user.email,
+                        "username": user.username,
+                        "is_staff": bool(user.is_staff),
+                        "is_superuser": bool(user.is_superuser),
+                    }
+                }, status=status.HTTP_200_OK)
+
+        if token_record.status == 'CONSUMED':
+            return Response({'status': 'CONSUMED', 'error': 'Session already completed.'}, status=status.HTTP_400_BAD_REQUEST)
+
+        return Response({'status': token_record.status}, status=status.HTTP_200_OK)
+
+
 class VerifyMagicLinkView(APIView):
+    """
+    Verification endpoint called when a magic link is accessed:
+    - action='check': Checks link validity and returns match code without consuming token (for mobile prompt)
+    - action='approve': Marks cross-device session as APPROVED (called by mobile phone)
+    - action='deny': Rejects cross-device session
+    - action='verify' (default): Validates token, consumes it, and establishes session on current device
+    """
     permission_classes = [permissions.AllowAny]
 
     def post(self, request):
         raw_token = request.data.get('token', '')
+        session_id = request.data.get('session_id') or request.data.get('sid')
+        action = request.data.get('action', 'verify')
+
         if not raw_token or not isinstance(raw_token, str):
             return Response({'error': 'Verification token is required.'}, status=status.HTTP_400_BAD_REQUEST)
 
@@ -133,24 +233,65 @@ class VerifyMagicLinkView(APIView):
                 )
             }, status=status.HTTP_400_BAD_REQUEST)
 
+        token_record = MagicLoginToken.objects.select_related('user').filter(token=token).first()
+        if not token_record:
+            return Response({'error': 'This login link is invalid.'}, status=status.HTTP_400_BAD_REQUEST)
+
+        try:
+            user_id = int(payload.split(':')[0])
+            if token_record.user_id != user_id:
+                return Response({'error': 'Token user mismatch.'}, status=status.HTTP_400_BAD_REQUEST)
+        except (ValueError, IndexError):
+            return Response({'error': 'Malformed token payload.'}, status=status.HTTP_400_BAD_REQUEST)
+
+        # 1. ACTION: CHECK (Mobile inspects request before approving)
+        if action == 'check':
+            if token_record.is_used and token_record.status != 'APPROVED':
+                return Response({'error': 'This login link has already been used.', 'status': token_record.status}, status=status.HTTP_400_BAD_REQUEST)
+            return Response({
+                "valid": True,
+                "email": token_record.user.email,
+                "match_code": token_record.match_code,
+                "status": token_record.status,
+                "session_id": str(token_record.session_id) if token_record.session_id else None,
+            }, status=status.HTTP_200_OK)
+
+        # 2. ACTION: DENY (User explicitly rejects sign-in on phone)
+        if action == 'deny':
+            with transaction.atomic():
+                locked = MagicLoginToken.objects.select_for_update().get(id=token_record.id)
+                locked.status = 'DENIED'
+                locked.is_used = True
+                locked.used_at = timezone.now()
+                locked.save(update_fields=['status', 'is_used', 'used_at'])
+            return Response({"success": True, "message": "Sign-in request denied."}, status=status.HTTP_200_OK)
+
+        # 3. ACTION: APPROVE (User confirms login from their phone)
+        if action == 'approve':
+            with transaction.atomic():
+                locked = MagicLoginToken.objects.select_for_update().get(id=token_record.id)
+                if locked.is_used and locked.status != 'PENDING':
+                    return Response({'error': 'This request has already been processed or expired.'}, status=status.HTTP_400_BAD_REQUEST)
+                locked.status = 'APPROVED'
+                locked.save(update_fields=['status'])
+            return Response({
+                "success": True,
+                "cross_device": True,
+                "message": "Authorized! Your computer will log in momentarily."
+            }, status=status.HTTP_200_OK)
+
+        # 4. ACTION: VERIFY (Default / Same-Device Direct Login)
         with transaction.atomic():
-            token_record = MagicLoginToken.objects.select_for_update().filter(token=token).first()
-            if not token_record or token_record.is_used:
+            locked = MagicLoginToken.objects.select_for_update().get(id=token_record.id)
+            if locked.is_used:
                 return Response({'error': 'This login link has already been used or is invalid.'}, status=status.HTTP_400_BAD_REQUEST)
 
-            try:
-                user_id = int(payload.split(':')[0])
-                if token_record.user_id != user_id:
-                    return Response({'error': 'Token user mismatch.'}, status=status.HTTP_400_BAD_REQUEST)
-            except (ValueError, IndexError):
-                return Response({'error': 'Malformed token payload.'}, status=status.HTTP_400_BAD_REQUEST)
+            locked.is_used = True
+            locked.status = 'CONSUMED'
+            locked.used_at = timezone.now()
+            locked.save(update_fields=['is_used', 'status', 'used_at'])
 
-            token_record.is_used = True
-            token_record.used_at = timezone.now()
-            token_record.save(update_fields=['is_used', 'used_at'])
-
-            user = token_record.user
-            # Ensure staff/superuser status if in configured ADMIN_EMAILS
+            user = locked.user
             admin_emails = [e.lower() for e in getattr(settings, 'ADMIN_EMAILS', [])]
             if user.email and user.email.lower() in admin_emails and not user.is_staff:
                 user.is_staff = True
