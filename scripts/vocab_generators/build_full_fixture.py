@@ -44,6 +44,26 @@ try:
     from data_batch7 import ROOTS_BATCH7
 except ImportError:
     ROOTS_BATCH7 = []
+try:
+    from data_batch8 import ROOTS_BATCH8
+except ImportError:
+    ROOTS_BATCH8 = []
+try:
+    from data_batch9 import ROOTS_BATCH9
+except ImportError:
+    ROOTS_BATCH9 = []
+try:
+    from data_batch10 import ROOTS_BATCH10
+except ImportError:
+    ROOTS_BATCH10 = []
+try:
+    from data_batch11 import ROOTS_BATCH11
+except ImportError:
+    ROOTS_BATCH11 = []
+try:
+    from data_batch12 import ROOTS_BATCH12
+except ImportError:
+    ROOTS_BATCH12 = []
 
 
 def build_unified_fixture(target_paths=None):
@@ -54,7 +74,7 @@ def build_unified_fixture(target_paths=None):
             os.path.join(PROJECT_ROOT, "core", "fixtures", "sat_vocab_seed.json"),
         ]
 
-    all_parts = [ROOTS_PART1, ROOTS_PART2, ROOTS_PART3, ROOTS_BATCH1, ROOTS_BATCH2, ROOTS_BATCH3, ROOTS_BATCH4, ROOTS_BATCH5, ROOTS_BATCH6, ROOTS_BATCH7]
+    all_parts = [ROOTS_PART1, ROOTS_PART2, ROOTS_PART3, ROOTS_BATCH1, ROOTS_BATCH2, ROOTS_BATCH3, ROOTS_BATCH4, ROOTS_BATCH5, ROOTS_BATCH6, ROOTS_BATCH7, ROOTS_BATCH8, ROOTS_BATCH9, ROOTS_BATCH10, ROOTS_BATCH11, ROOTS_BATCH12]
 
     combined_roots = {}
     seen_words = set()
