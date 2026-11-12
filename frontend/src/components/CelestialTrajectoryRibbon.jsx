@@ -44,26 +44,26 @@ export default function CelestialTrajectoryRibbon() {
   }, [trajectory.length]);
 
   if (!isRibbonVisible) {
-    // Minimized Floating Node Pill
+    // Minimized Floating Node Pill - Sleek & Modern
     return (
       <aside
         aria-label="Navigation Trajectory Pill"
-        className="fixed bottom-4 right-4 z-40 bg-[#111410] text-[#FAFBF8] border-2 border-[#111410] shadow-[3px_3px_0px_0px_#7BB33B] px-3 py-1.5 flex items-center space-x-2 text-xs font-mono font-bold"
+        className="fixed bottom-5 right-5 z-40 bg-white/95 backdrop-blur-md text-[#111410] border border-stone-200 shadow-soft-lg hover:shadow-soft-xl rounded-full px-3.5 py-1.5 flex items-center space-x-2 text-xs font-mono transition-all duration-200 hover:-translate-y-0.5"
       >
         <div className="relative w-2.5 h-2.5">
           <div className="w-2.5 h-2.5 bg-[#7BB33B] rounded-full animate-ping absolute inset-0 opacity-75" />
           <div className="w-2.5 h-2.5 bg-[#7BB33B] rounded-full relative" />
         </div>
-        <span className="text-[#84C341] tracking-wider uppercase text-[11px]">
-          TRAJECTORY: {currentWaypoint ? currentWaypoint.title : 'READY'}
+        <span className="text-[#2F441E] font-bold tracking-wide uppercase text-[11px]">
+          Trajectory: {currentWaypoint ? currentWaypoint.title : 'Ready'}
         </span>
-        <span className="text-[#62685E] text-[10px]">({trajectory.length} nodes)</span>
+        <span className="text-[#62685E] text-[10px]">({trajectory.length})</span>
         <button
           onClick={() => setIsRibbonVisible(true)}
-          className="ml-2 px-1.5 py-0.5 bg-[#7BB33B] hover:bg-[#84C341] text-[#111410] font-black uppercase tracking-wider text-[10px] transition"
+          className="ml-1.5 px-2 py-0.5 bg-[#EDF5E5] hover:bg-[#7BB33B] hover:text-white text-[#2F441E] font-bold uppercase tracking-wider text-[10px] rounded-full border border-[#7BB33B]/40 transition"
           title="Expand Trajectory Ribbon"
         >
-          RESTORE RIBBON
+          Expand
         </button>
       </aside>
     );
@@ -97,10 +97,10 @@ export default function CelestialTrajectoryRibbon() {
   return (
     <section 
       aria-label="Navigation Trajectory Ribbon"
-      className="bg-[#FAFBF8] border-b-2 border-[#111410] select-none relative z-30 transition-all duration-200"
+      className="bg-white/95 backdrop-blur-md border-b border-stone-200 select-none relative z-30 transition-all duration-200 shadow-soft-xs"
     >
       {/* Top Telemetry Header Bar */}
-      <div className="max-w-7xl mx-auto px-3 sm:px-4 py-1.5 flex items-center justify-between border-b border-[#111410]/15 text-[11px] font-mono font-bold uppercase">
+      <div className="max-w-7xl mx-auto px-3 sm:px-4 py-1.5 flex items-center justify-between border-b border-stone-100 text-[11px] font-mono font-bold uppercase">
         <div className="flex items-center space-x-2 sm:space-x-3 overflow-hidden">
           {/* Live Node Beacon */}
           <div className="flex items-center space-x-1.5 shrink-0">
@@ -115,14 +115,14 @@ export default function CelestialTrajectoryRibbon() {
 
           {/* Current Node Info */}
           <div className="hidden md:flex items-center space-x-1.5 text-[#62685E] text-[10px] truncate">
-            <span className="text-[#111410]/30">|</span>
+            <span className="text-stone-300">|</span>
             <span className="text-[#7BB33B] font-bold">●</span>
             <span className="truncate text-[#111410] font-black uppercase">
               {currentWaypoint ? currentWaypoint.title : 'READY'}
             </span>
             {currentWaypoint && (
               <>
-                <span className="text-[#111410]/30">|</span>
+                <span className="text-stone-300">|</span>
                 <span className="text-[#42281D] truncate">
                   LEVEL {currentWaypoint.depth}: {currentWaypoint.subtitle}
                 </span>

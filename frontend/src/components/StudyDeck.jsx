@@ -58,11 +58,11 @@ export default function StudyDeck({
   const getConnotationBadge = (connotation) => {
     switch (connotation) {
       case 'positive':
-        return 'bg-[#EDF5E5] text-[#2F441E] border-2 border-[#111410]';
+        return 'bg-[#EDF5E5] text-[#2F441E] border border-[#7BB33B]/40 rounded-full font-sans font-semibold';
       case 'negative':
-        return 'bg-[#FDF2F2] text-[#991B1B] border-2 border-[#111410]';
+        return 'bg-rose-50 text-rose-700 border border-rose-200 rounded-full font-sans font-semibold';
       default:
-        return 'bg-[#EFE8DF] text-[#42281D] border-2 border-[#111410]';
+        return 'bg-stone-100 text-stone-700 border border-stone-200 rounded-full font-sans font-semibold';
     }
   };
 
@@ -229,34 +229,34 @@ export default function StudyDeck({
 
       {/* SESSION COMPLETE BENTO */}
       {isSessionComplete ? (
-        <div className="bg-white border-2 border-[#111410] shadow-[5px_5px_0px_0px_#111410] sm:shadow-[6px_6px_0px_0px_#111410] p-5 sm:p-8 text-center animate-fade-in my-4 sm:my-6">
-          <div className="w-12 h-12 sm:w-14 sm:h-14 mx-auto bg-[#EDF5E5] border-2 border-[#111410] shadow-[3px_3px_0px_0px_#111410] flex items-center justify-center mb-3 sm:mb-4">
-            <Award className="w-6 h-6 sm:w-7 sm:h-7 text-[#7BB33B]" />
+        <div className="bg-white border border-stone-200/90 rounded-3xl shadow-soft-lg p-6 sm:p-10 text-center animate-fade-in my-4 sm:my-6">
+          <div className="w-14 h-14 mx-auto bg-[#EDF5E5] border border-[#7BB33B]/40 rounded-2xl shadow-soft-xs flex items-center justify-center mb-4">
+            <Award className="w-7 h-7 text-[#7BB33B]" />
           </div>
 
-          <span className="text-[10px] font-mono font-black uppercase tracking-wider px-2 py-0.5 bg-[#EDF5E5] text-[#2F441E] border border-[#111410] inline-block mb-2">
-            ROUND {sessionRound} SUMMARY
+          <span className="text-[11px] font-sans font-bold uppercase tracking-wider px-3 py-1 bg-[#EDF5E5] text-[#2F441E] rounded-full inline-block mb-3 border border-[#7BB33B]/30">
+            Round {sessionRound} Summary
           </span>
 
-          <h2 className="text-2xl sm:text-3xl font-black font-sans uppercase tracking-tight text-[#111410]">
+          <h2 className="text-2xl sm:text-4xl font-extrabold font-sans tracking-tight text-stone-900">
             {subsetPracticeInfo ? 'Practice Session Complete!' : '15-Card Session Complete!'}
           </h2>
-          <p className="text-xs sm:text-sm font-mono text-[#62685E] mt-1 uppercase">
+          <p className="text-xs sm:text-sm font-sans text-stone-500 mt-1.5">
             {subsetPracticeInfo 
               ? `Completed review: ${subsetPracticeInfo.title}.`
-              : 'Active spaced-repetition batch logged to platform activity.'}
+              : 'Spaced repetition batch logged to platform progress.'}
           </p>
 
-          <div className="my-5 sm:my-6 max-w-sm mx-auto bg-[#FAFBF8] border-2 border-[#111410] p-4 shadow-[3px_3px_0px_0px_#111410]">
-            <div className="flex items-center justify-between text-xs font-mono font-bold uppercase mb-2">
-              <span className="text-[#62685E]">Batch Accuracy:</span>
-              <span className="text-[#2F441E] font-black">
-                {roundStats.correct} / {roundStats.total} MASTERED ({roundStats.total > 0 ? Math.round((roundStats.correct / roundStats.total) * 100) : 0}%)
+          <div className="my-6 max-w-sm mx-auto bg-stone-50 border border-stone-200/80 rounded-2xl p-4 shadow-soft-xs">
+            <div className="flex items-center justify-between text-xs font-sans font-semibold mb-2">
+              <span className="text-stone-500">Batch Accuracy:</span>
+              <span className="text-[#2F441E] font-bold">
+                {roundStats.correct} / {roundStats.total} Mastered ({roundStats.total > 0 ? Math.round((roundStats.correct / roundStats.total) * 100) : 0}%)
               </span>
             </div>
-            <div className="w-full h-3 bg-[#EFE8DF] border-2 border-[#111410] overflow-hidden">
+            <div className="w-full h-2.5 bg-stone-200 rounded-full overflow-hidden">
               <div 
-                className="h-full bg-[#7BB33B] transition-all duration-500"
+                className="h-full bg-[#7BB33B] rounded-full transition-all duration-500"
                 style={{ width: `${roundStats.total > 0 ? (roundStats.correct / roundStats.total) * 100 : 0}%` }}
               />
             </div>
@@ -264,32 +264,32 @@ export default function StudyDeck({
 
           {/* Guest completion call-to-action */}
           {isGuestMode && onOpenAuth && (
-            <div className="my-5 p-4 sm:p-5 bg-[#EDF5E5] border-2 border-[#111410] shadow-[3px_3px_0px_0px_#111410] text-left flex flex-col sm:flex-row items-center justify-between gap-4">
+            <div className="my-6 p-5 bg-[#EDF5E5]/70 border border-[#7BB33B]/30 rounded-2xl shadow-soft-xs text-left flex flex-col sm:flex-row items-center justify-between gap-4">
               <div>
-                <span className="text-[10px] font-mono font-black uppercase tracking-wider px-2 py-0.5 bg-white text-[#2F441E] border border-[#111410] inline-block mb-1">
-                  ⚡ GUEST CHALLENGE FINISHED
+                <span className="text-[10px] font-mono font-bold uppercase tracking-wider px-2 py-0.5 bg-white text-[#2F441E] rounded-md border border-[#7BB33B]/30 inline-block mb-1.5">
+                  ⚡ Guest Challenge Finished
                 </span>
-                <h4 className="text-sm sm:text-base font-black font-sans uppercase text-[#111410]">
+                <h4 className="text-base font-bold font-sans text-stone-900">
                   Save your streak & unlock personalized spaced repetition
                 </h4>
-                <p className="text-xs font-mono text-[#42281D] mt-0.5">
+                <p className="text-xs font-sans text-stone-600 mt-1">
                   Sign in with your email to log your accuracy, review words you missed, and track root mastery rings.
                 </p>
               </div>
               <button
                 type="button"
                 onClick={onOpenAuth}
-                className="shrink-0 px-4 py-2.5 bg-[#7BB33B] hover:bg-[#6FA334] text-white border-2 border-[#111410] shadow-[3px_3px_0px_0px_#111410] text-xs font-mono font-black uppercase transition-all cursor-pointer"
+                className="shrink-0 px-4 py-2.5 bg-[#7BB33B] hover:bg-[#6FA334] text-white rounded-xl shadow-soft-xs text-xs font-sans font-bold transition-all cursor-pointer"
               >
                 Sign In To Save Progress &rarr;
               </button>
             </div>
           )}
 
-          <div className="flex flex-col sm:flex-row items-center justify-center gap-3 sm:gap-4 mt-6">
+          <div className="flex flex-col sm:flex-row items-center justify-center gap-3 mt-6">
             <button
               onClick={onRestartSession}
-              className="w-full sm:w-auto px-5 sm:px-6 py-3 bg-[#7BB33B] hover:bg-[#84C341] text-white font-mono font-black text-xs uppercase tracking-wider border-2 border-[#111410] shadow-[3px_3px_0px_0px_#111410] sm:shadow-[4px_4px_0px_0px_#111410] transition active:translate-x-[2px] active:translate-y-[2px] flex items-center justify-center space-x-2"
+              className="w-full sm:w-auto px-6 py-3 bg-[#7BB33B] hover:bg-[#6FA334] text-white font-sans font-bold text-xs uppercase tracking-wider rounded-2xl shadow-soft-sm transition-all flex items-center justify-center space-x-2"
             >
               <RotateCcw className="w-4 h-4" />
               <span>Practice Deck Again ({sessionDeck.length})</span>
@@ -297,36 +297,36 @@ export default function StudyDeck({
 
             <button
               onClick={onOpenCustomModal}
-              className="w-full sm:w-auto px-5 sm:px-6 py-3 bg-[#FAFBF8] hover:bg-white text-[#111410] font-mono font-black text-xs uppercase tracking-wider border-2 border-[#111410] shadow-[3px_3px_0px_0px_#111410] sm:shadow-[4px_4px_0px_0px_#111410] transition flex items-center justify-center space-x-2"
+              className="w-full sm:w-auto px-6 py-3 bg-white hover:bg-stone-50 text-stone-700 font-sans font-bold text-xs uppercase tracking-wider rounded-2xl border border-stone-200 shadow-soft-xs transition-all flex items-center justify-center space-x-2"
             >
-              <Sliders className="w-4 h-4 text-[#42281D]" />
-              <span>New Custom Session</span>
+              <Sliders className="w-4 h-4 text-stone-500" />
+              <span>Custom Session</span>
             </button>
 
             <button
               onClick={onReviewProgress}
-              className="w-full sm:w-auto px-5 sm:px-6 py-3 bg-white hover:bg-[#FAFBF8] text-[#111410] font-mono font-black text-xs uppercase tracking-wider border-2 border-[#111410] shadow-[3px_3px_0px_0px_#111410] sm:shadow-[4px_4px_0px_0px_#111410] transition flex items-center justify-center space-x-2"
+              className="w-full sm:w-auto px-6 py-3 bg-white hover:bg-stone-50 text-stone-700 font-sans font-bold text-xs uppercase tracking-wider rounded-2xl border border-stone-200 shadow-soft-xs transition-all flex items-center justify-center space-x-2"
             >
-              <Award className="w-4 h-4 text-[#42281D]" />
-              <span>Review Root Progress</span>
+              <Award className="w-4 h-4 text-stone-500" />
+              <span>Root Progress</span>
             </button>
           </div>
         </div>
       ) : !currentWord ? (
-        <div className="bg-white border-2 border-[#111410] shadow-[4px_4px_0px_0px_#111410] p-8 sm:p-12 text-center my-6">
-          <Layers className="w-12 h-12 text-[#42281D] mx-auto mb-3" />
-          <h3 className="text-lg font-bold font-mono text-[#111410] uppercase">No Matching Vocabulary Words</h3>
-          <p className="text-xs font-mono text-[#62685E] mt-1">Try resetting your origin filter or launching a custom practice session.</p>
-          <div className="flex flex-col sm:flex-row items-center justify-center gap-3 mt-4">
+        <div className="bg-white border border-stone-200 rounded-3xl shadow-soft-md p-8 sm:p-12 text-center my-6">
+          <Layers className="w-12 h-12 text-stone-400 mx-auto mb-3" />
+          <h3 className="text-lg font-bold font-sans text-stone-800">No Matching Vocabulary Words</h3>
+          <p className="text-xs font-sans text-stone-500 mt-1">Try resetting your origin filter or launching a custom practice session.</p>
+          <div className="flex flex-col sm:flex-row items-center justify-center gap-3 mt-5">
             <button
               onClick={onResetFilters}
-              className="w-full sm:w-auto px-5 py-2.5 bg-white text-[#111410] font-mono font-bold text-xs uppercase border-2 border-[#111410] shadow-[3px_3px_0px_0px_#111410]"
+              className="w-full sm:w-auto px-5 py-2.5 bg-white text-stone-700 font-sans font-bold text-xs rounded-xl border border-stone-200 shadow-soft-xs hover:bg-stone-50"
             >
-              Reset All Filters
+              Reset Filters
             </button>
             <button
               onClick={onOpenCustomModal}
-              className="w-full sm:w-auto px-5 py-2.5 bg-[#7BB33B] text-white font-mono font-bold text-xs uppercase border-2 border-[#111410] shadow-[3px_3px_0px_0px_#111410]"
+              className="w-full sm:w-auto px-5 py-2.5 bg-[#7BB33B] text-white font-sans font-bold text-xs rounded-xl shadow-soft-xs hover:bg-[#6FA334]"
             >
               Start Custom Session
             </button>
@@ -336,18 +336,18 @@ export default function StudyDeck({
         <>
           {/* Guest Mode Indicator Header */}
           {isGuestMode && (
-            <div className="mb-3 px-3 py-2 bg-[#EDF5E5] border-2 border-[#111410] shadow-[2px_2px_0px_0px_#111410] flex items-center justify-between text-xs font-mono">
+            <div className="mb-3 px-3.5 py-2 bg-[#EDF5E5]/80 border border-[#7BB33B]/30 rounded-2xl shadow-soft-xs flex items-center justify-between text-xs font-sans">
               <div className="flex items-center space-x-2">
-                <span className="w-2.5 h-2.5 rounded-full bg-[#7BB33B] animate-pulse shrink-0" />
-                <span className="font-black text-[#2F441E] uppercase tracking-wide">
-                  DAILY GUEST CHALLENGE {dailyDateFormatted ? `· ${dailyDateFormatted}` : ''}
+                <span className="w-2 h-2 rounded-full bg-[#7BB33B] animate-pulse shrink-0" />
+                <span className="font-bold text-[#2F441E]">
+                  Daily Guest Challenge {dailyDateFormatted ? `· ${dailyDateFormatted}` : ''}
                 </span>
               </div>
               {onOpenAuth && (
                 <button
                   type="button"
                   onClick={onOpenAuth}
-                  className="text-[11px] font-bold text-[#42281D] hover:underline uppercase flex items-center space-x-1 cursor-pointer"
+                  className="text-xs font-semibold text-[#42281D] hover:underline flex items-center space-x-1 cursor-pointer"
                 >
                   <span>Sign in to save progress</span>
                   <span>&rarr;</span>
@@ -357,20 +357,20 @@ export default function StudyDeck({
           )}
 
           {/* Progress Bar & Header */}
-          <div className="flex items-center justify-between text-xs font-mono font-bold text-[#111410] uppercase">
+          <div className="flex items-center justify-between text-xs font-sans text-stone-700">
             <div className="flex items-center space-x-2 sm:space-x-3">
-              <span className="px-2 sm:px-2.5 py-1 bg-white border-2 border-[#111410] shadow-[2px_2px_0px_0px_#111410]">
-                CARD {currentIndex + 1} OF {sessionDeck.length}
+              <span className="px-2.5 py-1 bg-white border border-stone-200 rounded-xl font-mono font-bold shadow-soft-xs text-stone-800">
+                Card {currentIndex + 1} of {sessionDeck.length}
               </span>
-              <span className="text-[#42281D] text-[11px] sm:text-xs">
-                ROOT: <strong>{currentWord.root_details?.morpheme?.toUpperCase()}</strong>
-                <span className="hidden sm:inline"> ({currentWord.root_details?.language?.toUpperCase()})</span>
+              <span className="text-stone-500 text-xs">
+                Root: <strong className="text-[#2F441E] font-mono font-bold">[{currentWord.root_details?.morpheme?.toUpperCase()}]</strong>
+                <span className="hidden sm:inline"> ({currentWord.root_details?.language})</span>
               </span>
             </div>
 
-            <div className="w-28 sm:w-44 h-3 bg-[#EFE8DF] border-2 border-[#111410] overflow-hidden shadow-[1px_1px_0px_0px_#111410]">
+            <div className="w-28 sm:w-44 h-2 bg-stone-200 rounded-full overflow-hidden shadow-soft-xs">
               <div 
-                className="h-full bg-[#7BB33B] transition-all duration-300"
+                className="h-full bg-[#7BB33B] rounded-full transition-all duration-300"
                 style={{ width: `${((currentIndex + 1) / sessionDeck.length) * 100}%` }}
               />
             </div>
@@ -420,7 +420,7 @@ export default function StudyDeck({
           )}
 
           {/* 3D FLASHCARD CONTAINER WITH TOUCH SWIPE GESTURES */}
-          <div className="relative min-h-[420px] sm:min-h-[440px] w-full [perspective:1200px] mb-2 sm:mb-4 select-none">
+          <div className="relative min-h-[440px] sm:min-h-[460px] w-full [perspective:1200px] mb-3 sm:mb-5 select-none">
             <div 
               onClick={handleCardClick}
               onTouchStart={handleTouchStart}
@@ -434,17 +434,17 @@ export default function StudyDeck({
                 }`,
                 transition: touchOffset ? 'none' : 'transform 0.45s ease-in-out',
               }}
-              className="w-full min-h-[420px] sm:min-h-[440px] relative cursor-pointer touch-pan-y"
+              className="w-full min-h-[440px] sm:min-h-[460px] relative cursor-pointer touch-pan-y"
             >
               {/* Dynamic On-Card Swipe Feedback Badges */}
               {touchOffset > 30 && (
-                <div className="absolute top-6 right-6 z-40 pointer-events-none bg-[#7BB33B] text-white font-mono font-black text-xs sm:text-sm uppercase px-3 py-1.5 border-2 border-[#111410] shadow-[3px_3px_0px_0px_#111410] rotate-6 animate-pulse">
-                  ✓ MASTERED →
+                <div className="absolute top-6 right-6 z-40 pointer-events-none bg-[#7BB33B] text-white font-sans font-bold text-xs sm:text-sm uppercase px-3.5 py-1.5 rounded-xl shadow-soft-lg rotate-6 animate-pulse">
+                  ✓ Mastered →
                 </div>
               )}
               {touchOffset < -30 && (
-                <div className="absolute top-6 left-6 z-40 pointer-events-none bg-[#991B1B] text-white font-mono font-black text-xs sm:text-sm uppercase px-3 py-1.5 border-2 border-[#111410] shadow-[3px_3px_0px_0px_#111410] -rotate-6 animate-pulse">
-                  ← NEEDS REVIEW ✗
+                <div className="absolute top-6 left-6 z-40 pointer-events-none bg-rose-600 text-white font-sans font-bold text-xs sm:text-sm uppercase px-3.5 py-1.5 rounded-xl shadow-soft-lg -rotate-6 animate-pulse">
+                  ← Needs Review ✗
                 </div>
               )}
 
@@ -455,40 +455,40 @@ export default function StudyDeck({
                   WebkitBackfaceVisibility: 'hidden',
                   transform: 'rotateY(0deg)',
                 }}
-                className={`absolute inset-0 w-full min-h-[420px] sm:min-h-[440px] h-full bg-white border-2 border-[#111410] shadow-[5px_5px_0px_0px_#42281D] sm:shadow-[6px_6px_0px_0px_#42281D] p-4 sm:p-8 flex flex-col justify-between transition-shadow duration-200 ${
+                className={`absolute inset-0 w-full min-h-[440px] sm:min-h-[460px] h-full bg-white border border-stone-200/90 rounded-3xl shadow-soft-lg hover:shadow-card-glow p-6 sm:p-10 flex flex-col justify-between transition-all duration-300 ${
                   isFlipped ? 'pointer-events-none' : 'pointer-events-auto'
                 }`}
               >
                 {/* Top Metadata */}
-                <div className="flex flex-wrap items-center justify-between gap-2 border-b-2 border-[#111410] pb-2.5 sm:pb-3">
-                  <div className="flex items-center space-x-1.5 sm:space-x-2 flex-wrap gap-y-1">
-                    <span className="text-[10px] sm:text-[11px] font-mono font-extrabold uppercase tracking-wider px-2 py-0.5 bg-[#111410] text-white">
+                <div className="flex flex-wrap items-center justify-between gap-2 border-b border-stone-100 pb-3 sm:pb-4">
+                  <div className="flex items-center space-x-1.5 sm:space-x-2 flex-wrap gap-y-1.5">
+                    <span className="text-[11px] font-sans font-bold uppercase tracking-wider px-2.5 py-0.5 bg-stone-800 text-white rounded-full">
                       {currentWord.part_of_speech || 'noun'}
                     </span>
-                    <span className={`text-[10px] sm:text-[11px] font-mono font-bold uppercase tracking-wider px-2 py-0.5 ${getConnotationBadge(currentWord.connotation)}`}>
+                    <span className={`text-[11px] font-sans font-semibold uppercase tracking-wider px-2.5 py-0.5 ${getConnotationBadge(currentWord.connotation)}`}>
                       {currentWord.connotation}
                     </span>
                     {currentWord.root_details?.thematic_cluster && (
-                      <span className="text-[10px] sm:text-[11px] font-mono font-bold uppercase tracking-wider px-2 py-0.5 bg-[#EDF5E5] text-[#2F441E] border border-[#111410]">
+                      <span className="text-[11px] font-sans font-semibold px-2.5 py-0.5 bg-[#EDF5E5] text-[#2F441E] border border-[#7BB33B]/30 rounded-full">
                         🧠 {currentWord.root_details.thematic_cluster}
                       </span>
                     )}
                     {currentWord.root_details?.sat_tier && (
-                      <span className="text-[10px] sm:text-[11px] font-mono font-bold uppercase tracking-wider px-2 py-0.5 bg-[#FFFBEB] text-[#92400E] border border-[#111410]">
+                      <span className="text-[11px] font-sans font-semibold px-2.5 py-0.5 bg-amber-50 text-amber-800 border border-amber-200 rounded-full">
                         ⚡ {currentWord.root_details.sat_tier}
                       </span>
                     )}
                     {currentWord.review?.verified && (
                       <span 
-                        className="inline-flex items-center space-x-1 px-1.5 sm:px-2 py-0.5 bg-[#EDF5E5] text-[#2F441E] border border-[#7BB33B] text-[10px] font-mono font-bold uppercase shadow-[1px_1px_0px_0px_#2F441E] cursor-help"
+                        className="inline-flex items-center space-x-1 px-2.5 py-0.5 bg-[#EDF5E5] text-[#2F441E] border border-[#7BB33B]/40 text-[11px] font-sans font-semibold rounded-full shadow-soft-xs cursor-help"
                         title="Independently verified for SAT/ACT accuracy"
                       >
                         <Check className="w-3 h-3 text-[#7BB33B] stroke-[3]" />
-                        <span className="hidden sm:inline">✓ Verified</span>
+                        <span className="hidden sm:inline">Verified</span>
                       </span>
                     )}
                     {isAdminMode && !currentWord.review?.verified && (
-                      <span className="px-1.5 py-0.5 bg-[#FEF3C7] text-[#92400E] border border-[#111410] text-[9px] font-mono font-bold uppercase">
+                      <span className="px-2 py-0.5 bg-amber-50 text-amber-800 border border-amber-200 text-[10px] font-sans font-bold rounded-full">
                         Unreviewed
                       </span>
                     )}
@@ -502,7 +502,7 @@ export default function StudyDeck({
                           e.stopPropagation();
                           if (onEditWordVerification) onEditWordVerification(currentWord);
                         }}
-                        className="px-2 py-1 bg-[#EDF5E5] hover:bg-[#DCEDD0] text-[#2F441E] border-2 border-[#111410] shadow-[2px_2px_0px_0px_#111410] text-[10px] font-mono font-black uppercase flex items-center space-x-1 transition active:translate-x-[1px] active:translate-y-[1px]"
+                        className="px-2.5 py-1 bg-[#EDF5E5] hover:bg-[#DCEDD0] text-[#2F441E] border border-[#7BB33B]/30 rounded-xl text-xs font-sans font-bold flex items-center space-x-1 transition shadow-soft-xs"
                         title="Edit verification & editorial notes"
                       >
                         <Edit3 className="w-3 h-3 text-[#7BB33B]" />
@@ -516,7 +516,7 @@ export default function StudyDeck({
                         e.stopPropagation();
                         onSpeak(currentWord.word);
                       }}
-                      className="p-1.5 bg-[#FAFBF8] hover:bg-[#EDF5E5] text-[#111410] border-2 border-[#111410] shadow-[2px_2px_0px_0px_#111410] transition min-w-[36px] min-h-[36px] flex items-center justify-center"
+                      className="p-2 bg-stone-50 hover:bg-[#EDF5E5] text-stone-700 border border-stone-200 rounded-xl transition shadow-soft-xs min-w-[38px] min-h-[38px] flex items-center justify-center"
                       title="Listen to pronunciation"
                     >
                       <Volume2 className="w-4 h-4 text-[#2F441E]" />
@@ -525,28 +525,28 @@ export default function StudyDeck({
                 </div>
 
                 {/* Target Word */}
-                <div className="my-6 sm:my-8 text-center px-1">
-                  <h1 className="text-3xl sm:text-5xl font-black text-[#111410] tracking-tight uppercase font-sans break-words hyphens-auto">
+                <div className="my-6 sm:my-10 text-center px-2">
+                  <h1 className="text-4xl sm:text-6xl font-extrabold text-stone-900 tracking-tight font-sans break-words hyphens-auto">
                     {currentWord.word}
                   </h1>
                   {currentWord.pronunciation && (
-                    <p className="text-[#62685E] text-xs sm:text-sm mt-1.5 sm:mt-2 font-mono font-bold tracking-wider">
+                    <p className="text-stone-500 text-sm sm:text-base mt-2 font-mono font-medium tracking-wide">
                       /{currentWord.pronunciation}/
                     </p>
                   )}
                 </div>
 
                 {/* Morpheme Decomposition Tags */}
-                <div className="bg-[#FAFBF8] border-2 border-[#111410] p-3 sm:p-4">
-                  <div className="text-[10px] sm:text-[11px] font-mono font-black text-[#111410] uppercase tracking-wider mb-2.5 flex items-center justify-between">
-                    <span className="flex items-center space-x-1.5">
+                <div className="bg-stone-50/80 border border-stone-200/80 rounded-2xl p-4 sm:p-5 shadow-soft-xs">
+                  <div className="text-[11px] font-sans font-bold text-stone-500 uppercase tracking-wider mb-3 flex items-center justify-between">
+                    <span className="flex items-center space-x-1.5 text-stone-700">
                       <Layers className="w-3.5 h-3.5 text-[#7BB33B]" />
                       <span>Morpheme Decomposition</span>
                     </span>
-                    <span className="text-[#62685E] text-[10px] font-normal uppercase hidden sm:inline">[Space] to reveal</span>
+                    <span className="text-stone-400 text-[10px] font-mono lowercase hidden sm:inline">[space to flip]</span>
                   </div>
                   
-                  <div className="flex flex-wrap items-center gap-1.5 sm:gap-2">
+                  <div className="flex flex-wrap items-center gap-2 sm:gap-2.5">
                     {currentWord.prefix && (
                       <button
                         type="button"
@@ -558,7 +558,7 @@ export default function StudyDeck({
                             word: currentWord,
                           });
                         }}
-                        className="px-2.5 sm:px-3 py-1.5 bg-[#EDF5E5] hover:bg-[#DCEDD0] text-[#2F441E] border-2 border-[#111410] shadow-[2px_2px_0px_0px_#111410] hover:shadow-[3px_3px_0px_0px_#111410] active:translate-y-0 transition cursor-pointer text-left group"
+                        className="px-3 py-1.5 bg-[#EDF5E5] hover:bg-[#DCEDD0] text-[#2F441E] border border-[#7BB33B]/40 rounded-xl shadow-soft-xs hover:shadow-soft-sm transition cursor-pointer text-left group"
                         title="Click to explore this Prefix Morpheme & practice subset"
                       >
                         <div className="flex items-center justify-between space-x-1">
@@ -569,7 +569,7 @@ export default function StudyDeck({
                       </button>
                     )}
 
-                    {currentWord.prefix && <span className="text-[#111410] font-black font-mono text-base">+</span>}
+                    {currentWord.prefix && <span className="text-stone-400 font-bold font-mono text-base">+</span>}
 
                     <button
                       type="button"
@@ -581,36 +581,36 @@ export default function StudyDeck({
                           word: currentWord,
                         });
                       }}
-                      className="px-2.5 sm:px-3 py-1.5 bg-[#EFE8DF] hover:bg-[#E5DCD1] text-[#42281D] border-2 border-[#111410] shadow-[2px_2px_0px_0px_#111410] hover:shadow-[3px_3px_0px_0px_#111410] active:translate-y-0 transition cursor-pointer text-left group"
+                      className="px-3 py-1.5 bg-[#EFE8DF]/80 hover:bg-[#EFE8DF] text-[#42281D] border border-[#C29B78]/40 rounded-xl shadow-soft-xs hover:shadow-soft-sm transition cursor-pointer text-left group"
                       title="Click to explore this Root Morpheme & practice subset"
                     >
-                      <div className="flex items-center justify-between space-x-1">
+                      <div className="flex items-center justify-between space-x-1.5">
                         <span className="text-[9px] block uppercase font-mono font-bold text-[#42281D]/70">
                           Root ({currentWord.root_details?.language || 'Latin'})
                         </span>
                         <div className="flex items-center space-x-1">
                           {currentWord.root_details?.thematic_cluster && (
-                            <span className="text-[8px] font-mono font-bold px-1 py-0.2 bg-white/80 border border-[#111410]/40">
+                            <span className="text-[8px] font-mono font-bold px-1.5 py-0.2 bg-white/90 border border-stone-200 rounded">
                               🧠 {currentWord.root_details.thematic_cluster}
                             </span>
                           )}
                           {currentWord.root_details?.sat_tier && (
-                            <span className="text-[8px] font-mono font-bold px-1 py-0.2 bg-[#FFFBEB] text-[#92400E] border border-[#111410]/40">
+                            <span className="text-[8px] font-mono font-bold px-1.5 py-0.2 bg-amber-50 text-amber-800 border border-amber-200 rounded">
                               ⚡ {currentWord.root_details.sat_tier}
                             </span>
                           )}
                           <span className="text-[9px] font-mono font-bold opacity-60 group-hover:opacity-100">↗</span>
                         </div>
                       </div>
-                      <span className="font-mono font-black text-xs text-[#42281D]">
+                      <span className="font-mono font-bold text-xs text-[#42281D]">
                         [{currentWord.root_details?.morpheme?.toUpperCase()}]
                       </span>
-                      <span className="text-[#42281D] text-xs ml-1.5 font-sans font-bold">
+                      <span className="text-[#42281D] text-xs ml-1.5 font-sans font-medium">
                         = "{currentWord.root_details?.core_meaning}"
                       </span>
                     </button>
 
-                    {currentWord.suffix && <span className="text-[#111410] font-black font-mono text-base">+</span>}
+                    {currentWord.suffix && <span className="text-stone-400 font-bold font-mono text-base">+</span>}
 
                     {currentWord.suffix && (
                       <button
@@ -623,11 +623,11 @@ export default function StudyDeck({
                             word: currentWord,
                           });
                         }}
-                        className="px-2.5 sm:px-3 py-1.5 bg-[#FFFFFF] hover:bg-[#FAFBF8] text-[#111410] border-2 border-[#111410] shadow-[2px_2px_0px_0px_#111410] hover:shadow-[3px_3px_0px_0px_#111410] active:translate-y-0 transition cursor-pointer text-left group"
+                        className="px-3 py-1.5 bg-white hover:bg-stone-50 text-stone-800 border border-stone-200 rounded-xl shadow-soft-xs hover:shadow-soft-sm transition cursor-pointer text-left group"
                         title="Click to explore this Suffix Morpheme & practice subset"
                       >
                         <div className="flex items-center justify-between space-x-1">
-                          <span className="text-[9px] block uppercase font-mono font-bold text-[#62685E]">Suffix</span>
+                          <span className="text-[9px] block uppercase font-mono font-bold text-stone-500">Suffix</span>
                           <span className="text-[9px] font-mono font-bold opacity-60 group-hover:opacity-100">↗</span>
                         </div>
                         <span className="font-mono font-extrabold text-xs">{currentWord.suffix}</span>
@@ -636,16 +636,16 @@ export default function StudyDeck({
                   </div>
 
                   {currentWord.root_details?.mnemonic && (
-                    <div className="mt-2.5 pt-2 border-t border-[#111410]/20 flex items-start space-x-2 text-[11px] sm:text-xs font-mono text-[#42281D]">
-                      <span className="font-black uppercase text-[#2F441E] bg-[#EDF5E5] px-1 border border-[#111410] shrink-0">Key:</span>
+                    <div className="mt-3 pt-2.5 border-t border-stone-200/60 flex items-start space-x-2 text-xs font-sans text-stone-700">
+                      <span className="font-bold uppercase text-[10px] text-[#2F441E] bg-[#EDF5E5] px-1.5 py-0.5 rounded border border-[#7BB33B]/30 shrink-0 font-mono">Key:</span>
                       <span className="italic font-serif">"{currentWord.root_details.mnemonic}"</span>
                     </div>
                   )}
                 </div>
 
-                <div className="mt-3 sm:mt-4 flex items-center justify-center space-x-1.5 text-[10px] sm:text-[11px] font-mono font-bold uppercase text-[#62685E]">
+                <div className="mt-4 flex items-center justify-center space-x-1.5 text-xs font-sans font-medium text-stone-400">
                   <RotateCw className="w-3.5 h-3.5 text-[#7BB33B]" />
-                  <span>Tap card to flip definition <span className="hidden sm:inline">[Space]</span></span>
+                  <span>Tap card to flip definition <span className="hidden sm:inline font-mono text-[11px]">[Space]</span></span>
                 </div>
               </div>
 
@@ -656,23 +656,23 @@ export default function StudyDeck({
                   WebkitBackfaceVisibility: 'hidden',
                   transform: 'rotateY(180deg)',
                 }}
-                className={`absolute inset-0 w-full min-h-[420px] sm:min-h-[440px] h-full bg-white border-2 border-[#111410] shadow-[5px_5px_0px_0px_#42281D] sm:shadow-[6px_6px_0px_0px_#42281D] p-4 sm:p-8 flex flex-col justify-between transition-shadow duration-200 ${
+                className={`absolute inset-0 w-full min-h-[440px] sm:min-h-[460px] h-full bg-white border border-stone-200/90 rounded-3xl shadow-soft-lg hover:shadow-card-glow p-6 sm:p-10 flex flex-col justify-between transition-all duration-300 ${
                   isFlipped ? 'pointer-events-auto' : 'pointer-events-none'
                 }`}
               >
-                <div className="flex flex-wrap items-center justify-between gap-2 border-b-2 border-[#111410] pb-2.5 sm:pb-3">
-                  <div className="flex items-center space-x-2">
-                    <h3 className="text-xl sm:text-2xl font-black text-[#111410] font-sans uppercase break-words">{currentWord.word}</h3>
-                    <span className={`text-[9px] sm:text-[10px] font-mono font-bold uppercase px-2 py-0.5 ${getConnotationBadge(currentWord.connotation)}`}>
+                <div className="flex flex-wrap items-center justify-between gap-2 border-b border-stone-100 pb-3 sm:pb-4">
+                  <div className="flex items-center space-x-2.5">
+                    <h3 className="text-2xl sm:text-3xl font-extrabold text-stone-900 font-sans tracking-tight break-words">{currentWord.word}</h3>
+                    <span className={`text-[10px] sm:text-[11px] font-sans font-semibold uppercase px-2.5 py-0.5 ${getConnotationBadge(currentWord.connotation)}`}>
                       {currentWord.connotation}
                     </span>
                     {currentWord.review?.verified && (
                       <span 
-                        className="inline-flex items-center space-x-1 px-1.5 sm:px-2 py-0.5 bg-[#EDF5E5] text-[#2F441E] border border-[#7BB33B] text-[10px] font-mono font-bold uppercase shadow-[1px_1px_0px_0px_#2F441E] cursor-help"
+                        className="inline-flex items-center space-x-1 px-2 py-0.5 bg-[#EDF5E5] text-[#2F441E] border border-[#7BB33B]/40 text-[10px] font-sans font-semibold rounded-full shadow-soft-xs cursor-help"
                         title="Independently verified for SAT/ACT accuracy"
                       >
                         <Check className="w-3 h-3 text-[#7BB33B] stroke-[3]" />
-                        <span className="hidden sm:inline">✓ Verified</span>
+                        <span className="hidden sm:inline">Verified</span>
                       </span>
                     )}
                   </div>
@@ -684,7 +684,7 @@ export default function StudyDeck({
                           e.stopPropagation();
                           if (onEditWordVerification) onEditWordVerification(currentWord);
                         }}
-                        className="px-2 py-1 bg-[#EDF5E5] hover:bg-[#DCEDD0] text-[#2F441E] border-2 border-[#111410] shadow-[2px_2px_0px_0px_#111410] text-[10px] font-mono font-black uppercase flex items-center space-x-1 transition active:translate-x-[1px] active:translate-y-[1px]"
+                        className="px-2.5 py-1 bg-[#EDF5E5] hover:bg-[#DCEDD0] text-[#2F441E] border border-[#7BB33B]/30 rounded-xl text-xs font-sans font-bold flex items-center space-x-1 transition shadow-soft-xs"
                         title="Edit verification & editorial notes"
                       >
                         <Edit3 className="w-3 h-3 text-[#7BB33B]" />
@@ -692,27 +692,27 @@ export default function StudyDeck({
                         <span className="sm:hidden">Edit</span>
                       </button>
                     )}
-                    <span className="text-[10px] sm:text-xs font-mono font-extrabold text-[#42281D] uppercase">Kiwi SAT Lexicon</span>
+                    <span className="text-xs font-mono font-bold text-stone-400 uppercase">SAT Lexicon</span>
                   </div>
                 </div>
 
                 {/* Core Definition */}
-                <div className="my-3 sm:my-4">
-                  <h4 className="text-[10px] font-mono font-black uppercase tracking-wider text-[#62685E] mb-1">
-                    Official SAT Context Definition
+                <div className="my-4 sm:my-6">
+                  <h4 className="text-[11px] font-sans font-bold uppercase tracking-wider text-stone-400 mb-2">
+                    SAT Context Definition
                   </h4>
-                  <p className="text-base sm:text-xl text-[#111410] font-serif leading-relaxed">
+                  <p className="text-xl sm:text-2xl text-stone-900 font-serif leading-relaxed font-normal">
                     "{currentWord.definition}"
                   </p>
                 </div>
 
                 {/* Exam Context Sentence */}
-                <div className="bg-[#FAFBF8] border-2 border-[#111410] p-3 sm:p-4 shadow-[2px_2px_0px_0px_#111410]">
-                  <h4 className="text-[10px] font-mono font-black uppercase tracking-wider text-[#42281D] mb-1 flex items-center space-x-1.5">
+                <div className="bg-[#FAFBF8] border-l-4 border-[#7BB33B] rounded-r-2xl p-4 sm:p-5 my-2 shadow-soft-xs">
+                  <h4 className="text-[11px] font-sans font-bold uppercase tracking-wider text-[#2F441E] mb-1.5 flex items-center space-x-1.5">
                     <BookMarked className="w-3.5 h-3.5 text-[#7BB33B]" />
-                    <span>Exam Context Sentence</span>
+                    <span>Exam Context</span>
                   </h4>
-                  <p className="text-xs sm:text-sm text-[#111410] font-serif italic leading-relaxed">
+                  <p className="text-sm sm:text-base text-stone-700 font-serif italic leading-relaxed">
                     "{currentWord.sat_sentence}"
                   </p>
                 </div>
@@ -727,63 +727,63 @@ export default function StudyDeck({
                       word: currentWord,
                     });
                   }}
-                  className="bg-[#EDF5E5] border-2 border-[#111410] p-2.5 sm:p-3 text-xs font-mono text-[#2F441E] flex items-center justify-between cursor-pointer hover:bg-[#E2F0D5] transition"
+                  className="bg-[#EDF5E5]/60 hover:bg-[#EDF5E5] border border-[#7BB33B]/30 rounded-2xl p-3 sm:p-3.5 text-xs font-sans text-[#2F441E] flex items-center justify-between cursor-pointer transition shadow-soft-xs"
                   title="Click to view root morpheme deep dive"
                 >
-                  <div className="flex items-center space-x-1.5 sm:space-x-2 truncate">
-                    <span className="font-black uppercase text-[10px] sm:text-xs">Root:</span>
-                    <strong className="underline decoration-2 text-[11px] sm:text-xs">
+                  <div className="flex items-center space-x-2 truncate">
+                    <span className="font-bold uppercase text-[10px] text-stone-500 font-mono">Root:</span>
+                    <strong className="underline decoration-[#7BB33B] text-xs font-mono font-bold">
                       [{currentWord.root_details?.morpheme?.toUpperCase()}]
                     </strong>
-                    <span className="text-[10px] sm:text-[11px] font-sans truncate">
-                      = "{currentWord.root_details?.core_meaning}"
+                    <span className="text-xs text-stone-600 truncate font-serif italic">
+                      "{currentWord.root_details?.core_meaning}"
                     </span>
                   </div>
-                  <span className="text-[10px] font-bold uppercase underline shrink-0 ml-1">Explore ↗</span>
+                  <span className="text-xs font-bold uppercase text-[#7BB33B] shrink-0 ml-2">Explore ↗</span>
                 </div>
               </div>
             </div>
           </div>
 
           {/* Mobile Gestures Helper Bar */}
-          <div className="flex sm:hidden items-center justify-between text-[10px] font-mono font-bold px-1 text-[#62685E]">
-            <span className="text-[#991B1B]">← Swipe: Review</span>
-            <span className="text-[#111410]">Tap: Flip</span>
+          <div className="flex sm:hidden items-center justify-between text-xs font-sans font-medium px-2 text-stone-500">
+            <span className="text-rose-600">← Swipe: Review</span>
+            <span className="text-stone-700">Tap: Flip</span>
             <span className="text-[#2F441E]">Swipe: Master →</span>
           </div>
 
-          {/* Flashcard Action Controls (Large Thumb-Friendly on Mobile) */}
-          <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-2.5 sm:gap-3 pt-1 sm:pt-2">
+          {/* Flashcard Action Controls (Taller, spacious, Thumb-Friendly) */}
+          <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3 pt-2 sm:pt-3">
             <button
               onClick={() => setIsFlipped(prev => !prev)}
-              className="w-full sm:w-auto px-4 sm:px-5 py-3 sm:py-2.5 bg-white hover:bg-[#FAFBF8] text-[#111410] font-mono font-bold text-xs uppercase border-2 border-[#111410] shadow-[2px_2px_0px_0px_#111410] sm:shadow-[3px_3px_0px_0px_#111410] transition flex items-center justify-center space-x-2 min-h-[44px]"
+              className="w-full sm:w-auto px-5 py-3 bg-white hover:bg-stone-50 text-stone-800 font-sans font-bold text-xs rounded-2xl border border-stone-200 shadow-soft-xs hover:shadow-soft-sm transition-all flex items-center justify-center space-x-2 min-h-[48px]"
             >
               <RotateCw className="w-4 h-4 text-[#7BB33B]" />
-              <span>Flip Card <span className="hidden sm:inline">[Space]</span></span>
+              <span>Flip Card <span className="hidden sm:inline font-mono text-[11px] text-stone-400">[Space]</span></span>
             </button>
 
             {/* RESPONSE BUTTONS */}
-            <div className="flex items-center space-x-2 sm:space-x-3 w-full sm:w-auto">
+            <div className="flex items-center space-x-3 w-full sm:w-auto">
               <button
                 disabled={submitting}
                 onClick={() => onResponse(false)}
-                className={`flex-1 sm:flex-none px-4 sm:px-6 py-3.5 sm:py-2.5 bg-white hover:bg-[#FDF2F2] text-[#991B1B] font-mono font-black text-xs uppercase tracking-wider border-2 border-[#111410] shadow-[2px_2px_0px_0px_#111410] sm:shadow-[3px_3px_0px_0px_#111410] transition active:translate-x-[1px] active:translate-y-[1px] flex items-center justify-center space-x-1.5 sm:space-x-2 min-h-[48px] ${
+                className={`flex-1 sm:flex-none px-6 py-3 bg-white hover:bg-rose-50 text-rose-700 font-sans font-bold text-xs tracking-wide rounded-2xl border border-rose-200 shadow-soft-xs hover:shadow-soft-sm transition-all flex items-center justify-center space-x-2 min-h-[48px] ${
                   submitting ? 'opacity-50 cursor-not-allowed' : ''
                 }`}
               >
                 <X className="w-4 h-4 shrink-0" />
-                <span>Needs Review <span className="hidden sm:inline">[1]</span></span>
+                <span>Needs Review <span className="hidden sm:inline font-mono text-[11px] opacity-60">[1]</span></span>
               </button>
 
               <button
                 disabled={submitting}
                 onClick={() => onResponse(true)}
-                className={`flex-1 sm:flex-none px-4 sm:px-6 py-3.5 sm:py-2.5 bg-[#7BB33B] hover:bg-[#84C341] text-white font-mono font-black text-xs uppercase tracking-wider border-2 border-[#111410] shadow-[2px_2px_0px_0px_#111410] sm:shadow-[3px_3px_0px_0px_#111410] transition active:translate-x-[1px] active:translate-y-[1px] flex items-center justify-center space-x-1.5 sm:space-x-2 min-h-[48px] ${
+                className={`flex-1 sm:flex-none px-6 py-3 bg-[#7BB33B] hover:bg-[#6FA334] text-white font-sans font-bold text-xs tracking-wide rounded-2xl shadow-soft-md hover:shadow-card-glow transition-all flex items-center justify-center space-x-2 min-h-[48px] ${
                   submitting ? 'opacity-50 cursor-not-allowed' : ''
                 }`}
               >
                 <Check className="w-4 h-4 stroke-[3] shrink-0" />
-                <span>Mastered <span className="hidden sm:inline">[2]</span></span>
+                <span>Mastered <span className="hidden sm:inline font-mono text-[11px] text-white/80">[2]</span></span>
               </button>
             </div>
           </div>

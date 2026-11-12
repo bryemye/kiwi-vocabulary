@@ -723,14 +723,14 @@ export default function App() {
       {/* Celestial Flight Log & Cartography Modal */}
       <CelestialFlightLogModal />
 
-      {/* Neo-Brutalist Technical Footer */}
-      <footer className="border-t-2 border-[#111410] bg-white py-6 text-center text-xs font-mono uppercase text-[#42281D]">
+      {/* Clean Editorial Footer */}
+      <footer className="border-t border-stone-200 bg-white/80 py-8 text-center text-xs font-sans text-stone-500">
         <div className="max-w-7xl mx-auto px-4 flex flex-col sm:flex-row items-center justify-between gap-2">
-          <div className="font-extrabold tracking-tight">
-            KIWI VOCABULARY
+          <div className="font-bold tracking-tight text-stone-800">
+            Kiwi Vocabulary Studio
           </div>
-          <div className="font-bold text-[#62685E]">
-            LATIN & GREEK MORPHEMES ·  VOCABULARY MASTERY
+          <div className="text-stone-500">
+            Latin & Greek Morphemes · Test Preparation Lexicon
           </div>
         </div>
       </footer>

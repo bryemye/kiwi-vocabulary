@@ -1,380 +1,315 @@
-import React, { useState, useEffect } from 'react';
-import { 
-  Sparkles, 
-  LineChart, 
-  BookOpenCheck, 
-  Clock, 
-  ArrowRight, 
-  CheckCircle2, 
-  AlertCircle, 
-  Layers, 
-  Compass,
-  Target,
-  Zap
+import React, { useState, useEffect, useMemo } from 'react';
+import {
+  Sparkles,
+  ArrowRight,
+  CheckCircle2,
+  AlertCircle,
+  Clock,
+  Layers,
+  FilterX,
+  Target
 } from 'lucide-react';
-import PathwayToggle from './PathwayToggle';
+import MasteryDial from './MasteryDial';
+import DomainFilterBar from './DomainFilterBar';
+import DomainRibbon from './DomainRibbon';
+import CircleMasteryRing from './CircleMasteryRing';
+import WordPipTrack from './WordPipTrack';
 import {
   getStoredPathway,
   setStoredPathway,
   PATHWAY_CHANGE_EVENT,
   PATHWAY_THEMATIC,
-  PATHWAY_YIELD,
-  groupRootsByPathway,
-  getClusterMeta,
-  getTierMeta
+  groupRootsByDomainLens,
 } from '../services/pathwayService';
 
+/**
+ * DashboardView: Revamped student expertise dashboard featuring the circular
+ * mastery motif (outlined ○ to filled ● circles) and multi-dimensional domain filters.
+ */
 export default function DashboardView({ stats, onSelectRoot, onNavigateMode }) {
-  const [originFilter, setOriginFilter] = useState('ALL'); // 'ALL' | 'Latin' | 'Greek'
-  const [learningPathway, setLearningPathway] = useState(getStoredPathway);
+  // Domain Taxonomy Lens ('thematic' | 'yield' | 'origin' | 'academic')
+  const [activeLens, setActiveLens] = useState(getStoredPathway);
 
+  // Secondary Filters
+  const [selectedDomainId, setSelectedDomainId] = useState('ALL');
+  const [maturityFilter, setMaturityFilter] = useState('ALL'); // 'ALL' | 'MASTERED' | 'DEVELOPING' | 'FOCUS'
+  const [searchQuery, setSearchQuery] = useState('');
+  const [sortBy, setSortBy] = useState('DEFAULT');
+
+  // Synchronize active pathway across tabs and components
   useEffect(() => {
     const handlePathwayEvent = (e) => {
       const next = e.detail?.pathway || getStoredPathway();
-      setLearningPathway(next);
+      setActiveLens(next);
     };
     window.addEventListener(PATHWAY_CHANGE_EVENT, handlePathwayEvent);
     return () => window.removeEventListener(PATHWAY_CHANGE_EVENT, handlePathwayEvent);
   }, []);
 
-  const handlePathwayChange = (newPathway) => {
-    setLearningPathway(newPathway);
-    setStoredPathway(newPathway);
+  const handleLensChange = (newLens) => {
+    setActiveLens(newLens);
+    setStoredPathway(newLens);
+    setSelectedDomainId('ALL'); // Reset isolated domain on lens switch
+  };
+
+  const handleResetFilters = () => {
+    setSelectedDomainId('ALL');
+    setMaturityFilter('ALL');
+    setSearchQuery('');
+    setSortBy('DEFAULT');
   };
 
   if (!stats) {
     return (
-      <div className="max-w-7xl mx-auto px-4 py-16 text-center text-[#111410] font-mono">
-        <div className="w-8 h-8 mx-auto border-4 border-[#111410] border-t-[#7BB33B] animate-spin mb-4" />
-        <p className="uppercase text-xs font-bold">SYNCHRONIZING KIWI TELEMETRY...</p>
+      <div className="max-w-7xl mx-auto px-4 py-20 text-center text-[#111410] font-mono">
+        <div className="w-10 h-10 mx-auto border-4 border-[#111410] border-t-[#7BB33B] animate-spin mb-4" />
+        <p className="uppercase text-xs font-bold tracking-wider">
+          SYNCHRONIZING STUDENT MASTERY TELEMETRY...
+        </p>
       </div>
     );
   }
 
   const { overall = {}, sections = {}, root_mastery = [], recommendations = [], recent_logs = [] } = stats;
 
-  const formatSeconds = (totalSecs) => {
-    if (!totalSecs || totalSecs === 0) return '0 MIN';
-    const hrs = Math.floor(totalSecs / 3600);
-    const mins = Math.floor((totalSecs % 3600) / 60);
-    const secs = totalSecs % 60;
-    if (hrs > 0) return `${hrs}H ${mins}M`;
-    if (mins > 0) return `${mins}M ${secs}S`;
-    return `${secs}S`;
-  };
+  // Compute all domain groups for the active lens
+  const allDomainGroups = useMemo(() => {
+    return groupRootsByDomainLens(root_mastery, activeLens, {
+      maturityFilter,
+      searchQuery,
+      sortBy,
+    });
+  }, [root_mastery, activeLens, maturityFilter, searchQuery, sortBy]);
 
-  const filteredRoots = root_mastery.filter((r) => {
-    if (originFilter === 'ALL') return true;
-    return r.language.toLowerCase() === originFilter.toLowerCase();
-  });
+  // Filter by selected domain if user clicked a specific domain in the ribbon
+  const visibleGroups = useMemo(() => {
+    if (selectedDomainId === 'ALL') return allDomainGroups;
+    return allDomainGroups.filter((g) => g.id === selectedDomainId);
+  }, [allDomainGroups, selectedDomainId]);
+
+  const totalVisibleRoots = visibleGroups.reduce((acc, g) => acc + g.roots.length, 0);
 
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-8">
-      {/* Neo-brutalist Bento Header Banner */}
-      <div className="bg-white border-2 border-[#111410] shadow-[5px_5px_0px_0px_#111410] p-6 sm:p-8">
-        <div className="flex flex-col md:flex-row md:items-center justify-between gap-6">
-          <div>
-            <div className="inline-flex items-center space-x-2 px-2.5 py-1 bg-[#EDF5E5] border border-[#111410] text-[#2F441E] text-[10px] font-mono font-black uppercase tracking-wider mb-3">
-              <Zap className="w-3.5 h-3.5 text-[#7BB33B]" />
-              <span>Diagnostic Learning Engine Online</span>
-            </div>
-            <h1 className="text-2xl sm:text-4xl font-black text-[#111410] tracking-tight uppercase font-sans">
-              Kiwi Learning Command Grid
-            </h1>
-            <p className="text-[#62685E] text-xs sm:text-sm mt-2 max-w-2xl font-mono uppercase">
-              Adaptive etymological decomposition, Latin & Greek root families & SAT/ACT vocabulary mastery.
-            </p>
-          </div>
+      {/* 1. Hero Mastery Dial & Global Performance Banner */}
+      <MasteryDial
+        stats={stats}
+        onStartSession={() => onNavigateMode && onNavigateMode('vocab')}
+      />
 
-          <div className="flex items-center space-x-3 shrink-0">
-            <button
-              onClick={() => onNavigateMode('vocab')}
-              className="flex items-center space-x-2 px-5 py-3 bg-[#7BB33B] hover:bg-[#84C341] text-white border-2 border-[#111410] shadow-[3px_3px_0px_0px_#111410] font-mono font-black text-xs uppercase tracking-wider transition active:translate-x-[2px] active:translate-y-[2px]"
-            >
-              <Sparkles className="w-4 h-4" />
-              <span>Start Study Session</span>
-            </button>
-          </div>
-        </div>
-      </div>
-
-      {/* High-Level Metric Cards (Modular Bento Grid) */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
-        {/* Metric 1: Total Words Reviewed */}
-        <div className="bg-white border-2 border-[#111410] shadow-[4px_4px_0px_0px_#111410] p-5 flex flex-col justify-between relative overflow-hidden">
-          <div className="w-full h-1.5 bg-[#7BB33B] absolute top-0 left-0" />
-          <div className="flex items-center justify-between">
-            <span className="text-[10px] font-mono font-black text-[#62685E] uppercase tracking-wider">
-              Words Mastered
-            </span>
-            <div className="w-8 h-8 bg-[#EDF5E5] border border-[#111410] text-[#2F441E] flex items-center justify-center font-mono font-bold text-xs">
-              01
-            </div>
-          </div>
-          <div className="mt-4">
-            <div className="text-4xl font-black font-mono text-[#111410]">
-              {overall.unique_words_reviewed || 0}
-            </div>
-            <div className="text-xs font-mono text-[#62685E] mt-1 flex items-center space-x-1 uppercase">
-              <span>{sections.vocab?.total || 0} attempts</span>
-              <span>·</span>
-              <span className="text-[#2F441E] font-bold">{sections.vocab?.accuracy_percentage || 0}% ACC</span>
-            </div>
-          </div>
-        </div>
-
-        {/* Metric 2: Root Families Available */}
-        <div className="bg-white border-2 border-[#111410] shadow-[4px_4px_0px_0px_#111410] p-5 flex flex-col justify-between relative overflow-hidden">
-          <div className="w-full h-1.5 bg-[#42281D] absolute top-0 left-0" />
-          <div className="flex items-center justify-between">
-            <span className="text-[10px] font-mono font-black text-[#62685E] uppercase tracking-wider">
-              Root Families Active
-            </span>
-            <div className="w-8 h-8 bg-[#EFE8DF] border border-[#111410] text-[#42281D] flex items-center justify-center font-mono font-bold text-xs">
-              02
-            </div>
-          </div>
-          <div className="mt-4">
-            <div className="text-4xl font-black font-mono text-[#111410]">
-              {root_mastery.length}
-            </div>
-            <div className="text-xs font-mono text-[#62685E] mt-1 uppercase">
-              LATIN & GREEK MORPHEME CLUSTERS
-            </div>
-          </div>
-        </div>
-
-        {/* Metric 3: Vocabulary Retention Rate */}
-        <div className="bg-white border-2 border-[#111410] shadow-[4px_4px_0px_0px_#111410] p-5 flex flex-col justify-between relative overflow-hidden">
-          <div className="w-full h-1.5 bg-[#7BB33B] absolute top-0 left-0" />
-          <div className="flex items-center justify-between">
-            <span className="text-[10px] font-mono font-black text-[#62685E] uppercase tracking-wider">
-              Vocabulary Retention
-            </span>
-            <div className="w-8 h-8 bg-[#EDF5E5] border border-[#111410] text-[#2F441E] flex items-center justify-center font-mono font-bold text-xs">
-              03
-            </div>
-          </div>
-          <div className="mt-4">
-            <div className="text-4xl font-black font-mono text-[#111410]">
-              {sections.vocab?.accuracy_percentage || 0}%
-            </div>
-            <div className="text-xs font-mono text-[#2F441E] mt-1 uppercase font-bold">
-              {sections.vocab?.correct || 0} OF {sections.vocab?.total || 0} WORDS RETAINED
-            </div>
-          </div>
-        </div>
-
-        {/* Metric 4: Total Study Time */}
-        <div className="bg-white border-2 border-[#111410] shadow-[4px_4px_0px_0px_#111410] p-5 flex flex-col justify-between relative overflow-hidden">
-          <div className="w-full h-1.5 bg-[#42281D] absolute top-0 left-0" />
-          <div className="flex items-center justify-between">
-            <span className="text-[10px] font-mono font-black text-[#62685E] uppercase tracking-wider">
-              Total Practice Time
-            </span>
-            <div className="w-8 h-8 bg-[#FAFBF8] border border-[#111410] text-[#111410] flex items-center justify-center font-mono font-bold text-xs">
-              04
-            </div>
-          </div>
-          <div className="mt-4">
-            <div className="text-4xl font-black font-mono text-[#111410]">
-              {formatSeconds(overall.total_seconds_spent)}
-            </div>
-            <div className="text-xs font-mono text-[#62685E] mt-1 uppercase">
-              COMPOSITE: <strong className="text-[#2F441E]">{overall.accuracy_percentage || 0}%</strong> ({overall.total_correct}/{overall.total_attempts})
-            </div>
-          </div>
-        </div>
-      </div>
-
-      {/* Bento Section: "Start Next Session" Recommendations */}
+      {/* 2. Targeted Practice Recommendations (Low-Mastery Focus Areas) */}
       {recommendations && recommendations.length > 0 && (
-        <div className="bg-white border-2 border-[#111410] shadow-[4px_4px_0px_0px_#111410] p-6">
-          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 mb-4 border-b-2 border-[#111410] pb-2 font-mono">
+        <div className="bg-white border-2 border-[#111410] shadow-[4px_4px_0px_0px_#111410] p-6 space-y-4">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b-2 border-[#111410] pb-3 font-mono">
             <div className="flex items-center space-x-2">
               <span className="w-3 h-3 bg-[#42281D]" />
               <h2 className="text-xs font-black uppercase text-[#111410] tracking-wider">
-                Targeted Practice Recommendations
+                Priority Practice Targets (Highest Leverage)
               </h2>
             </div>
             <span className="text-[10px] font-bold text-[#62685E] uppercase">
-              AUTOMATICALLY IDENTIFIED LOW-MASTERY MORPHEME CLUSTERS
+              Identified roots with uncompleted word circles
             </span>
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-            {recommendations.map((root) => (
-              <div
-                key={root.id}
-                className="p-4 bg-[#FAFBF8] border-2 border-[#111410] shadow-[2px_2px_0px_0px_#111410] flex flex-col justify-between space-y-3"
-              >
-                <div>
-                  <div className="flex items-center justify-between text-xs font-mono mb-1">
-                    <span className="text-[#42281D] font-black uppercase">
-                      [{root.morpheme}]
-                    </span>
-                    <span className="px-1.5 py-0.2 bg-[#EFE8DF] text-[#42281D] border border-[#111410] text-[9px] font-bold uppercase">
-                      {root.language}
-                    </span>
-                  </div>
-                  <h4 className="text-sm font-black text-[#111410] font-sans">
-                    "{root.core_meaning}"
-                  </h4>
-                  <p className="text-xs text-[#62685E] italic font-serif line-clamp-1 mt-1">
-                    {root.mnemonic}
-                  </p>
-                  <div className="flex flex-wrap items-center gap-1.5 mt-2">
-                    {root.thematic_cluster && (
-                      <span className="px-1.5 py-0.5 bg-[#EDF5E5] text-[#2F441E] border border-[#111410] text-[9px] font-mono font-bold uppercase">
-                        🧠 {root.thematic_cluster}
-                      </span>
-                    )}
-                    {root.sat_tier && (
-                      <span className="px-1.5 py-0.5 bg-[#FAF3DD] text-[#42281D] border border-[#111410] text-[9px] font-mono font-bold uppercase">
-                        ⚡ {root.sat_tier}
-                      </span>
-                    )}
-                  </div>
-                </div>
+            {recommendations.map((root) => {
+              const rootWords = root.words || [];
+              const isFull = root.mastered_words === root.total_words && root.total_words > 0;
 
-                <div className="pt-2 border-t border-[#111410]/20 flex items-center justify-between font-mono">
-                  <div className="text-[10px] font-bold text-[#62685E]">
-                    MASTERY: <span className="text-[#2F441E] font-black">{root.mastery_percentage}%</span>
+              return (
+                <div
+                  key={root.id}
+                  className="p-5 bg-[#FAFBF8] border-2 border-[#111410] shadow-[3px_3px_0px_0px_#111410] flex flex-col justify-between space-y-4 group hover:translate-x-[-1px] hover:translate-y-[-1px] transition"
+                >
+                  <div>
+                    {/* Header: Morpheme & Radial Meter */}
+                    <div className="flex items-start justify-between gap-3 mb-2">
+                      <div>
+                        <div className="flex items-center space-x-1.5 font-mono mb-1">
+                          <span className="text-[#111410] font-black uppercase text-sm">
+                            [{root.morpheme}]
+                          </span>
+                          <span className="px-1.5 py-0.2 bg-[#EFE8DF] text-[#42281D] border border-[#111410] text-[9px] font-bold uppercase">
+                            {root.language}
+                          </span>
+                        </div>
+                        <h4 className="text-sm font-black text-[#111410] font-sans">
+                          "{root.core_meaning}"
+                        </h4>
+                      </div>
+
+                      {/* Circular Gauge */}
+                      <CircleMasteryRing
+                        percentage={root.mastery_percentage || 0}
+                        size={42}
+                        strokeWidth={4}
+                      >
+                        <span className="text-[9px] font-mono font-black">
+                          {Math.round(root.mastery_percentage || 0)}%
+                        </span>
+                      </CircleMasteryRing>
+                    </div>
+
+                    <p className="text-xs text-[#62685E] italic font-serif line-clamp-1 mt-1">
+                      {root.mnemonic || 'Focus on etymology breakdown'}
+                    </p>
+
+                    {/* Word Pip Track */}
+                    <div className="mt-4 pt-3 border-t border-[#111410]/15">
+                      <WordPipTrack words={rootWords} size="sm" showCounter={true} />
+                    </div>
                   </div>
+
+                  {/* Practice Action */}
                   <button
-                    onClick={() => onSelectRoot(root.id)}
-                    className="flex items-center space-x-1 text-xs font-black text-[#7BB33B] hover:text-[#84C341] uppercase transition"
+                    onClick={() => onSelectRoot && onSelectRoot(root.id)}
+                    className="w-full py-2 bg-white hover:bg-[#7BB33B] hover:text-white text-[#111410] border-2 border-[#111410] shadow-[2px_2px_0px_0px_#111410] font-mono font-black text-xs uppercase flex items-center justify-center space-x-1.5 transition active:translate-x-[1px] active:translate-y-[1px]"
                   >
-                    <span>PRACTICE ROOT</span>
+                    <span>Practice Target</span>
                     <ArrowRight className="w-3.5 h-3.5" />
                   </button>
                 </div>
-              </div>
-            ))}
+              );
+            })}
           </div>
         </div>
       )}
 
-      {/* Root Mastery Tree / Matrix (Organized by Active Pathway) */}
-      <div className="bg-white border-2 border-[#111410] shadow-[5px_5px_0px_0px_#111410] p-6 sm:p-8 space-y-6">
-        <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4 border-b-2 border-[#111410] pb-4">
-          <div>
-            <div className="flex items-center space-x-2">
-              <span className="w-6 h-6 bg-[#42281D] text-white flex items-center justify-center font-mono font-black text-xs">
-                M
-              </span>
-              <h2 className="text-lg font-black text-[#111410] tracking-tight uppercase font-mono">
-                Etymology Root Mastery Matrix
-              </h2>
-            </div>
-            <p className="text-xs font-mono text-[#62685E] mt-1 uppercase">
-              {learningPathway === PATHWAY_THEMATIC
-                ? 'Roots organized into semantic narrative clusters (Movement, Cognition, Emotion, etc.)'
-                : 'Roots prioritized by SAT/ACT frequency tiers for 80/20 test prep leverage'}
+      {/* 3. Multi-Dimensional Domain Filter Bar */}
+      <DomainFilterBar
+        activeLens={activeLens}
+        onLensChange={handleLensChange}
+        maturityFilter={maturityFilter}
+        onMaturityFilterChange={setMaturityFilter}
+        searchQuery={searchQuery}
+        onSearchChange={setSearchQuery}
+        sortBy={sortBy}
+        onSortChange={setSortBy}
+      />
+
+      {/* 4. Domain Mastery Ribbon (Quick-filter across all categories in active lens) */}
+      <DomainRibbon
+        domains={allDomainGroups}
+        selectedDomainId={selectedDomainId}
+        onSelectDomain={setSelectedDomainId}
+      />
+
+      {/* 5. Domain Mastery Matrix Grid */}
+      <div className="space-y-10">
+        {totalVisibleRoots === 0 ? (
+          <div className="bg-white border-2 border-[#111410] shadow-[4px_4px_0px_0px_#111410] p-12 text-center space-y-4 font-mono">
+            <FilterX className="w-10 h-10 text-[#62685E] mx-auto stroke-1" />
+            <h3 className="text-base font-black uppercase text-[#111410]">
+              No Root Families Match Filter Criteria
+            </h3>
+            <p className="text-xs text-[#62685E] max-w-md mx-auto uppercase">
+              No morphemes found matching the current search query or expertise maturity filter.
             </p>
+            <button
+              onClick={handleResetFilters}
+              className="px-4 py-2 bg-[#7BB33B] text-white border-2 border-[#111410] shadow-[2px_2px_0px_0px_#111410] text-xs font-black uppercase hover:bg-[#84C341] transition"
+            >
+              Reset All Filters
+            </button>
           </div>
-
-          <div className="flex flex-wrap items-center gap-3">
-            {/* Learning Mode Pathway Toggle */}
-            <PathwayToggle
-              currentPathway={learningPathway}
-              onPathwayChange={handlePathwayChange}
-              variant="compact"
-            />
-
-            {/* Origin filter buttons */}
-            <div className="flex items-center space-x-1 font-mono text-xs">
-              {['ALL', 'Latin', 'Greek'].map((origin) => (
-                <button
-                  key={origin}
-                  onClick={() => setOriginFilter(origin)}
-                  className={`px-3 py-1 font-black uppercase border-2 border-[#111410] transition ${
-                    originFilter === origin
-                      ? 'bg-[#7BB33B] text-white shadow-[2px_2px_0px_0px_#111410]'
-                      : 'bg-white text-[#111410] hover:bg-[#FAFBF8]'
-                  }`}
-                >
-                  {origin === 'ALL' ? 'ALL ORIGINS' : `${origin.toUpperCase()}`}
-                </button>
-              ))}
-            </div>
-          </div>
-        </div>
-
-        {/* Grouped Matrix View */}
-        <div className="space-y-8">
-          {groupRootsByPathway(filteredRoots, learningPathway).map((group) => {
+        ) : (
+          visibleGroups.map((group) => {
             if (group.roots.length === 0) return null;
-            const groupMastered = group.roots.reduce((acc, r) => acc + (r.mastered_words || 0), 0);
-            const groupTotalWords = group.roots.reduce((acc, r) => acc + (r.total_words || 0), 0);
-            const groupAccuracy = groupTotalWords > 0 ? Math.round((groupMastered / groupTotalWords) * 100) : 0;
 
             return (
               <div key={group.id} className="space-y-4">
-                {/* Pathway Group Header Banner */}
-                <div className="bg-[#FAFBF8] border-2 border-[#111410] shadow-[3px_3px_0px_0px_#111410] p-4 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
-                  <div className="flex items-center space-x-3">
-                    <span className="text-2xl" role="img" aria-label={group.name}>{group.icon}</span>
+                {/* Domain Header Banner with Circular Meter */}
+                <div className="bg-[#FAFBF8] border-2 border-[#111410] shadow-[4px_4px_0px_0px_#111410] p-4 sm:p-5 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                  <div className="flex items-start sm:items-center space-x-3.5">
+                    <CircleMasteryRing
+                      percentage={group.masteryPercentage}
+                      size={48}
+                      strokeWidth={4.5}
+                      strokeColor={group.accentColor || '#7BB33B'}
+                    >
+                      <span className="text-[10px] font-mono font-black">
+                        {group.masteryPercentage}%
+                      </span>
+                    </CircleMasteryRing>
+
                     <div>
                       <div className="flex items-center space-x-2">
-                        <h3 className="text-sm font-black text-[#111410] font-mono uppercase tracking-wide">
+                        <span className="text-lg">{group.icon}</span>
+                        <h3 className="text-sm sm:text-base font-black text-[#111410] font-mono uppercase tracking-wide">
                           {group.name}
                         </h3>
                         <span className="px-2 py-0.5 bg-white border border-[#111410] text-[10px] font-mono font-black text-[#42281D]">
                           {group.roots.length} {group.roots.length === 1 ? 'ROOT' : 'ROOTS'}
                         </span>
                       </div>
-                      <p className="text-xs text-[#62685E] font-sans mt-0.5">
+                      <p className="text-xs text-[#62685E] font-sans mt-0.5 max-w-2xl">
                         {group.description}
                       </p>
                     </div>
                   </div>
 
-                  <div className="flex items-center space-x-3 shrink-0 font-mono text-xs">
-                    <div className="text-right">
-                      <div className="text-[10px] text-[#62685E] uppercase font-bold">Group Mastery</div>
-                      <div className="font-black text-[#2F441E]">{groupMastered}/{groupTotalWords} Words ({groupAccuracy}%)</div>
-                    </div>
-                    <div className="w-16 h-2 bg-[#EFE8DF] border border-[#111410] overflow-hidden hidden sm:block">
-                      <div
-                        className="h-full bg-[#7BB33B] transition-all"
-                        style={{ width: `${groupAccuracy}%` }}
-                      />
+                  <div className="flex items-center space-x-3 shrink-0 font-mono text-xs border-t sm:border-t-0 border-[#111410]/15 pt-2 sm:pt-0">
+                    <div className="text-left sm:text-right">
+                      <div className="text-[10px] text-[#62685E] uppercase font-bold">Domain Expertise</div>
+                      <div className="font-black text-[#2F441E]">
+                        {group.masteredWords}/{group.totalWords} Words Mastered
+                      </div>
                     </div>
                   </div>
                 </div>
 
-                {/* Matrix Grid of Roots for this Group */}
+                {/* Grid of Root Mastery Cards for this Domain */}
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
                   {group.roots.map((root) => {
-                    const isFullMastery = root.mastered_words === root.total_words && root.total_words > 0;
+                    const isFullMastery =
+                      root.mastered_words === root.total_words && root.total_words > 0;
+                    const rootWords = root.words || [];
+
                     return (
                       <div
                         key={root.id}
-                        className="bg-[#FAFBF8] border-2 border-[#111410] shadow-[3px_3px_0px_0px_#111410] p-5 flex flex-col justify-between"
+                        className="bg-white border-2 border-[#111410] shadow-[3px_3px_0px_0px_#111410] p-5 flex flex-col justify-between space-y-4 hover:translate-x-[-1px] hover:translate-y-[-1px] transition"
                       >
-                        <div>
-                          {/* Card Header */}
-                          <div className="flex items-center justify-between mb-2 font-mono">
-                            <span className="px-2 py-0.5 text-xs font-black bg-white text-[#111410] border border-[#111410]">
-                              [{root.morpheme.toUpperCase()}]
-                            </span>
-                            <span className="text-[10px] font-bold text-[#42281D] uppercase">
-                              {root.language}
-                            </span>
+                        <div className="space-y-3">
+                          {/* Card Header: Morpheme & Circular Mastery Ring */}
+                          <div className="flex items-start justify-between gap-2">
+                            <div>
+                              <div className="flex items-center space-x-2 mb-1.5 font-mono">
+                                <span className="px-2 py-0.5 text-xs font-black bg-[#EDF5E5] text-[#2F441E] border border-[#111410]">
+                                  [{root.morpheme.toUpperCase()}]
+                                </span>
+                                <span className="text-[10px] font-bold text-[#42281D] uppercase">
+                                  {root.language}
+                                </span>
+                              </div>
+                              <h4 className="text-base font-black text-[#111410] font-sans uppercase">
+                                "{root.core_meaning}"
+                              </h4>
+                            </div>
+
+                            {/* Circular Progress Ring */}
+                            <CircleMasteryRing
+                              percentage={root.mastery_percentage || 0}
+                              size={46}
+                              strokeWidth={4.5}
+                              title={`Mastery: ${root.mastery_percentage || 0}%`}
+                            >
+                              <span className="text-[9px] font-mono font-black text-[#111410]">
+                                {Math.round(root.mastery_percentage || 0)}%
+                              </span>
+                            </CircleMasteryRing>
                           </div>
 
-                          <h3 className="text-base font-black text-[#111410] font-sans uppercase">
-                            "{root.core_meaning}"
-                          </h3>
-                          <p className="text-xs text-[#62685E] italic font-serif mt-1">
-                            "{root.mnemonic}"
+                          {/* Mnemonic Hint */}
+                          <p className="text-xs text-[#62685E] italic font-serif leading-relaxed line-clamp-2">
+                            "{root.mnemonic || 'Focus on prefix and root composition'}"
                           </p>
 
-                          {/* Badges for thematic_cluster and sat_tier */}
-                          <div className="flex flex-wrap items-center gap-1.5 mt-3">
+                          {/* Secondary Domain & Tier Badges */}
+                          <div className="flex flex-wrap items-center gap-1.5 pt-1">
                             {root.thematic_cluster && (
-                              <span className="px-2 py-0.5 bg-[#EDF5E5] text-[#2F441E] border border-[#111410] text-[9px] font-mono font-bold uppercase flex items-center space-x-1">
+                              <span className="px-2 py-0.5 bg-[#FAFBF8] text-[#2F441E] border border-[#111410] text-[9px] font-mono font-bold uppercase flex items-center space-x-1">
                                 <span>🧠</span>
                                 <span>{root.thematic_cluster}</span>
                               </span>
@@ -387,48 +322,22 @@ export default function DashboardView({ stats, onSelectRoot, onNavigateMode }) {
                             )}
                           </div>
 
-                          {/* Progress Bar & Stat (Kiwi Green against Soft Cream Track) */}
-                          <div className="mt-4 space-y-1.5">
-                            <div className="flex items-center justify-between text-[11px] font-mono font-bold uppercase">
-                              <span className="text-[#62685E]">Progress:</span>
-                              <span className={isFullMastery ? 'text-[#2F441E] font-black' : 'text-[#111410]'}>
-                                {root.mastered_words} / {root.total_words} WORDS ({root.mastery_percentage}%)
-                              </span>
-                            </div>
-                            {/* Linear Bar Meter in Kiwi Green against Cream Track */}
-                            <div className="w-full h-3 bg-[#EFE8DF] border-2 border-[#111410] overflow-hidden">
-                              <div
-                                className={`h-full transition-all duration-500 ${
-                                  isFullMastery ? 'bg-[#7BB33B]' : 'bg-[#84C341]'
-                                }`}
-                                style={{ width: `${root.mastery_percentage}%` }}
-                              />
-                            </div>
-                          </div>
-
-                          {/* Words Pill List */}
-                          <div className="mt-4 pt-3 border-t border-[#111410]/20 flex flex-wrap gap-1.5">
-                            {root.words && root.words.map((w) => (
-                              <span
-                                key={w.id}
-                                className={`text-[10px] font-mono font-bold uppercase px-2 py-0.5 border border-[#111410] flex items-center space-x-1 ${
-                                  w.is_mastered
-                                    ? 'bg-[#EDF5E5] text-[#2F441E]'
-                                    : 'bg-white text-[#62685E]'
-                                }`}
-                              >
-                                {w.is_mastered ? <CheckCircle2 className="w-3 h-3 text-[#7BB33B]" /> : <span className="w-1.5 h-1.5 bg-[#42281D]" />}
-                                <span>{w.word}</span>
-                              </span>
-                            ))}
+                          {/* Circular Word Pips Track (The Outlined-to-Filled Motif) */}
+                          <div className="pt-3 border-t border-[#111410]/15">
+                            <WordPipTrack
+                              words={rootWords}
+                              size="md"
+                              showCounter={true}
+                              showLabels={false}
+                            />
                           </div>
                         </div>
 
-                        {/* Bottom Action */}
-                        <div className="mt-5 pt-3 border-t border-[#111410]/20">
+                        {/* Bottom Action: Practice Root */}
+                        <div className="pt-3 border-t border-[#111410]/15">
                           <button
-                            onClick={() => onSelectRoot(root.id)}
-                            className="w-full py-2 bg-white hover:bg-[#7BB33B] hover:text-white text-[#111410] border-2 border-[#111410] shadow-[2px_2px_0px_0px_#111410] text-xs font-mono font-black uppercase flex items-center justify-center space-x-1.5 transition active:translate-x-[1px] active:translate-y-[1px]"
+                            onClick={() => onSelectRoot && onSelectRoot(root.id)}
+                            className="w-full py-2 bg-[#FAFBF8] hover:bg-[#7BB33B] hover:text-white text-[#111410] border-2 border-[#111410] shadow-[2px_2px_0px_0px_#111410] text-xs font-mono font-black uppercase flex items-center justify-center space-x-1.5 transition active:translate-x-[1px] active:translate-y-[1px]"
                           >
                             <span>Launch Root Cards</span>
                             <ArrowRight className="w-3.5 h-3.5" />
@@ -440,19 +349,19 @@ export default function DashboardView({ stats, onSelectRoot, onNavigateMode }) {
                 </div>
               </div>
             );
-          })}
-        </div>
+          })
+        )}
       </div>
 
-      {/* Recent Activity Log (Bento Grid Style) */}
+      {/* 6. Recent Telemetry Audit Log */}
       {recent_logs && recent_logs.length > 0 && (
-        <div className="bg-white border-2 border-[#111410] shadow-[4px_4px_0px_0px_#111410] p-6">
-          <div className="flex items-center justify-between mb-4 border-b-2 border-[#111410] pb-2 font-mono">
+        <div className="bg-white border-2 border-[#111410] shadow-[4px_4px_0px_0px_#111410] p-6 space-y-4">
+          <div className="flex items-center justify-between border-b-2 border-[#111410] pb-3 font-mono">
             <h3 className="text-xs font-black uppercase text-[#111410] tracking-wider">
               Recent Practice Telemetry Audit
             </h3>
             <span className="text-[10px] font-bold text-[#62685E] uppercase">
-              REAL-TIME LOG PERSISTENCE
+              Real-time Spaced Repetition Logs
             </span>
           </div>
 
@@ -467,11 +376,15 @@ export default function DashboardView({ stats, onSelectRoot, onNavigateMode }) {
                 <div key={log.id} className="py-3 flex items-center justify-between text-xs font-mono">
                   <div className="flex items-center space-x-3">
                     <span
-                      className={`w-6 h-6 border border-[#111410] flex items-center justify-center shrink-0 ${
-                        log.is_correct ? 'bg-[#7BB33B] text-white' : 'bg-[#42281D] text-white'
+                      className={`w-6 h-6 rounded-full border-2 border-[#111410] flex items-center justify-center shrink-0 ${
+                        log.is_correct ? 'bg-[#7BB33B] text-white' : 'bg-white text-[#42281D]'
                       }`}
                     >
-                      {log.is_correct ? <CheckCircle2 className="w-3.5 h-3.5" /> : <AlertCircle className="w-3.5 h-3.5" />}
+                      {log.is_correct ? (
+                        <CheckCircle2 className="w-3.5 h-3.5 text-white" />
+                      ) : (
+                        <span className="w-2 h-2 rounded-full bg-[#42281D]" />
+                      )}
                     </span>
                     <div>
                       <span className="font-bold text-[#111410]">{title}</span>
@@ -485,10 +398,10 @@ export default function DashboardView({ stats, onSelectRoot, onNavigateMode }) {
                     className={`px-2 py-0.5 font-bold uppercase text-[10px] border border-[#111410] ${
                       log.is_correct
                         ? 'bg-[#EDF5E5] text-[#2F441E]'
-                        : 'bg-[#FDF2F2] text-[#991B1B]'
+                        : 'bg-[#FAF3DD] text-[#42281D]'
                     }`}
                   >
-                    {log.is_correct ? 'MASTERED' : 'NEEDS REVIEW'}
+                    {log.is_correct ? '● MASTERED' : '○ REVIEW NEEDED'}
                   </span>
                 </div>
               );

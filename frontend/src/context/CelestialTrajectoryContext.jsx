@@ -9,7 +9,7 @@ const CelestialTrajectoryContext = createContext(null);
 
 export function CelestialTrajectoryProvider({ children }) {
   const [trajectory, setTrajectory] = useState(loadStoredTrajectory);
-  const [isRibbonVisible, setIsRibbonVisible] = useState(true);
+  const [isRibbonVisible, setIsRibbonVisible] = useState(false);
   const [isFlightLogOpen, setIsFlightLogOpen] = useState(false);
   const [slingshotTargetId, setSlingshotTargetId] = useState(null);
 

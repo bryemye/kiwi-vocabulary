@@ -33,6 +33,7 @@ import VocabGraphView from '../views/VocabGraphView';
 import StudyDeck from './StudyDeck';
 import CustomPracticeModal from './CustomPracticeModal';
 import EditorialReviewModal from './EditorialReviewModal';
+import DashboardView from './DashboardView';
 import PathwayToggle from './PathwayToggle';
 import {
   getStoredPathway,
@@ -753,86 +754,67 @@ export default function VocabView({
   return (
     <div className={`mx-auto px-3 sm:px-4 ${subTab === 'graph' ? 'max-w-7xl py-3 sm:py-4 space-y-4' : 'max-w-6xl py-4 sm:py-6 space-y-4 sm:space-y-6'}`}>
 
-      {/* FLAGSHIP HUB HEADER & DEDICATED SUB-NAVIGATION */}
-      <div className="bg-white border-2 border-[#111410] shadow-[4px_4px_0px_0px_#111410] sm:shadow-[5px_5px_0px_0px_#111410] p-4 sm:p-6">
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 sm:gap-4 border-b-2 border-[#111410] pb-4 sm:pb-5">
-          <div className="flex items-center space-x-3">
-            <div className="w-10 h-10 sm:w-12 sm:h-12 bg-[#7BB33B] border-2 border-[#111410] shadow-[2px_2px_0px_0px_#111410] sm:shadow-[3px_3px_0px_0px_#111410] flex items-center justify-center shrink-0">
-              <Sparkles className="w-5 h-5 sm:w-6 sm:h-6 text-white" />
-            </div>
-            <div>
-              <div className="flex items-center space-x-2">
-                <h1 className="text-xl sm:text-3xl font-black font-sans uppercase tracking-tight text-[#111410]">
-                  Kiwi Vocabulary
-                </h1>
-              </div>
-              <p className="text-[11px] sm:text-xs font-mono uppercase text-[#62685E] mt-0.5">
-                SAT/ACT Spaced Repetition
-              </p>
-            </div>
-          </div>
-
-          {/* Quick Metrics Capsule */}
-          <div className="flex items-center space-x-2 text-[11px] sm:text-xs font-mono">
-            <div className="flex-1 sm:flex-none text-center px-2.5 sm:px-3 py-1 sm:py-1.5 bg-[#FAFBF8] border-2 border-[#111410] shadow-[2px_2px_0px_0px_#111410]">
-              <span className="text-[#62685E] font-bold">LEXICON: </span>
-              <strong>{words.length} WORDS</strong>
-            </div>
-            <div className="flex-1 sm:flex-none text-center px-2.5 sm:px-3 py-1 sm:py-1.5 bg-[#EDF5E5] border-2 border-[#111410] shadow-[2px_2px_0px_0px_#111410] text-[#2F441E]">
-              <span className="font-bold">ROOTS: </span>
-              <strong>{roots.length} FAMILIES</strong>
-            </div>
-          </div>
-        </div>
-
-        {/* DEDICATED SUB-NAVIGATION BAR (HORIZONTALLY SCROLLABLE SEGMENTED BAR ON MOBILE) */}
-        <div className="flex items-center gap-2 pt-3 sm:pt-4 overflow-x-auto no-scrollbar scroll-smooth pb-1 -mx-1 px-1 sm:overflow-visible sm:flex-wrap">
+      {/* CONSOLIDATED SUB-NAVIGATION & METRICS HEADER */}
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 bg-white/95 backdrop-blur-md border border-stone-200/90 rounded-2xl px-4 py-3 sm:px-5 sm:py-3.5 shadow-soft-sm">
+        {/* Segmented Sub-Navigation Pills */}
+        <div className="flex items-center gap-1.5 overflow-x-auto no-scrollbar scroll-smooth pb-0.5 sm:pb-0">
           <button
             onClick={() => handleAttemptTabChange('study')}
-            className={`flex items-center space-x-1.5 sm:space-x-2 px-3 sm:px-4 py-2 font-mono text-xs font-black uppercase tracking-wider border-2 border-[#111410] whitespace-nowrap shrink-0 transition ${subTab === 'study'
-                ? 'bg-[#7BB33B] text-white shadow-[3px_3px_0px_0px_#111410] translate-x-[-1px] translate-y-[-1px]'
-                : 'bg-white hover:bg-[#FAFBF8] text-[#111410] shadow-[2px_2px_0px_0px_#111410]'
-              }`}
+            className={`flex items-center space-x-2 px-3.5 py-1.5 rounded-xl font-sans text-xs transition-all ${
+              subTab === 'study'
+                ? 'bg-[#7BB33B] text-white font-bold shadow-soft-xs'
+                : 'text-stone-600 hover:text-stone-900 hover:bg-stone-50 font-semibold'
+            }`}
           >
-            <Layers className="w-3.5 h-3.5 sm:w-4 sm:h-4 shrink-0" />
-            <span className="hidden sm:inline">Study Deck (15-Card Session)</span>
-            <span className="sm:hidden">Study Deck</span>
+            <Layers className="w-3.5 h-3.5 shrink-0" />
+            <span>Study Deck</span>
           </button>
 
           <button
             onClick={() => handleAttemptTabChange('explorer')}
-            className={`flex items-center space-x-1.5 sm:space-x-2 px-3 sm:px-4 py-2 font-mono text-xs font-black uppercase tracking-wider border-2 border-[#111410] whitespace-nowrap shrink-0 transition ${subTab === 'explorer'
-                ? 'bg-[#7BB33B] text-white shadow-[3px_3px_0px_0px_#111410] translate-x-[-1px] translate-y-[-1px]'
-                : 'bg-white hover:bg-[#FAFBF8] text-[#111410] shadow-[2px_2px_0px_0px_#111410]'
-              }`}
+            className={`flex items-center space-x-2 px-3.5 py-1.5 rounded-xl font-sans text-xs transition-all ${
+              subTab === 'explorer'
+                ? 'bg-[#7BB33B] text-white font-bold shadow-soft-xs'
+                : 'text-stone-600 hover:text-stone-900 hover:bg-stone-50 font-semibold'
+            }`}
           >
-            <Compass className="w-3.5 h-3.5 sm:w-4 sm:h-4 shrink-0" />
-            <span className="hidden sm:inline">Etymology Root Explorer</span>
-            <span className="sm:hidden">Explorer</span>
+            <Compass className="w-3.5 h-3.5 shrink-0" />
+            <span>Root Explorer</span>
           </button>
 
           <button
             onClick={() => handleAttemptTabChange('progress')}
-            className={`flex items-center space-x-1.5 sm:space-x-2 px-3 sm:px-4 py-2 font-mono text-xs font-black uppercase tracking-wider border-2 border-[#111410] whitespace-nowrap shrink-0 transition ${subTab === 'progress'
-                ? 'bg-[#7BB33B] text-white shadow-[3px_3px_0px_0px_#111410] translate-x-[-1px] translate-y-[-1px]'
-                : 'bg-white hover:bg-[#FAFBF8] text-[#111410] shadow-[2px_2px_0px_0px_#111410]'
-              }`}
+            className={`flex items-center space-x-2 px-3.5 py-1.5 rounded-xl font-sans text-xs transition-all ${
+              subTab === 'progress'
+                ? 'bg-[#7BB33B] text-white font-bold shadow-soft-xs'
+                : 'text-stone-600 hover:text-stone-900 hover:bg-stone-50 font-semibold'
+            }`}
           >
-            <Award className="w-3.5 h-3.5 sm:w-4 sm:h-4 shrink-0" />
-            <span className="hidden sm:inline">Vocab Progress & Mastery</span>
-            <span className="sm:hidden">Mastery</span>
+            <Award className="w-3.5 h-3.5 shrink-0" />
+            <span>Mastery</span>
           </button>
 
           <button
             onClick={() => handleAttemptTabChange('graph')}
-            className={`flex items-center space-x-1.5 sm:space-x-2 px-3 sm:px-4 py-2 font-mono text-xs font-black uppercase tracking-wider border-2 border-[#111410] whitespace-nowrap shrink-0 transition ${subTab === 'graph'
-                ? 'bg-[#7BB33B] text-white shadow-[3px_3px_0px_0px_#111410] translate-x-[-1px] translate-y-[-1px]'
-                : 'bg-white hover:bg-[#FAFBF8] text-[#111410] shadow-[2px_2px_0px_0px_#111410]'
-              }`}
+            className={`flex items-center space-x-2 px-3.5 py-1.5 rounded-xl font-sans text-xs transition-all ${
+              subTab === 'graph'
+                ? 'bg-[#7BB33B] text-white font-bold shadow-soft-xs'
+                : 'text-stone-600 hover:text-stone-900 hover:bg-stone-50 font-semibold'
+            }`}
           >
-            <Network className="w-3.5 h-3.5 sm:w-4 sm:h-4 shrink-0" />
+            <Network className="w-3.5 h-3.5 shrink-0" />
             <span>Root Graph</span>
           </button>
+        </div>
+
+        {/* Compact Lexicon & Roots Telemetry Badge */}
+        <div className="flex items-center space-x-2 text-xs font-mono self-end sm:self-auto shrink-0">
+          <span className="px-3 py-1 bg-stone-50 border border-stone-200/90 rounded-xl text-stone-600 font-medium">
+            <strong className="text-stone-900 font-bold">{words.length}</strong> words
+          </span>
+          <span className="px-3 py-1 bg-[#EDF5E5] border border-[#7BB33B]/30 rounded-xl text-[#2F441E] font-medium">
+            <strong className="text-[#2F441E] font-bold">{roots.length}</strong> roots
+          </span>
         </div>
       </div>
 
@@ -877,10 +859,10 @@ export default function VocabView({
         <div className="max-w-4xl mx-auto space-y-4">
 
           {/* FILTER & CUSTOM SESSION TOOLBAR */}
-          <div className="bg-[#FAFBF8] border-2 border-[#111410] p-3 shadow-[3px_3px_0px_0px_#111410]">
+          <div className="bg-white/95 backdrop-blur-md border border-stone-200/90 rounded-2xl p-3 sm:p-4 shadow-soft-xs">
             <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-3">
               {/* Left: Dual Learning Pathway Segmented Control & Origin Filter */}
-              <div className="flex flex-wrap items-center gap-2">
+              <div className="flex flex-wrap items-center gap-2 sm:gap-3">
                 <PathwayToggle
                   currentPathway={learningPathway}
                   onPathwayChange={handlePathwayChange}
@@ -888,17 +870,18 @@ export default function VocabView({
                 />
 
                 <div className="flex items-center space-x-1 font-mono text-xs">
-                  <span className="text-[10px] font-black uppercase text-[#62685E] mr-1 hidden sm:inline">ORIGIN:</span>
+                  <span className="text-[10px] font-bold uppercase text-stone-400 mr-1 hidden sm:inline">Origin:</span>
                   {['ALL', 'Latin', 'Greek'].map((lang) => (
                     <button
                       key={lang}
                       onClick={() => handleLanguageChange(lang)}
-                      className={`px-2.5 py-1 font-black uppercase border-2 border-[#111410] text-center transition ${selectedLanguage.toLowerCase() === lang.toLowerCase()
-                          ? 'bg-[#7BB33B] text-white shadow-[2px_2px_0px_0px_#111410]'
-                          : 'bg-white text-[#111410] hover:bg-[#FAFBF8]'
-                        }`}
+                      className={`px-2.5 py-1 text-xs font-bold rounded-lg border transition ${
+                        selectedLanguage.toLowerCase() === lang.toLowerCase()
+                          ? 'bg-[#EDF5E5] text-[#2F441E] border-[#7BB33B]/40 shadow-soft-xs'
+                          : 'bg-white text-stone-600 border-stone-200 hover:bg-stone-50'
+                      }`}
                     >
-                      {lang.toUpperCase()}
+                      {lang === 'ALL' ? 'ALL' : lang}
                     </button>
                   ))}
                 </div>
@@ -906,43 +889,43 @@ export default function VocabView({
 
               {/* Root Select, Search & Custom Session Trigger */}
               <div className="flex flex-wrap sm:flex-nowrap items-center gap-2 flex-1 lg:justify-end">
-                <div className="bg-white border-2 border-[#111410] shadow-[2px_2px_0px_0px_#111410] px-2 py-1 flex items-center flex-1 sm:flex-none min-w-[150px]">
-                  <Filter className="w-3.5 h-3.5 text-[#42281D] mr-1.5 shrink-0" />
+                <div className="bg-white border border-stone-200 rounded-xl px-2.5 py-1.5 flex items-center flex-1 sm:flex-none min-w-[150px] shadow-soft-xs focus-within:border-[#7BB33B] focus-within:ring-2 focus-within:ring-[#7BB33B]/20 transition">
+                  <Filter className="w-3.5 h-3.5 text-stone-400 mr-1.5 shrink-0" />
                   <select
                     value={selectedRootId}
                     onChange={(e) => setSelectedRootId(e.target.value)}
-                    className="bg-transparent text-[#111410] text-base sm:text-xs font-mono font-bold uppercase focus:outline-none cursor-pointer w-full max-w-full sm:max-w-[200px] truncate"
+                    className="bg-transparent text-stone-800 text-xs font-mono font-medium focus:outline-none cursor-pointer w-full max-w-full sm:max-w-[200px] truncate"
                   >
-                    <option value="ALL">ALL MORPHEMES ({availableRoots.length} ROOTS)</option>
+                    <option value="ALL">All Morphemes ({availableRoots.length} roots)</option>
                     {groupedRootsForSelect.map((group) => {
                       if (group.roots.length === 0) return null;
                       return (
                         <optgroup
                           key={group.id}
-                          label={`${group.icon} ${group.name.toUpperCase()} (${group.roots.length})`}
+                          label={`${group.icon} ${group.name} (${group.roots.length})`}
                         >
                           {group.roots.map((root) => (
                             <option key={root.id} value={root.id}>
-                              [{root.morpheme.toUpperCase()}] {root.core_meaning.toUpperCase()}
+                              [{root.morpheme.toUpperCase()}] {root.core_meaning}
                             </option>
                           ))}
                         </optgroup>
                       );
                     })}
                     {prefixMorphemes.length > 0 && (
-                      <optgroup label={`🧩 PREFIXES (${prefixMorphemes.slice(0, 15).length})`}>
+                      <optgroup label={`🧩 Prefixes (${prefixMorphemes.slice(0, 15).length})`}>
                         {prefixMorphemes.slice(0, 15).map((p) => (
                           <option key={p.id} value={`prefix:${p.cleanToken}`}>
-                            PREFIX {p.cleanToken} ({p.wordCount} WORDS)
+                            Prefix {p.cleanToken} ({p.wordCount} words)
                           </option>
                         ))}
                       </optgroup>
                     )}
                     {suffixMorphemes.length > 0 && (
-                      <optgroup label={`🏷️ SUFFIXES (${suffixMorphemes.slice(0, 15).length})`}>
+                      <optgroup label={`🏷️ Suffixes (${suffixMorphemes.slice(0, 15).length})`}>
                         {suffixMorphemes.slice(0, 15).map((s) => (
                           <option key={s.id} value={`suffix:${s.cleanToken}`}>
-                            SUFFIX {s.cleanToken} ({s.wordCount} WORDS)
+                            Suffix {s.cleanToken} ({s.wordCount} words)
                           </option>
                         ))}
                       </optgroup>
@@ -950,19 +933,19 @@ export default function VocabView({
                   </select>
                 </div>
 
-                <div className="relative flex-1 sm:max-w-[150px] min-w-[120px]">
-                  <Search className="w-3.5 h-3.5 absolute left-2.5 top-2.5 text-[#62685E]" />
+                <div className="relative flex-1 sm:max-w-[160px] min-w-[120px]">
+                  <Search className="w-3.5 h-3.5 absolute left-2.5 top-2.5 text-stone-400" />
                   <input
                     type="text"
                     value={searchTerm}
                     onChange={(e) => setSearchTerm(e.target.value)}
-                    placeholder="SEARCH WORDS..."
-                    className="w-full bg-white text-[#111410] font-mono font-bold text-base sm:text-xs pl-8 pr-7 py-1 border-2 border-[#111410] shadow-[2px_2px_0px_0px_#111410] focus:outline-none uppercase placeholder:text-[#A8AAA6]"
+                    placeholder="Search words..."
+                    className="w-full bg-white text-stone-800 font-mono text-xs pl-8 pr-7 py-1.5 border border-stone-200 rounded-xl shadow-soft-xs focus:outline-none focus:border-[#7BB33B] focus:ring-2 focus:ring-[#7BB33B]/20 transition placeholder:text-stone-400"
                   />
                   {searchTerm && (
                     <button
                       onClick={() => setSearchTerm('')}
-                      className="absolute right-2 top-2 text-[#42281D] hover:text-[#111410]"
+                      className="absolute right-2 top-2 text-stone-400 hover:text-stone-700"
                     >
                       <X className="w-3.5 h-3.5" />
                     </button>
@@ -983,12 +966,11 @@ export default function VocabView({
                       handleOpenCustomSession([]);
                     }
                   }}
-                  className="flex items-center justify-center space-x-1.5 px-3 py-1.5 bg-[#7BB33B] hover:bg-[#84C341] text-white font-mono font-black text-xs uppercase tracking-wider border-2 border-[#111410] shadow-[2px_2px_0px_0px_#111410] active:translate-x-[1px] active:translate-y-[1px] transition shrink-0"
+                  className="flex items-center justify-center space-x-1.5 px-3.5 py-1.5 bg-[#7BB33B] hover:bg-[#6FA334] text-white font-sans font-bold text-xs rounded-xl shadow-soft-xs hover:shadow-soft-sm transition-all shrink-0"
                   title="Configure custom 15-card practice session"
                 >
                   <Sliders className="w-3.5 h-3.5" />
-                  <span className="hidden sm:inline">Start Custom Session</span>
-                  <span className="sm:hidden">Custom</span>
+                  <span>Custom Deck</span>
                 </button>
               </div>
             </div>
@@ -1464,7 +1446,7 @@ export default function VocabView({
                       <button
                         type="button"
                         onClick={() => handleOpenCustomSession(group.roots.map(r => r.id))}
-                        className="flex items-center space-x-1.5 px-3 py-1.5 bg-[#FAFBF8] hover:bg-[#EDF5E5] text-[#111410] hover:text-[#2F441E] font-mono text-xs font-black uppercase border-2 border-[#111410] shadow-[2px_2px_0px_0px_#111410] active:translate-x-[1px] active:translate-y-[1px] transition shrink-0 self-start sm:self-auto"
+                        className="flex items-center space-x-1.5 px-3 py-1.5 bg-white hover:bg-[#EDF5E5] text-stone-700 hover:text-[#2F441E] font-sans text-xs font-bold rounded-xl border border-stone-200 shadow-soft-xs transition shrink-0 self-start sm:self-auto"
                         title={`Start custom practice with all ${group.roots.length} roots in this ${learningPathway === PATHWAY_THEMATIC ? 'cluster' : 'tier'}`}
                       >
                         <Sparkles className="w-3.5 h-3.5 text-[#7BB33B]" />
@@ -1480,20 +1462,20 @@ export default function VocabView({
                         return (
                           <div
                             key={root.id}
-                            className="bg-white border-2 border-[#111410] shadow-[4px_4px_0px_0px_#111410] p-5 flex flex-col justify-between hover:translate-x-[-1px] hover:translate-y-[-1px] transition"
+                            className="bg-white border border-stone-200/90 rounded-2xl shadow-soft-xs hover:shadow-soft-md p-5 flex flex-col justify-between transition-all duration-200"
                           >
                             <div>
                               {/* Card Header with Morpheme, Origin, and Pathway Badges */}
-                              <div className="border-b-2 border-[#111410] pb-2.5 mb-3">
+                              <div className="border-b border-stone-100 pb-2.5 mb-3">
                                 <div className="flex items-center justify-between">
-                                  <span className="font-mono text-sm font-black text-[#111410] uppercase tracking-wider">
+                                  <span className="font-mono text-sm font-bold text-stone-900 tracking-wider">
                                     [{root.morpheme.toUpperCase()}]
                                   </span>
                                   <div className="flex items-center space-x-1.5">
-                                    <span className="text-[10px] font-mono px-2 py-0.5 bg-[#EDF5E5] text-[#2F441E] border border-[#111410] uppercase font-bold">
+                                    <span className="text-[10px] font-sans px-2 py-0.5 bg-[#EDF5E5] text-[#2F441E] border border-[#7BB33B]/30 rounded-full font-semibold">
                                       {root.language}
                                     </span>
-                                    <span className="text-[10px] font-mono px-2 py-0.5 bg-[#FAFBF8] border border-[#111410] font-bold text-[#62685E]">
+                                    <span className="text-[10px] font-mono px-2 py-0.5 bg-stone-50 border border-stone-200 rounded-full text-stone-500">
                                       {rootWords.length} Words
                                     </span>
                                   </div>
@@ -1502,20 +1484,20 @@ export default function VocabView({
                                 {/* Pathway Dual Tagging Badges */}
                                 <div className="flex flex-wrap items-center gap-1.5 mt-2">
                                   <span
-                                    className={`text-[9px] font-mono font-bold uppercase px-2 py-0.5 border border-[#111410] ${
+                                    className={`text-[10px] font-sans font-medium px-2 py-0.5 rounded-full border ${
                                       learningPathway === PATHWAY_THEMATIC
-                                        ? 'bg-[#EDF5E5] text-[#2F441E] font-black'
-                                        : 'bg-[#FAFBF8] text-[#42281D]'
+                                        ? 'bg-[#EDF5E5] text-[#2F441E] border-[#7BB33B]/40 font-semibold'
+                                        : 'bg-stone-50 text-stone-600 border-stone-200'
                                     }`}
                                     title={`Thematic Cluster: ${root.thematic_cluster}`}
                                   >
                                     🧠 {root.thematic_cluster || 'Movement'}
                                   </span>
                                   <span
-                                    className={`text-[9px] font-mono uppercase px-2 py-0.5 border border-[#111410] ${
+                                    className={`text-[10px] font-sans font-medium px-2 py-0.5 rounded-full border ${
                                       learningPathway === PATHWAY_YIELD
-                                        ? 'bg-[#FFFBEB] text-[#92400E] font-black'
-                                        : 'bg-[#FAFBF8] text-[#62685E] font-bold'
+                                        ? 'bg-amber-50 text-amber-800 border-amber-200 font-semibold'
+                                        : 'bg-stone-50 text-stone-600 border-stone-200'
                                     }`}
                                     title={`SAT/ACT Frequency Tier: ${root.sat_tier}`}
                                   >
@@ -1526,12 +1508,12 @@ export default function VocabView({
 
                               {/* Core Meaning & Key */}
                               <div className="space-y-2 mb-4">
-                                <p className="text-sm font-serif italic text-[#42281D] leading-snug">
+                                <p className="text-sm font-serif italic text-stone-700 leading-snug">
                                   "{root.core_meaning}"
                                 </p>
                                 {root.mnemonic && (
-                                  <div className="text-[11px] font-mono text-[#62685E] bg-[#FAFBF8] p-2 border border-[#111410]/30">
-                                    <span className="font-bold text-[#2F441E] uppercase mr-1">Key:</span>
+                                  <div className="text-xs font-sans text-stone-600 bg-stone-50/80 p-2.5 rounded-xl border border-stone-200/80">
+                                    <span className="font-bold text-[#2F441E] uppercase mr-1 text-[10px] font-mono">Key:</span>
                                     {root.mnemonic}
                                   </div>
                                 )}
@@ -1539,7 +1521,7 @@ export default function VocabView({
 
                               {/* Word Families Sample */}
                               <div className="space-y-1.5">
-                                <span className="text-[9px] font-mono font-bold uppercase text-[#62685E] block">
+                                <span className="text-[10px] font-sans font-bold uppercase text-stone-400 block">
                                   Family Derivatives:
                                 </span>
                                 <div className="flex flex-wrap gap-1">
@@ -1552,14 +1534,14 @@ export default function VocabView({
                                           setEditingReviewWord(w);
                                         }
                                       }}
-                                      className={`px-2 py-0.5 border text-[10px] font-mono font-bold uppercase transition ${
+                                      className={`px-2 py-0.5 border text-xs font-sans rounded-md transition ${
                                         isAdminMode
-                                          ? 'hover:bg-[#EDF5E5] hover:border-[#7BB33B] cursor-pointer active:translate-x-[1px]'
+                                          ? 'hover:bg-[#EDF5E5] hover:border-[#7BB33B] cursor-pointer'
                                           : 'cursor-default'
                                       } ${
                                         w.review?.verified
-                                          ? 'bg-[#EDF5E5] text-[#2F441E] border-[#7BB33B]'
-                                          : 'bg-[#FAFBF8] border-[#111410] text-[#111410]'
+                                          ? 'bg-[#EDF5E5] text-[#2F441E] border-[#7BB33B]/40 font-medium'
+                                          : 'bg-stone-50 border-stone-200 text-stone-700'
                                       }`}
                                       title={isAdminMode ? `Click to review and verify "${w.word}"` : undefined}
                                     >
@@ -1568,7 +1550,7 @@ export default function VocabView({
                                     </button>
                                   ))}
                                   {rootWords.length > 5 && (
-                                    <span className="px-1.5 py-0.5 text-[10px] font-mono text-[#62685E]">
+                                    <span className="px-1.5 py-0.5 text-xs text-stone-400">
                                       +{rootWords.length - 5} more
                                     </span>
                                   )}
@@ -1579,7 +1561,7 @@ export default function VocabView({
                             {/* Launch Practice for this root */}
                             <button
                               onClick={() => handleLaunchRootPractice(root.id)}
-                              className="mt-5 w-full flex items-center justify-center space-x-2 py-2 bg-[#7BB33B] hover:bg-[#84C341] text-white border-2 border-[#111410] shadow-[2px_2px_0px_0px_#111410] font-mono text-xs font-black uppercase tracking-wider transition active:translate-x-[1px] active:translate-y-[1px]"
+                              className="mt-5 w-full flex items-center justify-center space-x-2 py-2 bg-[#7BB33B] hover:bg-[#6FA334] text-white rounded-xl shadow-soft-xs hover:shadow-soft-sm font-sans text-xs font-bold transition-all"
                             >
                               <Sparkles className="w-3.5 h-3.5" />
                               <span>Study This Root</span>
@@ -1601,96 +1583,13 @@ export default function VocabView({
       {/* TAB 3: VOCAB PROGRESS & MASTERY */}
       {/* ---------------------------------------------------------------------- */}
       {subTab === 'progress' && (
-        <div className="space-y-6">
-          {/* High-Level Stats Bento */}
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-            <div className="bg-white border-2 border-[#111410] shadow-[4px_4px_0px_0px_#111410] p-5">
-              <span className="text-[10px] font-mono font-black uppercase text-[#62685E]">Total Vocabulary</span>
-              <div className="text-3xl font-black font-mono text-[#111410] mt-1">{words.length}</div>
-              <span className="text-[10px] font-mono text-[#42281D] mt-1 block">Full SAT/ACT Lexicon</span>
-            </div>
-
-            <div className="bg-white border-2 border-[#111410] shadow-[4px_4px_0px_0px_#111410] p-5">
-              <span className="text-[10px] font-mono font-black uppercase text-[#62685E]">Roots Available</span>
-              <div className="text-3xl font-black font-mono text-[#111410] mt-1">{roots.length}</div>
-              <span className="text-[10px] font-mono text-[#42281D] mt-1 block">Latin & Greek Families</span>
-            </div>
-
-            <div className="bg-white border-2 border-[#111410] shadow-[4px_4px_0px_0px_#111410] p-5">
-              <span className="text-[10px] font-mono font-black uppercase text-[#62685E]">Words Reviewed</span>
-              <div className="text-3xl font-black font-mono text-[#7BB33B] mt-1">
-                {vocabStats?.words_reviewed ?? (stats?.sections?.vocab?.unique_reviewed || 0)}
-              </div>
-              <span className="text-[10px] font-mono text-[#62685E] mt-1 block">Unique Words Attempted</span>
-            </div>
-
-            <div className="bg-white border-2 border-[#111410] shadow-[4px_4px_0px_0px_#111410] p-5">
-              <span className="text-[10px] font-mono font-black uppercase text-[#62685E]">Retention Accuracy</span>
-              <div className="text-3xl font-black font-mono text-[#111410] mt-1">
-                {vocabStats?.retention_rate ?? (stats?.sections?.vocab?.accuracy_percentage || 0)}%
-              </div>
-              <span className="text-[10px] font-mono text-[#2F441E] mt-1 block font-bold">Session Accuracy Rate</span>
-            </div>
-          </div>
-
-          {/* Root Mastery List */}
-          <div className="bg-white border-2 border-[#111410] shadow-[5px_5px_0px_0px_#111410] p-6">
-            <div className="flex items-center justify-between border-b-2 border-[#111410] pb-3 mb-4">
-              <div>
-                <h3 className="text-lg font-black font-sans uppercase text-[#111410]">
-                  Etymology Root Mastery Index
-                </h3>
-                <p className="text-xs font-mono text-[#62685E]">
-                  Continuous tracking of root families, mastery rings, and retention rate.
-                </p>
-              </div>
-            </div>
-
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              {(vocabStats?.root_mastery || stats?.root_mastery || []).slice(0, 12).map((r) => (
-                <div
-                  key={r.id}
-                  className="bg-[#FAFBF8] border-2 border-[#111410] p-4 shadow-[2px_2px_0px_0px_#111410] flex items-center justify-between"
-                >
-                  <div className="min-w-0 flex-1 pr-3">
-                    <div className="flex items-center space-x-2">
-                      <span className="font-mono text-sm font-black uppercase text-[#111410]">
-                        {r.morpheme}
-                      </span>
-                      <span className="text-[9px] font-mono px-1.5 py-0.2 bg-[#EDF5E5] text-[#2F441E] border border-[#111410] uppercase font-bold">
-                        {r.language}
-                      </span>
-                    </div>
-                    <p className="text-xs font-serif italic text-[#42281D] truncate mt-0.5">
-                      "{r.core_meaning}"
-                    </p>
-                    <div className="w-full bg-[#EFE8DF] border border-[#111410] h-2 mt-2">
-                      <div
-                        className="bg-[#7BB33B] h-full"
-                        style={{ width: `${r.mastery_percentage || 0}%` }}
-                      />
-                    </div>
-                  </div>
-
-                  <div className="text-right shrink-0">
-                    <div className="text-base font-black font-mono text-[#111410]">
-                      {r.mastery_percentage || 0}%
-                    </div>
-                    <span className="text-[10px] font-mono text-[#62685E] block uppercase">
-                      {r.mastered_words || 0}/{r.total_words} Words
-                    </span>
-                    <button
-                      onClick={() => handleLaunchRootPractice(r.id)}
-                      className="mt-1 text-[10px] font-mono font-bold uppercase text-[#7BB33B] hover:underline"
-                    >
-                      Practice →
-                    </button>
-                  </div>
-                </div>
-              ))}
-            </div>
-          </div>
-        </div>
+        <DashboardView
+          stats={stats || vocabStats}
+          onSelectRoot={(rootId) => {
+            handleOpenCustomSession([Number(rootId)]);
+          }}
+          onNavigateMode={() => handleAttemptTabChange('study')}
+        />
       )}
 
       {/* ---------------------------------------------------------------------- */}

@@ -25,6 +25,12 @@ export default {
         }
       },
       boxShadow: {
+        'soft-xs': '0 1px 2px 0 rgba(17, 20, 16, 0.04)',
+        'soft-sm': '0 2px 5px 0 rgba(17, 20, 16, 0.05)',
+        'soft-md': '0 4px 14px -1px rgba(17, 20, 16, 0.07)',
+        'soft-lg': '0 10px 25px -3px rgba(17, 20, 16, 0.08), 0 4px 10px -2px rgba(17, 20, 16, 0.03)',
+        'soft-xl': '0 20px 35px -5px rgba(17, 20, 16, 0.08), 0 8px 16px -4px rgba(17, 20, 16, 0.03)',
+        'card-glow': '0 12px 36px -4px rgba(123, 179, 59, 0.12), 0 4px 14px -2px rgba(66, 40, 29, 0.05)',
         'brutal': '4px 4px 0px 0px #111410',
         'brutal-sm': '2px 2px 0px 0px #111410',
         'brutal-lg': '6px 6px 0px 0px #111410',
