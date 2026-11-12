@@ -420,7 +420,7 @@ export default function StudyDeck({
           )}
 
           {/* 3D FLASHCARD CONTAINER WITH TOUCH SWIPE GESTURES */}
-          <div className="relative min-h-[440px] sm:min-h-[460px] w-full [perspective:1200px] mb-3 sm:mb-5 select-none">
+          <div className="relative min-h-[480px] sm:min-h-[520px] lg:min-h-[530px] w-full [perspective:1200px] mb-3 sm:mb-5 select-none">
             <div 
               onClick={handleCardClick}
               onTouchStart={handleTouchStart}
@@ -434,7 +434,7 @@ export default function StudyDeck({
                 }`,
                 transition: touchOffset ? 'none' : 'transform 0.45s ease-in-out',
               }}
-              className="w-full min-h-[440px] sm:min-h-[460px] relative cursor-pointer touch-pan-y"
+              className="w-full min-h-[480px] sm:min-h-[520px] lg:min-h-[530px] relative cursor-pointer touch-pan-y"
             >
               {/* Dynamic On-Card Swipe Feedback Badges */}
               {touchOffset > 30 && (
@@ -455,12 +455,12 @@ export default function StudyDeck({
                   WebkitBackfaceVisibility: 'hidden',
                   transform: 'rotateY(0deg)',
                 }}
-                className={`absolute inset-0 w-full min-h-[440px] sm:min-h-[460px] h-full bg-white border border-stone-200/90 rounded-3xl shadow-soft-lg hover:shadow-card-glow p-6 sm:p-10 flex flex-col justify-between transition-all duration-300 ${
+                className={`absolute inset-0 w-full h-full bg-white border border-stone-200/90 rounded-3xl shadow-soft-lg hover:shadow-card-glow p-5 sm:p-7 lg:p-8 flex flex-col justify-between overflow-hidden transition-all duration-300 ${
                   isFlipped ? 'pointer-events-none' : 'pointer-events-auto'
                 }`}
               >
                 {/* Top Metadata */}
-                <div className="flex flex-wrap items-center justify-between gap-2 border-b border-stone-100 pb-3 sm:pb-4">
+                <div className="flex flex-wrap items-center justify-between gap-2 border-b border-stone-100 pb-3 sm:pb-3.5 shrink-0">
                   <div className="flex items-center space-x-1.5 sm:space-x-2 flex-wrap gap-y-1.5">
                     <span className="text-[11px] font-sans font-bold uppercase tracking-wider px-2.5 py-0.5 bg-stone-800 text-white rounded-full">
                       {currentWord.part_of_speech || 'noun'}
@@ -516,7 +516,7 @@ export default function StudyDeck({
                         e.stopPropagation();
                         onSpeak(currentWord.word);
                       }}
-                      className="p-2 bg-stone-50 hover:bg-[#EDF5E5] text-stone-700 border border-stone-200 rounded-xl transition shadow-soft-xs min-w-[38px] min-h-[38px] flex items-center justify-center"
+                      className="p-2 bg-stone-50 hover:bg-[#EDF5E5] text-stone-700 border border-stone-200 rounded-xl transition shadow-soft-xs min-w-[36px] min-h-[36px] flex items-center justify-center"
                       title="Listen to pronunciation"
                     >
                       <Volume2 className="w-4 h-4 text-[#2F441E]" />
@@ -525,20 +525,20 @@ export default function StudyDeck({
                 </div>
 
                 {/* Target Word */}
-                <div className="my-6 sm:my-10 text-center px-2">
-                  <h1 className="text-4xl sm:text-6xl font-extrabold text-stone-900 tracking-tight font-sans break-words hyphens-auto">
+                <div className="my-3 sm:my-5 text-center px-2 flex-1 flex flex-col justify-center">
+                  <h1 className="text-4xl sm:text-5xl font-extrabold text-stone-900 tracking-tight font-sans break-words hyphens-auto">
                     {currentWord.word}
                   </h1>
                   {currentWord.pronunciation && (
-                    <p className="text-stone-500 text-sm sm:text-base mt-2 font-mono font-medium tracking-wide">
+                    <p className="text-stone-500 text-xs sm:text-sm mt-1 sm:mt-1.5 font-mono font-medium tracking-wide">
                       /{currentWord.pronunciation}/
                     </p>
                   )}
                 </div>
 
                 {/* Morpheme Decomposition Tags */}
-                <div className="bg-stone-50/80 border border-stone-200/80 rounded-2xl p-4 sm:p-5 shadow-soft-xs">
-                  <div className="text-[11px] font-sans font-bold text-stone-500 uppercase tracking-wider mb-3 flex items-center justify-between">
+                <div className="bg-stone-50/80 border border-stone-200/80 rounded-2xl p-3.5 sm:p-4 shadow-soft-xs shrink-0">
+                  <div className="text-[11px] font-sans font-bold text-stone-500 uppercase tracking-wider mb-2.5 flex items-center justify-between">
                     <span className="flex items-center space-x-1.5 text-stone-700">
                       <Layers className="w-3.5 h-3.5 text-[#7BB33B]" />
                       <span>Morpheme Decomposition</span>
@@ -636,14 +636,14 @@ export default function StudyDeck({
                   </div>
 
                   {currentWord.root_details?.mnemonic && (
-                    <div className="mt-3 pt-2.5 border-t border-stone-200/60 flex items-start space-x-2 text-xs font-sans text-stone-700">
+                    <div className="mt-2.5 pt-2 border-t border-stone-200/60 flex items-start space-x-2 text-xs font-sans text-stone-700">
                       <span className="font-bold uppercase text-[10px] text-[#2F441E] bg-[#EDF5E5] px-1.5 py-0.5 rounded border border-[#7BB33B]/30 shrink-0 font-mono">Key:</span>
                       <span className="italic font-serif">"{currentWord.root_details.mnemonic}"</span>
                     </div>
                   )}
                 </div>
 
-                <div className="mt-4 flex items-center justify-center space-x-1.5 text-xs font-sans font-medium text-stone-400">
+                <div className="mt-2.5 sm:mt-3 flex items-center justify-center space-x-1.5 text-xs font-sans font-medium text-stone-400 shrink-0">
                   <RotateCw className="w-3.5 h-3.5 text-[#7BB33B]" />
                   <span>Tap card to flip definition <span className="hidden sm:inline font-mono text-[11px]">[Space]</span></span>
                 </div>
@@ -656,11 +656,11 @@ export default function StudyDeck({
                   WebkitBackfaceVisibility: 'hidden',
                   transform: 'rotateY(180deg)',
                 }}
-                className={`absolute inset-0 w-full min-h-[440px] sm:min-h-[460px] h-full bg-white border border-stone-200/90 rounded-3xl shadow-soft-lg hover:shadow-card-glow p-6 sm:p-10 flex flex-col justify-between transition-all duration-300 ${
+                className={`absolute inset-0 w-full h-full bg-white border border-stone-200/90 rounded-3xl shadow-soft-lg hover:shadow-card-glow p-5 sm:p-7 lg:p-8 flex flex-col justify-between overflow-hidden transition-all duration-300 ${
                   isFlipped ? 'pointer-events-auto' : 'pointer-events-none'
                 }`}
               >
-                <div className="flex flex-wrap items-center justify-between gap-2 border-b border-stone-100 pb-3 sm:pb-4">
+                <div className="flex flex-wrap items-center justify-between gap-2 border-b border-stone-100 pb-3 sm:pb-3.5 shrink-0">
                   <div className="flex items-center space-x-2.5">
                     <h3 className="text-2xl sm:text-3xl font-extrabold text-stone-900 font-sans tracking-tight break-words">{currentWord.word}</h3>
                     <span className={`text-[10px] sm:text-[11px] font-sans font-semibold uppercase px-2.5 py-0.5 ${getConnotationBadge(currentWord.connotation)}`}>
@@ -697,22 +697,22 @@ export default function StudyDeck({
                 </div>
 
                 {/* Core Definition */}
-                <div className="my-4 sm:my-6">
-                  <h4 className="text-[11px] font-sans font-bold uppercase tracking-wider text-stone-400 mb-2">
+                <div className="my-3 sm:my-4 flex-1 flex flex-col justify-center">
+                  <h4 className="text-[11px] font-sans font-bold uppercase tracking-wider text-stone-400 mb-1.5">
                     SAT Context Definition
                   </h4>
-                  <p className="text-xl sm:text-2xl text-stone-900 font-serif leading-relaxed font-normal">
+                  <p className="text-lg sm:text-xl text-stone-900 font-serif leading-relaxed font-normal">
                     "{currentWord.definition}"
                   </p>
                 </div>
 
                 {/* Exam Context Sentence */}
-                <div className="bg-[#FAFBF8] border-l-4 border-[#7BB33B] rounded-r-2xl p-4 sm:p-5 my-2 shadow-soft-xs">
-                  <h4 className="text-[11px] font-sans font-bold uppercase tracking-wider text-[#2F441E] mb-1.5 flex items-center space-x-1.5">
+                <div className="bg-[#FAFBF8] border-l-4 border-[#7BB33B] rounded-r-2xl p-3.5 sm:p-4 my-2 shadow-soft-xs shrink-0">
+                  <h4 className="text-[11px] font-sans font-bold uppercase tracking-wider text-[#2F441E] mb-1 flex items-center space-x-1.5">
                     <BookMarked className="w-3.5 h-3.5 text-[#7BB33B]" />
                     <span>Exam Context</span>
                   </h4>
-                  <p className="text-sm sm:text-base text-stone-700 font-serif italic leading-relaxed">
+                  <p className="text-xs sm:text-sm text-stone-700 font-serif italic leading-relaxed">
                     "{currentWord.sat_sentence}"
                   </p>
                 </div>
@@ -727,7 +727,7 @@ export default function StudyDeck({
                       word: currentWord,
                     });
                   }}
-                  className="bg-[#EDF5E5]/60 hover:bg-[#EDF5E5] border border-[#7BB33B]/30 rounded-2xl p-3 sm:p-3.5 text-xs font-sans text-[#2F441E] flex items-center justify-between cursor-pointer transition shadow-soft-xs"
+                  className="bg-[#EDF5E5]/60 hover:bg-[#EDF5E5] border border-[#7BB33B]/30 rounded-2xl p-2.5 sm:p-3 text-xs font-sans text-[#2F441E] flex items-center justify-between cursor-pointer transition shadow-soft-xs shrink-0"
                   title="Click to view root morpheme deep dive"
                 >
                   <div className="flex items-center space-x-2 truncate">
