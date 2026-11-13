@@ -641,7 +641,7 @@ export default function App() {
     <div className="min-h-screen bg-[#FAFBF8] bg-grid-kiwi text-[#111410] flex flex-col font-sans selection:bg-[#7BB33B] selection:text-white">
       {/* Shared Suite Header featuring Kiwi Vocabulary and Disabled Switcher Badges */}
       <Navbar
-        activeApp={activeApp}
+        activeApp={activeApp === 'vocab' && activeTab === 'progress' ? 'platform' : activeApp}
         setActiveApp={handleNavigateApp}
         stats={stats}
         sessionSeconds={sessionSeconds}
