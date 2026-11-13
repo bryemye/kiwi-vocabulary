@@ -117,12 +117,12 @@ function drawGraphCard(ctx, x, y, width, height, options = {}) {
 /**
  * Ambient background particles for gentle depth
  */
-const AMBIENT_PARTICLES_COUNT = 28;
+const AMBIENT_PARTICLES_COUNT = 55;
 function createAmbientParticles() {
   const particles = [];
   for (let i = 0; i < AMBIENT_PARTICLES_COUNT; i++) {
     const angle = pseudoRandom(i * 13 + 1) * Math.PI * 2;
-    const dist = 80 + pseudoRandom(i * 13 + 2) * 1350;
+    const dist = 80 + pseudoRandom(i * 13 + 2) * 3000;
     particles.push({
       baseX: Math.cos(angle) * dist,
       baseY: Math.sin(angle) * dist,
@@ -142,6 +142,202 @@ function createAmbientParticles() {
 }
 
 /**
+ * Deterministic map coordinates for each thematic cluster and SAT tier territory
+ */
+function getClusterTerritory(pathway, filterName) {
+  if (!filterName || filterName === 'ALL') return null;
+
+  if (pathway === PATHWAY_YIELD) {
+    const idx = SAT_TIER_DEFS.findIndex(
+      t => t.name.toLowerCase() === filterName.toLowerCase()
+    );
+    if (idx === -1) return null;
+    const tier = SAT_TIER_DEFS[idx];
+    const radius = 1650;
+    const angle = (idx / SAT_TIER_DEFS.length) * Math.PI * 2 - Math.PI / 2;
+    return {
+      x: Math.round(Math.cos(angle) * radius),
+      y: Math.round(Math.sin(angle) * radius),
+      label: tier.badge,
+      icon: tier.icon,
+      accentColor: tier.accentColor || '#7BB33B',
+    };
+  }
+
+  const idx = THEMATIC_CLUSTER_DEFS.findIndex(
+    c => c.name.toLowerCase() === filterName.toLowerCase()
+  );
+  if (idx === -1) return null;
+  const cluster = THEMATIC_CLUSTER_DEFS[idx];
+  const radius = 2000;
+  const angle = (idx / THEMATIC_CLUSTER_DEFS.length) * Math.PI * 2 - Math.PI / 2;
+  return {
+    x: Math.round(Math.cos(angle) * radius),
+    y: Math.round(Math.sin(angle) * radius),
+    label: cluster.name,
+    icon: cluster.icon,
+    accentColor: cluster.accentColor || '#7BB33B',
+  };
+}
+
+/**
+ * Compute radial outward placement of a word around its parent root
+ */
+function computeWordPosition(rootX, rootY, hubX, hubY, wordIdx, wordCount, orbitRadius = 140) {
+  const outwardAngle = Math.atan2(rootY - hubY, rootX - hubX);
+  let wordAngle;
+  if (wordCount <= 1) {
+    wordAngle = outwardAngle;
+  } else {
+    const span = Math.min(Math.PI * 1.3, (wordCount - 1) * 0.45);
+    const step = span / (wordCount - 1);
+    wordAngle = outwardAngle - span / 2 + wordIdx * step;
+  }
+  return {
+    x: rootX + orbitRadius * Math.cos(wordAngle),
+    y: rootY + orbitRadius * Math.sin(wordAngle),
+  };
+}
+
+/**
+ * Update targetBaseX/targetBaseY on all nodes to gather a filtered cluster or return home
+ */
+function assignClusterTargets(nodes, pathway, filterName) {
+  if (!filterName || filterName === 'ALL') {
+    nodes.forEach(node => {
+      node.targetBaseX = node.homeX;
+      node.targetBaseY = node.homeY;
+      node.inActiveCluster = true;
+    });
+    return null;
+  }
+
+  const territory = getClusterTerritory(pathway, filterName);
+  if (!territory) {
+    nodes.forEach(node => {
+      node.targetBaseX = node.homeX;
+      node.targetBaseY = node.homeY;
+      node.inActiveCluster = true;
+    });
+    return null;
+  }
+
+  const matchingRoots = [];
+  const matchingRootIds = new Set();
+
+  nodes.forEach(node => {
+    if (node.type !== 'root') return;
+    const matches = pathway === PATHWAY_YIELD
+      ? (node.sat_tier || '').toLowerCase() === filterName.toLowerCase()
+      : (node.thematic_cluster || '').toLowerCase() === filterName.toLowerCase();
+    if (matches) {
+      matchingRoots.push(node);
+      matchingRootIds.add(node.id);
+    }
+  });
+
+  const count = matchingRoots.length;
+  let ringSpecs;
+  let clusterZoom;
+  if (count <= 10) {
+    ringSpecs = [{ cap: count, radius: 250 }];
+    clusterZoom = 0.86;
+  } else if (count <= 26) {
+    const r1 = Math.min(10, Math.ceil(count * 0.4));
+    ringSpecs = [
+      { cap: r1, radius: 240 },
+      { cap: count - r1, radius: 450 },
+    ];
+    clusterZoom = 0.74;
+  } else if (count <= 50) {
+    const r1 = 12;
+    const r2 = 20;
+    ringSpecs = [
+      { cap: r1, radius: 250 },
+      { cap: r2, radius: 470 },
+      { cap: count - r1 - r2, radius: 690 },
+    ];
+    clusterZoom = 0.63;
+  } else {
+    const r1 = 14;
+    const r2 = 24;
+    const r3 = 32;
+    ringSpecs = [
+      { cap: r1, radius: 260 },
+      { cap: r2, radius: 500 },
+      { cap: r3, radius: 740 },
+      { cap: count - r1 - r2 - r3, radius: 980 },
+    ];
+    clusterZoom = 0.54;
+  }
+
+  // Place matching roots in concentric rings around territory center
+  const rootPosMap = new Map();
+  let cursor = 0;
+  ringSpecs.forEach((spec, ringIdx) => {
+    if (spec.cap <= 0) return;
+    for (let i = 0; i < spec.cap && cursor < count; i++, cursor++) {
+      const rootNode = matchingRoots[cursor];
+      const angle = (i / spec.cap) * Math.PI * 2 + ringIdx * 0.42;
+      const rx = territory.x + spec.radius * Math.cos(angle);
+      const ry = territory.y + spec.radius * Math.sin(angle);
+      rootNode.targetBaseX = rx;
+      rootNode.targetBaseY = ry;
+      rootNode.inActiveCluster = true;
+      rootPosMap.set(rootNode.id, { x: rx, y: ry });
+    }
+  });
+
+  // Group child words by rootNodeId so they fan out cleanly from cluster center
+  const wordsByRoot = new Map();
+  nodes.forEach(node => {
+    if (node.type === 'word') {
+      if (matchingRootIds.has(node.rootNodeId)) {
+        if (!wordsByRoot.has(node.rootNodeId)) wordsByRoot.set(node.rootNodeId, []);
+        wordsByRoot.get(node.rootNodeId).push(node);
+      } else {
+        node.targetBaseX = node.homeX;
+        node.targetBaseY = node.homeY;
+        node.inActiveCluster = false;
+      }
+    } else if (node.type === 'root' && !matchingRootIds.has(node.id)) {
+      node.targetBaseX = node.homeX;
+      node.targetBaseY = node.homeY;
+      node.inActiveCluster = false;
+    } else if (node.type === 'origin') {
+      node.targetBaseX = node.homeX;
+      node.targetBaseY = node.homeY;
+      node.inActiveCluster = false;
+    }
+  });
+
+  wordsByRoot.forEach((wordList, rootId) => {
+    const rPos = rootPosMap.get(rootId);
+    if (!rPos) return;
+    wordList.forEach((wordNode, wIdx) => {
+      const pos = computeWordPosition(
+        rPos.x,
+        rPos.y,
+        territory.x,
+        territory.y,
+        wIdx,
+        wordList.length,
+        135
+      );
+      wordNode.targetBaseX = pos.x;
+      wordNode.targetBaseY = pos.y;
+      wordNode.inActiveCluster = true;
+    });
+  });
+
+  return {
+    ...territory,
+    count,
+    zoom: clusterZoom,
+  };
+}
+
+/**
  * Deterministic 2D Node-Link Layout Generator with Slow Sway & Breathing Parameters
  */
 function buildGraphLayout(roots, masteredSet) {
@@ -154,10 +350,15 @@ function buildGraphLayout(roots, masteredSet) {
     type: 'origin',
     label: 'LATIN ROOTS',
     language: 'Latin',
+    homeX: -1020,
+    homeY: 0,
+    targetBaseX: -1020,
+    targetBaseY: 0,
     baseX: -1020,
     baseY: 0,
     x: -1020,
     y: 0,
+    inActiveCluster: true,
     width: 174,
     height: 54,
     driftSpeedX: 0.045,
@@ -178,10 +379,15 @@ function buildGraphLayout(roots, masteredSet) {
     type: 'origin',
     label: 'GREEK ROOTS',
     language: 'Greek',
+    homeX: 1020,
+    homeY: 0,
+    targetBaseX: 1020,
+    targetBaseY: 0,
     baseX: 1020,
     baseY: 0,
     x: 1020,
     y: 0,
+    inActiveCluster: true,
     width: 174,
     height: 54,
     driftSpeedX: 0.05,
@@ -250,10 +456,15 @@ function buildGraphLayout(roots, masteredSet) {
         sat_tier: root.sat_tier || 'Tier 1 High-Yield',
         total_words: (root.words || []).length,
         data: root,
+        homeX: rootX,
+        homeY: rootY,
+        targetBaseX: rootX,
+        targetBaseY: rootY,
         baseX: rootX,
         baseY: rootY,
         x: rootX,
         y: rootY,
+        inActiveCluster: true,
         width: 95,
         height: 46,
         originId: origin.id,
@@ -264,7 +475,7 @@ function buildGraphLayout(roots, masteredSet) {
         driftAmpY: 7 + pseudoRandom(seed * 7 + 4) * 7,
         driftPhaseX: pseudoRandom(seed * 7 + 5) * Math.PI * 2,
         driftPhaseY: pseudoRandom(seed * 7 + 6) * Math.PI * 2,
-        // Slow Breathing Fade Parameters (~10-14% active at a time over slow ~2-3 min cycles)
+        // Slow Breathing Fade Parameters
         fadeFreq: 0.032 + pseudoRandom(seed * 7 + 7) * 0.025,
         fadePhase: pseudoRandom(seed * 7 + 8) * Math.PI * 2,
         minFadeOpacity: 0,
@@ -285,21 +496,17 @@ function buildGraphLayout(roots, masteredSet) {
       // Child Word Leaf Nodes
       const childWords = root.words || [];
       const wordCount = childWords.length;
-      const wordOrbitRadius = 140;
-      const outwardAngle = Math.atan2(rootY - origin.baseY, rootX - origin.baseX);
 
       childWords.forEach((word, wIdx) => {
-        let wordAngle;
-        if (wordCount === 1) {
-          wordAngle = outwardAngle;
-        } else {
-          const span = Math.min(Math.PI * 1.3, (wordCount - 1) * 0.45);
-          const step = span / (wordCount - 1);
-          wordAngle = outwardAngle - span / 2 + wIdx * step;
-        }
-
-        const wordX = rootX + wordOrbitRadius * Math.cos(wordAngle);
-        const wordY = rootY + wordOrbitRadius * Math.sin(wordAngle);
+        const { x: wordX, y: wordY } = computeWordPosition(
+          rootX,
+          rootY,
+          origin.baseX,
+          origin.baseY,
+          wIdx,
+          wordCount,
+          140
+        );
 
         const wordSeed = seed * 100 + wIdx * 13;
         const wordNodeId = `word-${word.id}`;
@@ -313,10 +520,15 @@ function buildGraphLayout(roots, masteredSet) {
           isMastered,
           data: word,
           parentRoot: root,
+          homeX: wordX,
+          homeY: wordY,
+          targetBaseX: wordX,
+          targetBaseY: wordY,
           baseX: wordX,
           baseY: wordY,
           x: wordX,
           y: wordY,
+          inActiveCluster: true,
           width: Math.max(86, word.word.length * 8.5 + 24),
           height: 28,
           rootNodeId,
@@ -357,10 +569,15 @@ function buildGraphLayout(roots, masteredSet) {
       type: 'origin',
       label: 'OTHER ROOTS',
       language: 'Other',
+      homeX: 0,
+      homeY: 1120,
+      targetBaseX: 0,
+      targetBaseY: 1120,
       baseX: 0,
       baseY: 1120,
       x: 0,
       y: 1120,
+      inActiveCluster: true,
       width: 174,
       height: 54,
       driftSpeedX: 0.045,
@@ -611,6 +828,39 @@ export default function VocabGraphView({
     pathwayFilterRef.current = pathwayFilter;
   }, [pathwayFilter]);
 
+  const activeClusterMetaRef = useRef(null);
+  const lastAppliedClusterKeyRef = useRef('init');
+
+  // Gather roots into spatial map clusters and glide camera when filter/pathway changes
+  useEffect(() => {
+    if (!graphData.nodes || graphData.nodes.length === 0) return;
+    const key = `${learningPathway}::${pathwayFilter}`;
+    const clusterMeta = assignClusterTargets(graphData.nodes, learningPathway, pathwayFilter);
+    activeClusterMetaRef.current = clusterMeta;
+
+    const prevKey = lastAppliedClusterKeyRef.current;
+    lastAppliedClusterKeyRef.current = key;
+
+    // On initial mount with default 'ALL' filter, keep existing camera / restore target intact
+    if (prevKey === 'init' && (!pathwayFilter || pathwayFilter === 'ALL')) {
+      return;
+    }
+
+    if (prevKey !== key) {
+      setFocusedRootId(null);
+      setSelectedNode(null);
+      if (clusterMeta) {
+        targetCameraRef.current = {
+          x: -clusterMeta.x,
+          y: -clusterMeta.y,
+          zoom: clusterMeta.zoom,
+        };
+      } else {
+        targetCameraRef.current = { x: 0, y: 0, zoom: 0.56 };
+      }
+    }
+  }, [pathwayFilter, learningPathway, graphData]);
+
   // Sync initialRoots if passed or changed
   useEffect(() => {
     if (initialRoots && initialRoots.length > 0 && graphData.nodes.length === 0) {
@@ -695,9 +945,11 @@ export default function VocabGraphView({
 
     // Smoothly pan camera to center the focused root with comfortable zoom
     const drawerOffset = 180;
+    const targetX = rootNode.targetBaseX ?? rootNode.baseX;
+    const targetY = rootNode.targetBaseY ?? rootNode.baseY;
     targetCameraRef.current = {
-      x: -rootNode.baseX - drawerOffset,
-      y: -rootNode.baseY,
+      x: -targetX - drawerOffset,
+      y: -targetY,
       zoom: 1.05,
     };
   }, []);
@@ -706,7 +958,16 @@ export default function VocabGraphView({
     setFocusedRootId(null);
     setSelectedNode(null);
     setSearchQuery('');
-    targetCameraRef.current = { x: 0, y: 0, zoom: 0.56 };
+    const cluster = activeClusterMetaRef.current;
+    if (cluster) {
+      targetCameraRef.current = {
+        x: -cluster.x,
+        y: -cluster.y,
+        zoom: cluster.zoom,
+      };
+    } else {
+      targetCameraRef.current = { x: 0, y: 0, zoom: 0.56 };
+    }
   }, []);
 
   const smoothPanToNode = useCallback((node) => {
@@ -720,9 +981,11 @@ export default function VocabGraphView({
     }
 
     const drawerOffset = 180;
+    const targetX = node.targetBaseX ?? node.baseX;
+    const targetY = node.targetBaseY ?? node.baseY;
     targetCameraRef.current = {
-      x: -node.baseX - drawerOffset,
-      y: -node.baseY,
+      x: -targetX - drawerOffset,
+      y: -targetY,
       zoom: node.type === 'word' ? 1.15 : 1.05,
     };
   }, []);
@@ -823,6 +1086,14 @@ export default function VocabGraphView({
           setStudyWordModal(null);
           return;
         }
+        if (focusedRootIdRef.current || selectedNode) {
+          clearFocus();
+          return;
+        }
+        if (pathwayFilterRef.current && pathwayFilterRef.current !== 'ALL') {
+          setPathwayFilter('ALL');
+          return;
+        }
         clearFocus();
         return;
       }
@@ -864,7 +1135,7 @@ export default function VocabGraphView({
       window.removeEventListener('keydown', handleKeyDown);
       window.removeEventListener('keyup', handleKeyUp);
     };
-  }, [clearFocus, resetCamera, studyWordModal]);
+  }, [clearFocus, resetCamera, studyWordModal, selectedNode]);
 
   // ---------------------------------------------------------------------------
   // 4. ANIMATION FRAME LOOP: CALM SWAY & FOCUS ENGINE
@@ -920,9 +1191,9 @@ export default function VocabGraphView({
         if (targetCameraRef.current) {
           const tc = targetCameraRef.current;
           const cam = cameraRef.current;
-          cam.x += (tc.x - cam.x) * 0.12;
-          cam.y += (tc.y - cam.y) * 0.12;
-          cam.zoom += (tc.zoom - cam.zoom) * 0.12;
+          cam.x += (tc.x - cam.x) * 0.075;
+          cam.y += (tc.y - cam.y) * 0.075;
+          cam.zoom += (tc.zoom - cam.zoom) * 0.075;
 
           if (
             Math.abs(tc.x - cam.x) < 0.5 &&
@@ -944,18 +1215,10 @@ export default function VocabGraphView({
         graphData.nodes.forEach(n => nodeMap.set(n.id, n));
 
         const activeFilter = pathwayFilterRef.current;
-        const activePathway = learningPathwayRef.current;
         const hasActiveFilter = Boolean(activeFilter && activeFilter !== 'ALL');
+        const activeCluster = activeClusterMetaRef.current;
 
-        const rootMatchesFilter = (rootNode) => {
-          if (!hasActiveFilter) return true;
-          if (activePathway === PATHWAY_YIELD) {
-            return (rootNode.sat_tier || '').toLowerCase() === activeFilter.toLowerCase();
-          }
-          return (rootNode.thematic_cluster || '').toLowerCase() === activeFilter.toLowerCase();
-        };
-
-        // Helper for slow, sparse smoothstep breathing (only ~12-14% of roots visible at once)
+        // Helper for slow smoothstep breathing
         const computeSparseBreath = (node, threshold) => {
           const wave = Math.sin(time * node.fadeFreq + node.fadePhase);
           if (wave <= threshold) return 0;
@@ -963,11 +1226,29 @@ export default function VocabGraphView({
           return t * t * (3 - 2 * t);
         };
 
-        // 4. Update Node Positions & Sparse Continuous Breathing Opacities
-        // - Ambient Mode (no focus): ~10% of the graph gently surfaces at a time, swaying slowly
-        // - Focus Mode: The selected root & its children remain clearly visible
-        //   while unrelated nodes dim softly into the background
+        // Determine cluster root breathing threshold scaled by cluster size
+        let clusterRootThreshold = 0.05;
+        if (activeCluster) {
+          if (activeCluster.count <= 18) clusterRootThreshold = -0.15;
+          else if (activeCluster.count <= 45) clusterRootThreshold = 0.15;
+          else clusterRootThreshold = 0.45;
+        }
+
+        // 4. Update Node Positions (Spatial Swimming + Sway + Breathing Opacities)
         const updateNodeMotion = (node, parentNode = null) => {
+          // Smoothly migrate base coordinates toward targetBaseX/Y (cluster formation or home)
+          const targetX = node.targetBaseX ?? node.baseX;
+          const targetY = node.targetBaseY ?? node.baseY;
+          const dx = targetX - node.baseX;
+          const dy = targetY - node.baseY;
+          if (Math.abs(dx) > 0.25 || Math.abs(dy) > 0.25) {
+            node.baseX += dx * 0.055;
+            node.baseY += dy * 0.055;
+          } else {
+            node.baseX = targetX;
+            node.baseY = targetY;
+          }
+
           const parentDriftX = parentNode?._driftX || 0;
           const parentDriftY = parentNode?._driftY || 0;
           const isFocalRoot = currentFocusedId && node.id === currentFocusedId;
@@ -986,30 +1267,39 @@ export default function VocabGraphView({
             node.y = node.baseY + totalDriftY;
 
             if (node.type === 'origin') {
-              const breath = 0.5 + 0.5 * Math.sin(time * node.fadeFreq + node.fadePhase);
-              const eased = breath * breath * (3 - 2 * breath);
-              node.opacity = node.minFadeOpacity + eased * (node.maxFadeOpacity - node.minFadeOpacity);
+              if (hasActiveFilter) {
+                node.opacity = 0;
+              } else {
+                const breath = 0.5 + 0.5 * Math.sin(time * node.fadeFreq + node.fadePhase);
+                const eased = breath * breath * (3 - 2 * breath);
+                node.opacity = node.minFadeOpacity + eased * (node.maxFadeOpacity - node.minFadeOpacity);
+              }
             } else if (node.type === 'root') {
               if (hasActiveFilter) {
-                if (!rootMatchesFilter(node)) {
+                if (!node.inActiveCluster) {
                   node.opacity = 0;
                 } else {
-                  const breath = 0.5 + 0.5 * Math.sin(time * node.fadeFreq + node.fadePhase);
-                  node.opacity = 0.55 + breath * 0.35;
+                  const sparse = computeSparseBreath(node, clusterRootThreshold);
+                  node.opacity = sparse * node.maxFadeOpacity;
                 }
               } else {
-                const sparse = computeSparseBreath(node, 0.90);
+                // ~28% of roots gently visible at a time in ALL mode
+                const sparse = computeSparseBreath(node, 0.62);
                 node.opacity = sparse * node.maxFadeOpacity;
               }
             } else {
-              // Child word only surfaces gently alongside a surfaced parent root
-              const parentAlpha = parentNode?.opacity || 0;
-              if (parentAlpha <= 0.35) {
+              // Child word surfaces softly alongside a surfaced parent root
+              if (hasActiveFilter && !node.inActiveCluster) {
                 node.opacity = 0;
               } else {
-                const parentGate = (parentAlpha - 0.35) / 0.65;
-                const wordSparse = computeSparseBreath(node, 0.25);
-                node.opacity = parentGate * wordSparse * node.maxFadeOpacity;
+                const parentAlpha = parentNode?.opacity || 0;
+                if (parentAlpha <= 0.25) {
+                  node.opacity = 0;
+                } else {
+                  const parentGate = (parentAlpha - 0.25) / 0.75;
+                  const wordSparse = computeSparseBreath(node, 0.05);
+                  node.opacity = parentGate * wordSparse * node.maxFadeOpacity;
+                }
               }
             }
           } else if (isFocalFamily) {
@@ -1022,7 +1312,7 @@ export default function VocabGraphView({
             node.y = node.baseY + microDriftY;
             node.opacity = 1.0;
           } else {
-            // Peripheral nodes during Focus Mode: slow sway, sparsely & very faintly visible
+            // Peripheral nodes during Focus Mode: slow sway, sparsely & faintly visible
             const localDriftX = Math.sin(time * node.driftSpeedX * 0.6 + node.driftPhaseX) * node.driftAmpX;
             const localDriftY = Math.cos(time * node.driftSpeedY * 0.6 + node.driftPhaseY) * node.driftAmpY;
             const totalDriftX = parentDriftX * 0.85 + localDriftX;
@@ -1033,9 +1323,13 @@ export default function VocabGraphView({
             node.y = node.baseY + totalDriftY;
 
             if (node.type === 'origin') {
-              node.opacity = 0.20;
+              node.opacity = hasActiveFilter ? 0 : 0.20;
             } else if (node.type === 'root') {
-              node.opacity = computeSparseBreath(node, 0.90) * 0.12;
+              if (hasActiveFilter && !node.inActiveCluster) {
+                node.opacity = 0;
+              } else {
+                node.opacity = computeSparseBreath(node, hasActiveFilter ? clusterRootThreshold : 0.62) * 0.12;
+              }
             } else {
               node.opacity = 0;
             }
@@ -1079,6 +1373,7 @@ export default function VocabGraphView({
         // 7. Draw Connector Edges
         // First pass: ambient or background edges
         graphData.edges.forEach(edge => {
+          if (hasActiveFilter && edge.type === 'origin-to-root') return;
           const fromNode = nodeMap.get(edge.from);
           const toNode = nodeMap.get(edge.to);
           if (!fromNode || !toNode) return;
@@ -1107,9 +1402,26 @@ export default function VocabGraphView({
           ctx.globalAlpha = 1.0;
         });
 
+        // Subtle constellation threads from active cluster center to visible cluster roots
+        if (hasActiveFilter && activeCluster) {
+          graphData.nodes.forEach(node => {
+            if (node.type !== 'root' || !node.inActiveCluster || node.opacity <= 0.01) return;
+            if (currentFocusedId && node.id === currentFocusedId) return;
+            ctx.beginPath();
+            ctx.moveTo(activeCluster.x, activeCluster.y);
+            ctx.lineTo(node.x, node.y);
+            ctx.strokeStyle = activeCluster.accentColor || '#42281D';
+            ctx.lineWidth = 1;
+            ctx.globalAlpha = currentFocusedId ? 0.03 : node.opacity * 0.14;
+            ctx.stroke();
+            ctx.globalAlpha = 1.0;
+          });
+        }
+
         // Second pass: Focused Edges for selected root family
         if (currentFocusedId) {
           graphData.edges.forEach(edge => {
+            if (hasActiveFilter && edge.type === 'origin-to-root') return;
             if (edge.rootId !== currentFocusedId) return;
             const fromNode = nodeMap.get(edge.from);
             const toNode = nodeMap.get(edge.to);
@@ -1124,6 +1436,11 @@ export default function VocabGraphView({
             ctx.stroke();
             ctx.globalAlpha = 1.0;
           });
+        }
+
+        // 7b. Draw Active Cluster Landmark Hub
+        if (hasActiveFilter && activeCluster && isVisible(activeCluster.x, activeCluster.y)) {
+          drawClusterLandmark(ctx, activeCluster, time, Boolean(currentFocusedId));
         }
 
         // 8. Draw Nodes
@@ -1248,6 +1565,65 @@ export default function VocabGraphView({
   // 6. NODE RENDERING HELPERS
   // ---------------------------------------------------------------------------
 
+  const drawClusterLandmark = (ctx, cluster, time, hasFocus) => {
+    const swayX = Math.sin(time * 0.045) * 6;
+    const swayY = Math.cos(time * 0.035) * 3;
+    const cx = cluster.x + swayX;
+    const cy = cluster.y + swayY;
+    const alpha = hasFocus ? 0.22 : 0.88;
+
+    // Subtle territory halo ring
+    ctx.save();
+    ctx.beginPath();
+    ctx.arc(cluster.x, cluster.y, 175, 0, Math.PI * 2);
+    ctx.strokeStyle = cluster.accentColor || '#7BB33B';
+    ctx.lineWidth = 1.25;
+    ctx.setLineDash([6, 10]);
+    ctx.globalAlpha = hasFocus ? 0.05 : 0.16;
+    ctx.stroke();
+    ctx.restore();
+
+    const titleText = `${cluster.icon || ''} ${cluster.label.toUpperCase()}`.trim();
+    const subText = `${cluster.count} ROOTS`;
+    ctx.save();
+    ctx.font = '900 12px "JetBrains Mono", Menlo, Consolas, monospace';
+    const cardWidth = Math.max(185, ctx.measureText(titleText).width + 44);
+    const cardHeight = 56;
+    ctx.restore();
+
+    drawGraphCard(ctx, cx, cy, cardWidth, cardHeight, {
+      fillColor: '#1C211B',
+      borderColor: 'rgba(255, 255, 255, 0.16)',
+      borderWidth: 1.25,
+      borderRadius: 16,
+      shadowColor: 'rgba(17, 20, 16, 0.14)',
+      shadowBlur: 16,
+      shadowOffsetY: 4,
+      alpha,
+    });
+
+    ctx.save();
+    ctx.globalAlpha = alpha;
+    traceRoundedRect(ctx, cx - cardWidth / 2, cy - cardHeight / 2, cardWidth, cardHeight, 16);
+    ctx.clip();
+    ctx.fillStyle = cluster.accentColor || '#7BB33B';
+    ctx.fillRect(cx - cardWidth / 2, cy - cardHeight / 2, cardWidth, 4);
+    ctx.restore();
+
+    ctx.save();
+    ctx.globalAlpha = alpha;
+    ctx.fillStyle = '#FAFBF8';
+    ctx.font = '900 12px "JetBrains Mono", Menlo, Consolas, monospace';
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'middle';
+    ctx.fillText(titleText, cx, cy - 6);
+
+    ctx.fillStyle = '#B8C4B0';
+    ctx.font = 'bold 9.5px "JetBrains Mono", Menlo, Consolas, monospace';
+    ctx.fillText(subText, cx, cy + 12);
+    ctx.restore();
+  };
+
   const drawOriginNode = (ctx, node, isSelected, isHovered, currentFocusedId) => {
     const isLatin = node.language === 'Latin';
     const isGreek = node.language === 'Greek';
@@ -1308,7 +1684,7 @@ export default function VocabGraphView({
 
     let effectiveAlpha = isFocal ? 1.0 : isHighlighted ? 1.0 : node.opacity;
     if (!matchesFilter && !isFocal && !isHighlighted) {
-      effectiveAlpha = 0.15;
+      effectiveAlpha = 0;
     }
 
     const borderColor = isFocal || isHighlighted
@@ -2026,9 +2402,15 @@ export default function VocabGraphView({
         <div className="bg-white border-2 border-[#111410] shadow-[3px_3px_0px_0px_#111410] px-3.5 py-2 font-mono text-xs text-[#111410] flex flex-wrap items-center gap-2">
           <div className="flex items-center space-x-1 font-black">
             <span className={`w-2 h-2 inline-block border border-[#111410] mr-1 ${
-              focusedRootId ? 'bg-[#7BB33B] animate-pulse' : 'bg-[#EFE8DF]'
+              focusedRootId ? 'bg-[#7BB33B] animate-pulse' : pathwayFilter !== 'ALL' ? 'bg-[#F59E0B]' : 'bg-[#EFE8DF]'
             }`} />
-            <span>{focusedRootId ? 'FOCUSED ROOT:' : 'ROOT GRAPH:'}</span>
+            <span>
+              {focusedRootId
+                ? 'FOCUSED ROOT:'
+                : pathwayFilter !== 'ALL'
+                  ? `CLUSTER · ${pathwayFilter.toUpperCase()}:`
+                  : 'ROOT GRAPH:'}
+            </span>
           </div>
 
           <div className="flex items-center space-x-1">
@@ -2049,7 +2431,9 @@ export default function VocabGraphView({
           <span className="text-[#111410]/30">|</span>
           <div className="flex items-center space-x-1">
             <kbd className="px-1.5 py-0.5 bg-[#FAFBF8] border border-[#111410] font-bold text-[10px]">ESC</kbd>
-            <span className="text-[#62685E] ml-1">{focusedRootId ? 'Clear Focus' : 'Reset'}</span>
+            <span className="text-[#62685E] ml-1">
+              {focusedRootId ? 'Back to Map' : pathwayFilter !== 'ALL' ? 'Show All' : 'Reset'}
+            </span>
           </div>
 
           <span className="text-[#111410]/30 hidden lg:inline">|</span>
