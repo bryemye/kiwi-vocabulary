@@ -94,6 +94,8 @@ export default function App() {
 
   // Celestial History & Fast Travel Restorations
   const [externalMorphemeView, setExternalMorphemeView] = useState(null);
+  const [practiceSetupTarget, setPracticeSetupTarget] = useState(null);
+  const [vocabNavNonce, setVocabNavNonce] = useState(0);
   const [initialPoemId, setInitialPoemId] = useState(null);
   const [poemRestoreTarget, setPoemRestoreTarget] = useState(null);
   const [trajectoryRestoreTarget, setTrajectoryRestoreTarget] = useState(null);
@@ -491,14 +493,22 @@ export default function App() {
   };
 
   const handleSelectRootForPractice = (rootId) => {
-    setSelectedRootId(rootId);
-    handleNavigateTab('study');
+    setPracticeSetupTarget({
+      rootIds: [Number(rootId)],
+      source: 'platform',
+      nonce: Date.now() + Math.random(),
+    });
+    handleNavigateTab('study', { preservePracticeSetup: true });
   };
 
   // Safe navigation handler enforcing Kiwi Views
-  const handleNavigateTab = (tab) => {
+  const handleNavigateTab = (tab, options = {}) => {
     setExternalMorphemeView(null);
     setTrajectoryRestoreTarget(null);
+    if (!options.preservePracticeSetup) {
+      setPracticeSetupTarget(null);
+      setVocabNavNonce((n) => n + 1);
+    }
     setActiveTab(tab);
     if (tab === 'poems') {
       setActiveApp('poems');
@@ -739,6 +749,9 @@ export default function App() {
             externalMorphemeView={externalMorphemeView}
             onClearExternalMorphemeView={() => setExternalMorphemeView(null)}
             trajectoryRestoreTarget={trajectoryRestoreTarget}
+            initialPracticeSetup={practiceSetupTarget}
+            onClearInitialPracticeSetup={() => setPracticeSetupTarget(null)}
+            navResetNonce={vocabNavNonce}
             preloadedDeck={preloadedDeck}
             isGuestMode={isGuestMode && !user}
             dailyDateFormatted={todayFormatted}

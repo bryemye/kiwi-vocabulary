@@ -166,7 +166,7 @@ export default function DashboardView({ stats, onSelectRoot, onNavigateMode }) {
                     onClick={() => onSelectRoot && onSelectRoot(root.id)}
                     className="w-full py-2 bg-white hover:bg-[#7BB33B] hover:text-white text-[#111410] border-2 border-[#111410] shadow-[2px_2px_0px_0px_#111410] font-mono font-black text-xs uppercase flex items-center justify-center space-x-1.5 transition active:translate-x-[1px] active:translate-y-[1px]"
                   >
-                    <span>Practice Target</span>
+                    <span>Target in Practice Set</span>
                     <ArrowRight className="w-3.5 h-3.5" />
                   </button>
                 </div>
@@ -339,7 +339,7 @@ export default function DashboardView({ stats, onSelectRoot, onNavigateMode }) {
                             onClick={() => onSelectRoot && onSelectRoot(root.id)}
                             className="w-full py-2 bg-[#FAFBF8] hover:bg-[#7BB33B] hover:text-white text-[#111410] border-2 border-[#111410] shadow-[2px_2px_0px_0px_#111410] text-xs font-mono font-black uppercase flex items-center justify-center space-x-1.5 transition active:translate-x-[1px] active:translate-y-[1px]"
                           >
-                            <span>Launch Root Cards</span>
+                            <span>Target in Practice Set</span>
                             <ArrowRight className="w-3.5 h-3.5" />
                           </button>
                         </div>

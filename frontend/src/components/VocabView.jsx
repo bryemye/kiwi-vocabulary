@@ -32,6 +32,7 @@ import MorphemeDetailView from './MorphemeDetailView';
 import VocabGraphView from '../views/VocabGraphView';
 import StudyDeck from './StudyDeck';
 import CustomPracticeModal from './CustomPracticeModal';
+import PracticeSetupView from './PracticeSetupView';
 import EditorialReviewModal from './EditorialReviewModal';
 import DashboardView from './DashboardView';
 import PathwayToggle from './PathwayToggle';
@@ -73,6 +74,9 @@ export default function VocabView({
   externalMorphemeView,
   onClearExternalMorphemeView,
   trajectoryRestoreTarget = null,
+  initialPracticeSetup = null,
+  onClearInitialPracticeSetup = null,
+  navResetNonce = 0,
   preloadedDeck = [],
   isGuestMode = false,
   dailyDateFormatted = '',
@@ -98,6 +102,7 @@ export default function VocabView({
   const handleSubTabChange = useCallback((newTab) => {
     setSubTab(newTab);
     setActiveMorphemeView(null);
+    setPracticeSetupConfig(null);
     if (onClearExternalMorphemeView) onClearExternalMorphemeView();
     if (onTabChange) {
       onTabChange(newTab);
@@ -108,11 +113,21 @@ export default function VocabView({
 
   // Dedicated Morpheme Detail & Subset Practice States
   const [activeMorphemeView, setActiveMorphemeView] = useState(null);
+  const [practiceSetupConfig, setPracticeSetupConfig] = useState(null);
   const [subsetPracticeInfo, setSubsetPracticeInfo] = useState(null);
   const subsetPracticeInfoRef = useRef(null);
   const [highlightedExplorerRootId, setHighlightedExplorerRootId] = useState(null);
   const explorerRootRefs = useRef({});
   const lastRestoredNonceRef = useRef(null);
+  const lastPracticeSetupNonceRef = useRef(null);
+  const lastNavResetNonceRef = useRef(navResetNonce);
+
+  useEffect(() => {
+    if (navResetNonce !== lastNavResetNonceRef.current) {
+      lastNavResetNonceRef.current = navResetNonce;
+      setPracticeSetupConfig(null);
+    }
+  }, [navResetNonce]);
 
   useEffect(() => {
     subsetPracticeInfoRef.current = subsetPracticeInfo;
@@ -503,7 +518,52 @@ export default function VocabView({
     setIsCustomModalOpen(true);
   }, []);
 
-  // Launch a generated custom session (from CustomPracticeModal)
+  // Sync external initialPracticeSetup (e.g. clicking a root in top-level Mastery Dashboard)
+  useEffect(() => {
+    if (!initialPracticeSetup) return;
+    if (
+      initialPracticeSetup.nonce &&
+      lastPracticeSetupNonceRef.current === initialPracticeSetup.nonce
+    ) {
+      return;
+    }
+    if (initialPracticeSetup.nonce) {
+      lastPracticeSetupNonceRef.current = initialPracticeSetup.nonce;
+    }
+    setActiveMorphemeView(null);
+    setIsCustomModalOpen(false);
+    setPracticeSetupConfig({
+      selectedRootIds: initialPracticeSetup.rootIds || [],
+      selectedMorphemeIds: initialPracticeSetup.morphemeIds || [],
+      source: initialPracticeSetup.source || 'platform',
+    });
+    if (onClearInitialPracticeSetup) {
+      onClearInitialPracticeSetup();
+    }
+  }, [initialPracticeSetup, onClearInitialPracticeSetup]);
+
+  const handleOpenPracticeSetup = useCallback(
+    ({ rootIds = [], morphemeIds = [], source = 'progress' }) => {
+      setActiveMorphemeView(null);
+      setIsCustomModalOpen(false);
+      setPracticeSetupConfig({
+        selectedRootIds: rootIds,
+        selectedMorphemeIds: morphemeIds,
+        source,
+      });
+    },
+    []
+  );
+
+  const handleBackFromPracticeSetup = useCallback(() => {
+    const source = practiceSetupConfig?.source;
+    setPracticeSetupConfig(null);
+    if (source === 'platform' && onNavigateDashboard) {
+      onNavigateDashboard();
+    }
+  }, [practiceSetupConfig, onNavigateDashboard]);
+
+  // Launch a generated custom session (from CustomPracticeModal or PracticeSetupView)
   const handleLaunchCustomSession = useCallback((sessionData) => {
     if (!sessionData || !sessionData.deck || sessionData.deck.length === 0) return;
 
@@ -514,6 +574,8 @@ export default function VocabView({
       details: sessionData.details,
       count: sessionData.deck.length,
       deckWordIds: sessionData.deck.map(w => w.id),
+      targetMorphemeIds: sessionData.targetMorphemeIds || [],
+      targetMorphemes: sessionData.targetMorphemes || [],
     };
     subsetPracticeInfoRef.current = nextSubsetInfo;
     setSubsetPracticeInfo(nextSubsetInfo);
@@ -523,6 +585,7 @@ export default function VocabView({
     setCardStartTime(Date.now());
     setRoundStats({ correct: 0, total: 0 });
     setIsSessionComplete(false);
+    setPracticeSetupConfig(null);
     suppressRecordingBriefly();
     handleSubTabChange('study');
     setActiveMorphemeView(null);
@@ -877,7 +940,7 @@ export default function VocabView({
     const handleKeyDown = (e) => {
       const activeTag = document.activeElement ? document.activeElement.tagName : '';
       if (['INPUT', 'SELECT', 'TEXTAREA'].includes(activeTag)) return;
-      if (activeMorphemeView || isCustomModalOpen || showTabConfirm) return; // Disable flashcard shortcuts while modal is open
+      if (activeMorphemeView || practiceSetupConfig || isCustomModalOpen || showTabConfirm) return; // Disable flashcard shortcuts while overlay/setup is open
       if (subTab !== 'study' || isSessionComplete) return;
 
       if (e.code === 'Space' || e.key === 'ArrowUp') {
@@ -894,11 +957,27 @@ export default function VocabView({
 
     window.addEventListener('keydown', handleKeyDown);
     return () => window.removeEventListener('keydown', handleKeyDown);
-  }, [subTab, isSessionComplete, activeMorphemeView, isCustomModalOpen, showTabConfirm, handleResponse]);
+  }, [subTab, isSessionComplete, activeMorphemeView, practiceSetupConfig, isCustomModalOpen, showTabConfirm, handleResponse]);
 
   const handleLaunchRootPractice = (rootId) => {
     handleOpenCustomSession([Number(rootId)]);
   };
+
+  // Dedicated Practice Set Target Setup Screen (when targeting a root from Mastery or editing targets)
+  if (practiceSetupConfig) {
+    return (
+      <PracticeSetupView
+        roots={roots}
+        words={words}
+        stats={stats || vocabStats}
+        initialSelectedRootIds={practiceSetupConfig.selectedRootIds || []}
+        initialSelectedMorphemeIds={practiceSetupConfig.selectedMorphemeIds || []}
+        source={practiceSetupConfig.source || 'progress'}
+        onBack={handleBackFromPracticeSetup}
+        onLaunchSession={handleLaunchCustomSession}
+      />
+    );
+  }
 
   // If a morpheme detail view is active, render dedicated Morpheme Definition page
   if (activeMorphemeView) {
@@ -1198,6 +1277,12 @@ export default function VocabView({
             }}
             onReviewProgress={() => handleAttemptTabChange('progress')}
             onOpenCustomModal={() => handleOpenCustomSession(selectedRootId !== 'ALL' ? [Number(selectedRootId)] : [])}
+            onEditTargets={() =>
+              handleOpenPracticeSetup({
+                morphemeIds: subsetPracticeInfo?.targetMorphemeIds || [],
+                source: 'study',
+              })
+            }
             onExitSession={handleClearSubsetPractice}
             onResetFilters={() => {
               hasInitializedFromPreloadedRef.current = false;
@@ -1787,7 +1872,10 @@ export default function VocabView({
         <DashboardView
           stats={stats || vocabStats}
           onSelectRoot={(rootId) => {
-            handleOpenCustomSession([Number(rootId)]);
+            handleOpenPracticeSetup({
+              rootIds: [Number(rootId)],
+              source: 'progress',
+            });
           }}
           onNavigateMode={() => handleAttemptTabChange('study')}
         />

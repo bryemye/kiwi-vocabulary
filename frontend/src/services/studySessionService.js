@@ -647,3 +647,152 @@ export function generateQuickStartDeck({ allWords = [], targetCount = SESSION_SI
     deck: shuffleWithMorphemeVariety(shuffled.slice(0, targetCount)),
   };
 }
+
+/**
+ * Return the subset of targetMorphemes that match a given word.
+ */
+export function getMatchingTargetMorphemes(word, targetMorphemes = []) {
+  if (!word || !Array.isArray(targetMorphemes) || targetMorphemes.length === 0) {
+    return [];
+  }
+
+  return targetMorphemes.filter((m) => {
+    if (!m) return false;
+    if (m.type === 'root') {
+      const targetRootId = Number(m.numericId ?? m.rootId);
+      const wordRootId = Number(word.root || word.root_details?.id);
+      if (targetRootId && wordRootId === targetRootId) return true;
+      const targetToken = (m.cleanToken || m.morpheme || '').toLowerCase();
+      const wordToken = (word.root_details?.morpheme || '').toLowerCase();
+      return Boolean(targetToken && wordToken && targetToken === wordToken);
+    }
+    if (m.type === 'prefix') {
+      return wordMatchesPrefix(word, m.cleanToken || m.morpheme);
+    }
+    if (m.type === 'suffix') {
+      return wordMatchesSuffix(word, m.cleanToken || m.morpheme);
+    }
+    return false;
+  });
+}
+
+/**
+ * Resolve initial morpheme IDs from root IDs, morpheme list, or a single morpheme descriptor.
+ */
+export function resolveInitialMorphemeIds({
+  allMorphemes = [],
+  initialSelectedMorphemes = [],
+  initialMorpheme = null,
+  initialSelectedRootIds = [],
+  fallbackToFirst = false,
+}) {
+  if (initialSelectedMorphemes && initialSelectedMorphemes.length > 0) {
+    const ids = initialSelectedMorphemes
+      .map((m) => (typeof m === 'object' ? (m.id || m.key) : String(m)))
+      .filter(Boolean);
+    if (ids.length > 0) {
+      return ids.slice(0, MAX_SELECTED_MORPHEMES);
+    }
+  }
+
+  if (initialMorpheme) {
+    const targetType = initialMorpheme.type?.toLowerCase();
+    const targetToken = (
+      initialMorpheme.cleanToken ||
+      initialMorpheme.morpheme ||
+      initialMorpheme.title ||
+      ''
+    )
+      .toLowerCase()
+      .trim();
+    const targetRootId = initialMorpheme.rootId || initialMorpheme.root?.id;
+
+    const found = allMorphemes.find((m) => {
+      if (targetType && m.type !== targetType) return false;
+      if (targetType === 'root' && targetRootId) {
+        return Number(m.numericId) === Number(targetRootId);
+      }
+      const mToken = (m.cleanToken || m.morpheme || '').toLowerCase();
+      return (
+        mToken === targetToken ||
+        mToken.replace(/[^a-z0-9]/g, '') === targetToken.replace(/[^a-z0-9]/g, '')
+      );
+    });
+    if (found) return [found.id];
+  }
+
+  if (initialSelectedRootIds && initialSelectedRootIds.length > 0) {
+    return initialSelectedRootIds
+      .slice(0, MAX_SELECTED_MORPHEMES)
+      .map((rId) => `root_${rId}`);
+  }
+
+  if (fallbackToFirst && allMorphemes.length > 0) {
+    return [allMorphemes[0].id];
+  }
+
+  return [];
+}
+
+/**
+ * Build a complete targeted morpheme practice session payload from selected targets.
+ */
+export function buildMorphemePracticeSession({
+  selectedMorphemes = [],
+  selectedMorphemeIds = [],
+  allWords = [],
+  allRoots = [],
+  allMorphemes = null,
+  backfillRelated = true,
+  targetCount = SESSION_SIZE,
+}) {
+  const gen = generateMorphemeDeck({
+    selectedMorphemes,
+    selectedMorphemeIds,
+    allWords,
+    allRoots,
+    allMorphemes,
+    backfillRelated,
+    targetCount,
+  });
+
+  const resolved = gen.resolvedMorphemes || selectedMorphemes || [];
+  const types = new Set(resolved.map((m) => m.type));
+  let modeLabel = 'Morpheme Focus';
+  if (types.size === 1) {
+    if (types.has('prefix')) modeLabel = 'Prefix Focus';
+    else if (types.has('suffix')) modeLabel = 'Suffix Focus';
+    else if (types.has('root')) modeLabel = 'Root Target Set';
+  }
+
+  const titleList = resolved
+    .map((m) => (m.type === 'root' ? `[${(m.morpheme || '').toUpperCase()}]` : m.title))
+    .join(' + ');
+
+  const targetWordsCount = Math.min(gen.totalEligible || 0, gen.deck.length);
+  const backfillCount = Math.max(0, gen.deck.length - targetWordsCount);
+
+  return {
+    deck: gen.deck,
+    title: `${modeLabel}: ${titleList}`,
+    mode: 'root_family',
+    modeLabel,
+    details:
+      backfillCount > 0
+        ? `${resolved.length} target${resolved.length === 1 ? '' : 's'} (${targetWordsCount} target words + ${backfillCount} related fill)`
+        : `${resolved.length} target${resolved.length === 1 ? '' : 's'} (${gen.deck.length} words)`,
+    targetMorphemeIds: resolved.map((m) => m.id),
+    targetMorphemes: resolved.map((m) => ({
+      id: m.id,
+      type: m.type,
+      numericId: m.numericId || null,
+      morpheme: m.morpheme,
+      cleanToken: m.cleanToken,
+      title: m.title,
+      core_meaning: m.core_meaning,
+      language: m.language,
+      wordCount: m.wordCount || m.words?.length || 0,
+    })),
+    backfillRelated,
+  };
+}

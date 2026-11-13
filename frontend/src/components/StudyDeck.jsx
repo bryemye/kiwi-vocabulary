@@ -13,8 +13,10 @@ import {
   AlertTriangle,
   Sparkles,
   ShieldCheck,
-  Edit3
+  Edit3,
+  Target
 } from 'lucide-react';
+import { getMatchingTargetMorphemes } from '../services/studySessionService';
 
 export default function StudyDeck({
   sessionDeck = [],
@@ -36,6 +38,7 @@ export default function StudyDeck({
   onRestartSession,
   onReviewProgress,
   onOpenCustomModal,
+  onEditTargets = null,
   onExitSession,
   onResetFilters,
   isGuestMode = false,
@@ -54,6 +57,12 @@ export default function StudyDeck({
   const ignoreNextClickRef = useRef(false);
 
   const currentWord = sessionDeck[currentIndex] || null;
+  const targetMorphemes = subsetPracticeInfo?.targetMorphemes || [];
+  const hasExplicitTargets = targetMorphemes.length > 0;
+  const matchingTargetsForCard = hasExplicitTargets && currentWord
+    ? getMatchingTargetMorphemes(currentWord, targetMorphemes)
+    : [];
+  const matchingTargetIds = new Set(matchingTargetsForCard.map((m) => m.id));
 
   const getConnotationBadge = (connotation) => {
     switch (connotation) {
@@ -155,41 +164,82 @@ export default function StudyDeck({
     <div className="space-y-4">
       {/* ACTIVE SESSION / TARGETED SUBSET BANNER */}
       {subsetPracticeInfo && (
-        <div className="bg-[#FAFBF8] border-2 border-[#111410] shadow-[3px_3px_0px_0px_#111410] p-3 sm:p-3.5 flex flex-col sm:flex-row sm:items-center justify-between gap-3 animate-fade-in">
-          <div className="flex items-start sm:items-center space-x-2.5 font-mono text-xs">
-            <span className="px-2 py-0.5 bg-[#7BB33B] text-white font-black text-[10px] uppercase border border-[#111410] shrink-0 mt-0.5 sm:mt-0">
-              {subsetPracticeInfo.modeLabel ? subsetPracticeInfo.modeLabel.toUpperCase() : 'CUSTOM SESSION'}
-            </span>
-            <div className="text-[#111410] font-bold">
-              <span>Practicing {sessionDeck.length} cards: </span>
-              <strong className="text-[#42281D]">{subsetPracticeInfo.title}</strong>
-              {subsetPracticeInfo.details && (
-                <span className="text-[#62685E] font-normal block sm:inline sm:ml-2">
-                  ({subsetPracticeInfo.details})
+        <div className="bg-[#FAFBF8] border-2 border-[#111410] shadow-[3px_3px_0px_0px_#111410] p-3.5 sm:p-4 space-y-2.5 animate-fade-in">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+            <div className="flex items-start sm:items-center space-x-2.5 font-mono text-xs">
+              <span className="px-2 py-0.5 bg-[#7BB33B] text-white font-black text-[10px] uppercase border border-[#111410] shrink-0 mt-0.5 sm:mt-0 inline-flex items-center space-x-1">
+                <Target className="w-3 h-3" />
+                <span>
+                  {subsetPracticeInfo.modeLabel ? subsetPracticeInfo.modeLabel.toUpperCase() : 'CUSTOM SESSION'}
                 </span>
-              )}
+              </span>
+              <div className="text-[#111410] font-bold">
+                <span>Practicing {sessionDeck.length} cards</span>
+                {!hasExplicitTargets && (
+                  <span>: <strong className="text-[#42281D]">{subsetPracticeInfo.title}</strong></span>
+                )}
+                {subsetPracticeInfo.details && (
+                  <span className="text-[#62685E] font-normal block sm:inline sm:ml-2">
+                    ({subsetPracticeInfo.details})
+                  </span>
+                )}
+              </div>
+            </div>
+
+            <div className="flex items-center space-x-2 shrink-0 self-end sm:self-auto">
+              <button
+                onClick={() => handleSafeExit(hasExplicitTargets && onEditTargets ? onEditTargets : onOpenCustomModal)}
+                className="px-3 py-1.5 sm:py-1 bg-white hover:bg-[#FAFBF8] text-[#111410] font-mono font-black text-xs uppercase border-2 border-[#111410] shadow-[2px_2px_0px_0px_#111410] flex items-center space-x-1.5 transition active:translate-x-[1px] active:translate-y-[1px]"
+                title={hasExplicitTargets ? 'Add or remove practice targets' : 'Configure custom practice deck'}
+              >
+                <Sliders className="w-3.5 h-3.5" />
+                <span>{hasExplicitTargets ? 'Edit Targets' : 'Change Mode'}</span>
+              </button>
+
+              <button
+                onClick={() => handleSafeExit(onExitSession)}
+                className="px-3 py-1.5 sm:py-1 bg-[#FAFBF8] hover:bg-[#EFE8DF] text-[#42281D] font-mono font-black text-xs uppercase border-2 border-[#111410] shadow-[2px_2px_0px_0px_#111410] flex items-center space-x-1.5 transition active:translate-x-[1px] active:translate-y-[1px]"
+                title="Return to full general deck"
+              >
+                <X className="w-3.5 h-3.5" />
+                <span>Exit</span>
+              </button>
             </div>
           </div>
 
-          <div className="flex items-center space-x-2 shrink-0 self-end sm:self-auto">
-            <button
-              onClick={() => handleSafeExit(onOpenCustomModal)}
-              className="px-3 py-1.5 sm:py-1 bg-white hover:bg-[#FAFBF8] text-[#111410] font-mono font-black text-xs uppercase border-2 border-[#111410] shadow-[2px_2px_0px_0px_#111410] flex items-center space-x-1.5 transition active:translate-x-[1px] active:translate-y-[1px]"
-              title="Configure custom practice deck"
-            >
-              <Sliders className="w-3.5 h-3.5" />
-              <span>Change Mode</span>
-            </button>
-
-            <button
-              onClick={() => handleSafeExit(onExitSession)}
-              className="px-3 py-1.5 sm:py-1 bg-[#FAFBF8] hover:bg-[#EFE8DF] text-[#42281D] font-mono font-black text-xs uppercase border-2 border-[#111410] shadow-[2px_2px_0px_0px_#111410] flex items-center space-x-1.5 transition active:translate-x-[1px] active:translate-y-[1px]"
-              title="Return to full general deck"
-            >
-              <X className="w-3.5 h-3.5" />
-              <span>Exit</span>
-            </button>
-          </div>
+          {hasExplicitTargets && (
+            <div className="flex flex-wrap items-center gap-1.5 pt-2 border-t border-[#111410]/15 font-mono text-[11px]">
+              <span className="text-[10px] font-black uppercase text-[#62685E] mr-1">
+                Active Targets:
+              </span>
+              {targetMorphemes.map((m) => {
+                const isCardMatch = matchingTargetIds.has(m.id);
+                const label = m.type === 'root' ? `[${(m.morpheme || '').toUpperCase()}]` : m.title;
+                return (
+                  <span
+                    key={m.id}
+                    className={`inline-flex items-center space-x-1 px-2 py-0.5 border font-bold transition ${
+                      isCardMatch
+                        ? 'bg-[#7BB33B] text-white border-[#111410] shadow-[1px_1px_0px_0px_#111410]'
+                        : 'bg-white text-[#111410] border-[#111410]/40'
+                    }`}
+                  >
+                    <span>{label}</span>
+                    {m.core_meaning && (
+                      <span className={`font-serif italic text-[10px] ${isCardMatch ? 'text-white/90' : 'text-[#62685E]'}`}>
+                        "{m.core_meaning}"
+                      </span>
+                    )}
+                  </span>
+                );
+              })}
+              {!isSessionComplete && currentWord && matchingTargetsForCard.length === 0 && (
+                <span className="ml-auto px-2 py-0.5 bg-[#FAF3DD] text-[#42281D] border border-[#111410]/40 text-[10px] font-bold uppercase">
+                  Related Fill Card
+                </span>
+              )}
+            </div>
+          )}
         </div>
       )}
 
@@ -296,11 +346,11 @@ export default function StudyDeck({
             </button>
 
             <button
-              onClick={onOpenCustomModal}
+              onClick={hasExplicitTargets && onEditTargets ? onEditTargets : onOpenCustomModal}
               className="w-full sm:w-auto px-6 py-3 bg-white hover:bg-stone-50 text-stone-700 font-sans font-bold text-xs uppercase tracking-wider rounded-2xl border border-stone-200 shadow-soft-xs transition-all flex items-center justify-center space-x-2"
             >
               <Sliders className="w-4 h-4 text-stone-500" />
-              <span>Custom Session</span>
+              <span>{hasExplicitTargets ? 'Edit Targets' : 'Custom Session'}</span>
             </button>
 
             <button

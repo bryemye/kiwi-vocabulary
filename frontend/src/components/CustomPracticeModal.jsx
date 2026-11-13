@@ -16,14 +16,13 @@ import {
 } from 'lucide-react';
 import { 
   SESSION_SIZE, 
-  MAX_SELECTED_ROOTS,
   MAX_SELECTED_MORPHEMES,
   HIGH_FREQUENCY_TIER1_MORPHEMES,
   getWordProgressMap,
   getReviewEligibleWords,
   extractMorphemesFromWords,
-  generateMorphemeDeck,
-  generateRootFamilyDeck,
+  resolveInitialMorphemeIds,
+  buildMorphemePracticeSession,
   generateSmartReviewDeck,
   generateTier1Deck,
   generateQuickStartDeck
@@ -39,8 +38,6 @@ export default function CustomPracticeModal({
   initialMorpheme = null,
   onLaunchSession
 }) {
-  if (!isOpen) return null;
-
   // Selected mode: 'root_family' | 'smart_review' | 'tier1'
   const [mode, setMode] = useState('root_family');
 
@@ -48,39 +45,15 @@ export default function CustomPracticeModal({
   const allMorphemes = useMemo(() => extractMorphemesFromWords(words, roots), [words, roots]);
 
   // Option A States
-  const [selectedMorphemeIds, setSelectedMorphemeIds] = useState(() => {
-    // 1. If explicit initialSelectedMorphemes provided
-    if (initialSelectedMorphemes && initialSelectedMorphemes.length > 0) {
-      const ids = initialSelectedMorphemes.map(m => typeof m === 'object' ? (m.id || m.key) : String(m));
-      return ids.slice(0, MAX_SELECTED_MORPHEMES);
-    }
-
-    // 2. If single initialMorpheme provided (e.g. from MorphemeDetailView)
-    if (initialMorpheme) {
-      const targetType = initialMorpheme.type?.toLowerCase();
-      const targetToken = (initialMorpheme.cleanToken || initialMorpheme.morpheme || initialMorpheme.title || '').toLowerCase().trim();
-      const targetRootId = initialMorpheme.rootId || initialMorpheme.root?.id;
-
-      const found = allMorphemes.find(m => {
-        if (targetType && m.type !== targetType) return false;
-        if (targetType === 'root' && targetRootId) {
-          return Number(m.numericId) === Number(targetRootId);
-        }
-        const mToken = (m.cleanToken || m.morpheme || '').toLowerCase();
-        return mToken === targetToken || mToken.replace(/[^a-z0-9]/g, '') === targetToken.replace(/[^a-z0-9]/g, '');
-      });
-      if (found) return [found.id];
-    }
-
-    // 3. If initialSelectedRootIds provided
-    if (initialSelectedRootIds && initialSelectedRootIds.length > 0) {
-      const rootIds = initialSelectedRootIds.slice(0, MAX_SELECTED_MORPHEMES).map(rId => `root_${rId}`);
-      return rootIds;
-    }
-
-    // Default to first root if available
-    return allMorphemes.length > 0 ? [allMorphemes[0].id] : [];
-  });
+  const [selectedMorphemeIds, setSelectedMorphemeIds] = useState(() =>
+    resolveInitialMorphemeIds({
+      allMorphemes,
+      initialSelectedMorphemes,
+      initialMorpheme,
+      initialSelectedRootIds,
+      fallbackToFirst: true,
+    })
+  );
 
   const [morphemeTypeFilter, setMorphemeTypeFilter] = useState('ALL'); // 'ALL' | 'ROOT' | 'PREFIX' | 'SUFFIX'
   const [morphemeSearchTerm, setMorphemeSearchTerm] = useState('');
@@ -90,29 +63,25 @@ export default function CustomPracticeModal({
   // Option B States
   const [backfillUnstudiedReview, setBackfillUnstudiedReview] = useState(true);
 
-  // Sync if initialMorpheme changes while modal opens
+  // Sync initial selection whenever the modal opens or initial props change
   useEffect(() => {
-    if (initialMorpheme) {
-      const targetType = initialMorpheme.type?.toLowerCase();
-      const targetToken = (initialMorpheme.cleanToken || initialMorpheme.morpheme || initialMorpheme.title || '').toLowerCase().trim();
-      const targetRootId = initialMorpheme.rootId || initialMorpheme.root?.id;
+    if (!isOpen) return;
+    setMode('root_family');
+    const resolved = resolveInitialMorphemeIds({
+      allMorphemes,
+      initialSelectedMorphemes,
+      initialMorpheme,
+      initialSelectedRootIds,
+      fallbackToFirst: true,
+    });
+    setSelectedMorphemeIds(resolved);
 
-      const found = allMorphemes.find(m => {
-        if (targetType && m.type !== targetType) return false;
-        if (targetType === 'root' && targetRootId) {
-          return Number(m.numericId) === Number(targetRootId);
-        }
-        const mToken = (m.cleanToken || m.morpheme || '').toLowerCase();
-        return mToken === targetToken || mToken.replace(/[^a-z0-9]/g, '') === targetToken.replace(/[^a-z0-9]/g, '');
-      });
-      if (found) {
-        setSelectedMorphemeIds([found.id]);
-        if (targetType === 'prefix') setMorphemeTypeFilter('PREFIX');
-        else if (targetType === 'suffix') setMorphemeTypeFilter('SUFFIX');
-        else if (targetType === 'root') setMorphemeTypeFilter('ROOT');
-      }
-    }
-  }, [initialMorpheme, allMorphemes]);
+    const targetType = initialMorpheme?.type?.toLowerCase();
+    if (targetType === 'prefix') setMorphemeTypeFilter('PREFIX');
+    else if (targetType === 'suffix') setMorphemeTypeFilter('SUFFIX');
+    else if (targetType === 'root') setMorphemeTypeFilter('ROOT');
+    else setMorphemeTypeFilter('ALL');
+  }, [isOpen, initialMorpheme, initialSelectedMorphemes, initialSelectedRootIds, allMorphemes]);
 
   // Filtered morphemes for search in Option A
   const filteredMorphemes = useMemo(() => {
@@ -195,37 +164,15 @@ export default function CustomPracticeModal({
 
     if (mode === 'root_family') {
       if (selectedMorphemeIds.length === 0) return;
-      const gen = generateMorphemeDeck({
+      sessionData = buildMorphemePracticeSession({
         selectedMorphemes: selectedMorphemesObjects,
         selectedMorphemeIds,
         allWords: words,
         allRoots: roots,
         allMorphemes,
         backfillRelated: backfillRelatedRoots,
-        targetCount: SESSION_SIZE
+        targetCount: SESSION_SIZE,
       });
-
-      // Construct descriptive title based on selected morpheme types
-      const types = new Set(selectedMorphemesObjects.map(m => m.type));
-      let modeLabel = 'Morpheme Focus';
-      if (types.size === 1) {
-        if (types.has('prefix')) modeLabel = 'Prefix Focus';
-        else if (types.has('suffix')) modeLabel = 'Suffix Focus';
-        else if (types.has('root')) modeLabel = 'Root Family Focus';
-      }
-
-      const titleList = selectedMorphemesObjects.map(m => {
-        if (m.type === 'root') return `[${m.morpheme.toUpperCase()}]`;
-        return m.title;
-      }).join(' + ');
-
-      sessionData = {
-        deck: gen.deck,
-        title: `${modeLabel}: ${titleList}`,
-        mode: 'root_family',
-        modeLabel,
-        details: `${selectedMorphemesObjects.length} morphemes selected (${gen.deck.length} words)`
-      };
     } else if (mode === 'smart_review') {
       const gen = generateSmartReviewDeck({
         allWords: words,
@@ -290,6 +237,8 @@ export default function CustomPracticeModal({
     }
     return SESSION_SIZE;
   }, [mode, selectedMorphemeIds, totalEligibleMorphemeWords, backfillRelatedRoots, reviewWords, backfillUnstudiedReview]);
+
+  if (!isOpen) return null;
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-2 sm:p-4 bg-[#111410]/70 backdrop-blur-xs animate-fade-in">
