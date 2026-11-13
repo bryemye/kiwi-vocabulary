@@ -268,6 +268,71 @@ CURATED_ROOT_CLUSTERS = {
     "samt / zenith": "Quantity & Relation",
 }
 
+# Focused 80/20 pyramid across SAT/ACT yield tiers:
+# - Tier 1 High-Yield (~24%): Essential 80/20 Latin & Greek test foundation
+# - Tier 2 Multipliers (~43%): High-leverage academic, scientific & literary roots
+# - Tier 3 Advanced (~33%): 99th-percentile nuanced, rare & specialized roots
+TIER_1_ROOTS = {
+    "ced / cess", "cur / curs / cour", "grad / gress", "mot / mov", "tract",
+    "fer / lat", "pel / puls", "jac / ject", "rupt", "fract / frag",
+    "sec / sect / seg", "mit / miss", "ven / vent", "vert / vers", "sta / sist / stit",
+    "cogn / gnos", "sci", "spec / spic", "vid / vis", "sent / sens",
+    "path", "loqu / loc", "voc / vok", "dict", "aud",
+    "cred", "fid", "leg / lect / log", "bene / bon", "mal / mis",
+    "pot / poss", "val / vail", "mut", "morph", "gen",
+    "chron", "temp / tempor", "magn / maj", "hyper", "hypo",
+    "auto", "anti / ant", "syn / sym", "jur / jud / just", "ver / veri",
+    "aequ / equi", "cap / cept / cip", "scrib / script", "duc / duct", "pon / pos / posit",
+    "ten / tin / tain", "fac / fec / fic / fect", "bio", "poly",
+}
+
+TIER_2_ROOTS = {
+    "pugn / pug", "bell / belli", "tort / tors", "vad / vas", "flu / flux",
+    "fus / fund", "cid / cis", "scend / scent", "cliv / clin", "err",
+    "her / hes", "string / strict", "pend / pens", "tend / tens / tent", "kin / kinet",
+    "agon", "polem", "ball / bol", "anim", "mem / mne",
+    "clam / claim", "phon", "tact / tang / ting", "luc / lum / lus", "cand",
+    "cord / card", "soph", "phil", "phob", "psych",
+    "dox / dog", "crit / cris", "nom / nym", "mon / monit", "pac / peac",
+    "plic / plex / ply", "brev", "anthrop", "rect", "grav / griev",
+    "lev", "plen / plet", "vac / van / void", "nov / neo", "prim / proto",
+    "omni", "pan", "arch / archi", "crat / cracy", "dem / demo",
+    "dur", "vinc / vict", "doc / doct", "sed / sid / sess", "greg",
+    "theo / the", "clud / clus / claus", "mor / mort", "plac / placat", "am / amat / amor",
+    "grat / grac", "corp / corpor", "ambul", "crypt / cryph", "acri / acr / acer",
+    "fall / fals", "quer / quest / quir / quis", "tac / tic", "prob / prov", "turb",
+    "ann / enn", "culp", "noc / noxi / noce", "flect / flex", "son",
+    "pass / pati", "sanct / sacr", "mit / miti", "trep", "pet / petit",
+    "verb", "man / manu", "clar", "sal / sil / sult", "und / unda",
+    "hetero", "homo / homeo", "peri", "cata", "rog / rogat",
+    "fug / fugit", "sequ / secut", "lud / lus", "nasc / nat", "apt / ept",
+    "vig / veg", "solv / solu",
+}
+
+TIER_3_ROOTS = {
+    "stroph", "tach / tachy", "sap / sag", "gust", "olfact / odor",
+    "umbr", "fatu", "mania", "vor / vour", "pung / punct",
+    "oner / onus", "pecc", "ferv", "di / dia", "torp",
+    "mend", "lit / litig", "pyr / pyro", "dorm", "palp",
+    "quie / quit", "sinu", "fulg / flagr", "moll", "av / avar",
+    "vet / veter", "ard / ars", "queri / querul", "cast / chast", "pau / pauc",
+    "scintill", "lucr", "cub / cumb", "trench / trunc", "parl",
+    "chev / chief", "gage / wage", "nois / noie", "sur / surfeit", "trai / treach",
+    "franch / frank", "parag / peer", "plaint", "dol", "somn / sopor",
+    "spond / spons", "joc", "tenu", "vituper", "milit",
+    "misc / mixt", "prop / propri", "salu / salv", "cal / chal", "audac",
+    "be-", "gain", "for / fore", "bode", "heed",
+    "wan / wane", "fret", "reck", "blithe", "ruth",
+    "sifr / cipher", "samt / zenith", "kimiya / alchem", "jabr / algor", "ghul / ghoul",
+    "pandit / pundit", "avatar", "pariah", "karm / dhar", "juggernaut / jag",
+}
+
+CURATED_ROOT_TIERS = {
+    **{m: "Tier 1 High-Yield" for m in TIER_1_ROOTS},
+    **{m: "Tier 2 Multipliers" for m in TIER_2_ROOTS},
+    **{m: "Tier 3 Advanced" for m in TIER_3_ROOTS},
+}
+
 FALLBACK_RULES = [
     ("Motion & Travel", r"\b(walk|run|go|come|arrive|flee|escape|follow|climb|leap|wander|flow|motion|speed|swift|carry|send|lead)\b"),
     ("Force & Transformation", r"\b(pull|drag|push|drive|throw|cast|break|shatter|cut|divide|twist|bend|curve|fold|make|do|produce|change|alter|dissolve|pierce)\b"),
@@ -294,6 +359,16 @@ def classify_cluster(morpheme, meaning):
     return "Form & Nature"
 
 
+def classify_tier(morpheme, language):
+    """Return curated SAT/ACT yield tier for known morphemes or origin-based fallback."""
+    if morpheme in CURATED_ROOT_TIERS:
+        return CURATED_ROOT_TIERS[morpheme]
+    lang = (language or "").lower()
+    if lang.startswith("latin") or lang.startswith("greek"):
+        return "Tier 2 Multipliers"
+    return "Tier 3 Advanced"
+
+
 def enrich_database():
     if not os.path.exists(DB_PATH):
         print(f"Database not found at {DB_PATH}; skipping SQLite update.")
@@ -301,16 +376,17 @@ def enrich_database():
 
     conn = sqlite3.connect(DB_PATH)
     cur = conn.cursor()
-    cur.execute("SELECT id, morpheme, core_meaning, sat_tier FROM kiwi_vocab_root")
+    cur.execute("SELECT id, morpheme, language, core_meaning FROM kiwi_vocab_root")
     roots = cur.fetchall()
 
-    tier_cycle = ["Tier 1 High-Yield", "Tier 2 Multipliers", "Tier 3 Advanced"]
-    counts = {}
+    cluster_counts = {}
+    tier_counts = {}
 
-    for idx, (r_id, morpheme, meaning, existing_tier) in enumerate(roots):
+    for r_id, morpheme, language, meaning in roots:
         cluster = classify_cluster(morpheme, meaning)
-        tier = existing_tier or tier_cycle[idx % 3]
-        counts[cluster] = counts.get(cluster, 0) + 1
+        tier = classify_tier(morpheme, language)
+        cluster_counts[cluster] = cluster_counts.get(cluster, 0) + 1
+        tier_counts[tier] = tier_counts.get(tier, 0) + 1
         cur.execute(
             "UPDATE kiwi_vocab_root SET thematic_cluster = ?, sat_tier = ? WHERE id = ?",
             (cluster, tier, r_id),
@@ -319,8 +395,12 @@ def enrich_database():
     conn.commit()
     conn.close()
     print(f"Updated {len(roots)} roots in {DB_PATH}:")
-    for k, v in sorted(counts.items(), key=lambda item: -item[1]):
-        print(f"  {k}: {v}")
+    print("  Thematic clusters:")
+    for k, v in sorted(cluster_counts.items(), key=lambda item: -item[1]):
+        print(f"    {k}: {v}")
+    print("  SAT yield tiers:")
+    for k, v in sorted(tier_counts.items()):
+        print(f"    {k}: {v}")
 
 
 def sync_fixtures():
@@ -333,6 +413,9 @@ def sync_fixtures():
             root_meta = entry["root"]
             root_meta["thematic_cluster"] = classify_cluster(
                 root_meta["morpheme"], root_meta.get("core_meaning", "")
+            )
+            root_meta["sat_tier"] = classify_tier(
+                root_meta["morpheme"], root_meta.get("language", "")
             )
         with open(path, "w", encoding="utf-8") as f:
             json.dump(data, f, indent=2, ensure_ascii=False)
