@@ -36,6 +36,7 @@ import PracticeSetupView from './PracticeSetupView';
 import EditorialReviewModal from './EditorialReviewModal';
 import DashboardView from './DashboardView';
 import PathwayToggle from './PathwayToggle';
+import OriginFilterControl from './OriginFilterControl';
 import {
   getStoredPathway,
   setStoredPathway,
@@ -53,7 +54,8 @@ import {
   SESSION_SIZE,
   extractMorphemesFromWords,
   wordMatchesPrefix,
-  wordMatchesSuffix
+  wordMatchesSuffix,
+  matchesOriginFilter
 } from '../services/studySessionService';
 import { useCelestialTrajectory } from '../context/CelestialTrajectoryContext';
 
@@ -276,7 +278,7 @@ export default function VocabView({
   // Filter available roots based on selected language
   const availableRoots = useMemo(() => {
     if (selectedLanguage === 'ALL') return roots;
-    return roots.filter(r => r.language.toLowerCase() === selectedLanguage.toLowerCase());
+    return roots.filter(r => matchesOriginFilter(r.language, selectedLanguage));
   }, [roots, selectedLanguage]);
 
   // Grouped roots for the Root select in Study tab (grouped by active pathway)
@@ -328,9 +330,10 @@ export default function VocabView({
   }, [filteredExplorerRoots, learningPathway]);
 
   const handleLanguageChange = (lang) => {
+    hasInitializedFromPreloadedRef.current = false;
     setSelectedLanguage(lang);
     if (selectedRootId !== 'ALL' && !String(selectedRootId).startsWith('prefix:') && !String(selectedRootId).startsWith('suffix:')) {
-      const rootBelongs = roots.find(r => r.id === Number(selectedRootId) && (lang === 'ALL' || r.language.toLowerCase() === lang.toLowerCase()));
+      const rootBelongs = roots.find(r => r.id === Number(selectedRootId) && matchesOriginFilter(r.language, lang));
       if (!rootBelongs) {
         setSelectedRootId('ALL');
       }
@@ -342,7 +345,7 @@ export default function VocabView({
     return words.filter((w) => {
       if (selectedLanguage !== 'ALL') {
         const rootLang = w.root_details?.language || roots.find(r => r.id === w.root)?.language;
-        if (rootLang && rootLang.toLowerCase() !== selectedLanguage.toLowerCase()) {
+        if (!matchesOriginFilter(rootLang, selectedLanguage)) {
           return false;
         }
       }
@@ -1064,22 +1067,12 @@ export default function VocabView({
                   compact
                 />
 
-                <div className="flex items-center space-x-1 font-mono text-xs">
-                  <span className="text-[10px] font-bold uppercase text-stone-400 mr-1 hidden sm:inline">Origin:</span>
-                  {['ALL', 'Latin', 'Greek'].map((lang) => (
-                    <button
-                      key={lang}
-                      onClick={() => handleLanguageChange(lang)}
-                      className={`px-2.5 py-1 text-xs font-bold rounded-lg border transition ${
-                        selectedLanguage.toLowerCase() === lang.toLowerCase()
-                          ? 'bg-[#EDF5E5] text-[#2F441E] border-[#7BB33B]/40 shadow-soft-xs'
-                          : 'bg-white text-stone-600 border-stone-200 hover:bg-stone-50'
-                      }`}
-                    >
-                      {lang === 'ALL' ? 'ALL' : lang}
-                    </button>
-                  ))}
-                </div>
+                <OriginFilterControl
+                  selectedOrigin={selectedLanguage}
+                  onChange={handleLanguageChange}
+                  roots={roots}
+                  variant="soft"
+                />
               </div>
 
               {/* Root Select, Search & Custom Session Trigger */}
@@ -1088,7 +1081,10 @@ export default function VocabView({
                   <Filter className="w-3.5 h-3.5 text-stone-400 mr-1.5 shrink-0" />
                   <select
                     value={selectedRootId}
-                    onChange={(e) => setSelectedRootId(e.target.value)}
+                    onChange={(e) => {
+                      hasInitializedFromPreloadedRef.current = false;
+                      setSelectedRootId(e.target.value);
+                    }}
                     className="bg-transparent text-stone-800 text-xs font-mono font-medium focus:outline-none cursor-pointer w-full max-w-full sm:max-w-[200px] truncate"
                   >
                     <option value="ALL">All Morphemes ({availableRoots.length} roots)</option>
@@ -1270,22 +1266,14 @@ export default function VocabView({
                   />
 
                   {/* Origin Filter */}
-                  <div className="flex items-center space-x-1 font-mono text-xs">
-                    <span className="font-black uppercase text-[#62685E] mr-1 hidden sm:inline">ORIGIN:</span>
-                    {['ALL', 'Latin', 'Greek'].map((lang) => (
-                      <button
-                        key={lang}
-                        onClick={() => setSelectedLanguage(lang)}
-                        className={`px-3 py-1 font-black uppercase border-2 border-[#111410] transition ${
-                          selectedLanguage.toLowerCase() === lang.toLowerCase()
-                            ? 'bg-[#7BB33B] text-white shadow-[2px_2px_0px_0px_#111410]'
-                            : 'bg-[#FAFBF8] text-[#111410] hover:bg-white'
-                        }`}
-                      >
-                        {lang.toUpperCase()}
-                      </button>
-                    ))}
-                  </div>
+                  <OriginFilterControl
+                    selectedOrigin={selectedLanguage}
+                    onChange={handleLanguageChange}
+                    roots={roots}
+                    variant="bordered"
+                    label="ORIGIN:"
+                    uppercaseButtons
+                  />
                 </>
               )}
             </div>

@@ -76,3 +76,25 @@ class KiwiVocabTests(TestCase):
         self.assertEqual(res.status_code, status.HTTP_200_OK)
         self.assertEqual(res.data['total_roots'], 1)
         self.assertEqual(res.data['total_words'], 2)
+
+    def test_additional_root_origins_validation_and_filtering(self):
+        french_root = Root.objects.create(
+            morpheme='parl',
+            language='Old French',
+            core_meaning='speak',
+        )
+        french_root.full_clean()
+        german_root = Root.objects.create(
+            morpheme='wander',
+            language='German',
+            core_meaning='roam',
+        )
+        german_root.full_clean()
+
+        res_french = self.client.get('/api/vocab/roots/?language=French')
+        self.assertEqual(res_french.status_code, status.HTTP_200_OK)
+        self.assertEqual([r['morpheme'] for r in res_french.data], ['parl'])
+
+        res_german = self.client.get('/api/vocab/roots/?language=German')
+        self.assertEqual(res_german.status_code, status.HTTP_200_OK)
+        self.assertEqual([r['morpheme'] for r in res_german.data], ['wander'])

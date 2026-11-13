@@ -17,7 +17,9 @@ import {
   extractMorphemesFromWords,
   resolveInitialMorphemeIds,
   buildMorphemePracticeSession,
+  matchesOriginFilter,
 } from '../services/studySessionService';
+import OriginFilterControl from './OriginFilterControl';
 
 /**
  * PracticeSetupView: Dedicated full-screen target builder for setting up a
@@ -105,7 +107,7 @@ export default function PracticeSetupView({
       if (
         selectedLanguageFilter !== 'ALL' &&
         m.type === 'root' &&
-        m.language?.toLowerCase() !== selectedLanguageFilter.toLowerCase()
+        !matchesOriginFilter(m.language, selectedLanguageFilter)
       ) {
         return false;
       }
@@ -426,23 +428,12 @@ export default function PracticeSetupView({
 
           <div className="flex flex-wrap items-center justify-between gap-2 font-mono text-[11px]">
             {(morphemeTypeFilter === 'ALL' || morphemeTypeFilter === 'ROOT') && (
-              <div className="flex items-center space-x-1.5">
-                <span className="font-bold uppercase text-[10px] text-[#62685E]">Origin:</span>
-                {['ALL', 'Latin', 'Greek'].map((lang) => (
-                  <button
-                    key={lang}
-                    type="button"
-                    onClick={() => setSelectedLanguageFilter(lang)}
-                    className={`px-2 py-0.5 border font-bold uppercase transition ${
-                      selectedLanguageFilter.toLowerCase() === lang.toLowerCase()
-                        ? 'bg-[#111410] text-white border-[#111410]'
-                        : 'bg-white text-[#111410] border-[#111410]/30 hover:border-[#111410]'
-                    }`}
-                  >
-                    {lang}
-                  </button>
-                ))}
-              </div>
+              <OriginFilterControl
+                selectedOrigin={selectedLanguageFilter}
+                onChange={setSelectedLanguageFilter}
+                roots={roots}
+                variant="bordered"
+              />
             )}
 
             <div className="flex items-center space-x-1.5">

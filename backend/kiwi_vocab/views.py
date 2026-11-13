@@ -144,7 +144,7 @@ class RootViewSet(viewsets.ReadOnlyModelViewSet):
         if tier and tier.upper() != 'ALL':
             queryset = queryset.filter(sat_tier__iexact=tier)
         if language and language.upper() != 'ALL':
-            queryset = queryset.filter(language__iexact=language)
+            queryset = queryset.filter(language__icontains=language.strip())
         if search:
             search = search.strip()
             queryset = queryset.filter(
@@ -180,7 +180,7 @@ class VocabularyWordViewSet(viewsets.ModelViewSet):
         if root_id:
             queryset = queryset.filter(root_id=root_id)
         if language and language.upper() != 'ALL':
-            queryset = queryset.filter(root__language__iexact=language)
+            queryset = queryset.filter(root__language__icontains=language.strip())
         if cluster and cluster.upper() != 'ALL':
             queryset = queryset.filter(root__thematic_cluster__iexact=cluster)
         if tier and tier.upper() != 'ALL':
@@ -273,7 +273,7 @@ class VocabSessionView(APIView):
         if root_id:
             qs = qs.filter(root_id=root_id)
         if language and language.upper() != 'ALL':
-            qs = qs.filter(root__language__iexact=language)
+            qs = qs.filter(root__language__icontains=language.strip())
         if prefix:
             qs = qs.filter(prefix__icontains=prefix.strip())
         if suffix:

@@ -796,3 +796,50 @@ export function buildMorphemePracticeSession({
     backfillRelated,
   };
 }
+
+/**
+ * Check whether a root's language string matches the selected origin filter.
+ */
+export function matchesOriginFilter(rootLanguage = '', selectedOrigin = 'ALL') {
+  if (!selectedOrigin || selectedOrigin.toUpperCase() === 'ALL') return true;
+  const lang = String(rootLanguage || '').toLowerCase();
+  const target = String(selectedOrigin).toLowerCase().trim();
+  if (!lang || !target) return false;
+  return lang.includes(target);
+}
+
+/**
+ * Extract unique non-Latin/Greek origin options (with root counts) for the "More Origins" dropdown.
+ */
+export function extractExtraOrigins(roots = []) {
+  const counts = new Map();
+
+  roots.forEach((r) => {
+    const raw = String(r?.language || '').trim();
+    if (!raw) return;
+
+    const tokens =
+      raw.toLowerCase() === 'tamil / indian'
+        ? [raw]
+        : raw.split('/').map((part) => part.trim()).filter(Boolean);
+
+    const seenForRoot = new Set();
+    tokens.forEach((token) => {
+      const lower = token.toLowerCase();
+      if (lower === 'latin' || lower === 'greek') return;
+      if (!seenForRoot.has(lower)) {
+        seenForRoot.add(lower);
+        const existing = counts.get(lower);
+        counts.set(lower, {
+          value: existing?.value || token,
+          label: existing?.label || token,
+          count: (existing?.count || 0) + 1,
+        });
+      }
+    });
+  });
+
+  return Array.from(counts.values()).sort(
+    (a, b) => b.count - a.count || a.label.localeCompare(b.label)
+  );
+}

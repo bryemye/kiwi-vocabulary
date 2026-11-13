@@ -25,8 +25,10 @@ import {
   buildMorphemePracticeSession,
   generateSmartReviewDeck,
   generateTier1Deck,
-  generateQuickStartDeck
+  generateQuickStartDeck,
+  matchesOriginFilter
 } from '../services/studySessionService';
+import OriginFilterControl from './OriginFilterControl';
 
 export default function CustomPracticeModal({
   isOpen,
@@ -91,7 +93,7 @@ export default function CustomPracticeModal({
         return false;
       }
       // Language filter (only applies to roots)
-      if (selectedLanguageFilter !== 'ALL' && m.type === 'root' && m.language.toLowerCase() !== selectedLanguageFilter.toLowerCase()) {
+      if (selectedLanguageFilter !== 'ALL' && m.type === 'root' && !matchesOriginFilter(m.language, selectedLanguageFilter)) {
         return false;
       }
       // Search query
@@ -474,22 +476,15 @@ export default function CustomPracticeModal({
 
                 {/* Sub-bar for Language Filter if Roots are visible */}
                 {(morphemeTypeFilter === 'ALL' || morphemeTypeFilter === 'ROOT') && (
-                  <div className="flex items-center space-x-1.5 font-mono text-[11px] text-[#62685E] pt-0.5">
-                    <span className="font-bold uppercase text-[10px]">Root Origin:</span>
-                    {['ALL', 'Latin', 'Greek'].map(lang => (
-                      <button
-                        key={lang}
-                        type="button"
-                        onClick={() => setSelectedLanguageFilter(lang)}
-                        className={`px-2 py-0.5 border font-bold uppercase transition ${
-                          selectedLanguageFilter.toLowerCase() === lang.toLowerCase()
-                            ? 'bg-[#111410] text-white border-[#111410]'
-                            : 'bg-white text-[#111410] border-[#111410]/30 hover:border-[#111410]'
-                        }`}
-                      >
-                        {lang}
-                      </button>
-                    ))}
+                  <div className="pt-0.5">
+                    <OriginFilterControl
+                      selectedOrigin={selectedLanguageFilter}
+                      onChange={setSelectedLanguageFilter}
+                      roots={roots}
+                      variant="bordered"
+                      label="Root Origin:"
+                      uppercaseButtons
+                    />
                   </div>
                 )}
               </div>

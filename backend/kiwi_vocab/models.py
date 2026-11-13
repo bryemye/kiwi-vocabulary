@@ -5,6 +5,18 @@ class Root(models.Model):
     LANGUAGE_CHOICES = [
         ('Latin', 'Latin'),
         ('Greek', 'Greek'),
+        ('French', 'French'),
+        ('Old French', 'Old French'),
+        ('German', 'German'),
+        ('Old English', 'Old English'),
+        ('Old Norse', 'Old Norse'),
+        ('Arabic', 'Arabic'),
+        ('Sanskrit', 'Sanskrit'),
+        ('Tamil / Indian', 'Tamil / Indian'),
+        ('Latin / Greek', 'Latin / Greek'),
+        ('Greek / Latin', 'Greek / Latin'),
+        ('Latin / Old French', 'Latin / Old French'),
+        ('Old English / Old Norse', 'Old English / Old Norse'),
     ]
 
     THEMATIC_CLUSTERS = [
@@ -25,7 +37,7 @@ class Root(models.Model):
     ]
 
     morpheme = models.CharField(max_length=50)
-    language = models.CharField(max_length=20, choices=LANGUAGE_CHOICES, default='Latin')
+    language = models.CharField(max_length=50, choices=LANGUAGE_CHOICES, default='Latin')
     core_meaning = models.CharField(max_length=200)
     mnemonic = models.TextField(blank=True, default='')
     thematic_cluster = models.CharField(
