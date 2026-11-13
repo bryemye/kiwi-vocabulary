@@ -360,7 +360,8 @@ export default function VocabGraphView({
   initialRoots = [],
   isAdminMode = false,
   onUpdateWordReview,
-  onOpenMorpheme
+  onOpenMorpheme,
+  trajectoryRestoreTarget = null
 }) {
   // Data States
   const [rootsData, setRootsData] = useState(() => mergeReviewsIntoRoots(initialRoots));
@@ -1531,7 +1532,7 @@ export default function VocabGraphView({
   // ---------------------------------------------------------------------------
   // 8. STUDY ATTEMPT & MINI-FLASHCARD HANDLER
   // ---------------------------------------------------------------------------
-  const handleOpenMiniFlashcard = (wordData, parentRoot = null) => {
+  const handleOpenMiniFlashcard = useCallback((wordData, parentRoot = null) => {
     const rootDetails = wordData?.root_details || parentRoot || (selectedNode?.type === 'word' ? selectedNode.parentRoot : null);
     setStudyWordModal({
       ...wordData,
@@ -1539,7 +1540,46 @@ export default function VocabGraphView({
     });
     setFlashcardFlipped(false);
     setCardStartTime(Date.now());
-  };
+  }, [selectedNode]);
+
+  const lastRestoredNonceRef = useRef(null);
+
+  useEffect(() => {
+    if (!trajectoryRestoreTarget || trajectoryRestoreTarget.tab !== 'graph') return;
+    if (trajectoryRestoreTarget.nonce && lastRestoredNonceRef.current === trajectoryRestoreTarget.nonce) return;
+
+    if (trajectoryRestoreTarget.wordName) {
+      if (graphData.nodes.length === 0) return;
+      const targetWordLower = trajectoryRestoreTarget.wordName.toLowerCase();
+      const wordNode = graphData.nodes.find(
+        (n) =>
+          n.type === 'word' &&
+          (n.word?.toLowerCase() === targetWordLower || n.data?.word?.toLowerCase() === targetWordLower)
+      );
+      if (wordNode) {
+        lastRestoredNonceRef.current = trajectoryRestoreTarget.nonce;
+        smoothPanToNode(wordNode);
+        handleOpenMiniFlashcard(wordNode.data, wordNode.parentRoot);
+      }
+      return;
+    }
+
+    if (trajectoryRestoreTarget.rootId) {
+      if (graphData.nodes.length === 0) return;
+      const rootNode = graphData.nodes.find(
+        (n) => n.type === 'root' && Number(n.rawId) === Number(trajectoryRestoreTarget.rootId)
+      );
+      if (rootNode) {
+        lastRestoredNonceRef.current = trajectoryRestoreTarget.nonce;
+        setStudyWordModal(null);
+        focusRoot(rootNode);
+      }
+      return;
+    }
+
+    lastRestoredNonceRef.current = trajectoryRestoreTarget.nonce;
+    setStudyWordModal(null);
+  }, [trajectoryRestoreTarget, graphData.nodes, smoothPanToNode, focusRoot, handleOpenMiniFlashcard]);
 
   const handleLogCardAttempt = async (isCorrect) => {
     if (!studyWordModal) return;

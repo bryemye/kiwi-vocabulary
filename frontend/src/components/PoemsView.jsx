@@ -33,7 +33,7 @@ import {
 } from '../data/poemsData';
 import { useCelestialTrajectory } from '../context/CelestialTrajectoryContext';
 
-export default function PoemsView({ onNavigateHome, initialPoemId }) {
+export default function PoemsView({ onNavigateHome, initialPoemId, poemRestoreTarget = null }) {
   // Active Poem & Custom Poems State
   const [poemsList, setPoemsList] = useState(SAMPLE_POEMS);
   const [activePoemId, setActivePoemId] = useState(() => initialPoemId || SAMPLE_POEMS[0].id);
@@ -50,6 +50,13 @@ export default function PoemsView({ onNavigateHome, initialPoemId }) {
       setActivePoemId(initialPoemId);
     }
   }, [initialPoemId, poemsList]);
+
+  useEffect(() => {
+    const targetId = poemRestoreTarget?.poemId;
+    if (targetId && poemsList.some((p) => p.id === targetId)) {
+      setActivePoemId(targetId);
+    }
+  }, [poemRestoreTarget, poemsList]);
 
   const currentPoem = poemsList.find((p) => p.id === activePoemId) || poemsList[0];
 

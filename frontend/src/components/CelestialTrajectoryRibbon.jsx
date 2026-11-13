@@ -20,6 +20,7 @@ import { getNodePalette } from '../services/celestialTrajectory';
 export default function CelestialTrajectoryRibbon() {
   const {
     trajectory,
+    activeWaypointId,
     currentWaypoint,
     fastTravel,
     stepBack,
@@ -29,6 +30,11 @@ export default function CelestialTrajectoryRibbon() {
     setIsFlightLogOpen,
     slingshotTargetId
   } = useCelestialTrajectory();
+
+  const activeIndex = trajectory.findIndex(
+    (w) => w.id === (activeWaypointId || currentWaypoint?.id)
+  );
+  const canStepBack = activeIndex > 0;
 
   const scrollContainerRef = useRef(null);
   const [hoveredNodeId, setHoveredNodeId] = useState(null);
@@ -136,9 +142,9 @@ export default function CelestialTrajectoryRibbon() {
           {/* Retrace / Step Back */}
           <button
             onClick={stepBack}
-            disabled={trajectory.length <= 1}
+            disabled={!canStepBack}
             className={`flex items-center space-x-1 px-2 py-0.5 border border-[#111410] text-[10px] font-black uppercase tracking-wider transition ${
-              trajectory.length > 1
+              canStepBack
                 ? 'bg-[#EFE8DF] hover:bg-[#EDF5E5] text-[#111410] active:translate-y-0.5'
                 : 'bg-[#FAFBF8] text-[#111410]/30 border-[#111410]/20 cursor-not-allowed'
             }`}
@@ -192,8 +198,10 @@ export default function CelestialTrajectoryRibbon() {
           </div>
         ) : (
           trajectory.map((waypoint, index) => {
-            const isLive = index === trajectory.length - 1;
-            const indexFromEnd = trajectory.length - 1 - index;
+            const isLive = currentWaypoint
+              ? waypoint.id === currentWaypoint.id
+              : index === trajectory.length - 1;
+            const indexFromEnd = isLive ? 0 : Math.max(1, trajectory.length - 1 - index);
             const palette = getNodePalette(indexFromEnd);
             const isSlingshotTarget = slingshotTargetId === waypoint.id;
             const isHovered = hoveredNodeId === waypoint.id;

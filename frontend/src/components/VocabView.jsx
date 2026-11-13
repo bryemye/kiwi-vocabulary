@@ -72,6 +72,7 @@ export default function VocabView({
   onUpdateWord,
   externalMorphemeView,
   onClearExternalMorphemeView,
+  trajectoryRestoreTarget = null,
   preloadedDeck = [],
   isGuestMode = false,
   dailyDateFormatted = '',
@@ -79,7 +80,7 @@ export default function VocabView({
   onSaveGuestSession = null,
   onOpenAuth = null,
 }) {
-  const { recordWaypoint } = useCelestialTrajectory();
+  const { recordWaypoint, suppressRecordingBriefly } = useCelestialTrajectory();
 
   // Navigation Sub-tab state
   const [subTab, setSubTab] = useState(initialSubTab);
@@ -88,9 +89,11 @@ export default function VocabView({
     const target = propActiveTab || initialSubTab;
     if (target) {
       setSubTab(target);
-      setActiveMorphemeView(null);
+      if (!externalMorphemeView) {
+        setActiveMorphemeView(null);
+      }
     }
-  }, [propActiveTab, initialSubTab]);
+  }, [propActiveTab, initialSubTab, externalMorphemeView]);
 
   const handleSubTabChange = useCallback((newTab) => {
     setSubTab(newTab);
@@ -106,6 +109,14 @@ export default function VocabView({
   // Dedicated Morpheme Detail & Subset Practice States
   const [activeMorphemeView, setActiveMorphemeView] = useState(null);
   const [subsetPracticeInfo, setSubsetPracticeInfo] = useState(null);
+  const subsetPracticeInfoRef = useRef(null);
+  const [highlightedExplorerRootId, setHighlightedExplorerRootId] = useState(null);
+  const explorerRootRefs = useRef({});
+  const lastRestoredNonceRef = useRef(null);
+
+  useEffect(() => {
+    subsetPracticeInfoRef.current = subsetPracticeInfo;
+  }, [subsetPracticeInfo]);
 
   // Sync externalMorphemeView from celestial trajectory fast-travel
   useEffect(() => {
@@ -117,6 +128,7 @@ export default function VocabView({
   // Record Root Node when a morpheme detail is opened
   useEffect(() => {
     if (activeMorphemeView) {
+      const resolvedRootId = activeMorphemeView.rootId || activeMorphemeView.root?.id || null;
       recordWaypoint({
         type: 'PRIMARY_STAR',
         title: activeMorphemeView.title || `[${activeMorphemeView.cleanToken?.toUpperCase()}]`,
@@ -127,6 +139,8 @@ export default function VocabView({
         state: {
           app: 'vocab',
           tab: subTab,
+          rootId: resolvedRootId,
+          morphemeType: activeMorphemeView.type || 'root',
           morphemeData: activeMorphemeView,
           morphemeToken: activeMorphemeView.cleanToken,
         },
@@ -134,13 +148,13 @@ export default function VocabView({
     }
   }, [activeMorphemeView, recordWaypoint, subTab]);
 
-  // Record Session Node when subset practice is active
+  // Record Session Node when subset practice is active (word_focus already records a SATELLITE node)
   useEffect(() => {
-    if (subsetPracticeInfo) {
+    if (subsetPracticeInfo && subsetPracticeInfo.mode !== 'word_focus') {
       recordWaypoint({
         type: 'ANOMALY',
         title: subsetPracticeInfo.title ? subsetPracticeInfo.title.toUpperCase() : 'SUBSET PRACTICE',
-        subtitle: `${subsetPracticeInfo.totalCount || 5} Words · Targeted Run`,
+        subtitle: `${subsetPracticeInfo.count || subsetPracticeInfo.totalCount || 5} Words · Targeted Run`,
         system: 'Practice Session',
         depth: 2,
         state: {
@@ -345,7 +359,7 @@ export default function VocabView({
 
   // Initialize or re-shuffle session deck (15-word slice with morpheme variety)
   const initializeSession = useCallback((advanceRound = false) => {
-    if (subsetPracticeInfo) return; // Preserve active targeted subset session
+    if (subsetPracticeInfo || subsetPracticeInfoRef.current) return; // Preserve active targeted subset session
 
     if (filteredWords.length === 0) {
       setSessionDeck([]);
@@ -370,8 +384,8 @@ export default function VocabView({
     }
   }, [filteredWords, subsetPracticeInfo]);
 
-  // Open Morpheme Detail View (for prefix, root, or suffix)
-  const handleOpenMorpheme = useCallback(({ type, raw = '', root = null, word = null }) => {
+  // Build standardized morpheme detail payload (for interactive opening & trajectory restore)
+  const buildMorphemeViewData = useCallback(({ type = 'root', raw = '', root = null, word = null, sourceTabOverride = null }) => {
     let title = '';
     let cleanToken = '';
     let meaning = '';
@@ -382,8 +396,12 @@ export default function VocabView({
     let rootObj = null;
 
     if (type === 'root') {
-      rootObj = root || word?.root_details || roots.find(r => r.id === word?.root);
-      const morpheme = rootObj?.morpheme || 'UNKNOWN ROOT';
+      rootObj =
+        root ||
+        word?.root_details ||
+        roots.find(r => r.id === word?.root) ||
+        (raw ? roots.find(r => r.morpheme?.toLowerCase() === raw.toLowerCase()) : null);
+      const morpheme = rootObj?.morpheme || raw || 'UNKNOWN ROOT';
       title = `[${morpheme.toUpperCase()}]`;
       cleanToken = morpheme;
       meaning = rootObj?.core_meaning || '';
@@ -442,7 +460,7 @@ export default function VocabView({
       matchedWords = [word, ...matchedWords.filter(w => w.id !== word.id)];
     }
 
-    setActiveMorphemeView({
+    return {
       type,
       title,
       cleanToken,
@@ -454,9 +472,18 @@ export default function VocabView({
       matchedWords,
       rootId: rootObj?.id || null,
       root: rootObj,
-      sourceTab: subTab,
-    });
+      sourceTab: sourceTabOverride || subTab,
+    };
   }, [roots, words, subTab]);
+
+  // Open Morpheme Detail View (for prefix, root, or suffix)
+  const handleOpenMorpheme = useCallback(({ type, raw = '', root = null, word = null }) => {
+    const viewData = buildMorphemeViewData({ type, raw, root, word });
+    if (viewData.rootId) {
+      setHighlightedExplorerRootId(viewData.rootId);
+    }
+    setActiveMorphemeView(viewData);
+  }, [buildMorphemeViewData]);
 
   // Open Custom Practice Session Modal (supports root IDs or morpheme descriptors)
   const handleOpenCustomSession = useCallback((config = []) => {
@@ -480,22 +507,26 @@ export default function VocabView({
   const handleLaunchCustomSession = useCallback((sessionData) => {
     if (!sessionData || !sessionData.deck || sessionData.deck.length === 0) return;
 
-    setSubsetPracticeInfo({
+    const nextSubsetInfo = {
       title: sessionData.title,
       mode: sessionData.mode,
       modeLabel: sessionData.modeLabel,
       details: sessionData.details,
-      count: sessionData.deck.length
-    });
+      count: sessionData.deck.length,
+      deckWordIds: sessionData.deck.map(w => w.id),
+    };
+    subsetPracticeInfoRef.current = nextSubsetInfo;
+    setSubsetPracticeInfo(nextSubsetInfo);
     setSessionDeck(sessionData.deck);
     setCurrentIndex(0);
     setIsFlipped(false);
     setCardStartTime(Date.now());
     setRoundStats({ correct: 0, total: 0 });
     setIsSessionComplete(false);
+    suppressRecordingBriefly();
     handleSubTabChange('study');
     setActiveMorphemeView(null);
-  }, [handleSubTabChange]);
+  }, [handleSubTabChange, suppressRecordingBriefly]);
 
   // Start targeted subset practice (called from MorphemeDetailView launcher)
   const handleStartSubsetPractice = useCallback((subsetWords, subsetTitle, morphemeData) => {
@@ -519,6 +550,7 @@ export default function VocabView({
 
   // Exit targeted subset practice and restore full 15-card session
   const handleClearSubsetPractice = useCallback(() => {
+    subsetPracticeInfoRef.current = null;
     setSubsetPracticeInfo(null);
     if (filteredWords.length === 0) {
       setSessionDeck([]);
@@ -535,6 +567,31 @@ export default function VocabView({
     setRoundStats({ correct: 0, total: 0 });
   }, [filteredWords]);
 
+  const activateWordFocus = useCallback((wordItem) => {
+    if (!wordItem) return;
+    const remainingWords = words.filter(w => w.id !== wordItem.id);
+    // Keep the focused word pinned as card #1, with variety-shuffled backfill cards after it
+    const customDeck = [wordItem, ...shuffleWithMorphemeVariety(remainingWords.slice(0, SESSION_SIZE - 1))];
+    const nextSubsetInfo = {
+      title: `Word Focus: ${wordItem.word}`,
+      mode: 'word_focus',
+      modeLabel: 'Word Focus',
+      details: `1 specific word + 14 general practice words`,
+      count: 1,
+      wordName: wordItem.word,
+    };
+    subsetPracticeInfoRef.current = nextSubsetInfo;
+    setSubsetPracticeInfo(nextSubsetInfo);
+    setSessionDeck(customDeck);
+    setCurrentIndex(0);
+    setIsFlipped(false);
+    setCardStartTime(Date.now());
+    setRoundStats({ correct: 0, total: 0 });
+    setIsSessionComplete(false);
+    setSubTab('study');
+    setActiveMorphemeView(null);
+  }, [words]);
+
   // Select a single word to practice from the morpheme word list
   const handleSelectSingleWord = useCallback((wordItem) => {
     if (!wordItem) return;
@@ -550,24 +607,147 @@ export default function VocabView({
         wordName: wordItem.word,
       },
     });
-    const remainingWords = words.filter(w => w.id !== wordItem.id);
-    const customDeck = [wordItem, ...remainingWords.slice(0, SESSION_SIZE - 1)];
-    setSubsetPracticeInfo({
-      title: `Word Focus: ${wordItem.word}`,
-      mode: 'word_focus',
-      modeLabel: 'Word Focus',
-      details: `1 specific word + 14 general practice words`,
-      count: 1
-    });
-    setSessionDeck(shuffleWithMorphemeVariety(customDeck));
-    setCurrentIndex(0);
-    setIsFlipped(false);
-    setCardStartTime(Date.now());
-    setRoundStats({ correct: 0, total: 0 });
-    setIsSessionComplete(false);
+    suppressRecordingBriefly();
     handleSubTabChange('study');
+    activateWordFocus(wordItem);
+  }, [recordWaypoint, suppressRecordingBriefly, handleSubTabChange, activateWordFocus]);
+
+  // Restore exact saved page/state when clicking a waypoint in the trajectory ribbon
+  useEffect(() => {
+    if (!trajectoryRestoreTarget) return;
+    if (trajectoryRestoreTarget.nonce && lastRestoredNonceRef.current === trajectoryRestoreTarget.nonce) {
+      return;
+    }
+
+    const targetTab = trajectoryRestoreTarget.tab || 'study';
+    const isMorphemeWaypoint =
+      trajectoryRestoreTarget.waypointType === 'PRIMARY_STAR' ||
+      Boolean(trajectoryRestoreTarget.morphemeData) ||
+      Boolean(trajectoryRestoreTarget.morphemeToken);
+
+    if (isMorphemeWaypoint) {
+      const mData = trajectoryRestoreTarget.morphemeData;
+      const mType = trajectoryRestoreTarget.morphemeType || mData?.type || 'root';
+      const targetRootId = trajectoryRestoreTarget.rootId || mData?.rootId || mData?.root?.id;
+      const targetToken = trajectoryRestoreTarget.morphemeToken || mData?.cleanToken || '';
+
+      if (mType === 'root') {
+        setExplorerMorphemeType('ROOT');
+        if (targetRootId) setHighlightedExplorerRootId(Number(targetRootId));
+      } else if (mType === 'prefix') {
+        setExplorerMorphemeType('PREFIX');
+      } else if (mType === 'suffix') {
+        setExplorerMorphemeType('SUFFIX');
+      }
+
+      // If user was on a root, open Root Explorer with that root selected / MorphemeDetailView
+      const destinationTab = mType === 'root' && targetTab === 'explorer' ? 'explorer' : targetTab;
+      setSubTab(destinationTab);
+
+      if (roots.length > 0 && words.length > 0) {
+        const matchedRoot = targetRootId
+          ? roots.find(r => Number(r.id) === Number(targetRootId))
+          : roots.find(r => r.morpheme?.toLowerCase() === targetToken.toLowerCase());
+        const rebuilt = buildMorphemeViewData({
+          type: mType,
+          raw: mData?.title || targetToken,
+          root: matchedRoot || mData?.root || null,
+          sourceTabOverride: destinationTab,
+        });
+        // Preserve meaning/mnemonic from saved morphemeData if live lookup was partial
+        setActiveMorphemeView(
+          rebuilt.matchedWords.length > 0 || matchedRoot
+            ? rebuilt
+            : (mData ? { ...mData, sourceTab: destinationTab } : rebuilt)
+        );
+        lastRestoredNonceRef.current = trajectoryRestoreTarget.nonce;
+      } else if (mData) {
+        setActiveMorphemeView({ ...mData, sourceTab: destinationTab });
+        lastRestoredNonceRef.current = trajectoryRestoreTarget.nonce;
+      }
+      return;
+    }
+
+    if (trajectoryRestoreTarget.wordName) {
+      setActiveMorphemeView(null);
+      setSubTab(targetTab);
+      if (targetTab === 'study') {
+        if (words.length === 0) return;
+        const targetLower = trajectoryRestoreTarget.wordName.toLowerCase();
+        const foundWord = words.find(w => w.word?.toLowerCase() === targetLower);
+        if (foundWord) {
+          activateWordFocus(foundWord);
+        }
+        lastRestoredNonceRef.current = trajectoryRestoreTarget.nonce;
+      } else {
+        lastRestoredNonceRef.current = trajectoryRestoreTarget.nonce;
+      }
+      return;
+    }
+
+    if (trajectoryRestoreTarget.subsetPracticeInfo) {
+      const savedInfo = trajectoryRestoreTarget.subsetPracticeInfo;
+      setActiveMorphemeView(null);
+      setSubTab(targetTab);
+      if (savedInfo.mode === 'word_focus') {
+        if (words.length === 0) return;
+        const focusWordName =
+          savedInfo.wordName || savedInfo.title?.replace(/^Word Focus:\s*/i, '').trim();
+        const foundWord = focusWordName
+          ? words.find(w => w.word?.toLowerCase() === focusWordName.toLowerCase())
+          : null;
+        if (foundWord) {
+          activateWordFocus(foundWord);
+        }
+        lastRestoredNonceRef.current = trajectoryRestoreTarget.nonce;
+        return;
+      }
+
+      if (Array.isArray(savedInfo.deckWordIds) && savedInfo.deckWordIds.length > 0) {
+        if (words.length === 0) return;
+        const wordMap = new Map(words.map(w => [w.id, w]));
+        const restoredDeck = savedInfo.deckWordIds.map(id => wordMap.get(id)).filter(Boolean);
+        if (restoredDeck.length > 0) {
+          subsetPracticeInfoRef.current = savedInfo;
+          setSubsetPracticeInfo(savedInfo);
+          setSessionDeck(restoredDeck);
+          setCurrentIndex(0);
+          setIsFlipped(false);
+          setCardStartTime(Date.now());
+          setRoundStats({ correct: 0, total: 0 });
+          setIsSessionComplete(false);
+        }
+      } else {
+        subsetPracticeInfoRef.current = savedInfo;
+        setSubsetPracticeInfo(savedInfo);
+      }
+      lastRestoredNonceRef.current = trajectoryRestoreTarget.nonce;
+      return;
+    }
+
+    // Plain top-level tab restoration (study / explorer / progress / graph)
     setActiveMorphemeView(null);
-  }, [words, handleSubTabChange]);
+    setSubTab(targetTab);
+    if (targetTab === 'study') {
+      subsetPracticeInfoRef.current = null;
+      setSubsetPracticeInfo(null);
+    }
+    if (targetTab === 'explorer' && trajectoryRestoreTarget.rootId) {
+      setExplorerMorphemeType('ROOT');
+      setHighlightedExplorerRootId(Number(trajectoryRestoreTarget.rootId));
+    }
+    lastRestoredNonceRef.current = trajectoryRestoreTarget.nonce;
+  }, [trajectoryRestoreTarget, roots, words, buildMorphemeViewData, activateWordFocus]);
+
+  // Smoothly scroll highlighted root card into view when returning to Root Explorer
+  useEffect(() => {
+    if (subTab === 'explorer' && !activeMorphemeView && highlightedExplorerRootId) {
+      const targetEl = explorerRootRefs.current[highlightedExplorerRootId];
+      if (targetEl && typeof targetEl.scrollIntoView === 'function') {
+        targetEl.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      }
+    }
+  }, [subTab, activeMorphemeView, highlightedExplorerRootId]);
 
   // Safe Tab Navigation handling confirmation if active session in progress
   const handleAttemptTabChange = useCallback((targetTab) => {
@@ -1458,11 +1638,19 @@ export default function VocabView({
                     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
                       {group.roots.map((root) => {
                         const rootWords = words.filter(w => w.root === root.id || w.root_details?.id === root.id);
+                        const isHighlightedRoot = Number(highlightedExplorerRootId) === Number(root.id);
 
                         return (
                           <div
                             key={root.id}
-                            className="bg-white border border-stone-200/90 rounded-2xl shadow-soft-xs hover:shadow-soft-md p-5 flex flex-col justify-between transition-all duration-200"
+                            ref={(el) => {
+                              if (el) explorerRootRefs.current[root.id] = el;
+                            }}
+                            className={`bg-white rounded-2xl p-5 flex flex-col justify-between transition-all duration-200 ${
+                              isHighlightedRoot
+                                ? 'border-2 border-[#7BB33B] ring-2 ring-[#7BB33B]/30 shadow-soft-md'
+                                : 'border border-stone-200/90 shadow-soft-xs hover:shadow-soft-md'
+                            }`}
                           >
                             <div>
                               {/* Card Header with Morpheme, Origin, and Pathway Badges */}
@@ -1558,14 +1746,27 @@ export default function VocabView({
                               </div>
                             </div>
 
-                            {/* Launch Practice for this root */}
-                            <button
-                              onClick={() => handleLaunchRootPractice(root.id)}
-                              className="mt-5 w-full flex items-center justify-center space-x-2 py-2 bg-[#7BB33B] hover:bg-[#6FA334] text-white rounded-xl shadow-soft-xs hover:shadow-soft-sm font-sans text-xs font-bold transition-all"
-                            >
-                              <Sparkles className="w-3.5 h-3.5" />
-                              <span>Study This Root</span>
-                            </button>
+                            {/* Explore Root Details & Launch Practice */}
+                            <div className="mt-5 flex items-center gap-2">
+                              <button
+                                type="button"
+                                onClick={() => {
+                                  setHighlightedExplorerRootId(root.id);
+                                  handleOpenMorpheme({ type: 'root', root });
+                                }}
+                                className="px-3.5 py-2 bg-white hover:bg-[#EDF5E5] text-stone-700 hover:text-[#2F441E] border border-stone-200 rounded-xl shadow-soft-xs font-sans text-xs font-bold transition-all"
+                                title={`Inspect [${root.morpheme.toUpperCase()}] details and word family`}
+                              >
+                                Explore
+                              </button>
+                              <button
+                                onClick={() => handleLaunchRootPractice(root.id)}
+                                className="flex-1 flex items-center justify-center space-x-2 py-2 bg-[#7BB33B] hover:bg-[#6FA334] text-white rounded-xl shadow-soft-xs hover:shadow-soft-sm font-sans text-xs font-bold transition-all"
+                              >
+                                <Sparkles className="w-3.5 h-3.5" />
+                                <span>Study This Root</span>
+                              </button>
+                            </div>
                           </div>
                         );
                       })}
@@ -1611,6 +1812,7 @@ export default function VocabView({
             handleOpenCustomSession([Number(rootId)]);
           }}
           onOpenMorpheme={handleOpenMorpheme}
+          trajectoryRestoreTarget={trajectoryRestoreTarget}
         />
       )}
 

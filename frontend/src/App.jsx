@@ -95,36 +95,58 @@ export default function App() {
   // Celestial History & Fast Travel Restorations
   const [externalMorphemeView, setExternalMorphemeView] = useState(null);
   const [initialPoemId, setInitialPoemId] = useState(null);
+  const [poemRestoreTarget, setPoemRestoreTarget] = useState(null);
+  const [trajectoryRestoreTarget, setTrajectoryRestoreTarget] = useState(null);
   const { recordWaypoint, registerNavigator, setIsFlightLogOpen } = useCelestialTrajectory();
 
   // Register master fast-travel navigator
   useEffect(() => {
-    registerNavigator((state) => {
+    registerNavigator((state, waypoint) => {
+      if (!state) return;
+
       if (state.app === 'poems') {
-        if (state.poemId) setInitialPoemId(state.poemId);
+        if (state.poemId) {
+          setInitialPoemId(state.poemId);
+          setPoemRestoreTarget({ poemId: state.poemId, nonce: Date.now() + Math.random() });
+        } else {
+          setPoemRestoreTarget(null);
+        }
         setActiveApp('poems');
         setActiveTab('poems');
         if (window.history && window.history.pushState) {
           window.history.pushState({}, document.title, '/poems');
         }
       } else if (state.app === 'platform') {
+        setExternalMorphemeView(null);
+        setTrajectoryRestoreTarget(null);
         setActiveApp('platform');
       } else {
-        setActiveApp('vocab');
-        if (state.tab) {
-          setActiveTab(state.tab);
-          if (window.history && window.history.replaceState) {
-            window.history.replaceState({}, document.title, `#${state.tab}`);
-          }
+        const targetTab = state.tab || 'study';
+        setActiveTab(targetTab);
+        if (targetTab === 'graph') {
+          setActiveApp('graph');
+        } else if (targetTab === 'explorer') {
+          setActiveApp('explorer');
+        } else {
+          setActiveApp('vocab');
         }
-        if (state.rootId !== undefined) {
-          setSelectedRootId(state.rootId);
+
+        if (window.history && window.history.replaceState) {
+          window.history.replaceState({}, document.title, `#${targetTab}`);
         }
+
         if (state.morphemeData) {
           setExternalMorphemeView(state.morphemeData);
         } else {
           setExternalMorphemeView(null);
         }
+
+        setTrajectoryRestoreTarget({
+          ...state,
+          tab: targetTab,
+          waypointType: waypoint?.type,
+          nonce: Date.now() + Math.random(),
+        });
       }
     });
   }, [registerNavigator]);
@@ -161,7 +183,10 @@ export default function App() {
         depth: 1,
         state: { app: 'poems' },
       });
-    } else if (activeApp === 'vocab' && !externalMorphemeView) {
+    } else if (
+      (activeApp === 'vocab' || activeApp === 'explorer' || activeApp === 'graph') &&
+      !externalMorphemeView
+    ) {
       if (activeTab === 'study') {
         recordWaypoint({
           type: 'STAR_SYSTEM',
@@ -472,6 +497,8 @@ export default function App() {
 
   // Safe navigation handler enforcing Kiwi Views
   const handleNavigateTab = (tab) => {
+    setExternalMorphemeView(null);
+    setTrajectoryRestoreTarget(null);
     setActiveTab(tab);
     if (tab === 'poems') {
       setActiveApp('poems');
@@ -593,6 +620,7 @@ export default function App() {
           <PoemsView
             onNavigateHome={() => handleNavigateApp('vocab')}
             initialPoemId={initialPoemId}
+            poemRestoreTarget={poemRestoreTarget}
           />
         </div>
       </div>
@@ -710,6 +738,7 @@ export default function App() {
             onUpdateWord={handleUpdateWord}
             externalMorphemeView={externalMorphemeView}
             onClearExternalMorphemeView={() => setExternalMorphemeView(null)}
+            trajectoryRestoreTarget={trajectoryRestoreTarget}
             preloadedDeck={preloadedDeck}
             isGuestMode={isGuestMode && !user}
             dailyDateFormatted={todayFormatted}

@@ -19,6 +19,7 @@ import { useCelestialTrajectory } from '../context/CelestialTrajectoryContext';
 export default function CelestialFlightLogModal() {
   const {
     trajectory,
+    currentWaypoint,
     isFlightLogOpen,
     setIsFlightLogOpen,
     fastTravel,
@@ -191,7 +192,9 @@ export default function CelestialFlightLogModal() {
           ) : (
             filteredTrajectory.slice().reverse().map((waypoint, revIndex) => {
               const originalIndex = filteredTrajectory.length - 1 - revIndex;
-              const isLatest = originalIndex === trajectory.length - 1;
+              const isLatest = currentWaypoint
+                ? waypoint.id === currentWaypoint.id
+                : originalIndex === filteredTrajectory.length - 1;
 
               return (
                 <div
