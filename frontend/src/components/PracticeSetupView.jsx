@@ -219,29 +219,38 @@ export default function PracticeSetupView({
           </div>
 
           <div className="flex items-center space-x-2 font-mono text-xs shrink-0">
-            <span
-              className={`px-3 py-1.5 border-2 border-[#111410] font-black uppercase ${
-                selectedMorphemeIds.length > 0
-                  ? 'bg-[#7BB33B] text-white'
-                  : 'bg-[#EFE8DF] text-[#42281D]'
+            <button
+              type="button"
+              onClick={handleStartPractice}
+              disabled={selectedMorphemeIds.length === 0 || estimatedCardCount === 0}
+              className={`px-5 py-2.5 font-mono font-black text-xs uppercase tracking-wider border-2 border-[#111410] flex items-center justify-center space-x-2 transition ${
+                selectedMorphemeIds.length === 0 || estimatedCardCount === 0
+                  ? 'bg-[#EFE8DF] text-[#A8AAA6] cursor-not-allowed shadow-none'
+                  : 'bg-[#7BB33B] hover:bg-[#84C341] text-white shadow-[3px_3px_0px_0px_#111410] active:translate-x-[1px] active:translate-y-[1px]'
               }`}
             >
-              {selectedMorphemeIds.length} / {MAX_SELECTED_MORPHEMES} Targets
-            </span>
+              <Zap className="w-4 h-4 fill-current" />
+              <span>Start Practice Set ({estimatedCardCount} Cards)</span>
+            </button>
           </div>
         </div>
 
         {/* Practice Set Fill Progress Bar */}
         <div className="p-4 bg-[#FAFBF8] border-2 border-[#111410] space-y-2.5">
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-1 font-mono text-xs">
-            <span className="font-black uppercase text-[#111410]">
-              Set Capacity: {targetCardsInDeck} / {SESSION_SIZE} target words
-              {totalEligibleWords > SESSION_SIZE && (
-                <span className="text-[#2F441E] font-bold ml-1.5">
-                  ({totalEligibleWords} eligible · balanced 15-card draw)
-                </span>
-              )}
-            </span>
+            <div className="flex flex-wrap items-center gap-2">
+              <span className="font-black uppercase text-[#111410]">
+                Set Capacity: {targetCardsInDeck} / {SESSION_SIZE} target words
+                {totalEligibleWords > SESSION_SIZE && (
+                  <span className="text-[#2F441E] font-bold ml-1.5">
+                    ({totalEligibleWords} eligible · balanced 15-card draw)
+                  </span>
+                )}
+              </span>
+              <span className="px-2 py-0.5 bg-white border border-[#111410]/40 text-[10px] font-bold uppercase text-[#42281D]">
+                {selectedMorphemeIds.length} / {MAX_SELECTED_MORPHEMES} Targets
+              </span>
+            </div>
             <span className="text-[11px] font-bold text-[#62685E]">
               {selectedMorphemeIds.length === 0
                 ? 'Select at least 1 root below'
