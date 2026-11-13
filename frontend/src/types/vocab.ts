@@ -32,7 +32,10 @@ export interface VocabularyWord {
 export type LearningPathway = 'thematic' | 'yield';
 
 export type ThematicCluster =
-  | 'Movement'
+  | 'Motion & Travel'
+  | 'Force & Transformation'
+  | 'Position & Holding'
+  | 'Senses & Perception'
   | 'Communication'
   | 'Cognition'
   | 'Emotion'

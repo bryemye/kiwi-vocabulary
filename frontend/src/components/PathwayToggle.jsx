@@ -45,7 +45,7 @@ export default function PathwayToggle({
             ? 'bg-white text-[#2F441E] font-bold shadow-soft-xs border border-stone-200/60'
             : 'bg-transparent text-stone-600 hover:text-stone-900 font-medium'
         }`}
-        title="Group roots into semantic narrative clusters (Movement, Communication, Cognition, Emotion, etc.)"
+        title="Group roots into semantic narrative clusters (Motion & Travel, Force & Transformation, Position & Holding, Senses & Perception, Cognition, etc.)"
       >
         <span className="text-xs select-none">🧠</span>
         <span className={compact ? 'text-[11px]' : 'text-xs'}>Thematic</span>

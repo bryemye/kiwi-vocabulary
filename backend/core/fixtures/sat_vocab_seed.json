@@ -4,7 +4,8 @@
       "morpheme": "ced / cess",
       "language": "Latin",
       "core_meaning": "to go, yield, withdraw",
-      "mnemonic": "Think 'precede' (go before) or 'concede' (yield to)"
+      "mnemonic": "Think 'precede' (go before) or 'concede' (yield to)",
+      "thematic_cluster": "Motion & Travel"
     },
     "words": [
       {
@@ -70,7 +71,8 @@
       "morpheme": "cur / curs / cour",
       "language": "Latin",
       "core_meaning": "to run, course, flow",
-      "mnemonic": "Think 'current' (running flow) or 'courier' (runner)"
+      "mnemonic": "Think 'current' (running flow) or 'courier' (runner)",
+      "thematic_cluster": "Motion & Travel"
     },
     "words": [
       {
@@ -136,7 +138,8 @@
       "morpheme": "grad / gress",
       "language": "Latin",
       "core_meaning": "to step, walk, go",
-      "mnemonic": "Think 'progress' (step forward) or 'gradual' (step by step)"
+      "mnemonic": "Think 'progress' (step forward) or 'gradual' (step by step)",
+      "thematic_cluster": "Motion & Travel"
     },
     "words": [
       {
@@ -202,7 +205,8 @@
       "morpheme": "mot / mov",
       "language": "Latin",
       "core_meaning": "to move, stir, set in motion",
-      "mnemonic": "Think 'motion' or 'motivate' (stir to action)"
+      "mnemonic": "Think 'motion' or 'motivate' (stir to action)",
+      "thematic_cluster": "Motion & Travel"
     },
     "words": [
       {
@@ -268,7 +272,8 @@
       "morpheme": "tract",
       "language": "Latin",
       "core_meaning": "to pull, drag, draw",
-      "mnemonic": "Think 'tractor' (pulling vehicle) or 'extract' (draw out)"
+      "mnemonic": "Think 'tractor' (pulling vehicle) or 'extract' (draw out)",
+      "thematic_cluster": "Force & Transformation"
     },
     "words": [
       {
@@ -334,7 +339,8 @@
       "morpheme": "fer / lat",
       "language": "Latin",
       "core_meaning": "to carry, bear, bring",
-      "mnemonic": "Think 'transfer' (carry across) or 'ferry' (carry people)"
+      "mnemonic": "Think 'transfer' (carry across) or 'ferry' (carry people)",
+      "thematic_cluster": "Motion & Travel"
     },
     "words": [
       {
@@ -400,7 +406,8 @@
       "morpheme": "pel / puls",
       "language": "Latin",
       "core_meaning": "to drive, push, urge",
-      "mnemonic": "Think 'propel' (push forward) or 'impulse' (inner drive)"
+      "mnemonic": "Think 'propel' (push forward) or 'impulse' (inner drive)",
+      "thematic_cluster": "Force & Transformation"
     },
     "words": [
       {
@@ -466,7 +473,8 @@
       "morpheme": "jac / ject",
       "language": "Latin",
       "core_meaning": "to throw, cast, hurl",
-      "mnemonic": "Think 'eject' (throw out) or 'projectile' (hurled object)"
+      "mnemonic": "Think 'eject' (throw out) or 'projectile' (hurled object)",
+      "thematic_cluster": "Force & Transformation"
     },
     "words": [
       {
@@ -532,7 +540,8 @@
       "morpheme": "pugn / pug",
       "language": "Latin",
       "core_meaning": "to fight, fist, combat",
-      "mnemonic": "Think 'pugilist' (boxer) or 'pugnacious' (ready to fight)"
+      "mnemonic": "Think 'pugilist' (boxer) or 'pugnacious' (ready to fight)",
+      "thematic_cluster": "Power & Conflict"
     },
     "words": [
       {
@@ -598,7 +607,8 @@
       "morpheme": "bell / belli",
       "language": "Latin",
       "core_meaning": "war, fighting, hostility",
-      "mnemonic": "Think 'belligerent' (warlike) or 'antebellum' (before the war)"
+      "mnemonic": "Think 'belligerent' (warlike) or 'antebellum' (before the war)",
+      "thematic_cluster": "Power & Conflict"
     },
     "words": [
       {
@@ -664,7 +674,8 @@
       "morpheme": "rupt",
       "language": "Latin",
       "core_meaning": "to break, burst, shatter",
-      "mnemonic": "Think 'rupture' (burst) or 'interrupt' (break between)"
+      "mnemonic": "Think 'rupture' (burst) or 'interrupt' (break between)",
+      "thematic_cluster": "Force & Transformation"
     },
     "words": [
       {
@@ -730,7 +741,8 @@
       "morpheme": "tort / tors",
       "language": "Latin",
       "core_meaning": "to twist, wind, bend",
-      "mnemonic": "Think 'contort' (twist together) or 'torture' (twisting pain)"
+      "mnemonic": "Think 'contort' (twist together) or 'torture' (twisting pain)",
+      "thematic_cluster": "Force & Transformation"
     },
     "words": [
       {
@@ -796,7 +808,8 @@
       "morpheme": "fract / frag",
       "language": "Latin",
       "core_meaning": "to break, shatter, split",
-      "mnemonic": "Think 'fracture' (bone break) or 'fragment' (broken piece)"
+      "mnemonic": "Think 'fracture' (bone break) or 'fragment' (broken piece)",
+      "thematic_cluster": "Force & Transformation"
     },
     "words": [
       {
@@ -862,7 +875,8 @@
       "morpheme": "sec / sect / seg",
       "language": "Latin",
       "core_meaning": "to cut, divide, slice",
-      "mnemonic": "Think 'dissect' (cut apart) or 'segment' (cut slice)"
+      "mnemonic": "Think 'dissect' (cut apart) or 'segment' (cut slice)",
+      "thematic_cluster": "Force & Transformation"
     },
     "words": [
       {
@@ -928,7 +942,8 @@
       "morpheme": "mit / miss",
       "language": "Latin",
       "core_meaning": "to send, let go, discharge",
-      "mnemonic": "Think 'transmit' (send across) or 'mission' (sent task)"
+      "mnemonic": "Think 'transmit' (send across) or 'mission' (sent task)",
+      "thematic_cluster": "Motion & Travel"
     },
     "words": [
       {
@@ -994,7 +1009,8 @@
       "morpheme": "ven / vent",
       "language": "Latin",
       "core_meaning": "to come, arrive",
-      "mnemonic": "Think 'convene' (come together) or 'advent' (arrival)"
+      "mnemonic": "Think 'convene' (come together) or 'advent' (arrival)",
+      "thematic_cluster": "Motion & Travel"
     },
     "words": [
       {
@@ -1060,7 +1076,8 @@
       "morpheme": "vad / vas",
       "language": "Latin",
       "core_meaning": "to go, walk, rush",
-      "mnemonic": "Think 'evade' (go away from) or 'invade' (rush into)"
+      "mnemonic": "Think 'evade' (go away from) or 'invade' (rush into)",
+      "thematic_cluster": "Motion & Travel"
     },
     "words": [
       {
@@ -1126,7 +1143,8 @@
       "morpheme": "flu / flux",
       "language": "Latin",
       "core_meaning": "to flow, glide, stream",
-      "mnemonic": "Think 'fluid' or 'influx' (flowing in)"
+      "mnemonic": "Think 'fluid' or 'influx' (flowing in)",
+      "thematic_cluster": "Motion & Travel"
     },
     "words": [
       {
@@ -1192,7 +1210,8 @@
       "morpheme": "fus / fund",
       "language": "Latin",
       "core_meaning": "to pour, melt, spread",
-      "mnemonic": "Think 'diffuse' (pour out) or 'fusion' (melting together)"
+      "mnemonic": "Think 'diffuse' (pour out) or 'fusion' (melting together)",
+      "thematic_cluster": "Force & Transformation"
     },
     "words": [
       {
@@ -1258,7 +1277,8 @@
       "morpheme": "cid / cis",
       "language": "Latin",
       "core_meaning": "to cut, kill, sever",
-      "mnemonic": "Think 'incision' (surgical cut) or 'homicide' (killing)"
+      "mnemonic": "Think 'incision' (surgical cut) or 'homicide' (killing)",
+      "thematic_cluster": "Force & Transformation"
     },
     "words": [
       {
@@ -1324,7 +1344,8 @@
       "morpheme": "scend / scent",
       "language": "Latin",
       "core_meaning": "to climb, leap, mount",
-      "mnemonic": "Think 'ascend' (climb up) or 'descend' (climb down)"
+      "mnemonic": "Think 'ascend' (climb up) or 'descend' (climb down)",
+      "thematic_cluster": "Motion & Travel"
     },
     "words": [
       {
@@ -1390,7 +1411,8 @@
       "morpheme": "cliv / clin",
       "language": "Latin",
       "core_meaning": "to slope, lean, incline",
-      "mnemonic": "Think 'incline' (slope up) or 'recline' (lean back)"
+      "mnemonic": "Think 'incline' (slope up) or 'recline' (lean back)",
+      "thematic_cluster": "Position & Holding"
     },
     "words": [
       {
@@ -1456,7 +1478,8 @@
       "morpheme": "vert / vers",
       "language": "Latin",
       "core_meaning": "to turn, reverse, alter",
-      "mnemonic": "Think 'reverse' (turn back) or 'convert' (turn around)"
+      "mnemonic": "Think 'reverse' (turn back) or 'convert' (turn around)",
+      "thematic_cluster": "Force & Transformation"
     },
     "words": [
       {
@@ -1522,7 +1545,8 @@
       "morpheme": "err",
       "language": "Latin",
       "core_meaning": "to wander, stray, make a mistake",
-      "mnemonic": "Think 'error' (mistake) or 'erratic' (wandering unpredictably)"
+      "mnemonic": "Think 'error' (mistake) or 'erratic' (wandering unpredictably)",
+      "thematic_cluster": "Motion & Travel"
     },
     "words": [
       {
@@ -1588,7 +1612,8 @@
       "morpheme": "her / hes",
       "language": "Latin",
       "core_meaning": "to stick, cling, adhere",
-      "mnemonic": "Think 'adhesive' (sticking) or 'coherent' (sticking together)"
+      "mnemonic": "Think 'adhesive' (sticking) or 'coherent' (sticking together)",
+      "thematic_cluster": "Position & Holding"
     },
     "words": [
       {
@@ -1654,7 +1679,8 @@
       "morpheme": "string / strict",
       "language": "Latin",
       "core_meaning": "to bind, draw tight, compress",
-      "mnemonic": "Think 'strict' (tight rule) or 'constrict' (tighten together)"
+      "mnemonic": "Think 'strict' (tight rule) or 'constrict' (tighten together)",
+      "thematic_cluster": "Position & Holding"
     },
     "words": [
       {
@@ -1720,7 +1746,8 @@
       "morpheme": "pend / pens",
       "language": "Latin",
       "core_meaning": "to hang, weigh, pay",
-      "mnemonic": "Think 'pendant' (hanging jewel) or 'suspend' (hang under)"
+      "mnemonic": "Think 'pendant' (hanging jewel) or 'suspend' (hang under)",
+      "thematic_cluster": "Position & Holding"
     },
     "words": [
       {
@@ -1786,7 +1813,8 @@
       "morpheme": "tend / tens / tent",
       "language": "Latin",
       "core_meaning": "to stretch, aim, strain",
-      "mnemonic": "Think 'tension' (stretched tight) or 'extend' (stretch out)"
+      "mnemonic": "Think 'tension' (stretched tight) or 'extend' (stretch out)",
+      "thematic_cluster": "Position & Holding"
     },
     "words": [
       {
@@ -1852,7 +1880,8 @@
       "morpheme": "sta / sist / stit",
       "language": "Latin",
       "core_meaning": "to stand, halt, set firmly",
-      "mnemonic": "Think 'stationary' (standing still) or 'resist' (stand against)"
+      "mnemonic": "Think 'stationary' (standing still) or 'resist' (stand against)",
+      "thematic_cluster": "Position & Holding"
     },
     "words": [
       {
@@ -1918,7 +1947,8 @@
       "morpheme": "kin / kinet",
       "language": "Greek",
       "core_meaning": "movement, motion, speed",
-      "mnemonic": "Think 'kinetic' energy (energy of motion) or 'cinema' (moving pictures)"
+      "mnemonic": "Think 'kinetic' energy (energy of motion) or 'cinema' (moving pictures)",
+      "thematic_cluster": "Motion & Travel"
     },
     "words": [
       {
@@ -1984,7 +2014,8 @@
       "morpheme": "stroph",
       "language": "Greek",
       "core_meaning": "to turn, twist, bend",
-      "mnemonic": "Think 'catastrophe' (a downturn) or 'apostrophe' (turning away)"
+      "mnemonic": "Think 'catastrophe' (a downturn) or 'apostrophe' (turning away)",
+      "thematic_cluster": "Force & Transformation"
     },
     "words": [
       {
@@ -2050,7 +2081,8 @@
       "morpheme": "agon",
       "language": "Greek",
       "core_meaning": "contest, struggle, trial",
-      "mnemonic": "Think 'agony' (pain of struggle) or 'antagonist' (struggler against)"
+      "mnemonic": "Think 'agony' (pain of struggle) or 'antagonist' (struggler against)",
+      "thematic_cluster": "Power & Conflict"
     },
     "words": [
       {
@@ -2116,7 +2148,8 @@
       "morpheme": "polem",
       "language": "Greek",
       "core_meaning": "war, dispute, hostility",
-      "mnemonic": "Think 'polemic' (war of words) or 'polemical' (argumentative)"
+      "mnemonic": "Think 'polemic' (war of words) or 'polemical' (argumentative)",
+      "thematic_cluster": "Power & Conflict"
     },
     "words": [
       {
@@ -2182,7 +2215,8 @@
       "morpheme": "ball / bol",
       "language": "Greek",
       "core_meaning": "to throw, cast, put",
-      "mnemonic": "Think 'ballistic' (thrown through air) or 'symbol' (thrown together)"
+      "mnemonic": "Think 'ballistic' (thrown through air) or 'symbol' (thrown together)",
+      "thematic_cluster": "Force & Transformation"
     },
     "words": [
       {
@@ -2248,7 +2282,8 @@
       "morpheme": "tach / tachy",
       "language": "Greek",
       "core_meaning": "swift, rapid, fast",
-      "mnemonic": "Think 'tachometer' (measures rapid engine revs)"
+      "mnemonic": "Think 'tachometer' (measures rapid engine revs)",
+      "thematic_cluster": "Motion & Travel"
     },
     "words": [
       {
@@ -2315,7 +2350,7 @@
       "language": "Latin",
       "core_meaning": "to lie down, recline, yield",
       "mnemonic": "Think 'incumbent' (leaning on an office) or 'succumb' (yield / lie down under)",
-      "thematic_cluster": "Power & Conflict",
+      "thematic_cluster": "Position & Holding",
       "sat_tier": "Tier 1 High-Yield"
     },
     "words": [
@@ -2358,7 +2393,8 @@
       "morpheme": "cogn / gnos",
       "language": "Latin",
       "core_meaning": "to know, recognize, learn",
-      "mnemonic": "Think 'cognition' (mental processing) or 'diagnosis' (knowing through symptoms)"
+      "mnemonic": "Think 'cognition' (mental processing) or 'diagnosis' (knowing through symptoms)",
+      "thematic_cluster": "Cognition"
     },
     "words": [
       {
@@ -2424,7 +2460,8 @@
       "morpheme": "sci",
       "language": "Latin",
       "core_meaning": "to know, understand",
-      "mnemonic": "Think 'science' (knowledge) or 'conscious' (knowing within)"
+      "mnemonic": "Think 'science' (knowledge) or 'conscious' (knowing within)",
+      "thematic_cluster": "Cognition"
     },
     "words": [
       {
@@ -2490,7 +2527,8 @@
       "morpheme": "spec / spic",
       "language": "Latin",
       "core_meaning": "to look, see, watch",
-      "mnemonic": "Think 'spectator' (one who looks) or 'inspect' (look into)"
+      "mnemonic": "Think 'spectator' (one who looks) or 'inspect' (look into)",
+      "thematic_cluster": "Senses & Perception"
     },
     "words": [
       {
@@ -2556,7 +2594,8 @@
       "morpheme": "vid / vis",
       "language": "Latin",
       "core_meaning": "to see, look, perceive",
-      "mnemonic": "Think 'visible' (can be seen) or 'vision' (act of seeing)"
+      "mnemonic": "Think 'visible' (can be seen) or 'vision' (act of seeing)",
+      "thematic_cluster": "Senses & Perception"
     },
     "words": [
       {
@@ -2622,7 +2661,8 @@
       "morpheme": "sent / sens",
       "language": "Latin",
       "core_meaning": "to feel, perceive, think",
-      "mnemonic": "Think 'sentiment' (feeling) or 'sensation' (perception)"
+      "mnemonic": "Think 'sentiment' (feeling) or 'sensation' (perception)",
+      "thematic_cluster": "Senses & Perception"
     },
     "words": [
       {
@@ -2688,7 +2728,8 @@
       "morpheme": "path",
       "language": "Greek",
       "core_meaning": "feeling, suffering, emotion, disease",
-      "mnemonic": "Think 'sympathy' (feeling with) or 'pathology' (study of suffering/disease)"
+      "mnemonic": "Think 'sympathy' (feeling with) or 'pathology' (study of suffering/disease)",
+      "thematic_cluster": "Emotion"
     },
     "words": [
       {
@@ -2754,7 +2795,8 @@
       "morpheme": "anim",
       "language": "Latin",
       "core_meaning": "mind, soul, breath, spirit",
-      "mnemonic": "Think 'animate' (breathe life into) or 'unanimous' (one mind)"
+      "mnemonic": "Think 'animate' (breathe life into) or 'unanimous' (one mind)",
+      "thematic_cluster": "Cognition"
     },
     "words": [
       {
@@ -2820,7 +2862,8 @@
       "morpheme": "mem / mne",
       "language": "Latin / Greek",
       "core_meaning": "memory, mindful, remembering",
-      "mnemonic": "Think 'memory' or 'mnemonic' (memory aid device)"
+      "mnemonic": "Think 'memory' or 'mnemonic' (memory aid device)",
+      "thematic_cluster": "Cognition"
     },
     "words": [
       {
@@ -2886,7 +2929,8 @@
       "morpheme": "loqu / loc",
       "language": "Latin",
       "core_meaning": "to speak, talk, converse",
-      "mnemonic": "Think 'eloquent' (speaking well) or 'loquacious' (talkative)"
+      "mnemonic": "Think 'eloquent' (speaking well) or 'loquacious' (talkative)",
+      "thematic_cluster": "Communication"
     },
     "words": [
       {
@@ -2952,7 +2996,8 @@
       "morpheme": "voc / vok",
       "language": "Latin",
       "core_meaning": "voice, to call, summon",
-      "mnemonic": "Think 'vocal' (voice) or 'invoke' (call upon)"
+      "mnemonic": "Think 'vocal' (voice) or 'invoke' (call upon)",
+      "thematic_cluster": "Communication"
     },
     "words": [
       {
@@ -3018,7 +3063,8 @@
       "morpheme": "dict",
       "language": "Latin",
       "core_meaning": "to say, speak, declare",
-      "mnemonic": "Think 'dictate' (say aloud) or 'predict' (say beforehand)"
+      "mnemonic": "Think 'dictate' (say aloud) or 'predict' (say beforehand)",
+      "thematic_cluster": "Communication"
     },
     "words": [
       {
@@ -3084,7 +3130,8 @@
       "morpheme": "clam / claim",
       "language": "Latin",
       "core_meaning": "to shout, cry out, call",
-      "mnemonic": "Think 'clamor' (loud shout) or 'exclaim' (cry out)"
+      "mnemonic": "Think 'clamor' (loud shout) or 'exclaim' (cry out)",
+      "thematic_cluster": "Communication"
     },
     "words": [
       {
@@ -3150,7 +3197,8 @@
       "morpheme": "phon",
       "language": "Greek",
       "core_meaning": "sound, voice, speech",
-      "mnemonic": "Think 'telephone' (distant sound) or 'phonics' (sounds of letters)"
+      "mnemonic": "Think 'telephone' (distant sound) or 'phonics' (sounds of letters)",
+      "thematic_cluster": "Communication"
     },
     "words": [
       {
@@ -3216,7 +3264,8 @@
       "morpheme": "aud",
       "language": "Latin",
       "core_meaning": "to hear, listen",
-      "mnemonic": "Think 'audio' (sound you hear) or 'auditorium' (place for hearing)"
+      "mnemonic": "Think 'audio' (sound you hear) or 'auditorium' (place for hearing)",
+      "thematic_cluster": "Senses & Perception"
     },
     "words": [
       {
@@ -3282,7 +3331,8 @@
       "morpheme": "tact / tang / ting",
       "language": "Latin",
       "core_meaning": "to touch, handle",
-      "mnemonic": "Think 'tangible' (touchable) or 'tactile' (felt by touch)"
+      "mnemonic": "Think 'tangible' (touchable) or 'tactile' (felt by touch)",
+      "thematic_cluster": "Senses & Perception"
     },
     "words": [
       {
@@ -3348,7 +3398,8 @@
       "morpheme": "sap / sag",
       "language": "Latin",
       "core_meaning": "to taste, perceive, be wise",
-      "mnemonic": "Think 'sage' (wise person) or 'sapient' (wise/perceptive)"
+      "mnemonic": "Think 'sage' (wise person) or 'sapient' (wise/perceptive)",
+      "thematic_cluster": "Senses & Perception"
     },
     "words": [
       {
@@ -3414,7 +3465,8 @@
       "morpheme": "gust",
       "language": "Latin",
       "core_meaning": "taste, flavor, relish",
-      "mnemonic": "Think 'gusto' (enthusiastic relish) or 'disgust' (bad taste)"
+      "mnemonic": "Think 'gusto' (enthusiastic relish) or 'disgust' (bad taste)",
+      "thematic_cluster": "Senses & Perception"
     },
     "words": [
       {
@@ -3480,7 +3532,8 @@
       "morpheme": "olfact / odor",
       "language": "Latin",
       "core_meaning": "smell, scent, fragrance",
-      "mnemonic": "Think 'olfactory' (sense of smell) or 'malodorous' (bad smelling)"
+      "mnemonic": "Think 'olfactory' (sense of smell) or 'malodorous' (bad smelling)",
+      "thematic_cluster": "Senses & Perception"
     },
     "words": [
       {
@@ -3546,7 +3599,8 @@
       "morpheme": "luc / lum / lus",
       "language": "Latin",
       "core_meaning": "light, shine, clear, bright",
-      "mnemonic": "Think 'lucid' (clear as light) or 'illuminate' (light up)"
+      "mnemonic": "Think 'lucid' (clear as light) or 'illuminate' (light up)",
+      "thematic_cluster": "Senses & Perception"
     },
     "words": [
       {
@@ -3612,7 +3666,8 @@
       "morpheme": "umbr",
       "language": "Latin",
       "core_meaning": "shade, shadow, obscure",
-      "mnemonic": "Think 'umbrella' (little shadow) or 'umbrage' (shadow of offense)"
+      "mnemonic": "Think 'umbrella' (little shadow) or 'umbrage' (shadow of offense)",
+      "thematic_cluster": "Senses & Perception"
     },
     "words": [
       {
@@ -3678,7 +3733,8 @@
       "morpheme": "cand",
       "language": "Latin",
       "core_meaning": "white, glowing, pure, shining",
-      "mnemonic": "Think 'candle' (glowing light) or 'candor' (pure frankness)"
+      "mnemonic": "Think 'candle' (glowing light) or 'candor' (pure frankness)",
+      "thematic_cluster": "Senses & Perception"
     },
     "words": [
       {
@@ -3744,7 +3800,8 @@
       "morpheme": "cord / card",
       "language": "Latin / Greek",
       "core_meaning": "heart, mind, courage",
-      "mnemonic": "Think 'cardiac' (heart) or 'cordial' (from the heart)"
+      "mnemonic": "Think 'cardiac' (heart) or 'cordial' (from the heart)",
+      "thematic_cluster": "Emotion"
     },
     "words": [
       {
@@ -3810,7 +3867,8 @@
       "morpheme": "cred",
       "language": "Latin",
       "core_meaning": "to believe, trust",
-      "mnemonic": "Think 'credible' (believable) or 'creed' (statement of belief)"
+      "mnemonic": "Think 'credible' (believable) or 'creed' (statement of belief)",
+      "thematic_cluster": "Cognition"
     },
     "words": [
       {
@@ -3876,7 +3934,8 @@
       "morpheme": "fid",
       "language": "Latin",
       "core_meaning": "faith, trust, loyalty",
-      "mnemonic": "Think 'fidelity' (faithfulness) or 'confide' (trust with secrets)"
+      "mnemonic": "Think 'fidelity' (faithfulness) or 'confide' (trust with secrets)",
+      "thematic_cluster": "Law & Morality"
     },
     "words": [
       {
@@ -3942,7 +4001,8 @@
       "morpheme": "fatu",
       "language": "Latin",
       "core_meaning": "foolish, silly, empty",
-      "mnemonic": "Think 'fatuous' (foolish/silly) or 'infatuation' (foolish obsession)"
+      "mnemonic": "Think 'fatuous' (foolish/silly) or 'infatuation' (foolish obsession)",
+      "thematic_cluster": "Cognition"
     },
     "words": [
       {
@@ -4008,7 +4068,8 @@
       "morpheme": "soph",
       "language": "Greek",
       "core_meaning": "wise, wisdom, knowledge",
-      "mnemonic": "Think 'philosophy' (love of wisdom) or 'sophisticated' (worldly wise)"
+      "mnemonic": "Think 'philosophy' (love of wisdom) or 'sophisticated' (worldly wise)",
+      "thematic_cluster": "Cognition"
     },
     "words": [
       {
@@ -4074,7 +4135,8 @@
       "morpheme": "phil",
       "language": "Greek",
       "core_meaning": "love, friendship, affection",
-      "mnemonic": "Think 'philanthropy' (love of humanity) or 'philosophy' (love of wisdom)"
+      "mnemonic": "Think 'philanthropy' (love of humanity) or 'philosophy' (love of wisdom)",
+      "thematic_cluster": "Emotion"
     },
     "words": [
       {
@@ -4140,7 +4202,8 @@
       "morpheme": "phob",
       "language": "Greek",
       "core_meaning": "fear, dread, terror, aversion",
-      "mnemonic": "Think 'phobia' (irrational fear) or 'claustrophobia' (fear of confined spaces)"
+      "mnemonic": "Think 'phobia' (irrational fear) or 'claustrophobia' (fear of confined spaces)",
+      "thematic_cluster": "Emotion"
     },
     "words": [
       {
@@ -4206,7 +4269,8 @@
       "morpheme": "mania",
       "language": "Greek",
       "core_meaning": "madness, frenzy, obsessive passion",
-      "mnemonic": "Think 'maniac' (mad person) or 'megalomania' (obsession with power)"
+      "mnemonic": "Think 'maniac' (mad person) or 'megalomania' (obsession with power)",
+      "thematic_cluster": "Emotion"
     },
     "words": [
       {
@@ -4272,7 +4336,8 @@
       "morpheme": "psych",
       "language": "Greek",
       "core_meaning": "mind, soul, spirit, mental",
-      "mnemonic": "Think 'psychology' (study of mind) or 'psychic' (mental sensitivity)"
+      "mnemonic": "Think 'psychology' (study of mind) or 'psychic' (mental sensitivity)",
+      "thematic_cluster": "Cognition"
     },
     "words": [
       {
@@ -4338,7 +4403,8 @@
       "morpheme": "dox / dog",
       "language": "Greek",
       "core_meaning": "opinion, belief, praise, teaching",
-      "mnemonic": "Think 'orthodox' (straight belief) or 'dogmatic' (rigid in opinion)"
+      "mnemonic": "Think 'orthodox' (straight belief) or 'dogmatic' (rigid in opinion)",
+      "thematic_cluster": "Cognition"
     },
     "words": [
       {
@@ -4404,7 +4470,8 @@
       "morpheme": "crit / cris",
       "language": "Greek",
       "core_meaning": "judge, decide, separate",
-      "mnemonic": "Think 'critical' (judging carefully) or 'crisis' (decisive turning point)"
+      "mnemonic": "Think 'critical' (judging carefully) or 'crisis' (decisive turning point)",
+      "thematic_cluster": "Cognition"
     },
     "words": [
       {
@@ -4470,7 +4537,8 @@
       "morpheme": "leg / lect / log",
       "language": "Greek / Latin",
       "core_meaning": "to read, gather, choose, speak",
-      "mnemonic": "Think 'legible' (readable) or 'dialogue' (speaking across)"
+      "mnemonic": "Think 'legible' (readable) or 'dialogue' (speaking across)",
+      "thematic_cluster": "Communication"
     },
     "words": [
       {
@@ -4536,7 +4604,8 @@
       "morpheme": "nom / nym",
       "language": "Greek / Latin",
       "core_meaning": "name, word, term",
-      "mnemonic": "Think 'pseudonym' (false name) or 'synonym' (same name/meaning)"
+      "mnemonic": "Think 'pseudonym' (false name) or 'synonym' (same name/meaning)",
+      "thematic_cluster": "Communication"
     },
     "words": [
       {
@@ -4602,7 +4671,8 @@
       "morpheme": "mon / monit",
       "language": "Latin",
       "core_meaning": "to warn, advise, remind",
-      "mnemonic": "Think 'admonish' (warn gently) or 'monitor' (watch and warn)"
+      "mnemonic": "Think 'admonish' (warn gently) or 'monitor' (watch and warn)",
+      "thematic_cluster": "Cognition"
     },
     "words": [
       {
@@ -4668,7 +4738,8 @@
       "morpheme": "bene / bon",
       "language": "Latin",
       "core_meaning": "good, well, favorable",
-      "mnemonic": "Think 'benefit' (good result) or 'benevolent' (wishing good)"
+      "mnemonic": "Think 'benefit' (good result) or 'benevolent' (wishing good)",
+      "thematic_cluster": "Law & Morality"
     },
     "words": [
       {
@@ -4734,7 +4805,8 @@
       "morpheme": "mal / mis",
       "language": "Latin / Old French",
       "core_meaning": "bad, evil, wrong, ill",
-      "mnemonic": "Think 'malicious' (evil-minded) or 'mistake' (wrong step)"
+      "mnemonic": "Think 'malicious' (evil-minded) or 'mistake' (wrong step)",
+      "thematic_cluster": "Law & Morality"
     },
     "words": [
       {
@@ -4800,7 +4872,8 @@
       "morpheme": "pac / peac",
       "language": "Latin",
       "core_meaning": "peace, calm, appease",
-      "mnemonic": "Think 'pacify' (make peaceful) or 'Pacific' (peaceful ocean)"
+      "mnemonic": "Think 'pacify' (make peaceful) or 'Pacific' (peaceful ocean)",
+      "thematic_cluster": "Power & Conflict"
     },
     "words": [
       {
@@ -4866,7 +4939,8 @@
       "morpheme": "pot / poss",
       "language": "Latin",
       "core_meaning": "powerful, able, master",
-      "mnemonic": "Think 'potent' (powerful) or 'omnipotent' (all-powerful)"
+      "mnemonic": "Think 'potent' (powerful) or 'omnipotent' (all-powerful)",
+      "thematic_cluster": "Power & Conflict"
     },
     "words": [
       {
@@ -4932,7 +5006,8 @@
       "morpheme": "val / vail",
       "language": "Latin",
       "core_meaning": "strength, worth, health, to be strong",
-      "mnemonic": "Think 'valor' (strength of bravery) or 'prevail' (prove stronger)"
+      "mnemonic": "Think 'valor' (strength of bravery) or 'prevail' (prove stronger)",
+      "thematic_cluster": "Power & Conflict"
     },
     "words": [
       {
@@ -4990,7 +5065,8 @@
       "morpheme": "mut",
       "language": "Latin",
       "core_meaning": "to change, alter, exchange",
-      "mnemonic": "Think 'mutate' (change form) or 'immutable' (unchangeable)"
+      "mnemonic": "Think 'mutate' (change form) or 'immutable' (unchangeable)",
+      "thematic_cluster": "Force & Transformation"
     },
     "words": [
       {
@@ -5056,7 +5132,8 @@
       "morpheme": "morph",
       "language": "Greek",
       "core_meaning": "form, shape, structure",
-      "mnemonic": "Think 'metamorphosis' (change of form) or 'amorphous' (shapeless)"
+      "mnemonic": "Think 'metamorphosis' (change of form) or 'amorphous' (shapeless)",
+      "thematic_cluster": "Form & Nature"
     },
     "words": [
       {
@@ -5122,7 +5199,8 @@
       "morpheme": "gen",
       "language": "Latin / Greek",
       "core_meaning": "birth, origin, race, kind, generate",
-      "mnemonic": "Think 'genesis' (origin) or 'generate' (give birth to)"
+      "mnemonic": "Think 'genesis' (origin) or 'generate' (give birth to)",
+      "thematic_cluster": "Form & Nature"
     },
     "words": [
       {
@@ -5188,7 +5266,8 @@
       "morpheme": "plic / plex / ply",
       "language": "Latin",
       "core_meaning": "to fold, bend, intertwine, weave",
-      "mnemonic": "Think 'complicate' (fold together) or 'duplicity' (two-folded deceit)"
+      "mnemonic": "Think 'complicate' (fold together) or 'duplicity' (two-folded deceit)",
+      "thematic_cluster": "Force & Transformation"
     },
     "words": [
       {
@@ -5254,7 +5333,8 @@
       "morpheme": "chron",
       "language": "Greek",
       "core_meaning": "time",
-      "mnemonic": "Think 'chronological' (in order of time) or 'chronic' (lasting over time)"
+      "mnemonic": "Think 'chronological' (in order of time) or 'chronic' (lasting over time)",
+      "thematic_cluster": "Quantity & Relation"
     },
     "words": [
       {
@@ -5320,7 +5400,8 @@
       "morpheme": "temp / tempor",
       "language": "Latin",
       "core_meaning": "time, season, moderation, restraint",
-      "mnemonic": "Think 'temporary' (for a short time) or 'temperate' (moderate/restrained)"
+      "mnemonic": "Think 'temporary' (for a short time) or 'temperate' (moderate/restrained)",
+      "thematic_cluster": "Quantity & Relation"
     },
     "words": [
       {
@@ -5386,7 +5467,8 @@
       "morpheme": "magn / maj",
       "language": "Latin",
       "core_meaning": "great, large, elevated",
-      "mnemonic": "Think 'magnify' (make large) or 'majestic' (grand/great)"
+      "mnemonic": "Think 'magnify' (make large) or 'majestic' (grand/great)",
+      "thematic_cluster": "Quantity & Relation"
     },
     "words": [
       {
@@ -5452,7 +5534,8 @@
       "morpheme": "brev",
       "language": "Latin",
       "core_meaning": "short, brief",
-      "mnemonic": "Think 'brevity' (shortness) or 'abbreviate' (make shorter)"
+      "mnemonic": "Think 'brevity' (shortness) or 'abbreviate' (make shorter)",
+      "thematic_cluster": "Quantity & Relation"
     },
     "words": [
       {
@@ -5518,7 +5601,8 @@
       "morpheme": "hyper",
       "language": "Greek",
       "core_meaning": "over, above, excessive, beyond",
-      "mnemonic": "Think 'hyperactive' (excessively active) or 'hyperbole' (overstatement)"
+      "mnemonic": "Think 'hyperactive' (excessively active) or 'hyperbole' (overstatement)",
+      "thematic_cluster": "Quantity & Relation"
     },
     "words": [
       {
@@ -5576,7 +5660,8 @@
       "morpheme": "hypo",
       "language": "Greek",
       "core_meaning": "under, below, deficient",
-      "mnemonic": "Think 'hypothesis' (supposition placed under) or 'hypodermic' (under the skin)"
+      "mnemonic": "Think 'hypothesis' (supposition placed under) or 'hypodermic' (under the skin)",
+      "thematic_cluster": "Quantity & Relation"
     },
     "words": [
       {
@@ -5634,7 +5719,8 @@
       "morpheme": "auto",
       "language": "Greek",
       "core_meaning": "self, same, one's own",
-      "mnemonic": "Think 'autonomy' (self-rule) or 'automatic' (self-moving)"
+      "mnemonic": "Think 'autonomy' (self-rule) or 'automatic' (self-moving)",
+      "thematic_cluster": "Quantity & Relation"
     },
     "words": [
       {
@@ -5700,7 +5786,8 @@
       "morpheme": "anti / ant",
       "language": "Greek",
       "core_meaning": "against, opposite, counteracting",
-      "mnemonic": "Think 'antidote' (against poison) or 'antithesis' (opposite thesis)"
+      "mnemonic": "Think 'antidote' (against poison) or 'antithesis' (opposite thesis)",
+      "thematic_cluster": "Quantity & Relation"
     },
     "words": [
       {
@@ -5750,7 +5837,8 @@
       "morpheme": "syn / sym",
       "language": "Greek",
       "core_meaning": "together, with, united",
-      "mnemonic": "Think 'synthesis' (putting together) or 'symphony' (sounding together)"
+      "mnemonic": "Think 'synthesis' (putting together) or 'symphony' (sounding together)",
+      "thematic_cluster": "Quantity & Relation"
     },
     "words": [
       {
@@ -5808,7 +5896,8 @@
       "morpheme": "anthrop",
       "language": "Greek",
       "core_meaning": "human, mankind",
-      "mnemonic": "Think 'anthropology' (study of human cultures) or 'philanthropy' (love of humans)"
+      "mnemonic": "Think 'anthropology' (study of human cultures) or 'philanthropy' (love of humans)",
+      "thematic_cluster": "Form & Nature"
     },
     "words": [
       {
@@ -5850,7 +5939,8 @@
       "morpheme": "jur / jud / just",
       "language": "Latin",
       "core_meaning": "law, swear, right, judge",
-      "mnemonic": "Think 'jury' (group sworn to judge) or 'judicious' (wise in judgment)"
+      "mnemonic": "Think 'jury' (group sworn to judge) or 'judicious' (wise in judgment)",
+      "thematic_cluster": "Law & Morality"
     },
     "words": [
       {
@@ -5916,7 +6006,8 @@
       "morpheme": "ver / veri",
       "language": "Latin",
       "core_meaning": "true, truth",
-      "mnemonic": "Think 'verify' (prove true) or 'veracity' (truthfulness)"
+      "mnemonic": "Think 'verify' (prove true) or 'veracity' (truthfulness)",
+      "thematic_cluster": "Law & Morality"
     },
     "words": [
       {
@@ -5974,7 +6065,8 @@
       "morpheme": "rect",
       "language": "Latin",
       "core_meaning": "straight, right, upright, rule",
-      "mnemonic": "Think 'rectify' (make right) or 'rectitude' (upright morality)"
+      "mnemonic": "Think 'rectify' (make right) or 'rectitude' (upright morality)",
+      "thematic_cluster": "Law & Morality"
     },
     "words": [
       {
@@ -6040,7 +6132,8 @@
       "morpheme": "aequ / equi",
       "language": "Latin",
       "core_meaning": "equal, even, fair, level",
-      "mnemonic": "Think 'equilibrium' (equal balance) or 'equitable' (fair and equal)"
+      "mnemonic": "Think 'equilibrium' (equal balance) or 'equitable' (fair and equal)",
+      "thematic_cluster": "Quantity & Relation"
     },
     "words": [
       {
@@ -6090,7 +6183,8 @@
       "morpheme": "grav / griev",
       "language": "Latin",
       "core_meaning": "heavy, serious, weighty, burdened",
-      "mnemonic": "Think 'gravity' (heaviness/weight) or 'aggravate' (make heavier/worse)"
+      "mnemonic": "Think 'gravity' (heaviness/weight) or 'aggravate' (make heavier/worse)",
+      "thematic_cluster": "Quantity & Relation"
     },
     "words": [
       {
@@ -6156,7 +6250,8 @@
       "morpheme": "lev",
       "language": "Latin",
       "core_meaning": "light, to lift, raise, rise",
-      "mnemonic": "Think 'levitate' (rise lightly) or 'alleviate' (lighten pain)"
+      "mnemonic": "Think 'levitate' (rise lightly) or 'alleviate' (lighten pain)",
+      "thematic_cluster": "Force & Transformation"
     },
     "words": [
       {
@@ -6222,7 +6317,8 @@
       "morpheme": "plen / plet",
       "language": "Latin",
       "core_meaning": "full, abundance, to fill",
-      "mnemonic": "Think 'plenty' (abundance) or 'replenish' (fill again)"
+      "mnemonic": "Think 'plenty' (abundance) or 'replenish' (fill again)",
+      "thematic_cluster": "Quantity & Relation"
     },
     "words": [
       {
@@ -6288,7 +6384,8 @@
       "morpheme": "vac / van / void",
       "language": "Latin",
       "core_meaning": "empty, hollow, unoccupied",
-      "mnemonic": "Think 'vacant' (empty) or 'devoid' (completely empty)"
+      "mnemonic": "Think 'vacant' (empty) or 'devoid' (completely empty)",
+      "thematic_cluster": "Quantity & Relation"
     },
     "words": [
       {
@@ -6354,7 +6451,8 @@
       "morpheme": "nov / neo",
       "language": "Latin / Greek",
       "core_meaning": "new, fresh, recent",
-      "mnemonic": "Think 'novel' (new/fresh) or 'neophyte' (new beginner)"
+      "mnemonic": "Think 'novel' (new/fresh) or 'neophyte' (new beginner)",
+      "thematic_cluster": "Quantity & Relation"
     },
     "words": [
       {
@@ -6420,7 +6518,8 @@
       "morpheme": "prim / proto",
       "language": "Latin / Greek",
       "core_meaning": "first, earliest, primary, original",
-      "mnemonic": "Think 'primary' (first) or 'prototype' (first model)"
+      "mnemonic": "Think 'primary' (first) or 'prototype' (first model)",
+      "thematic_cluster": "Quantity & Relation"
     },
     "words": [
       {
@@ -6478,7 +6577,8 @@
       "morpheme": "omni",
       "language": "Latin",
       "core_meaning": "all, every, everywhere",
-      "mnemonic": "Think 'omniscient' (all-knowing) or 'omnipresent' (everywhere present)"
+      "mnemonic": "Think 'omniscient' (all-knowing) or 'omnipresent' (everywhere present)",
+      "thematic_cluster": "Quantity & Relation"
     },
     "words": [
       {
@@ -6528,7 +6628,8 @@
       "morpheme": "pan",
       "language": "Greek",
       "core_meaning": "all, whole, entire, universal",
-      "mnemonic": "Think 'panacea' (cure for all) or 'panorama' (view of all)"
+      "mnemonic": "Think 'panacea' (cure for all) or 'panorama' (view of all)",
+      "thematic_cluster": "Quantity & Relation"
     },
     "words": [
       {
@@ -6594,7 +6695,8 @@
       "morpheme": "arch / archi",
       "language": "Greek",
       "core_meaning": "chief, ruler, origin, ancient",
-      "mnemonic": "Think 'monarch' (sole ruler) or 'archaic' (ancient origin)"
+      "mnemonic": "Think 'monarch' (sole ruler) or 'archaic' (ancient origin)",
+      "thematic_cluster": "Power & Conflict"
     },
     "words": [
       {
@@ -6660,7 +6762,8 @@
       "morpheme": "crat / cracy",
       "language": "Greek",
       "core_meaning": "rule, power, governance, strength",
-      "mnemonic": "Think 'democracy' (rule of the people) or 'autocrat' (self-ruler)"
+      "mnemonic": "Think 'democracy' (rule of the people) or 'autocrat' (self-ruler)",
+      "thematic_cluster": "Power & Conflict"
     },
     "words": [
       {
@@ -6718,7 +6821,8 @@
       "morpheme": "dem / demo",
       "language": "Greek",
       "core_meaning": "people, populace, common folk",
-      "mnemonic": "Think 'democracy' (people power) or 'demographic' (study of human populations)"
+      "mnemonic": "Think 'democracy' (people power) or 'demographic' (study of human populations)",
+      "thematic_cluster": "Power & Conflict"
     },
     "words": [
       {
@@ -6776,7 +6880,8 @@
       "morpheme": "dur",
       "language": "Latin",
       "core_meaning": "hard, strong, lasting, to endure",
-      "mnemonic": "Think 'durable' (lasting/hard) or 'endure' (bear through hardships)"
+      "mnemonic": "Think 'durable' (lasting/hard) or 'endure' (bear through hardships)",
+      "thematic_cluster": "Form & Nature"
     },
     "words": [
       {
@@ -6842,7 +6947,8 @@
       "morpheme": "cap / cept / cip",
       "language": "Latin",
       "core_meaning": "to take, seize, hold, catch",
-      "mnemonic": "Think 'capture' (seize by force) or 'intercept' (catch in transit)"
+      "mnemonic": "Think 'capture' (seize by force) or 'intercept' (catch in transit)",
+      "thematic_cluster": "Position & Holding"
     },
     "words": [
       {
@@ -6943,7 +7049,8 @@
       "morpheme": "scrib / script",
       "language": "Latin",
       "core_meaning": "to write, record, draw",
-      "mnemonic": "Think 'inscribe' (carve or write into) or 'manuscript' (written document)"
+      "mnemonic": "Think 'inscribe' (carve or write into) or 'manuscript' (written document)",
+      "thematic_cluster": "Communication"
     },
     "words": [
       {
@@ -7044,7 +7151,8 @@
       "morpheme": "vinc / vict",
       "language": "Latin",
       "core_meaning": "to conquer, overcome, win",
-      "mnemonic": "Think 'victory' (triumph) or 'invincible' (incapable of being defeated)"
+      "mnemonic": "Think 'victory' (triumph) or 'invincible' (incapable of being defeated)",
+      "thematic_cluster": "Power & Conflict"
     },
     "words": [
       {
@@ -7145,7 +7253,8 @@
       "morpheme": "duc / duct",
       "language": "Latin",
       "core_meaning": "to lead, guide, bring",
-      "mnemonic": "Think 'conduct' (lead along) or 'induce' (lead into a state)"
+      "mnemonic": "Think 'conduct' (lead along) or 'induce' (lead into a state)",
+      "thematic_cluster": "Motion & Travel"
     },
     "words": [
       {
@@ -7246,7 +7355,8 @@
       "morpheme": "pon / pos / posit",
       "language": "Latin",
       "core_meaning": "to place, put, set",
-      "mnemonic": "Think 'deposit' (put down) or 'posture' (manner of placing oneself)"
+      "mnemonic": "Think 'deposit' (put down) or 'posture' (manner of placing oneself)",
+      "thematic_cluster": "Position & Holding"
     },
     "words": [
       {
@@ -7347,7 +7457,8 @@
       "morpheme": "ten / tin / tain",
       "language": "Latin",
       "core_meaning": "to hold, keep, maintain",
-      "mnemonic": "Think 'tenant' (one who holds property) or 'tenacious' (holding firmly)"
+      "mnemonic": "Think 'tenant' (one who holds property) or 'tenacious' (holding firmly)",
+      "thematic_cluster": "Position & Holding"
     },
     "words": [
       {
@@ -7448,7 +7559,8 @@
       "morpheme": "doc / doct",
       "language": "Latin",
       "core_meaning": "to teach, instruct, prove",
-      "mnemonic": "Think 'doctor' (originally one qualified to teach) or 'indoctrinate' (teach beliefs)"
+      "mnemonic": "Think 'doctor' (originally one qualified to teach) or 'indoctrinate' (teach beliefs)",
+      "thematic_cluster": "Cognition"
     },
     "words": [
       {
@@ -7549,7 +7661,8 @@
       "morpheme": "sed / sid / sess",
       "language": "Latin",
       "core_meaning": "to sit, settle, reside",
-      "mnemonic": "Think 'sedentary' (sitting still) or 'president' (one who sits before and leads)"
+      "mnemonic": "Think 'sedentary' (sitting still) or 'president' (one who sits before and leads)",
+      "thematic_cluster": "Position & Holding"
     },
     "words": [
       {
@@ -7650,7 +7763,8 @@
       "morpheme": "greg",
       "language": "Latin",
       "core_meaning": "flock, herd, gather",
-      "mnemonic": "Think 'congregate' (gather into a flock) or 'gregarious' (flocking in social groups)"
+      "mnemonic": "Think 'congregate' (gather into a flock) or 'gregarious' (flocking in social groups)",
+      "thematic_cluster": "Quantity & Relation"
     },
     "words": [
       {
@@ -7751,7 +7865,8 @@
       "morpheme": "theo / the",
       "language": "Greek",
       "core_meaning": "god, deity, divine",
-      "mnemonic": "Think 'theology' (study of religion/god) or 'monotheism' (one god)"
+      "mnemonic": "Think 'theology' (study of religion/god) or 'monotheism' (one god)",
+      "thematic_cluster": "Law & Morality"
     },
     "words": [
       {
@@ -7865,7 +7980,8 @@
       "morpheme": "clud / clus / claus",
       "language": "Latin",
       "core_meaning": "to shut, close",
-      "mnemonic": "Think 'exclude' (shut out) or 'conclude' (close together)"
+      "mnemonic": "Think 'exclude' (shut out) or 'conclude' (close together)",
+      "thematic_cluster": "Position & Holding"
     },
     "words": [
       {
@@ -7966,7 +8082,8 @@
       "morpheme": "fac / fec / fic / fect",
       "language": "Latin",
       "core_meaning": "to make, do, produce",
-      "mnemonic": "Think 'factory' (place of making) or 'efficient' (doing thoroughly)"
+      "mnemonic": "Think 'factory' (place of making) or 'efficient' (doing thoroughly)",
+      "thematic_cluster": "Force & Transformation"
     },
     "words": [
       {
@@ -8067,7 +8184,8 @@
       "morpheme": "mor / mort",
       "language": "Latin",
       "core_meaning": "death, dead, dying",
-      "mnemonic": "Think 'mortal' (subject to death) or 'mortician' (undertaker)"
+      "mnemonic": "Think 'mortal' (subject to death) or 'mortician' (undertaker)",
+      "thematic_cluster": "Form & Nature"
     },
     "words": [
       {
@@ -8168,7 +8286,8 @@
       "morpheme": "plac / placat",
       "language": "Latin",
       "core_meaning": "to please, calm, appease",
-      "mnemonic": "Think 'placate' (calm down) or 'placid' (peaceful and calm)"
+      "mnemonic": "Think 'placate' (calm down) or 'placid' (peaceful and calm)",
+      "thematic_cluster": "Emotion"
     },
     "words": [
       {
@@ -8269,7 +8388,8 @@
       "morpheme": "am / amat / amor",
       "language": "Latin",
       "core_meaning": "love, affection, friendship",
-      "mnemonic": "Think 'amorous' (loving) or 'amiable' (friendly and warm)"
+      "mnemonic": "Think 'amorous' (loving) or 'amiable' (friendly and warm)",
+      "thematic_cluster": "Emotion"
     },
     "words": [
       {
@@ -8370,7 +8490,8 @@
       "morpheme": "grat / grac",
       "language": "Latin",
       "core_meaning": "thankful, pleasing, favor",
-      "mnemonic": "Think 'gratitude' (thankfulness) or 'gratify' (give pleasure)"
+      "mnemonic": "Think 'gratitude' (thankfulness) or 'gratify' (give pleasure)",
+      "thematic_cluster": "Emotion"
     },
     "words": [
       {
@@ -8471,7 +8592,8 @@
       "morpheme": "corp / corpor",
       "language": "Latin",
       "core_meaning": "body, flesh, physical substance",
-      "mnemonic": "Think 'corpse' (dead body) or 'corporation' (a legally formed body)"
+      "mnemonic": "Think 'corpse' (dead body) or 'corporation' (a legally formed body)",
+      "thematic_cluster": "Form & Nature"
     },
     "words": [
       {
@@ -8572,7 +8694,8 @@
       "morpheme": "vor / vour",
       "language": "Latin",
       "core_meaning": "to eat, swallow, devour",
-      "mnemonic": "Think 'voracious' (eating greedily) or 'devour' (swallow down greedily)"
+      "mnemonic": "Think 'voracious' (eating greedily) or 'devour' (swallow down greedily)",
+      "thematic_cluster": "Form & Nature"
     },
     "words": [
       {
@@ -8673,7 +8796,8 @@
       "morpheme": "ambul",
       "language": "Latin",
       "core_meaning": "to walk, move about, wander",
-      "mnemonic": "Think 'ambulatory' (able to walk) or 'preamble' (walking before to introduce)"
+      "mnemonic": "Think 'ambulatory' (able to walk) or 'preamble' (walking before to introduce)",
+      "thematic_cluster": "Motion & Travel"
     },
     "words": [
       {
@@ -8774,7 +8898,8 @@
       "morpheme": "crypt / cryph",
       "language": "Greek",
       "core_meaning": "hidden, secret, concealed",
-      "mnemonic": "Think 'cryptic' (having hidden meaning) or 'encrypt' (hide with code)"
+      "mnemonic": "Think 'cryptic' (having hidden meaning) or 'encrypt' (hide with code)",
+      "thematic_cluster": "Cognition"
     },
     "words": [
       {
@@ -8875,7 +9000,8 @@
       "morpheme": "acri / acr / acer",
       "language": "Latin",
       "core_meaning": "sharp, bitter, sour, stinging",
-      "mnemonic": "Think 'acrid' (stinging bitter smell) or 'acerbic' (sharp sour tone)"
+      "mnemonic": "Think 'acrid' (stinging bitter smell) or 'acerbic' (sharp sour tone)",
+      "thematic_cluster": "Emotion"
     },
     "words": [
       {
@@ -8976,7 +9102,8 @@
       "morpheme": "fall / fals",
       "language": "Latin",
       "core_meaning": "to deceive, trick, err",
-      "mnemonic": "Think 'fallacy' (deceptive mistaken belief) or 'falsify' (alter deceptively)"
+      "mnemonic": "Think 'fallacy' (deceptive mistaken belief) or 'falsify' (alter deceptively)",
+      "thematic_cluster": "Cognition"
     },
     "words": [
       {
@@ -9077,7 +9204,8 @@
       "morpheme": "quer / quest / quir / quis",
       "language": "Latin",
       "core_meaning": "to seek, ask, inquire",
-      "mnemonic": "Think 'inquire' (ask into) or 'quest' (search or journey of seeking)"
+      "mnemonic": "Think 'inquire' (ask into) or 'quest' (search or journey of seeking)",
+      "thematic_cluster": "Cognition"
     },
     "words": [
       {
@@ -9178,7 +9306,8 @@
       "morpheme": "pung / punct",
       "language": "Latin",
       "core_meaning": "to prick, pierce, point, sting",
-      "mnemonic": "Think 'puncture' (pierce a hole) or 'punctual' (right on the sharp point of time)"
+      "mnemonic": "Think 'puncture' (pierce a hole) or 'punctual' (right on the sharp point of time)",
+      "thematic_cluster": "Force & Transformation"
     },
     "words": [
       {
@@ -9279,7 +9408,8 @@
       "morpheme": "tac / tic",
       "language": "Latin",
       "core_meaning": "silent, quiet",
-      "mnemonic": "Think 'tacit' (unspoken agreement) or 'taciturn' (habitually silent)"
+      "mnemonic": "Think 'tacit' (unspoken agreement) or 'taciturn' (habitually silent)",
+      "thematic_cluster": "Communication"
     },
     "words": [
       {
@@ -9380,7 +9510,8 @@
       "morpheme": "prob / prov",
       "language": "Latin",
       "core_meaning": "to prove, test, upright, good",
-      "mnemonic": "Think 'probity' (proven integrity) or 'approbation' (proven praise)"
+      "mnemonic": "Think 'probity' (proven integrity) or 'approbation' (proven praise)",
+      "thematic_cluster": "Law & Morality"
     },
     "words": [
       {
@@ -9481,7 +9612,8 @@
       "morpheme": "turb",
       "language": "Latin",
       "core_meaning": "confusion, disturbance, turmoil, whirl",
-      "mnemonic": "Think 'turbulent' (stormy turmoil) or 'perturb' (disturb deeply)"
+      "mnemonic": "Think 'turbulent' (stormy turmoil) or 'perturb' (disturb deeply)",
+      "thematic_cluster": "Force & Transformation"
     },
     "words": [
       {
@@ -9582,7 +9714,8 @@
       "morpheme": "ann / enn",
       "language": "Latin",
       "core_meaning": "year",
-      "mnemonic": "Think 'annual' (occurring yearly) or 'perennial' (lasting through the years)"
+      "mnemonic": "Think 'annual' (occurring yearly) or 'perennial' (lasting through the years)",
+      "thematic_cluster": "Quantity & Relation"
     },
     "words": [
       {
@@ -9683,7 +9816,8 @@
       "morpheme": "poly",
       "language": "Greek",
       "core_meaning": "many, multiple, much",
-      "mnemonic": "Think 'polyglot' (speaking many languages) or 'polygon' (figure with many angles)"
+      "mnemonic": "Think 'polyglot' (speaking many languages) or 'polygon' (figure with many angles)",
+      "thematic_cluster": "Quantity & Relation"
     },
     "words": [
       {
@@ -9784,7 +9918,8 @@
       "morpheme": "bio",
       "language": "Greek",
       "core_meaning": "life, living organisms",
-      "mnemonic": "Think 'biology' (study of living things) or 'biodiversity' (variety of life)"
+      "mnemonic": "Think 'biology' (study of living things) or 'biodiversity' (variety of life)",
+      "thematic_cluster": "Form & Nature"
     },
     "words": [
       {
@@ -9885,7 +10020,8 @@
       "morpheme": "culp",
       "language": "Latin",
       "core_meaning": "blame, fault, guilt",
-      "mnemonic": "Think 'culprit' (one who committed the fault) or 'exculpate' (free from blame)"
+      "mnemonic": "Think 'culprit' (one who committed the fault) or 'exculpate' (free from blame)",
+      "thematic_cluster": "Law & Morality"
     },
     "words": [
       {
@@ -9986,7 +10122,8 @@
       "morpheme": "noc / noxi / noce",
       "language": "Latin",
       "core_meaning": "harm, hurt, injure",
-      "mnemonic": "Think 'innocuous' (doing no harm) or 'noxious' (harmful/poisonous)"
+      "mnemonic": "Think 'innocuous' (doing no harm) or 'noxious' (harmful/poisonous)",
+      "thematic_cluster": "Law & Morality"
     },
     "words": [
       {
@@ -10087,7 +10224,8 @@
       "morpheme": "oner / onus",
       "language": "Latin",
       "core_meaning": "burden, load, duty",
-      "mnemonic": "Think 'onerous' (burdensome) or 'onus' (burden of responsibility)"
+      "mnemonic": "Think 'onerous' (burdensome) or 'onus' (burden of responsibility)",
+      "thematic_cluster": "Quantity & Relation"
     },
     "words": [
       {
@@ -10188,7 +10326,8 @@
       "morpheme": "flect / flex",
       "language": "Latin",
       "core_meaning": "to bend, curve",
-      "mnemonic": "Think 'deflect' (bend away from) or 'flexible' (able to bend easily)"
+      "mnemonic": "Think 'deflect' (bend away from) or 'flexible' (able to bend easily)",
+      "thematic_cluster": "Force & Transformation"
     },
     "words": [
       {
@@ -10289,7 +10428,8 @@
       "morpheme": "son",
       "language": "Latin",
       "core_meaning": "sound",
-      "mnemonic": "Think 'sonorous' (deep, rich sound) or 'dissonant' (harsh conflicting sound)"
+      "mnemonic": "Think 'sonorous' (deep, rich sound) or 'dissonant' (harsh conflicting sound)",
+      "thematic_cluster": "Senses & Perception"
     },
     "words": [
       {
@@ -10390,7 +10530,8 @@
       "morpheme": "pecc",
       "language": "Latin",
       "core_meaning": "sin, fault, stumble, err",
-      "mnemonic": "Think 'impeccable' (flawless, without fault) or 'peccadillo' (minor fault/peccancy)"
+      "mnemonic": "Think 'impeccable' (flawless, without fault) or 'peccadillo' (minor fault/peccancy)",
+      "thematic_cluster": "Law & Morality"
     },
     "words": [
       {
@@ -10491,7 +10632,8 @@
       "morpheme": "pass / pati",
       "language": "Latin",
       "core_meaning": "to suffer, endure, feel, allow",
-      "mnemonic": "Think 'compassion' (suffering/feeling with) or 'impassive' (enduring without emotion)"
+      "mnemonic": "Think 'compassion' (suffering/feeling with) or 'impassive' (enduring without emotion)",
+      "thematic_cluster": "Emotion"
     },
     "words": [
       {
@@ -10592,7 +10734,8 @@
       "morpheme": "ferv",
       "language": "Latin",
       "core_meaning": "to boil, glow, burn with zeal",
-      "mnemonic": "Think 'fervent' (burning with passion) or 'effervescent' (bubbling over with vitality)"
+      "mnemonic": "Think 'fervent' (burning with passion) or 'effervescent' (bubbling over with vitality)",
+      "thematic_cluster": "Emotion"
     },
     "words": [
       {
@@ -10693,7 +10836,8 @@
       "morpheme": "di / dia",
       "language": "Greek",
       "core_meaning": "through, across, between",
-      "mnemonic": "Think 'diameter' (measuring across) or 'diaphanous' (translucent, light shining through)"
+      "mnemonic": "Think 'diameter' (measuring across) or 'diaphanous' (translucent, light shining through)",
+      "thematic_cluster": "Quantity & Relation"
     },
     "words": [
       {
@@ -10794,7 +10938,8 @@
       "morpheme": "torp",
       "language": "Latin",
       "core_meaning": "numb, sluggish, inactive, dull",
-      "mnemonic": "Think 'torpid' (sluggish/inactive) or 'torpor' (state of dormant lethargy)"
+      "mnemonic": "Think 'torpid' (sluggish/inactive) or 'torpor' (state of dormant lethargy)",
+      "thematic_cluster": "Emotion"
     },
     "words": [
       {
@@ -10895,7 +11040,8 @@
       "morpheme": "sanct / sacr",
       "language": "Latin",
       "core_meaning": "sacred, holy, solemnly decree",
-      "mnemonic": "Think 'sanctuary' (sacred refuge) or 'sacrosanct' (too holy to be violated)"
+      "mnemonic": "Think 'sanctuary' (sacred refuge) or 'sacrosanct' (too holy to be violated)",
+      "thematic_cluster": "Law & Morality"
     },
     "words": [
       {
@@ -10996,7 +11142,8 @@
       "morpheme": "mit / miti",
       "language": "Latin",
       "core_meaning": "mild, soft, gentle, calm",
-      "mnemonic": "Think 'mitigate' (make milder or less severe) or 'unmitigated' (pure/not softened)"
+      "mnemonic": "Think 'mitigate' (make milder or less severe) or 'unmitigated' (pure/not softened)",
+      "thematic_cluster": "Form & Nature"
     },
     "words": [
       {
@@ -11097,7 +11244,8 @@
       "morpheme": "trep",
       "language": "Latin",
       "core_meaning": "tremble, shake, fear, alarm",
-      "mnemonic": "Think 'trepidation' (trembling fear) or 'intrepid' (without trembling/fearless)"
+      "mnemonic": "Think 'trepidation' (trembling fear) or 'intrepid' (without trembling/fearless)",
+      "thematic_cluster": "Emotion"
     },
     "words": [
       {
@@ -11198,7 +11346,8 @@
       "morpheme": "mend",
       "language": "Latin",
       "core_meaning": "fault, flaw, defect, lie",
-      "mnemonic": "Think 'mendacious' (habitually dishonest) or 'emend' (correct defects in a text)"
+      "mnemonic": "Think 'mendacious' (habitually dishonest) or 'emend' (correct defects in a text)",
+      "thematic_cluster": "Law & Morality"
     },
     "words": [
       {
@@ -11299,7 +11448,8 @@
       "morpheme": "pet / petit",
       "language": "Latin",
       "core_meaning": "to seek, rush at, strive for, aim",
-      "mnemonic": "Think 'impetuous' (rushing impulsively) or 'petulant' (peevishly aggressive)"
+      "mnemonic": "Think 'impetuous' (rushing impulsively) or 'petulant' (peevishly aggressive)",
+      "thematic_cluster": "Motion & Travel"
     },
     "words": [
       {
@@ -11400,7 +11550,8 @@
       "morpheme": "verb",
       "language": "Latin",
       "core_meaning": "word",
-      "mnemonic": "Think 'verbose' (too many words) or 'verbatim' (word for word)"
+      "mnemonic": "Think 'verbose' (too many words) or 'verbatim' (word for word)",
+      "thematic_cluster": "Communication"
     },
     "words": [
       {
@@ -11501,7 +11652,8 @@
       "morpheme": "lit / litig",
       "language": "Latin",
       "core_meaning": "dispute, lawsuit, contend, quarrel",
-      "mnemonic": "Think 'litigation' (legal court lawsuit) or 'litigious' (prone to arguing/suing)"
+      "mnemonic": "Think 'litigation' (legal court lawsuit) or 'litigious' (prone to arguing/suing)",
+      "thematic_cluster": "Law & Morality"
     },
     "words": [
       {
@@ -11602,7 +11754,8 @@
       "morpheme": "man / manu",
       "language": "Latin",
       "core_meaning": "hand",
-      "mnemonic": "Think 'manipulate' (handle skillfully) or 'manumit' (release from the hand/free)"
+      "mnemonic": "Think 'manipulate' (handle skillfully) or 'manumit' (release from the hand/free)",
+      "thematic_cluster": "Position & Holding"
     },
     "words": [
       {
@@ -11703,7 +11856,8 @@
       "morpheme": "pyr / pyro",
       "language": "Greek",
       "core_meaning": "fire, heat",
-      "mnemonic": "Think 'pyrotechnics' (fireworks display) or 'pyre' (ceremonial fire)"
+      "mnemonic": "Think 'pyrotechnics' (fireworks display) or 'pyre' (ceremonial fire)",
+      "thematic_cluster": "Form & Nature"
     },
     "words": [
       {
@@ -11804,7 +11958,8 @@
       "morpheme": "dorm",
       "language": "Latin",
       "core_meaning": "sleep",
-      "mnemonic": "Think 'dormant' (sleeping/inactive) or 'dormitory' (sleeping hall)"
+      "mnemonic": "Think 'dormant' (sleeping/inactive) or 'dormitory' (sleeping hall)",
+      "thematic_cluster": "Form & Nature"
     },
     "words": [
       {
@@ -11905,7 +12060,8 @@
       "morpheme": "palp",
       "language": "Latin",
       "core_meaning": "to touch, stroke, feel gently",
-      "mnemonic": "Think 'palpable' (able to be touched/felt) or 'palpitate' (heart fluttering)"
+      "mnemonic": "Think 'palpable' (able to be touched/felt) or 'palpitate' (heart fluttering)",
+      "thematic_cluster": "Senses & Perception"
     },
     "words": [
       {
@@ -12006,7 +12162,8 @@
       "morpheme": "quie / quit",
       "language": "Latin",
       "core_meaning": "quiet, rest, calm",
-      "mnemonic": "Think 'quiescent' (at quiet rest) or 'acquiesce' (quietly yield to)"
+      "mnemonic": "Think 'quiescent' (at quiet rest) or 'acquiesce' (quietly yield to)",
+      "thematic_cluster": "Emotion"
     },
     "words": [
       {
@@ -12107,7 +12264,8 @@
       "morpheme": "clar",
       "language": "Latin",
       "core_meaning": "clear, bright, loud",
-      "mnemonic": "Think 'clarity' (clearness of thought) or 'clarion' (clear, ringing trumpet call)"
+      "mnemonic": "Think 'clarity' (clearness of thought) or 'clarion' (clear, ringing trumpet call)",
+      "thematic_cluster": "Senses & Perception"
     },
     "words": [
       {
@@ -12208,7 +12366,8 @@
       "morpheme": "sinu",
       "language": "Latin",
       "core_meaning": "curve, winding, fold, bend",
-      "mnemonic": "Think 'sinuous' (full of winding curves) or 'insinuate' (wind deviously into)"
+      "mnemonic": "Think 'sinuous' (full of winding curves) or 'insinuate' (wind deviously into)",
+      "thematic_cluster": "Force & Transformation"
     },
     "words": [
       {
@@ -12309,7 +12468,8 @@
       "morpheme": "sal / sil / sult",
       "language": "Latin",
       "core_meaning": "to leap, jump, spring forward",
-      "mnemonic": "Think 'salient' (leaping out/prominent) or 'resilient' (leaping back from adversity)"
+      "mnemonic": "Think 'salient' (leaping out/prominent) or 'resilient' (leaping back from adversity)",
+      "thematic_cluster": "Motion & Travel"
     },
     "words": [
       {
@@ -12410,7 +12570,8 @@
       "morpheme": "und / unda",
       "language": "Latin",
       "core_meaning": "wave, flow, overflow",
-      "mnemonic": "Think 'inundate' (overflow with waves/deluge) or 'undulate' (move with wave-like curves)"
+      "mnemonic": "Think 'inundate' (overflow with waves/deluge) or 'undulate' (move with wave-like curves)",
+      "thematic_cluster": "Motion & Travel"
     },
     "words": [
       {
@@ -12511,7 +12672,8 @@
       "morpheme": "fulg / flagr",
       "language": "Latin",
       "core_meaning": "shine, flash, blaze, burn",
-      "mnemonic": "Think 'refulgent' (shining radiantly) or 'conflagration' (destructive blaze)"
+      "mnemonic": "Think 'refulgent' (shining radiantly) or 'conflagration' (destructive blaze)",
+      "thematic_cluster": "Senses & Perception"
     },
     "words": [
       {
@@ -12612,7 +12774,8 @@
       "morpheme": "moll",
       "language": "Latin",
       "core_meaning": "soft, supple, to soften",
-      "mnemonic": "Think 'mollify' (soften anger/soothe) or 'emollient' (skin-softening cream)"
+      "mnemonic": "Think 'mollify' (soften anger/soothe) or 'emollient' (skin-softening cream)",
+      "thematic_cluster": "Form & Nature"
     },
     "words": [
       {
@@ -12713,7 +12876,8 @@
       "morpheme": "av / avar",
       "language": "Latin",
       "core_meaning": "eager, craving, greedy",
-      "mnemonic": "Think 'avarice' (greed for wealth) or 'avid' (eagerly craving/keen)"
+      "mnemonic": "Think 'avarice' (greed for wealth) or 'avid' (eagerly craving/keen)",
+      "thematic_cluster": "Emotion"
     },
     "words": [
       {
@@ -12814,7 +12978,8 @@
       "morpheme": "vet / veter",
       "language": "Latin",
       "core_meaning": "old, seasoned, long-standing",
-      "mnemonic": "Think 'inveterate' (deep-rooted by long habit) or 'veteran' (experienced through years)"
+      "mnemonic": "Think 'inveterate' (deep-rooted by long habit) or 'veteran' (experienced through years)",
+      "thematic_cluster": "Quantity & Relation"
     },
     "words": [
       {
@@ -12915,7 +13080,8 @@
       "morpheme": "ard / ars",
       "language": "Latin",
       "core_meaning": "to burn, glow, passion",
-      "mnemonic": "Think 'ardent' (burning with passion) or 'arson' (deliberate burning)"
+      "mnemonic": "Think 'ardent' (burning with passion) or 'arson' (deliberate burning)",
+      "thematic_cluster": "Emotion"
     },
     "words": [
       {
@@ -13016,7 +13182,8 @@
       "morpheme": "queri / querul",
       "language": "Latin",
       "core_meaning": "to complain, lament, dispute",
-      "mnemonic": "Think 'querulous' (habitually whining/complaining) or 'quarrel' (angry dispute)"
+      "mnemonic": "Think 'querulous' (habitually whining/complaining) or 'quarrel' (angry dispute)",
+      "thematic_cluster": "Communication"
     },
     "words": [
       {
@@ -13117,7 +13284,8 @@
       "morpheme": "hetero",
       "language": "Greek",
       "core_meaning": "other, different, diverse",
-      "mnemonic": "Think 'heterogeneous' (diverse components) or 'heteroclite' (departing from standard rules)"
+      "mnemonic": "Think 'heterogeneous' (diverse components) or 'heteroclite' (departing from standard rules)",
+      "thematic_cluster": "Quantity & Relation"
     },
     "words": [
       {
@@ -13218,7 +13386,8 @@
       "morpheme": "homo / homeo",
       "language": "Greek",
       "core_meaning": "same, similar, uniform",
-      "mnemonic": "Think 'homologous' (similar in structure/origin) or 'homeostasis' (maintaining internal equilibrium)"
+      "mnemonic": "Think 'homologous' (similar in structure/origin) or 'homeostasis' (maintaining internal equilibrium)",
+      "thematic_cluster": "Quantity & Relation"
     },
     "words": [
       {
@@ -13319,7 +13488,8 @@
       "morpheme": "cast / chast",
       "language": "Latin",
       "core_meaning": "pure, cut off from fault, correct, punish",
-      "mnemonic": "Think 'castigate' (punish severely to correct) or 'chaste' (pure/unstained)"
+      "mnemonic": "Think 'castigate' (punish severely to correct) or 'chaste' (pure/unstained)",
+      "thematic_cluster": "Law & Morality"
     },
     "words": [
       {
@@ -13420,7 +13590,8 @@
       "morpheme": "pau / pauc",
       "language": "Latin",
       "core_meaning": "few, little, small quantity",
-      "mnemonic": "Think 'paucity' (scarcity, small number) or 'pauper' (person with few resources)"
+      "mnemonic": "Think 'paucity' (scarcity, small number) or 'pauper' (person with few resources)",
+      "thematic_cluster": "Quantity & Relation"
     },
     "words": [
       {
@@ -13521,7 +13692,8 @@
       "morpheme": "scintill",
       "language": "Latin",
       "core_meaning": "spark, glimmer, flash",
-      "mnemonic": "Think 'scintillating' (sparkling brilliantly) or 'scintilla' (a tiny spark/trace)"
+      "mnemonic": "Think 'scintillating' (sparkling brilliantly) or 'scintilla' (a tiny spark/trace)",
+      "thematic_cluster": "Senses & Perception"
     },
     "words": [
       {
@@ -13622,7 +13794,8 @@
       "morpheme": "peri",
       "language": "Greek",
       "core_meaning": "around, about, enclosing, near",
-      "mnemonic": "Think 'periphery' (boundary around) or 'peripatetic' (walking around)"
+      "mnemonic": "Think 'periphery' (boundary around) or 'peripatetic' (walking around)",
+      "thematic_cluster": "Quantity & Relation"
     },
     "words": [
       {
@@ -13723,7 +13896,8 @@
       "morpheme": "cata",
       "language": "Greek",
       "core_meaning": "down, against, completely, thoroughly",
-      "mnemonic": "Think 'cataclysm' (violent down-wash) or 'catalyst' (completely breaks down energy barrier)"
+      "mnemonic": "Think 'cataclysm' (violent down-wash) or 'catalyst' (completely breaks down energy barrier)",
+      "thematic_cluster": "Quantity & Relation"
     },
     "words": [
       {
@@ -13824,7 +13998,8 @@
       "morpheme": "lucr",
       "language": "Latin",
       "core_meaning": "gain, profit, wealth",
-      "mnemonic": "Think 'lucrative' (yielding great financial profit) or 'filthy lucre' (illicit financial gain)"
+      "mnemonic": "Think 'lucrative' (yielding great financial profit) or 'filthy lucre' (illicit financial gain)",
+      "thematic_cluster": "Quantity & Relation"
     },
     "words": [
       {
@@ -13925,7 +14100,8 @@
       "morpheme": "trench / trunc",
       "language": "Old French",
       "core_meaning": "to cut, carve, sever",
-      "mnemonic": "Think of cutting a deep TRENCH into the earth or TRUNCATING a tree branch with sharp cuts."
+      "mnemonic": "Think of cutting a deep TRENCH into the earth or TRUNCATING a tree branch with sharp cuts.",
+      "thematic_cluster": "Force & Transformation"
     },
     "words": [
       {
@@ -14033,7 +14209,8 @@
       "morpheme": "parl",
       "language": "Old French",
       "core_meaning": "to speak, talk, confer",
-      "mnemonic": "Think of PARLIAMENT where representatives gather to PARLEY and speak on legislation."
+      "mnemonic": "Think of PARLIAMENT where representatives gather to PARLEY and speak on legislation.",
+      "thematic_cluster": "Communication"
     },
     "words": [
       {
@@ -14141,7 +14318,8 @@
       "morpheme": "chev / chief",
       "language": "Old French",
       "core_meaning": "head, leader, knightly code",
-      "mnemonic": "Think of a medieval CHEVALIER (knight) guided by CHIVALRY and loyal to his CHIEF."
+      "mnemonic": "Think of a medieval CHEVALIER (knight) guided by CHIVALRY and loyal to his CHIEF.",
+      "thematic_cluster": "Power & Conflict"
     },
     "words": [
       {
@@ -14249,7 +14427,8 @@
       "morpheme": "gage / wage",
       "language": "Old French",
       "core_meaning": "pledge, stake, security, promise",
-      "mnemonic": "Think of ENGAGING in battle or making a WAGER by placing a valuable pledge (gage) on the table."
+      "mnemonic": "Think of ENGAGING in battle or making a WAGER by placing a valuable pledge (gage) on the table.",
+      "thematic_cluster": "Law & Morality"
     },
     "words": [
       {
@@ -14357,7 +14536,8 @@
       "morpheme": "nois / noie",
       "language": "Old French",
       "core_meaning": "to annoy, bother, harm, stir strife",
-      "mnemonic": "Think of NOISOME odors that ANNOY the senses or the deep weariness of ENNUI."
+      "mnemonic": "Think of NOISOME odors that ANNOY the senses or the deep weariness of ENNUI.",
+      "thematic_cluster": "Emotion"
     },
     "words": [
       {
@@ -14465,7 +14645,8 @@
       "morpheme": "sur / surfeit",
       "language": "Old French",
       "core_meaning": "over, beyond, excess, above",
-      "mnemonic": "Think of a SURFEIT of rich food or SURMOUNTING a high mountain by climbing OVER it."
+      "mnemonic": "Think of a SURFEIT of rich food or SURMOUNTING a high mountain by climbing OVER it.",
+      "thematic_cluster": "Quantity & Relation"
     },
     "words": [
       {
@@ -14573,7 +14754,8 @@
       "morpheme": "trai / treach",
       "language": "Old French",
       "core_meaning": "to betray, deceive, cheat",
-      "mnemonic": "Think of a TREACHEROUS TRAITOR committing TREASON by betraying his country."
+      "mnemonic": "Think of a TREACHEROUS TRAITOR committing TREASON by betraying his country.",
+      "thematic_cluster": "Law & Morality"
     },
     "words": [
       {
@@ -14681,7 +14863,8 @@
       "morpheme": "franch / frank",
       "language": "Old French",
       "core_meaning": "free, sincere, liberated, open",
-      "mnemonic": "Think of the right to vote (ENFRANCHISE) making citizens FREE, or speaking with candid FRANKNESS."
+      "mnemonic": "Think of the right to vote (ENFRANCHISE) making citizens FREE, or speaking with candid FRANKNESS.",
+      "thematic_cluster": "Law & Morality"
     },
     "words": [
       {
@@ -14789,7 +14972,8 @@
       "morpheme": "parag / peer",
       "language": "Old French",
       "core_meaning": "equal rank, nobility, peerage, match",
-      "mnemonic": "Think of judging someone among their PEERS, or DISPARAGING someone by claiming they lack equal worth."
+      "mnemonic": "Think of judging someone among their PEERS, or DISPARAGING someone by claiming they lack equal worth.",
+      "thematic_cluster": "Quantity & Relation"
     },
     "words": [
       {
@@ -14897,7 +15081,8 @@
       "morpheme": "plaint",
       "language": "Old French",
       "core_meaning": "to lament, grieve, complain, mourn",
-      "mnemonic": "Think of a PLAINTIVE melody mourning a loss or a legal PLAINTIFF bringing a complaint to court."
+      "mnemonic": "Think of a PLAINTIVE melody mourning a loss or a legal PLAINTIFF bringing a complaint to court.",
+      "thematic_cluster": "Emotion"
     },
     "words": [
       {
@@ -15005,7 +15190,8 @@
       "morpheme": "rog / rogat",
       "language": "Latin",
       "core_meaning": "to ask, request, propose, demand",
-      "mnemonic": "Think of an INTERROGATION where officials formally ASK questions, or an ARROGANT person demanding privileges."
+      "mnemonic": "Think of an INTERROGATION where officials formally ASK questions, or an ARROGANT person demanding privileges.",
+      "thematic_cluster": "Communication"
     },
     "words": [
       {
@@ -15113,7 +15299,8 @@
       "morpheme": "dol",
       "language": "Latin",
       "core_meaning": "grief, sorrow, pain, suffering",
-      "mnemonic": "Think of a DOLEFUL sigh of sorrow, or an INDOLENT sluggard avoiding painful exertion."
+      "mnemonic": "Think of a DOLEFUL sigh of sorrow, or an INDOLENT sluggard avoiding painful exertion.",
+      "thematic_cluster": "Emotion"
     },
     "words": [
       {
@@ -15221,7 +15408,8 @@
       "morpheme": "fug / fugit",
       "language": "Latin",
       "core_meaning": "to flee, escape, run away",
-      "mnemonic": "Think of a FUGITIVE on the run fleeing from justice, or taking REFUGE from a storm."
+      "mnemonic": "Think of a FUGITIVE on the run fleeing from justice, or taking REFUGE from a storm.",
+      "thematic_cluster": "Motion & Travel"
     },
     "words": [
       {
@@ -15329,7 +15517,8 @@
       "morpheme": "sequ / secut",
       "language": "Latin",
       "core_meaning": "to follow, pursue",
-      "mnemonic": "Think of an OBSEQUIOUS sycophant FOLLOWING a boss everywhere, or events in a CONSECUTIVE SEQUENCE."
+      "mnemonic": "Think of an OBSEQUIOUS sycophant FOLLOWING a boss everywhere, or events in a CONSECUTIVE SEQUENCE.",
+      "thematic_cluster": "Motion & Travel"
     },
     "words": [
       {
@@ -15437,7 +15626,8 @@
       "morpheme": "lud / lus",
       "language": "Latin",
       "core_meaning": "to play, mock, sport, deceive",
-      "mnemonic": "Think of a LUDICROUS joke, ALLUDING to playful stories, or an optical ILLUSION playing tricks on the eyes."
+      "mnemonic": "Think of a LUDICROUS joke, ALLUDING to playful stories, or an optical ILLUSION playing tricks on the eyes.",
+      "thematic_cluster": "Emotion"
     },
     "words": [
       {
@@ -15545,7 +15735,8 @@
       "morpheme": "somn / sopor",
       "language": "Latin",
       "core_meaning": "sleep, stupor, slumber",
-      "mnemonic": "Think of a SOPORIFIC lecture that induces sleep, or suffering from sleepless INSOMNIA."
+      "mnemonic": "Think of a SOPORIFIC lecture that induces sleep, or suffering from sleepless INSOMNIA.",
+      "thematic_cluster": "Form & Nature"
     },
     "words": [
       {
@@ -15653,7 +15844,8 @@
       "morpheme": "nasc / nat",
       "language": "Latin",
       "core_meaning": "to be born, spring forth, arise",
-      "mnemonic": "Think of a NASCENT idea just being BORN, or an INNATE talent you were BORN with."
+      "mnemonic": "Think of a NASCENT idea just being BORN, or an INNATE talent you were BORN with.",
+      "thematic_cluster": "Form & Nature"
     },
     "words": [
       {
@@ -15761,7 +15953,8 @@
       "morpheme": "apt / ept",
       "language": "Latin",
       "core_meaning": "fit, join, fasten, suited, skilled",
-      "mnemonic": "Think of an ADEPT craftsman who is skillfully FIT for his craft, compared to an INEPT blunderer."
+      "mnemonic": "Think of an ADEPT craftsman who is skillfully FIT for his craft, compared to an INEPT blunderer.",
+      "thematic_cluster": "Position & Holding"
     },
     "words": [
       {
@@ -15869,7 +16062,8 @@
       "morpheme": "spond / spons",
       "language": "Latin",
       "core_meaning": "to pledge, promise, answer, guarantee",
-      "mnemonic": "Think of feeling DESPONDENT when promises fail, or ESPOUSING a cause as a solemn pledge."
+      "mnemonic": "Think of feeling DESPONDENT when promises fail, or ESPOUSING a cause as a solemn pledge.",
+      "thematic_cluster": "Law & Morality"
     },
     "words": [
       {
@@ -15977,7 +16171,8 @@
       "morpheme": "vig / veg",
       "language": "Latin",
       "core_meaning": "alert, watchful, lively, vigorous",
-      "mnemonic": "Think of a VIGILANT sentry keeping watch during an all-night VIGIL, or INVIGORATING exercise."
+      "mnemonic": "Think of a VIGILANT sentry keeping watch during an all-night VIGIL, or INVIGORATING exercise.",
+      "thematic_cluster": "Senses & Perception"
     },
     "words": [
       {
@@ -16085,7 +16280,8 @@
       "morpheme": "joc",
       "language": "Latin",
       "core_meaning": "joke, jest, playful, merry",
-      "mnemonic": "Think of a JOCULAR storyteller whose JESTS and JOKES amuse the crowd."
+      "mnemonic": "Think of a JOCULAR storyteller whose JESTS and JOKES amuse the crowd.",
+      "thematic_cluster": "Emotion"
     },
     "words": [
       {
@@ -16193,7 +16389,8 @@
       "morpheme": "tenu",
       "language": "Latin",
       "core_meaning": "thin, slender, slight, subtle, weak",
-      "mnemonic": "Think of ATTENUATING a signal until it becomes faint and THIN, or EXTENUATING circumstances lessening guilt."
+      "mnemonic": "Think of ATTENUATING a signal until it becomes faint and THIN, or EXTENUATING circumstances lessening guilt.",
+      "thematic_cluster": "Form & Nature"
     },
     "words": [
       {
@@ -16301,7 +16498,8 @@
       "morpheme": "vituper",
       "language": "Latin",
       "core_meaning": "to fault, blame, scold harshly, censure",
-      "mnemonic": "Think of a politician launching a VITUPERATIVE tirade full of venomous BLAME."
+      "mnemonic": "Think of a politician launching a VITUPERATIVE tirade full of venomous BLAME.",
+      "thematic_cluster": "Communication"
     },
     "words": [
       {
@@ -16409,7 +16607,8 @@
       "morpheme": "milit",
       "language": "Latin",
       "core_meaning": "soldier, fight, serve in war, exert force",
-      "mnemonic": "Think of MILITANT activists waging a battle of ideas, or evidence MILITATING against an argument."
+      "mnemonic": "Think of MILITANT activists waging a battle of ideas, or evidence MILITATING against an argument.",
+      "thematic_cluster": "Power & Conflict"
     },
     "words": [
       {
@@ -16517,7 +16716,8 @@
       "morpheme": "misc / mixt",
       "language": "Latin",
       "core_meaning": "to mix, blend, mingle",
-      "mnemonic": "Think of a MISCELLANEOUS collection of MIXED items, or an indiscriminate PROMISCUOUS blend."
+      "mnemonic": "Think of a MISCELLANEOUS collection of MIXED items, or an indiscriminate PROMISCUOUS blend.",
+      "thematic_cluster": "Force & Transformation"
     },
     "words": [
       {
@@ -16625,7 +16825,8 @@
       "morpheme": "prop / propri",
       "language": "Latin",
       "core_meaning": "one's own, fitting, proper, suitable",
-      "mnemonic": "Think of behaving with PROPRIETY (proper conduct) or a PROPRIETOR owning his OWN business."
+      "mnemonic": "Think of behaving with PROPRIETY (proper conduct) or a PROPRIETOR owning his OWN business.",
+      "thematic_cluster": "Law & Morality"
     },
     "words": [
       {
@@ -16733,7 +16934,8 @@
       "morpheme": "salu / salv",
       "language": "Latin",
       "core_meaning": "health, safety, wholesome, save",
-      "mnemonic": "Think of a SALUBRIOUS climate promoting HEALTH, or a SALUTARY lesson doing you lasting good."
+      "mnemonic": "Think of a SALUBRIOUS climate promoting HEALTH, or a SALUTARY lesson doing you lasting good.",
+      "thematic_cluster": "Form & Nature"
     },
     "words": [
       {
@@ -16841,7 +17043,8 @@
       "morpheme": "cal / chal",
       "language": "Latin / Old French",
       "core_meaning": "heat, warmth, zeal, care",
-      "mnemonic": "Think of a NONCHALANT person showing NO WARMTH or care, compared to high CALORIC HEAT."
+      "mnemonic": "Think of a NONCHALANT person showing NO WARMTH or care, compared to high CALORIC HEAT.",
+      "thematic_cluster": "Form & Nature"
     },
     "words": [
       {
@@ -16949,7 +17152,8 @@
       "morpheme": "solv / solu",
       "language": "Latin",
       "core_meaning": "to loosen, free, release, dissolve",
-      "mnemonic": "Think of an ABSOLUTE pardon LOOSENING guilt, or a RESOLUTE determination refusing to dissolve."
+      "mnemonic": "Think of an ABSOLUTE pardon LOOSENING guilt, or a RESOLUTE determination refusing to dissolve.",
+      "thematic_cluster": "Force & Transformation"
     },
     "words": [
       {
@@ -17057,7 +17261,8 @@
       "morpheme": "audac",
       "language": "Latin",
       "core_meaning": "to dare, bold, daring, intrepid",
-      "mnemonic": "Think of an AUDACIOUS explorer whose intrepid AUDACITY conquered the uncharted peak."
+      "mnemonic": "Think of an AUDACIOUS explorer whose intrepid AUDACITY conquered the uncharted peak.",
+      "thematic_cluster": "Emotion"
     },
     "words": [
       {
@@ -17165,7 +17370,8 @@
       "morpheme": "be-",
       "language": "Old English",
       "core_meaning": "thoroughly, around, intensive, make",
-      "mnemonic": "Think of words like BELIE, BEGUILE, or BEWILDER where BE- intensifies the action to completely surround someone."
+      "mnemonic": "Think of words like BELIE, BEGUILE, or BEWILDER where BE- intensifies the action to completely surround someone.",
+      "thematic_cluster": "Quantity & Relation"
     },
     "words": [
       {
@@ -17273,7 +17479,8 @@
       "morpheme": "gain",
       "language": "Old English",
       "core_meaning": "against, opposite, in return, contradict",
-      "mnemonic": "Think of GAINSAYING an accusation by speaking AGAINST it, or standing against opposition."
+      "mnemonic": "Think of GAINSAYING an accusation by speaking AGAINST it, or standing against opposition.",
+      "thematic_cluster": "Communication"
     },
     "words": [
       {
@@ -17381,7 +17588,8 @@
       "morpheme": "for / fore",
       "language": "Old English",
       "core_meaning": "completely away, off, in front, beforehand",
-      "mnemonic": "Think of FORBEARING an impulse with patience, FORSWEARING a vice under oath, or being left FORLORN."
+      "mnemonic": "Think of FORBEARING an impulse with patience, FORSWEARING a vice under oath, or being left FORLORN.",
+      "thematic_cluster": "Quantity & Relation"
     },
     "words": [
       {
@@ -17489,7 +17697,8 @@
       "morpheme": "bode",
       "language": "Old English",
       "core_meaning": "to announce, foretell, portend, omen",
-      "mnemonic": "Think of a dark cloud FOREBODING a severe storm, or events that BODE well for the future."
+      "mnemonic": "Think of a dark cloud FOREBODING a severe storm, or events that BODE well for the future.",
+      "thematic_cluster": "Communication"
     },
     "words": [
       {
@@ -17597,7 +17806,8 @@
       "morpheme": "heed",
       "language": "Old English",
       "core_meaning": "to pay attention, observe, take care, mind",
-      "mnemonic": "Think of paying HEED to warning signs, or HEEDLESS drivers ignoring the road."
+      "mnemonic": "Think of paying HEED to warning signs, or HEEDLESS drivers ignoring the road.",
+      "thematic_cluster": "Senses & Perception"
     },
     "words": [
       {
@@ -17705,7 +17915,8 @@
       "morpheme": "wan / wane",
       "language": "Old English",
       "core_meaning": "to decrease, fade, grow pale, faint, decline",
-      "mnemonic": "Think of the moon WANING from full to a sliver, or a patient looking sickly and WAN."
+      "mnemonic": "Think of the moon WANING from full to a sliver, or a patient looking sickly and WAN.",
+      "thematic_cluster": "Quantity & Relation"
     },
     "words": [
       {
@@ -17813,7 +18024,8 @@
       "morpheme": "fret",
       "language": "Old English",
       "core_meaning": "to devour, gnaw, worry, chafe, irritate",
-      "mnemonic": "Think of a FRETFUL child crying with agitation, or FRETTING and gnawing over test scores."
+      "mnemonic": "Think of a FRETFUL child crying with agitation, or FRETTING and gnawing over test scores.",
+      "thematic_cluster": "Emotion"
     },
     "words": [
       {
@@ -17921,7 +18133,8 @@
       "morpheme": "reck",
       "language": "Old English",
       "core_meaning": "to care for, heed, consider, worry, reckon",
-      "mnemonic": "Think of a RECKLESS driver who DOES NOT CARE (reck) about danger, or RECKONING up accounts."
+      "mnemonic": "Think of a RECKLESS driver who DOES NOT CARE (reck) about danger, or RECKONING up accounts.",
+      "thematic_cluster": "Cognition"
     },
     "words": [
       {
@@ -18029,7 +18242,8 @@
       "morpheme": "blithe",
       "language": "Old English",
       "core_meaning": "joyful, cheerful, lighthearted, carefree",
-      "mnemonic": "Think of a BLITHE spirit singing joyfully in the meadow, or a BLITHE disregard for serious rules."
+      "mnemonic": "Think of a BLITHE spirit singing joyfully in the meadow, or a BLITHE disregard for serious rules.",
+      "thematic_cluster": "Emotion"
     },
     "words": [
       {
@@ -18137,7 +18351,8 @@
       "morpheme": "ruth",
       "language": "Old English / Old Norse",
       "core_meaning": "pity, sorrow, compassion, remorse",
-      "mnemonic": "Think of a RUTHLESS conqueror who shows NO MERCY (ruth) to defeated foes."
+      "mnemonic": "Think of a RUTHLESS conqueror who shows NO MERCY (ruth) to defeated foes.",
+      "thematic_cluster": "Emotion"
     },
     "words": [
       {
@@ -18245,7 +18460,8 @@
       "morpheme": "sifr / cipher",
       "language": "Arabic",
       "core_meaning": "zero, empty, secret code, calculation",
-      "mnemonic": "Think of DECIPHERING a secret CIPHER, or starting from scratch at zero (sifr)."
+      "mnemonic": "Think of DECIPHERING a secret CIPHER, or starting from scratch at zero (sifr).",
+      "thematic_cluster": "Cognition"
     },
     "words": [
       {
@@ -18353,7 +18569,8 @@
       "morpheme": "samt / zenith",
       "language": "Arabic",
       "core_meaning": "path, direction, summit, apex, opposite nadir",
-      "mnemonic": "Think of the celestial ZENITH at the very summit of the sky, opposite the rock-bottom NADIR."
+      "mnemonic": "Think of the celestial ZENITH at the very summit of the sky, opposite the rock-bottom NADIR.",
+      "thematic_cluster": "Quantity & Relation"
     },
     "words": [
       {
@@ -18461,7 +18678,8 @@
       "morpheme": "kimiya / alchem",
       "language": "Arabic",
       "core_meaning": "transmutation, mystery, transformation, chemistry",
-      "mnemonic": "Think of an ALCHEMIST attempting the magical ALCHEMY of turning base lead into pure gold."
+      "mnemonic": "Think of an ALCHEMIST attempting the magical ALCHEMY of turning base lead into pure gold.",
+      "thematic_cluster": "Force & Transformation"
     },
     "words": [
       {
@@ -18569,7 +18787,8 @@
       "morpheme": "jabr / algor",
       "language": "Arabic",
       "core_meaning": "restoration, calculation, systematic procedure",
-      "mnemonic": "Think of ALGEBRA balancing equations (restoring parts), or computer ALGORITHMS calculating step by step."
+      "mnemonic": "Think of ALGEBRA balancing equations (restoring parts), or computer ALGORITHMS calculating step by step.",
+      "thematic_cluster": "Cognition"
     },
     "words": [
       {
@@ -18677,7 +18896,8 @@
       "morpheme": "ghul / ghoul",
       "language": "Arabic",
       "core_meaning": "desert demon, macabre devourer of the dead, morbid",
-      "mnemonic": "Think of a GHOUL haunting crypts, or a GHOULISH fascination with gruesome crimes."
+      "mnemonic": "Think of a GHOUL haunting crypts, or a GHOULISH fascination with gruesome crimes.",
+      "thematic_cluster": "Form & Nature"
     },
     "words": [
       {
@@ -18785,7 +19005,8 @@
       "morpheme": "pandit / pundit",
       "language": "Sanskrit",
       "core_meaning": "learned person, scholar, master of philosophy",
-      "mnemonic": "Think of political PUNDITS debating on television, claiming SCHOLARLY expertise (pandita)."
+      "mnemonic": "Think of political PUNDITS debating on television, claiming SCHOLARLY expertise (pandita).",
+      "thematic_cluster": "Cognition"
     },
     "words": [
       {
@@ -18893,7 +19114,8 @@
       "morpheme": "avatar",
       "language": "Sanskrit",
       "core_meaning": "descent, crossing down, manifestation of an ideal",
-      "mnemonic": "Think of an AVATAR descending from above as an earthly EMBODIMENT of a divine concept or digital persona."
+      "mnemonic": "Think of an AVATAR descending from above as an earthly EMBODIMENT of a divine concept or digital persona.",
+      "thematic_cluster": "Motion & Travel"
     },
     "words": [
       {
@@ -19001,7 +19223,8 @@
       "morpheme": "pariah",
       "language": "Tamil / Indian",
       "core_meaning": "social outcast, rejected person, ostracized",
-      "mnemonic": "Think of a PARIAH treated as an OUTCAST, shunned and expelled by everyone in society."
+      "mnemonic": "Think of a PARIAH treated as an OUTCAST, shunned and expelled by everyone in society.",
+      "thematic_cluster": "Law & Morality"
     },
     "words": [
       {
@@ -19109,7 +19332,8 @@
       "morpheme": "karm / dhar",
       "language": "Sanskrit",
       "core_meaning": "action, deed, consequence, moral duty, cosmic law",
-      "mnemonic": "Think of KARMA (inevitable moral cause and effect) and DHARMA (ethical duty and cosmic order)."
+      "mnemonic": "Think of KARMA (inevitable moral cause and effect) and DHARMA (ethical duty and cosmic order).",
+      "thematic_cluster": "Law & Morality"
     },
     "words": [
       {
@@ -19217,7 +19441,8 @@
       "morpheme": "juggernaut / jag",
       "language": "Sanskrit",
       "core_meaning": "unstoppable massive force, liberation, sacred chant",
-      "mnemonic": "Think of a crushing JUGGERNAUT advancing unstoppably, seeking supreme NIRVANA with a sacred MANTRA."
+      "mnemonic": "Think of a crushing JUGGERNAUT advancing unstoppably, seeking supreme NIRVANA with a sacred MANTRA.",
+      "thematic_cluster": "Power & Conflict"
     },
     "words": [
       {

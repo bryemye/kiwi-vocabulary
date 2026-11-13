@@ -464,7 +464,7 @@ class PlatformDashboardStatsView(APIView):
                     'language': root.language,
                     'core_meaning': root.core_meaning,
                     'mnemonic': root.mnemonic,
-                    'thematic_cluster': getattr(root, 'thematic_cluster', 'Movement'),
+                    'thematic_cluster': getattr(root, 'thematic_cluster', 'Motion & Travel'),
                     'sat_tier': getattr(root, 'sat_tier', 'Tier 1 High-Yield'),
                     'total_words': total_root_words,
                     'mastered_words': words_mastered_count,

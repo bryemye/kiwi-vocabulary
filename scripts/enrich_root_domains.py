@@ -1,50 +1,345 @@
 """
-Enrich kiwi_vocab roots with realistic thematic clusters and SAT frequency tiers.
-Distributes roots across 8 semantic clusters and 3 SAT tiers.
+Enrich kiwi_vocab roots with balanced, accurate thematic clusters.
+Distributes roots across 11 semantic clusters in both the SQLite database
+and the sat_vocab_seed.json fixture files.
 """
 
-import sqlite3
+import json
 import os
+import re
+import sqlite3
 
-DB_PATH = os.path.join(os.path.dirname(__file__), "..", "backend", "kiwi_platform.sqlite3")
+REPO_ROOT = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))
+DB_PATH = os.path.join(REPO_ROOT, "backend", "kiwi_platform.sqlite3")
+FIXTURE_PATHS = [
+    os.path.join(REPO_ROOT, "backend", "kiwi_vocab", "fixtures", "sat_vocab_seed.json"),
+    os.path.join(REPO_ROOT, "backend", "core", "fixtures", "sat_vocab_seed.json"),
+    os.path.join(REPO_ROOT, "core", "fixtures", "sat_vocab_seed.json"),
+]
 
-def enrich_roots():
+# Explicit curated mapping for all 226 SAT/ACT morpheme families
+CURATED_ROOT_CLUSTERS = {
+    # 1. Motion & Travel (locomotion, velocity, flow, approach, departure)
+    "ced / cess": "Motion & Travel",
+    "cur / curs / cour": "Motion & Travel",
+    "grad / gress": "Motion & Travel",
+    "mot / mov": "Motion & Travel",
+    "fer / lat": "Motion & Travel",
+    "mit / miss": "Motion & Travel",
+    "ven / vent": "Motion & Travel",
+    "vad / vas": "Motion & Travel",
+    "flu / flux": "Motion & Travel",
+    "scend / scent": "Motion & Travel",
+    "err": "Motion & Travel",
+    "kin / kinet": "Motion & Travel",
+    "tach / tachy": "Motion & Travel",
+    "duc / duct": "Motion & Travel",
+    "ambul": "Motion & Travel",
+    "pet / petit": "Motion & Travel",
+    "sal / sil / sult": "Motion & Travel",
+    "und / unda": "Motion & Travel",
+    "fug / fugit": "Motion & Travel",
+    "sequ / secut": "Motion & Travel",
+    "avatar": "Motion & Travel",
+
+    # 2. Force & Transformation (push/pull, throw, break, cut, bend, make, alter)
+    "tract": "Force & Transformation",
+    "pel / puls": "Force & Transformation",
+    "jac / ject": "Force & Transformation",
+    "rupt": "Force & Transformation",
+    "tort / tors": "Force & Transformation",
+    "fract / frag": "Force & Transformation",
+    "sec / sect / seg": "Force & Transformation",
+    "fus / fund": "Force & Transformation",
+    "cid / cis": "Force & Transformation",
+    "vert / vers": "Force & Transformation",
+    "stroph": "Force & Transformation",
+    "ball / bol": "Force & Transformation",
+    "mut": "Force & Transformation",
+    "plic / plex / ply": "Force & Transformation",
+    "lev": "Force & Transformation",
+    "fac / fec / fic / fect": "Force & Transformation",
+    "pung / punct": "Force & Transformation",
+    "turb": "Force & Transformation",
+    "flect / flex": "Force & Transformation",
+    "sinu": "Force & Transformation",
+    "trench / trunc": "Force & Transformation",
+    "misc / mixt": "Force & Transformation",
+    "solv / solu": "Force & Transformation",
+    "kimiya / alchem": "Force & Transformation",
+
+    # 3. Position & Holding (stand, sit, lie, cling, bind, seize, place, shut)
+    "cliv / clin": "Position & Holding",
+    "her / hes": "Position & Holding",
+    "string / strict": "Position & Holding",
+    "pend / pens": "Position & Holding",
+    "tend / tens / tent": "Position & Holding",
+    "sta / sist / stit": "Position & Holding",
+    "cap / cept / cip": "Position & Holding",
+    "pon / pos / posit": "Position & Holding",
+    "ten / tin / tain": "Position & Holding",
+    "sed / sid / sess": "Position & Holding",
+    "clud / clus / claus": "Position & Holding",
+    "man / manu": "Position & Holding",
+    "cub / cumb": "Position & Holding",
+    "apt / ept": "Position & Holding",
+
+    # 4. Senses & Perception (sight, hearing, touch, taste, smell, light, shadow, clarity)
+    "spec / spic": "Senses & Perception",
+    "vid / vis": "Senses & Perception",
+    "sent / sens": "Senses & Perception",
+    "aud": "Senses & Perception",
+    "tact / tang / ting": "Senses & Perception",
+    "sap / sag": "Senses & Perception",
+    "gust": "Senses & Perception",
+    "olfact / odor": "Senses & Perception",
+    "luc / lum / lus": "Senses & Perception",
+    "umbr": "Senses & Perception",
+    "cand": "Senses & Perception",
+    "son": "Senses & Perception",
+    "palp": "Senses & Perception",
+    "clar": "Senses & Perception",
+    "fulg / flagr": "Senses & Perception",
+    "scintill": "Senses & Perception",
+    "vig / veg": "Senses & Perception",
+    "heed": "Senses & Perception",
+
+    # 5. Cognition (knowledge, mind, memory, belief, teaching, inquiry, logic, secret)
+    "cogn / gnos": "Cognition",
+    "sci": "Cognition",
+    "anim": "Cognition",
+    "mem / mne": "Cognition",
+    "cred": "Cognition",
+    "fatu": "Cognition",
+    "soph": "Cognition",
+    "psych": "Cognition",
+    "dox / dog": "Cognition",
+    "crit / cris": "Cognition",
+    "mon / monit": "Cognition",
+    "doc / doct": "Cognition",
+    "crypt / cryph": "Cognition",
+    "fall / fals": "Cognition",
+    "quer / quest / quir / quis": "Cognition",
+    "reck": "Cognition",
+    "sifr / cipher": "Cognition",
+    "jabr / algor": "Cognition",
+    "pandit / pundit": "Cognition",
+
+    # 6. Communication (speech, voice, writing, names, asking, silence, omens)
+    "loqu / loc": "Communication",
+    "voc / vok": "Communication",
+    "dict": "Communication",
+    "clam / claim": "Communication",
+    "phon": "Communication",
+    "leg / lect / log": "Communication",
+    "nom / nym": "Communication",
+    "scrib / script": "Communication",
+    "tac / tic": "Communication",
+    "verb": "Communication",
+    "queri / querul": "Communication",
+    "parl": "Communication",
+    "rog / rogat": "Communication",
+    "vituper": "Communication",
+    "gain": "Communication",
+    "bode": "Communication",
+
+    # 7. Emotion (feeling, passion, love, fear, grief, humor, rest, temperament)
+    "path": "Emotion",
+    "cord / card": "Emotion",
+    "phil": "Emotion",
+    "phob": "Emotion",
+    "mania": "Emotion",
+    "plac / placat": "Emotion",
+    "am / amat / amor": "Emotion",
+    "grat / grac": "Emotion",
+    "acri / acr / acer": "Emotion",
+    "pass / pati": "Emotion",
+    "ferv": "Emotion",
+    "torp": "Emotion",
+    "trep": "Emotion",
+    "quie / quit": "Emotion",
+    "av / avar": "Emotion",
+    "ard / ars": "Emotion",
+    "nois / noie": "Emotion",
+    "plaint": "Emotion",
+    "dol": "Emotion",
+    "lud / lus": "Emotion",
+    "joc": "Emotion",
+    "audac": "Emotion",
+    "fret": "Emotion",
+    "blithe": "Emotion",
+    "ruth": "Emotion",
+
+    # 8. Power & Conflict (war, combat, contest, rule, leadership, strength)
+    "pugn / pug": "Power & Conflict",
+    "bell / belli": "Power & Conflict",
+    "agon": "Power & Conflict",
+    "polem": "Power & Conflict",
+    "pac / peac": "Power & Conflict",
+    "pot / poss": "Power & Conflict",
+    "val / vail": "Power & Conflict",
+    "arch / archi": "Power & Conflict",
+    "crat / cracy": "Power & Conflict",
+    "dem / demo": "Power & Conflict",
+    "vinc / vict": "Power & Conflict",
+    "chev / chief": "Power & Conflict",
+    "milit": "Power & Conflict",
+    "juggernaut / jag": "Power & Conflict",
+
+    # 9. Law & Morality (justice, truth, faith, ethics, sacredness, guilt, status)
+    "fid": "Law & Morality",
+    "bene / bon": "Law & Morality",
+    "mal / mis": "Law & Morality",
+    "jur / jud / just": "Law & Morality",
+    "ver / veri": "Law & Morality",
+    "rect": "Law & Morality",
+    "theo / the": "Law & Morality",
+    "prob / prov": "Law & Morality",
+    "culp": "Law & Morality",
+    "noc / noxi / noce": "Law & Morality",
+    "pecc": "Law & Morality",
+    "sanct / sacr": "Law & Morality",
+    "mend": "Law & Morality",
+    "lit / litig": "Law & Morality",
+    "cast / chast": "Law & Morality",
+    "gage / wage": "Law & Morality",
+    "trai / treach": "Law & Morality",
+    "franch / frank": "Law & Morality",
+    "spond / spons": "Law & Morality",
+    "prop / propri": "Law & Morality",
+    "pariah": "Law & Morality",
+    "karm / dhar": "Law & Morality",
+
+    # 10. Form & Nature (life, body, birth, death, sleep, health, elements, texture)
+    "morph": "Form & Nature",
+    "gen": "Form & Nature",
+    "anthrop": "Form & Nature",
+    "dur": "Form & Nature",
+    "mor / mort": "Form & Nature",
+    "corp / corpor": "Form & Nature",
+    "vor / vour": "Form & Nature",
+    "bio": "Form & Nature",
+    "mit / miti": "Form & Nature",
+    "pyr / pyro": "Form & Nature",
+    "dorm": "Form & Nature",
+    "moll": "Form & Nature",
+    "somn / sopor": "Form & Nature",
+    "nasc / nat": "Form & Nature",
+    "tenu": "Form & Nature",
+    "salu / salv": "Form & Nature",
+    "cal / chal": "Form & Nature",
+    "ghul / ghoul": "Form & Nature",
+
+    # 11. Quantity & Relation (time, size, degree, number, equality, spatial prefixes)
+    "chron": "Quantity & Relation",
+    "temp / tempor": "Quantity & Relation",
+    "magn / maj": "Quantity & Relation",
+    "brev": "Quantity & Relation",
+    "hyper": "Quantity & Relation",
+    "hypo": "Quantity & Relation",
+    "auto": "Quantity & Relation",
+    "anti / ant": "Quantity & Relation",
+    "syn / sym": "Quantity & Relation",
+    "aequ / equi": "Quantity & Relation",
+    "grav / griev": "Quantity & Relation",
+    "plen / plet": "Quantity & Relation",
+    "vac / van / void": "Quantity & Relation",
+    "nov / neo": "Quantity & Relation",
+    "prim / proto": "Quantity & Relation",
+    "omni": "Quantity & Relation",
+    "pan": "Quantity & Relation",
+    "greg": "Quantity & Relation",
+    "ann / enn": "Quantity & Relation",
+    "poly": "Quantity & Relation",
+    "oner / onus": "Quantity & Relation",
+    "di / dia": "Quantity & Relation",
+    "vet / veter": "Quantity & Relation",
+    "hetero": "Quantity & Relation",
+    "homo / homeo": "Quantity & Relation",
+    "pau / pauc": "Quantity & Relation",
+    "peri": "Quantity & Relation",
+    "cata": "Quantity & Relation",
+    "lucr": "Quantity & Relation",
+    "sur / surfeit": "Quantity & Relation",
+    "parag / peer": "Quantity & Relation",
+    "be-": "Quantity & Relation",
+    "for / fore": "Quantity & Relation",
+    "wan / wane": "Quantity & Relation",
+    "samt / zenith": "Quantity & Relation",
+}
+
+FALLBACK_RULES = [
+    ("Motion & Travel", r"\b(walk|run|go|come|arrive|flee|escape|follow|climb|leap|wander|flow|motion|speed|swift|carry|send|lead)\b"),
+    ("Force & Transformation", r"\b(pull|drag|push|drive|throw|cast|break|shatter|cut|divide|twist|bend|curve|fold|make|do|produce|change|alter|dissolve|pierce)\b"),
+    ("Position & Holding", r"\b(stand|sit|lie|recline|hang|stretch|bind|stick|cling|hold|seize|keep|place|put|shut|close|slope|lean)\b"),
+    ("Senses & Perception", r"\b(see|look|watch|hear|listen|touch|taste|smell|scent|sound|light|shine|glow|bright|shadow|shade|alert|watchful)\b"),
+    ("Cognition", r"\b(think|know|mind|learn|memory|remember|believe|trust|wise|wisdom|teach|judge|decide|inquire|seek|ask|secret|hidden|calculate)\b"),
+    ("Communication", r"\b(speak|talk|say|word|voice|call|shout|write|read|name|silent|quiet|ask|request|complain|announce)\b"),
+    ("Emotion", r"\b(feel|love|fear|dread|heart|suffer|grief|sorrow|passion|joy|joke|calm|please|anger|worry|pity|eager)\b"),
+    ("Power & Conflict", r"\b(war|fight|combat|force|conquer|rule|power|chief|leader|soldier|peace|strength|contest|struggle)\b"),
+    ("Law & Morality", r"\b(law|right|truth|true|swear|pledge|promise|sacred|holy|god|divine|faith|guilt|blame|sin|fault|harm|betray|free)\b"),
+    ("Form & Nature", r"\b(life|living|birth|born|death|die|sleep|body|flesh|health|earth|water|fire|heat|form|shape|soft|hard)\b"),
+    ("Quantity & Relation", r"\b(time|year|old|new|first|number|measure|equal|same|other|all|many|few|full|empty|heavy|great|short|above|below|around|against|together)\b"),
+]
+
+
+def classify_cluster(morpheme, meaning):
+    """Return curated cluster for known morphemes or word-boundary classification for new ones."""
+    if morpheme in CURATED_ROOT_CLUSTERS:
+        return CURATED_ROOT_CLUSTERS[morpheme]
+    txt = f"{morpheme} {meaning}".lower()
+    for cluster, pattern in FALLBACK_RULES:
+        if re.search(pattern, txt):
+            return cluster
+    return "Form & Nature"
+
+
+def enrich_database():
+    if not os.path.exists(DB_PATH):
+        print(f"Database not found at {DB_PATH}; skipping SQLite update.")
+        return
+
     conn = sqlite3.connect(DB_PATH)
     cur = conn.cursor()
-    cur.execute("SELECT id, morpheme, core_meaning, language FROM kiwi_vocab_root")
+    cur.execute("SELECT id, morpheme, core_meaning, sat_tier FROM kiwi_vocab_root")
     roots = cur.fetchall()
 
-    def classify_cluster(morpheme, meaning):
-        txt = f"{morpheme} {meaning}".lower()
-        if any(k in txt for k in ['think', 'know', 'mind', 'learn', 'see', 'look', 'view', 'spec', 'vid', 'vis', 'cog', 'sci', 'mem', 'sens', 'sent', 'intel', 'gn / gno', 'soph', 'doc', 'doct', 'sag', 'sap', 'put', 'crit']):
-            return 'Cognition'
-        if any(k in txt for k in ['speak', 'say', 'word', 'voice', 'sound', 'call', 'claim', 'dict', 'voc', 'vok', 'log', 'phon', 'clam', 'loqu', 'loc', 'narr', 'nounc', 'ora', 'graph', 'scrib', 'script', 'lingu']):
-            return 'Communication'
-        if any(k in txt for k in ['feel', 'love', 'fear', 'heart', 'suffer', 'passion', 'path', 'phil', 'am', 'cord', 'anim', 'plac', 'grat', 'dol', 'ter / terr', 'phob', 'cupid', 'miso']):
-            return 'Emotion'
-        if any(k in txt for k in ['war', 'fight', 'force', 'conquer', 'rule', 'power', 'strike', 'bell', 'pugn', 'vict', 'vinc', 'pot', 'dyn', 'crat', 'arch', 'domin', 'reg', 'rect', 'tyrann', 'agon']):
-            return 'Power & Conflict'
-        if any(k in txt for k in ['law', 'right', 'judge', 'true', 'swear', 'sacred', 'jur', 'jud', 'leg', 'ver', 'sanct', 'fide', 'crim', 'culp', 'pen / poen', 'prob', 'test', 'cast', 'just']):
-            return 'Law & Morality'
-        if any(k in txt for k in ['life', 'earth', 'water', 'light', 'birth', 'nature', 'form', 'body', 'bio', 'geo', 'hydr', 'luc', 'lum', 'gen', 'morph', 'corp', 'phyt', 'astr', 'pyr', 'therm', 'phys']):
-            return 'Form & Nature'
-        if any(k in txt for k in ['number', 'measure', 'time', 'equal', 'one', 'two', 'all', 'meter', 'chron', 'equi', 'omni', 'pan', 'poly', 'multi', 'semi', 'hemi', 'olig', 'brev', 'magn', 'min', 'temp']):
-            return 'Quantity & Relation'
-        return 'Movement'
+    tier_cycle = ["Tier 1 High-Yield", "Tier 2 Multipliers", "Tier 3 Advanced"]
+    counts = {}
 
-    tier_cycle = ['Tier 1 High-Yield', 'Tier 2 Multipliers', 'Tier 3 Advanced']
-
-    for idx, (r_id, morpheme, meaning, lang) in enumerate(roots):
+    for idx, (r_id, morpheme, meaning, existing_tier) in enumerate(roots):
         cluster = classify_cluster(morpheme, meaning)
-        tier = tier_cycle[idx % 3]
+        tier = existing_tier or tier_cycle[idx % 3]
+        counts[cluster] = counts.get(cluster, 0) + 1
         cur.execute(
             "UPDATE kiwi_vocab_root SET thematic_cluster = ?, sat_tier = ? WHERE id = ?",
-            (cluster, tier, r_id)
+            (cluster, tier, r_id),
         )
 
     conn.commit()
     conn.close()
-    print(f"Successfully enriched {len(roots)} roots with thematic clusters and SAT tiers.")
+    print(f"Updated {len(roots)} roots in {DB_PATH}:")
+    for k, v in sorted(counts.items(), key=lambda item: -item[1]):
+        print(f"  {k}: {v}")
+
+
+def sync_fixtures():
+    for path in FIXTURE_PATHS:
+        if not os.path.exists(path):
+            continue
+        with open(path, "r", encoding="utf-8") as f:
+            data = json.load(f)
+        for entry in data:
+            root_meta = entry["root"]
+            root_meta["thematic_cluster"] = classify_cluster(
+                root_meta["morpheme"], root_meta.get("core_meaning", "")
+            )
+        with open(path, "w", encoding="utf-8") as f:
+            json.dump(data, f, indent=2, ensure_ascii=False)
+            f.write("\n")
+        print(f"Synced {len(data)} fixture roots in {path}")
+
 
 if __name__ == "__main__":
-    enrich_roots()
+    enrich_database()
+    sync_fixtures()

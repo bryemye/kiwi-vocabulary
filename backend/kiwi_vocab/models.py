@@ -20,7 +20,10 @@ class Root(models.Model):
     ]
 
     THEMATIC_CLUSTERS = [
-        ('Movement', 'Movement'),
+        ('Motion & Travel', 'Motion & Travel'),
+        ('Force & Transformation', 'Force & Transformation'),
+        ('Position & Holding', 'Position & Holding'),
+        ('Senses & Perception', 'Senses & Perception'),
         ('Communication', 'Communication'),
         ('Cognition', 'Cognition'),
         ('Emotion', 'Emotion'),
@@ -43,7 +46,7 @@ class Root(models.Model):
     thematic_cluster = models.CharField(
         max_length=100,
         choices=THEMATIC_CLUSTERS,
-        default='Movement',
+        default='Motion & Travel',
         blank=True
     )
     sat_tier = models.CharField(

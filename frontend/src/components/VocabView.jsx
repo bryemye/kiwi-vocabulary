@@ -1545,7 +1545,7 @@ export default function VocabView({
                     </span>
                   </div>
                   <p className="text-xs font-mono text-[#42281D] mt-0.5">
-                    Root families grouped into semantic conceptual clusters (Movement, Communication, Cognition, Emotion, etc.) to build an interconnected narrative network.
+                    Root families grouped into semantic conceptual clusters (Motion & Travel, Force & Transformation, Position & Holding, Senses & Perception, Cognition, etc.) to build an interconnected narrative network.
                   </p>
                 </div>
               </div>
@@ -1688,7 +1688,7 @@ export default function VocabView({
                                     }`}
                                     title={`Thematic Cluster: ${root.thematic_cluster}`}
                                   >
-                                    🧠 {root.thematic_cluster || 'Movement'}
+                                    🧠 {root.thematic_cluster || 'Motion & Travel'}
                                   </span>
                                   <span
                                     className={`text-[10px] font-sans font-medium px-2 py-0.5 rounded-full border ${

@@ -44,7 +44,7 @@ class KiwiVocabTests(TestCase):
         self.assertEqual(res_cluster.status_code, status.HTTP_200_OK)
         self.assertEqual(len(res_cluster.data), 1)
 
-        res_wrong_cluster = self.client.get('/api/vocab/roots/?cluster=Movement')
+        res_wrong_cluster = self.client.get('/api/vocab/roots/?cluster=Motion%20%26%20Travel')
         self.assertEqual(res_wrong_cluster.status_code, status.HTTP_200_OK)
         self.assertEqual(len(res_wrong_cluster.data), 0)
 

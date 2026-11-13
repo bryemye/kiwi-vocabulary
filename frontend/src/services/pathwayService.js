@@ -23,7 +23,7 @@ export const DOMAIN_LENSES = [
     name: 'Thematic Semantic',
     shortLabel: 'Thematic',
     icon: '🧠',
-    description: 'Semantic networks grouped by human conceptual experience (Cognition, Movement, Law, Emotion)',
+    description: 'Semantic networks grouped by human conceptual experience (Motion, Force, Position, Senses, Cognition, Law)',
     badgeClass: 'bg-[#EDF5E5] text-[#2F441E] border-[#7BB33B]',
   },
   {
@@ -61,60 +61,81 @@ export const PATHWAYS = {
 
 export const THEMATIC_CLUSTER_DEFS = [
   {
-    id: 'Movement',
-    name: 'Movement',
+    id: 'Motion & Travel',
+    name: 'Motion & Travel',
     icon: '🏃',
     accentColor: '#10b981',
-    description: 'Kinetic verbs, spatial trajectories, propulsion, and bodily motion',
+    description: 'Locomotion, velocity, flow, approach, departure, and spatial paths',
+  },
+  {
+    id: 'Force & Transformation',
+    name: 'Force & Transformation',
+    icon: '💥',
+    accentColor: '#f97316',
+    description: 'Physical force, throwing, breaking, cutting, bending, making, and altering',
+  },
+  {
+    id: 'Position & Holding',
+    name: 'Position & Holding',
+    icon: '⚓',
+    accentColor: '#0d9488',
+    description: 'Standing, sitting, leaning, clinging, binding, seizing, placing, and enclosing',
+  },
+  {
+    id: 'Senses & Perception',
+    name: 'Senses & Perception',
+    icon: '👁️',
+    accentColor: '#0ea5e9',
+    description: 'Sight, hearing, touch, taste, smell, light, shadow, clarity, and vigilance',
   },
   {
     id: 'Communication',
     name: 'Communication',
     icon: '💬',
     accentColor: '#3b82f6',
-    description: 'Voice, dialogue, declarations, sound, and linguistic expression',
+    description: 'Voice, dialogue, declarations, writing, questioning, silence, and expression',
   },
   {
     id: 'Cognition',
     name: 'Cognition',
     icon: '🧠',
     accentColor: '#8b5cf6',
-    description: 'Intellect, perception, memory, inquiry, and critical judgment',
+    description: 'Intellect, memory, belief, teaching, inquiry, logic, and mystery',
   },
   {
     id: 'Emotion',
     name: 'Emotion',
     icon: '❤️',
     accentColor: '#ec4899',
-    description: 'Affect, passion, affinity, fear, empathy, and temperament',
+    description: 'Affect, passion, affinity, fear, grief, humor, patience, and temperament',
   },
   {
     id: 'Power & Conflict',
     name: 'Power & Conflict',
     icon: '⚔️',
     accentColor: '#ef4444',
-    description: 'Contest, combat, conquest, governance, and decisive resistance',
+    description: 'Contest, combat, conquest, governance, civic power, and decisive strength',
   },
   {
     id: 'Law & Morality',
     name: 'Law & Morality',
     icon: '⚖️',
     accentColor: '#f59e0b',
-    description: 'Truth, justice, ethics, sanctity, civic rectitude, and blame',
+    description: 'Truth, justice, ethics, oaths, sanctity, guilt, virtue, and civic standing',
   },
   {
     id: 'Form & Nature',
     name: 'Form & Nature',
     icon: '🌱',
     accentColor: '#14b8a6',
-    description: 'Physical substance, organic life, illumination, transformation, and structural changes',
+    description: 'Physical substance, organic life, birth, death, sleep, elements, and texture',
   },
   {
     id: 'Quantity & Relation',
     name: 'Quantity & Relation',
     icon: '📐',
     accentColor: '#6366f1',
-    description: 'Time, magnitude, spatial proximity, hierarchy, and mathematical order',
+    description: 'Time, magnitude, equality, similarity, and spatial/prefix relationships',
   },
 ];
 
@@ -196,8 +217,8 @@ export const ACADEMIC_DOMAIN_DEFS = [
     accentColor: '#0284c7',
     bgColor: '#F0F9FF',
     textColor: '#075985',
-    description: 'Roots underpinning biology, physics, earth systems, organic transformations, and quantitative relationships.',
-    clusters: ['Form & Nature', 'Quantity & Relation', 'Movement'],
+    description: 'Roots underpinning biology, physics, perception, earth systems, physical transformations, and quantitative relationships.',
+    clusters: ['Form & Nature', 'Quantity & Relation', 'Motion & Travel', 'Force & Transformation', 'Position & Holding', 'Senses & Perception'],
   },
   {
     id: 'Humanities',
@@ -352,7 +373,7 @@ export function groupRootsByDomainLens(
     domainDefs = ACADEMIC_DOMAIN_DEFS.map((acad) => ({
       ...acad,
       filterFn: (r) => {
-        const cluster = r.thematic_cluster || 'Movement';
+        const cluster = r.thematic_cluster || 'Motion & Travel';
         return acad.clusters.includes(cluster);
       },
     }));
@@ -361,7 +382,7 @@ export function groupRootsByDomainLens(
     domainDefs = THEMATIC_CLUSTER_DEFS.map((cluster) => ({
       ...cluster,
       filterFn: (r) =>
-        (r.thematic_cluster || 'Movement').toLowerCase() ===
+        (r.thematic_cluster || 'Motion & Travel').toLowerCase() ===
         cluster.name.toLowerCase(),
     }));
   }

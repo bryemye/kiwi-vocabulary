@@ -218,7 +218,7 @@ function buildGraphLayout(roots, masteredSet) {
         language: root.language,
         core_meaning: root.core_meaning,
         mnemonic: root.mnemonic,
-        thematic_cluster: root.thematic_cluster || 'Movement',
+        thematic_cluster: root.thematic_cluster || 'Motion & Travel',
         sat_tier: root.sat_tier || 'Tier 1 High-Yield',
         total_words: (root.words || []).length,
         data: root,
@@ -1992,7 +1992,7 @@ export default function VocabGraphView({
                   </p>
                   <div className="flex flex-wrap items-center gap-1.5 mt-2">
                     <span className="text-[10px] font-mono font-bold uppercase px-2 py-0.5 bg-[#EDF5E5] text-[#2F441E] border border-[#111410]">
-                      🧠 {selectedNode.thematic_cluster || selectedNode.data?.thematic_cluster || 'Movement'}
+                      🧠 {selectedNode.thematic_cluster || selectedNode.data?.thematic_cluster || 'Motion & Travel'}
                     </span>
                     <span className="text-[10px] font-mono font-bold uppercase px-2 py-0.5 bg-[#FFFBEB] text-[#92400E] border border-[#111410]">
                       ⚡ {selectedNode.sat_tier || selectedNode.data?.sat_tier || 'Tier 1 High-Yield'}

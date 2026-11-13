@@ -36,7 +36,7 @@ class Command(BaseCommand):
                     "language": entry["root"]["language"],
                     "core_meaning": entry["root"]["core_meaning"],
                     "mnemonic": entry["root"].get("mnemonic", ""),
-                    "thematic_cluster": entry["root"].get("thematic_cluster", "Movement"),
+                    "thematic_cluster": entry["root"].get("thematic_cluster", "Motion & Travel"),
                     "sat_tier": entry["root"].get("sat_tier", "Tier 1 High-Yield"),
                     "words": entry.get("words", [])
                 }
@@ -57,7 +57,7 @@ class Command(BaseCommand):
                     "language": r_item["language"],
                     "core_meaning": r_item["core_meaning"],
                     "mnemonic": r_item["mnemonic"],
-                    "thematic_cluster": r_item.get("thematic_cluster", "Movement"),
+                    "thematic_cluster": r_item.get("thematic_cluster", "Motion & Travel"),
                     "sat_tier": r_item.get("sat_tier", "Tier 1 High-Yield"),
                 }
             )

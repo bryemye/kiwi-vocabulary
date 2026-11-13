@@ -48,7 +48,7 @@ class Command(BaseCommand):
                     "language": root_data.get("language", "Latin"),
                     "core_meaning": root_data["core_meaning"],
                     "mnemonic": root_data.get("mnemonic", ""),
-                    "thematic_cluster": root_data.get("thematic_cluster", "Movement"),
+                    "thematic_cluster": root_data.get("thematic_cluster", "Motion & Travel"),
                     "sat_tier": root_data.get("sat_tier", "Tier 1 High-Yield"),
                 }
             )
