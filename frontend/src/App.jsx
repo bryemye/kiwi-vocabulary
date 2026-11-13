@@ -210,8 +210,8 @@ export default function App() {
       } else if (activeTab === 'graph') {
         recordWaypoint({
           type: 'STAR_SYSTEM',
-          title: 'CAVERN OF MIND',
-          subtitle: 'VOCABULARY CONSTELLATION GRAPH',
+          title: 'ROOT GRAPH',
+          subtitle: 'LATIN & GREEK ETYMOLOGY GRAPH',
           system: 'Vocab Mastery',
           depth: 1,
           state: { app: 'vocab', tab: 'graph' },

@@ -47,15 +47,35 @@ function pseudoRandom(seed) {
 }
 
 /**
- * Geometric Neo-Brutalist Canvas Rectangle with Hard Drop Shadow
+ * Trace a rounded rectangle path on the canvas context
  */
-function drawNeoCard(ctx, x, y, width, height, options = {}) {
+function traceRoundedRect(ctx, left, top, width, height, radius = 8) {
+  const r = Math.min(radius, width / 2, height / 2);
+  ctx.beginPath();
+  ctx.moveTo(left + r, top);
+  ctx.lineTo(left + width - r, top);
+  ctx.quadraticCurveTo(left + width, top, left + width, top + r);
+  ctx.lineTo(left + width, top + height - r);
+  ctx.quadraticCurveTo(left + width, top + height, left + width - r, top + height);
+  ctx.lineTo(left + r, top + height);
+  ctx.quadraticCurveTo(left, top + height, left, top + height - r);
+  ctx.lineTo(left, top + r);
+  ctx.quadraticCurveTo(left, top, left + r, top);
+  ctx.closePath();
+}
+
+/**
+ * Softened Rounded Canvas Card with Diffused Shadow
+ */
+function drawGraphCard(ctx, x, y, width, height, options = {}) {
   const {
-    fillColor = '#EFE8DF',
-    borderColor = '#111410',
-    borderWidth = 2,
-    shadowColor = '#42281D',
-    shadowOffsetX = 3,
+    fillColor = '#F3EEE7',
+    borderColor = 'rgba(17, 20, 16, 0.25)',
+    borderWidth = 1.5,
+    borderRadius = 10,
+    shadowColor = 'rgba(17, 20, 16, 0.10)',
+    shadowBlur = 10,
+    shadowOffsetX = 0,
     shadowOffsetY = 3,
     alpha = 1.0,
   } = options;
@@ -66,55 +86,63 @@ function drawNeoCard(ctx, x, y, width, height, options = {}) {
   ctx.save();
   ctx.globalAlpha = alpha;
 
-  // 1. Hard Shadow
-  if ((shadowOffsetX || shadowOffsetY) && alpha > 0.3) {
-    ctx.fillStyle = shadowColor;
-    ctx.fillRect(left + shadowOffsetX, top + shadowOffsetY, width, height);
+  // 1. Soft Diffused Shadow + Main Rounded Box Fill
+  traceRoundedRect(ctx, left, top, width, height, borderRadius);
+  if (shadowBlur > 0) {
+    ctx.shadowColor = shadowColor;
+    ctx.shadowBlur = shadowBlur;
+    ctx.shadowOffsetX = shadowOffsetX;
+    ctx.shadowOffsetY = shadowOffsetY;
   }
-
-  // 2. Main Box Fill
   ctx.fillStyle = fillColor;
-  ctx.fillRect(left, top, width, height);
+  ctx.fill();
 
-  // 3. Crisp Border
+  // Reset shadow before drawing border so stroke stays clean
+  ctx.shadowColor = 'transparent';
+  ctx.shadowBlur = 0;
+  ctx.shadowOffsetX = 0;
+  ctx.shadowOffsetY = 0;
+
+  // 2. Soft Border
   if (borderWidth > 0) {
+    traceRoundedRect(ctx, left, top, width, height, borderRadius);
     ctx.strokeStyle = borderColor;
     ctx.lineWidth = borderWidth;
-    ctx.strokeRect(left, top, width, height);
+    ctx.stroke();
   }
 
   ctx.restore();
 }
 
 /**
- * Ambient background dust motes inside the cavern of the mind
+ * Ambient background particles for gentle depth
  */
-const AMBIENT_MOTES_COUNT = 75;
-function createAmbientDustMotes() {
-  const motes = [];
-  for (let i = 0; i < AMBIENT_MOTES_COUNT; i++) {
+const AMBIENT_PARTICLES_COUNT = 60;
+function createAmbientParticles() {
+  const particles = [];
+  for (let i = 0; i < AMBIENT_PARTICLES_COUNT; i++) {
     const angle = pseudoRandom(i * 13 + 1) * Math.PI * 2;
     const dist = 80 + pseudoRandom(i * 13 + 2) * 1350;
-    motes.push({
+    particles.push({
       baseX: Math.cos(angle) * dist,
       baseY: Math.sin(angle) * dist,
-      radius: 1 + pseudoRandom(i * 13 + 3) * 2.2,
-      speedX: 0.15 + pseudoRandom(i * 13 + 4) * 0.25,
-      speedY: 0.12 + pseudoRandom(i * 13 + 5) * 0.22,
-      ampX: 25 + pseudoRandom(i * 13 + 6) * 40,
-      ampY: 20 + pseudoRandom(i * 13 + 7) * 35,
+      radius: 1.2 + pseudoRandom(i * 13 + 3) * 2.0,
+      speedX: 0.04 + pseudoRandom(i * 13 + 4) * 0.06,
+      speedY: 0.03 + pseudoRandom(i * 13 + 5) * 0.05,
+      ampX: 28 + pseudoRandom(i * 13 + 6) * 42,
+      ampY: 16 + pseudoRandom(i * 13 + 7) * 24,
       phaseX: pseudoRandom(i * 13 + 8) * Math.PI * 2,
       phaseY: pseudoRandom(i * 13 + 9) * Math.PI * 2,
-      baseAlpha: 0.08 + pseudoRandom(i * 13 + 10) * 0.22,
-      pulseFreq: 0.25 + pseudoRandom(i * 13 + 11) * 0.35,
+      baseAlpha: 0.04 + pseudoRandom(i * 13 + 10) * 0.10,
+      pulseFreq: 0.06 + pseudoRandom(i * 13 + 11) * 0.09,
       pulsePhase: pseudoRandom(i * 13 + 12) * Math.PI * 2,
     });
   }
-  return motes;
+  return particles;
 }
 
 /**
- * Deterministic 2D Node-Link Layout Generator with Dust-Mote Drift Parameters
+ * Deterministic 2D Node-Link Layout Generator with Slow Sway & Breathing Parameters
  */
 function buildGraphLayout(roots, masteredSet) {
   const nodes = [];
@@ -130,19 +158,19 @@ function buildGraphLayout(roots, masteredSet) {
     baseY: 0,
     x: -800,
     y: 0,
-    width: 170,
-    height: 52,
-    driftSpeedX: 0.15,
-    driftSpeedY: 0.12,
-    driftAmpX: 8,
-    driftAmpY: 6,
+    width: 174,
+    height: 54,
+    driftSpeedX: 0.045,
+    driftSpeedY: 0.035,
+    driftAmpX: 10,
+    driftAmpY: 5,
     driftPhaseX: 0.5,
     driftPhaseY: 1.2,
-    fadeFreq: 0.15,
+    fadeFreq: 0.06,
     fadePhase: 0,
-    minFadeOpacity: 0.45,
-    maxFadeOpacity: 0.85,
-    opacity: 0.85,
+    minFadeOpacity: 0.62,
+    maxFadeOpacity: 0.92,
+    opacity: 0.92,
   };
 
   const originGreek = {
@@ -154,19 +182,19 @@ function buildGraphLayout(roots, masteredSet) {
     baseY: 0,
     x: 800,
     y: 0,
-    width: 170,
-    height: 52,
-    driftSpeedX: 0.18,
-    driftSpeedY: 0.14,
-    driftAmpX: 8,
-    driftAmpY: 6,
+    width: 174,
+    height: 54,
+    driftSpeedX: 0.05,
+    driftSpeedY: 0.04,
+    driftAmpX: 10,
+    driftAmpY: 5,
     driftPhaseX: 2.1,
     driftPhaseY: 0.8,
-    fadeFreq: 0.15,
+    fadeFreq: 0.06,
     fadePhase: 1.5,
-    minFadeOpacity: 0.45,
-    maxFadeOpacity: 0.85,
-    opacity: 0.85,
+    minFadeOpacity: 0.62,
+    maxFadeOpacity: 0.92,
+    opacity: 0.92,
   };
 
   nodes.push(originLatin, originGreek);
@@ -229,19 +257,19 @@ function buildGraphLayout(roots, masteredSet) {
         width: 95,
         height: 46,
         originId: origin.id,
-        // Harmonic Dust Mote Drift Parameters
-        driftSpeedX: 0.25 + pseudoRandom(seed * 7 + 1) * 0.35,
-        driftSpeedY: 0.20 + pseudoRandom(seed * 7 + 2) * 0.30,
-        driftAmpX: 14 + pseudoRandom(seed * 7 + 3) * 16,
-        driftAmpY: 12 + pseudoRandom(seed * 7 + 4) * 14,
+        // Gentle Fish-Like Sway Parameters
+        driftSpeedX: 0.05 + pseudoRandom(seed * 7 + 1) * 0.05,
+        driftSpeedY: 0.04 + pseudoRandom(seed * 7 + 2) * 0.04,
+        driftAmpX: 14 + pseudoRandom(seed * 7 + 3) * 12,
+        driftAmpY: 7 + pseudoRandom(seed * 7 + 4) * 7,
         driftPhaseX: pseudoRandom(seed * 7 + 5) * Math.PI * 2,
         driftPhaseY: pseudoRandom(seed * 7 + 6) * Math.PI * 2,
-        // Breathing Fade Parameters
-        fadeFreq: 0.18 + pseudoRandom(seed * 7 + 7) * 0.25,
+        // Slow Breathing Fade Parameters
+        fadeFreq: 0.06 + pseudoRandom(seed * 7 + 7) * 0.07,
         fadePhase: pseudoRandom(seed * 7 + 8) * Math.PI * 2,
-        minFadeOpacity: 0.20 + pseudoRandom(seed * 7 + 9) * 0.15,
-        maxFadeOpacity: 0.75 + pseudoRandom(seed * 7 + 10) * 0.25,
-        opacity: 0.75,
+        minFadeOpacity: 0.28 + pseudoRandom(seed * 7 + 9) * 0.12,
+        maxFadeOpacity: 0.78 + pseudoRandom(seed * 7 + 10) * 0.18,
+        opacity: 0.78,
       };
       nodes.push(rootNode);
 
@@ -292,19 +320,19 @@ function buildGraphLayout(roots, masteredSet) {
           width: Math.max(86, word.word.length * 8.5 + 24),
           height: 28,
           rootNodeId,
-          // Harmonic Dust Mote Drift Parameters
-          driftSpeedX: 0.35 + pseudoRandom(wordSeed + 1) * 0.45,
-          driftSpeedY: 0.30 + pseudoRandom(wordSeed + 2) * 0.40,
-          driftAmpX: 10 + pseudoRandom(wordSeed + 3) * 12,
-          driftAmpY: 9 + pseudoRandom(wordSeed + 4) * 11,
+          // Gentle Secondary Tail-Sway Parameters (follows parent root drift)
+          driftSpeedX: 0.07 + pseudoRandom(wordSeed + 1) * 0.06,
+          driftSpeedY: 0.05 + pseudoRandom(wordSeed + 2) * 0.05,
+          driftAmpX: 5 + pseudoRandom(wordSeed + 3) * 4,
+          driftAmpY: 3 + pseudoRandom(wordSeed + 4) * 3,
           driftPhaseX: pseudoRandom(wordSeed + 5) * Math.PI * 2,
           driftPhaseY: pseudoRandom(wordSeed + 6) * Math.PI * 2,
-          // Breathing Fade Parameters
-          fadeFreq: 0.25 + pseudoRandom(wordSeed + 7) * 0.30,
+          // Slow Breathing Fade Parameters
+          fadeFreq: 0.07 + pseudoRandom(wordSeed + 7) * 0.07,
           fadePhase: pseudoRandom(wordSeed + 8) * Math.PI * 2,
-          minFadeOpacity: 0.15 + pseudoRandom(wordSeed + 9) * 0.15,
-          maxFadeOpacity: 0.70 + pseudoRandom(wordSeed + 10) * 0.25,
-          opacity: 0.70,
+          minFadeOpacity: 0.16 + pseudoRandom(wordSeed + 9) * 0.10,
+          maxFadeOpacity: 0.62 + pseudoRandom(wordSeed + 10) * 0.20,
+          opacity: 0.62,
         };
         nodes.push(wordNode);
 
@@ -333,19 +361,19 @@ function buildGraphLayout(roots, masteredSet) {
       baseY: 850,
       x: 0,
       y: 850,
-      width: 170,
-      height: 52,
-      driftSpeedX: 0.15,
-      driftSpeedY: 0.12,
-      driftAmpX: 8,
-      driftAmpY: 6,
+      width: 174,
+      height: 54,
+      driftSpeedX: 0.045,
+      driftSpeedY: 0.035,
+      driftAmpX: 10,
+      driftAmpY: 5,
       driftPhaseX: 1.0,
       driftPhaseY: 1.0,
-      fadeFreq: 0.15,
+      fadeFreq: 0.06,
       fadePhase: 0,
-      minFadeOpacity: 0.45,
-      maxFadeOpacity: 0.85,
-      opacity: 0.85,
+      minFadeOpacity: 0.62,
+      maxFadeOpacity: 0.92,
+      opacity: 0.92,
     };
     nodes.push(originOther);
     positionRoots(otherRoots, originOther);
@@ -400,8 +428,8 @@ export default function VocabGraphView({
   }, []);
 
   // Focus & Search States
-  // When focusedRootId is set, that root and its connections enter SHARP FOCUS
-  // While all other nodes become ambient floating dust motes
+  // When focusedRootId is set, that root and its connections come into focus
+  // while peripheral nodes dim gently into the background
   const [focusedRootId, setFocusedRootId] = useState(null);
   const [searchQuery, setSearchQuery] = useState('');
   const [isSearchFocused, setIsSearchFocused] = useState(false);
@@ -524,8 +552,8 @@ export default function VocabGraphView({
     }, 3500);
   };
 
-  // Ambient Dust Specks in Cavern of Mind
-  const ambientDustMotesRef = useRef(createAmbientDustMotes());
+  // Ambient background particles
+  const ambientParticlesRef = useRef(createAmbientParticles());
 
   // Celestial Trajectory History Tracking
   const { recordWaypoint } = useCelestialTrajectory();
@@ -542,7 +570,7 @@ export default function VocabGraphView({
         type: 'SATELLITE',
         title: studyWordModal.word?.toUpperCase() || 'SPECIMEN',
         subtitle: studyWordModal.definition ? `"${studyWordModal.definition.slice(0, 35)}..."` : 'WORD SPECIMEN NODE',
-        system: studyWordModal.root_details?.morpheme ? `Root [${studyWordModal.root_details.morpheme.toUpperCase()}]` : 'Constellation Graph',
+        system: studyWordModal.root_details?.morpheme ? `Root [${studyWordModal.root_details.morpheme.toUpperCase()}]` : 'Root Graph',
         depth: 3,
         state: {
           app: 'vocab',
@@ -839,7 +867,7 @@ export default function VocabGraphView({
   }, [clearFocus, resetCamera, studyWordModal]);
 
   // ---------------------------------------------------------------------------
-  // 4. ANIMATION FRAME LOOP: DUST MOTES & SHARP FOCUS ENGINE
+  // 4. ANIMATION FRAME LOOP: CALM SWAY & FOCUS ENGINE
   // ---------------------------------------------------------------------------
   useEffect(() => {
     const canvas = canvasRef.current;
@@ -912,59 +940,77 @@ export default function VocabGraphView({
         ctx.fillStyle = '#FAFBF8';
         ctx.fillRect(0, 0, width, height);
 
-        // 4. Update Node Positions & Breathing Opacities
-        // - Ambient Mode (no focus): Nodes drift organically and breathe in/out
-        // - Focus Mode: The selected root & its children lock in 100% sharp focus
-        //   while unrelated nodes fade down into subtle floating dust motes
-        graphData.nodes.forEach(node => {
+        const nodeMap = new Map();
+        graphData.nodes.forEach(n => nodeMap.set(n.id, n));
+
+        // 4. Update Node Positions & Continuous Breathing Opacities
+        // - Ambient Mode (no focus): Nodes sway slowly like fish and breathe smoothly
+        // - Focus Mode: The selected root & its children remain clearly visible
+        //   while unrelated nodes dim softly into the background
+        const updateNodeMotion = (node, parentDriftX = 0, parentDriftY = 0) => {
           const isFocalRoot = currentFocusedId && node.id === currentFocusedId;
           const isFocalChildWord = currentFocusedId && node.rootNodeId === currentFocusedId;
           const isFocalFamily = isFocalRoot || isFocalChildWord;
 
           if (!currentFocusedId) {
-            // Ambient Floating Dust Mote Mode
-            const driftX = Math.sin(time * node.driftSpeedX + node.driftPhaseX) * node.driftAmpX;
-            const driftY = Math.cos(time * node.driftSpeedY + node.driftPhaseY) * node.driftAmpY;
-            node.x = node.baseX + driftX;
-            node.y = node.baseY + driftY;
+            // Calm fish-like swaying: slow lateral glide + gentle secondary vertical motion
+            const localDriftX = Math.sin(time * node.driftSpeedX + node.driftPhaseX) * node.driftAmpX;
+            const localDriftY = Math.cos(time * node.driftSpeedY + node.driftPhaseY) * node.driftAmpY;
+            const totalDriftX = parentDriftX * 0.85 + localDriftX;
+            const totalDriftY = parentDriftY * 0.85 + localDriftY;
+            node._driftX = totalDriftX;
+            node._driftY = totalDriftY;
+            node.x = node.baseX + totalDriftX;
+            node.y = node.baseY + totalDriftY;
 
-            // Enforce ~80% of nodes having opacity 0 at any given moment
-            // Sine wave threshold: values <= 0.60 stay strictly at 0
-            const wave = Math.sin(time * node.fadeFreq + node.fadePhase);
-            const threshold = 0.60;
-            if (wave <= threshold) {
-              node.opacity = 0;
-            } else {
-              const normalized = (wave - threshold) / (1 - threshold);
-              const smoothCurve = normalized * normalized * (3 - 2 * normalized);
-              node.opacity = smoothCurve * node.maxFadeOpacity;
-            }
+            // Smooth continuous breathing wave (no abrupt fade-out to zero)
+            const breath = 0.5 + 0.5 * Math.sin(time * node.fadeFreq + node.fadePhase);
+            const easedBreath = breath * breath * (3 - 2 * breath);
+            node.opacity =
+              node.minFadeOpacity +
+              easedBreath * (node.maxFadeOpacity - node.minFadeOpacity);
           } else if (isFocalFamily) {
-            // Sharp Focus Mode: anchored firmly with subtle micro-levitation
-            const microDriftX = Math.sin(time * 0.3 + node.driftPhaseX) * 1.5;
-            const microDriftY = Math.cos(time * 0.3 + node.driftPhaseY) * 1.5;
+            // Focused Mode: anchored calmly with subtle slow sway
+            const microDriftX = Math.sin(time * 0.12 + node.driftPhaseX) * 1.5;
+            const microDriftY = Math.cos(time * 0.10 + node.driftPhaseY) * 1.0;
+            node._driftX = microDriftX;
+            node._driftY = microDriftY;
             node.x = node.baseX + microDriftX;
             node.y = node.baseY + microDriftY;
-            node.opacity = 1.0; // 100% sharp & solid
+            node.opacity = 1.0;
           } else {
-            // Background Dust Motes during Focus Mode
-            const driftX = Math.sin(time * node.driftSpeedX * 0.6 + node.driftPhaseX) * (node.driftAmpX * 1.3);
-            const driftY = Math.cos(time * node.driftSpeedY * 0.6 + node.driftPhaseY) * (node.driftAmpY * 1.3);
-            node.x = node.baseX + driftX;
-            node.y = node.baseY + driftY;
+            // Peripheral nodes during Focus Mode: slow sway, gently dimmed
+            const localDriftX = Math.sin(time * node.driftSpeedX * 0.6 + node.driftPhaseX) * node.driftAmpX;
+            const localDriftY = Math.cos(time * node.driftSpeedY * 0.6 + node.driftPhaseY) * node.driftAmpY;
+            const totalDriftX = parentDriftX * 0.85 + localDriftX;
+            const totalDriftY = parentDriftY * 0.85 + localDriftY;
+            node._driftX = totalDriftX;
+            node._driftY = totalDriftY;
+            node.x = node.baseX + totalDriftX;
+            node.y = node.baseY + totalDriftY;
 
-            // 80% completely invisible, remaining 20% faint background dust
-            const bgWave = Math.sin(time * node.fadeFreq + node.fadePhase);
-            if (bgWave <= 0.60) {
-              node.opacity = 0;
-            } else {
-              node.opacity = 0.08;
-            }
+            const bgBreath = 0.5 + 0.5 * Math.sin(time * node.fadeFreq + node.fadePhase);
+            node.opacity = 0.08 + bgBreath * 0.08;
+          }
+        };
+
+        // Pass 1: Origins & Roots
+        graphData.nodes.forEach(node => {
+          if (node.type !== 'word') {
+            updateNodeMotion(node, 0, 0);
           }
         });
 
-        // 5. Draw Technical Grid & Cavern Circle Motif
-        drawCavernBackgroundMotif(ctx, width, height, cameraRef.current, time);
+        // Pass 2: Child Words follow their parent root's sway
+        graphData.nodes.forEach(node => {
+          if (node.type === 'word') {
+            const parentRoot = nodeMap.get(node.rootNodeId);
+            updateNodeMotion(node, parentRoot?._driftX || 0, parentRoot?._driftY || 0);
+          }
+        });
+
+        // 5. Draw Technical Grid & Subtle Background Rings
+        drawGraphBackgroundMotif(ctx, width, height, cameraRef.current, time);
 
         // 6. Viewport Transform
         ctx.save();
@@ -981,9 +1027,6 @@ export default function VocabGraphView({
         const isVisible = (x, y) => {
           return x >= visibleLeft && x <= visibleRight && y >= visibleTop && y <= visibleBottom;
         };
-
-        const nodeMap = new Map();
-        graphData.nodes.forEach(n => nodeMap.set(n.id, n));
 
         // 7. Draw Connector Edges
         // First pass: ambient or background edges
@@ -1009,14 +1052,14 @@ export default function VocabGraphView({
           } else {
             // Ambient breathing edge
             ctx.strokeStyle = edge.type === 'origin-to-root' ? '#42281D' : '#111410';
-            ctx.lineWidth = 1.2;
-            ctx.globalAlpha = Math.min(fromNode.opacity, toNode.opacity) * 0.35;
+            ctx.lineWidth = 1.1;
+            ctx.globalAlpha = Math.min(fromNode.opacity, toNode.opacity) * 0.22;
           }
           ctx.stroke();
           ctx.globalAlpha = 1.0;
         });
 
-        // Second pass: Sharp Focus Edges for selected root family
+        // Second pass: Focused Edges for selected root family
         if (currentFocusedId) {
           graphData.edges.forEach(edge => {
             if (edge.rootId !== currentFocusedId) return;
@@ -1028,8 +1071,8 @@ export default function VocabGraphView({
             ctx.moveTo(fromNode.x, fromNode.y);
             ctx.lineTo(toNode.x, toNode.y);
             ctx.strokeStyle = '#7BB33B'; // Vivid Kiwi Green
-            ctx.lineWidth = 2.5;
-            ctx.globalAlpha = 0.95;
+            ctx.lineWidth = 2.25;
+            ctx.globalAlpha = 0.9;
             ctx.stroke();
             ctx.globalAlpha = 1.0;
           });
@@ -1069,18 +1112,18 @@ export default function VocabGraphView({
   }, [graphData, selectedNode, hoveredNodeId]);
 
   // ---------------------------------------------------------------------------
-  // 5. CAVERN OF THE MIND BACKGROUND CIRCLE & DUST MOTES
+  // 5. BACKGROUND RINGS, GRID & AMBIENT PARTICLES
   // ---------------------------------------------------------------------------
 
-  const drawCavernBackgroundMotif = (ctx, width, height, cam, time) => {
-    // 1. Subtle CAD Technical Grid
+  const drawGraphBackgroundMotif = (ctx, width, height, cam, time) => {
+    // 1. Subtle Technical Grid
     const gridSize = 60 * cam.zoom;
     if (gridSize >= 15) {
       const offsetX = (width / 2 + cam.x) % gridSize;
       const offsetY = (height / 2 + cam.y) % gridSize;
       ctx.strokeStyle = '#111410';
       ctx.lineWidth = 1;
-      ctx.globalAlpha = 0.06;
+      ctx.globalAlpha = 0.05;
       ctx.beginPath();
       const crossSize = 2.5;
       for (let x = offsetX; x < width; x += gridSize) {
@@ -1095,51 +1138,51 @@ export default function VocabGraphView({
       ctx.globalAlpha = 1.0;
     }
 
-    // 2. Faint Cavern Circle Motif (Orb of Memory)
+    // 2. Faint Concentric Graph Rings
     const centerX = width / 2 + cam.x;
     const centerY = height / 2 + cam.y;
-    const cavernRadius = 900 * cam.zoom;
+    const graphRadius = 900 * cam.zoom;
 
     ctx.save();
-    // Inner primary cavern circle
+    // Inner primary ring
     ctx.beginPath();
-    ctx.arc(centerX, centerY, cavernRadius, 0, Math.PI * 2);
+    ctx.arc(centerX, centerY, graphRadius, 0, Math.PI * 2);
     ctx.strokeStyle = '#111410';
-    ctx.lineWidth = 1.5;
-    ctx.globalAlpha = 0.08;
-    ctx.stroke();
-
-    // Secondary concentric dashed aura
-    ctx.beginPath();
-    ctx.arc(centerX, centerY, cavernRadius * 1.35, 0, Math.PI * 2);
-    ctx.strokeStyle = '#7BB33B';
-    ctx.lineWidth = 1;
-    ctx.setLineDash([8, 12]);
+    ctx.lineWidth = 1.2;
     ctx.globalAlpha = 0.06;
     ctx.stroke();
 
-    // Dual cardinal crosshairs in center of cavern
+    // Secondary concentric dashed ring
     ctx.beginPath();
-    ctx.moveTo(centerX - cavernRadius * 1.4, centerY);
-    ctx.lineTo(centerX + cavernRadius * 1.4, centerY);
-    ctx.moveTo(centerX, centerY - cavernRadius * 1.4);
-    ctx.lineTo(centerX, centerY + cavernRadius * 1.4);
+    ctx.arc(centerX, centerY, graphRadius * 1.35, 0, Math.PI * 2);
+    ctx.strokeStyle = '#7BB33B';
+    ctx.lineWidth = 1;
+    ctx.setLineDash([8, 12]);
+    ctx.globalAlpha = 0.05;
+    ctx.stroke();
+
+    // Faint center crosshairs
+    ctx.beginPath();
+    ctx.moveTo(centerX - graphRadius * 1.4, centerY);
+    ctx.lineTo(centerX + graphRadius * 1.4, centerY);
+    ctx.moveTo(centerX, centerY - graphRadius * 1.4);
+    ctx.lineTo(centerX, centerY + graphRadius * 1.4);
     ctx.strokeStyle = '#111410';
     ctx.lineWidth = 1;
     ctx.setLineDash([3, 10]);
-    ctx.globalAlpha = 0.04;
+    ctx.globalAlpha = 0.035;
     ctx.stroke();
     ctx.restore();
 
-    // 3. Floating Ambient Micro-Dust Specks
-    const motes = ambientDustMotesRef.current;
+    // 3. Slow Floating Ambient Particles
+    const particles = ambientParticlesRef.current;
     ctx.fillStyle = '#42281D';
-    motes.forEach(m => {
-      const moteWorldX = m.baseX + Math.sin(time * m.speedX + m.phaseX) * m.ampX;
-      const moteWorldY = m.baseY + Math.cos(time * m.speedY + m.phaseY) * m.ampY;
+    particles.forEach(m => {
+      const worldX = m.baseX + Math.sin(time * m.speedX + m.phaseX) * m.ampX;
+      const worldY = m.baseY + Math.cos(time * m.speedY + m.phaseY) * m.ampY;
 
-      const screenX = width / 2 + cam.x + moteWorldX * cam.zoom;
-      const screenY = height / 2 + cam.y + moteWorldY * cam.zoom;
+      const screenX = width / 2 + cam.x + worldX * cam.zoom;
+      const screenY = height / 2 + cam.y + worldY * cam.zoom;
 
       if (screenX >= -10 && screenX <= width + 10 && screenY >= -10 && screenY <= height + 10) {
         const pulse = 0.5 + 0.5 * Math.sin(time * m.pulseFreq + m.pulsePhase);
@@ -1154,31 +1197,45 @@ export default function VocabGraphView({
   };
 
   // ---------------------------------------------------------------------------
-  // 6. NODE RENDERING HELPERS (RESPECTING DUST-MOTE OPACITY)
+  // 6. NODE RENDERING HELPERS
   // ---------------------------------------------------------------------------
 
   const drawOriginNode = (ctx, node, isSelected, isHovered, currentFocusedId) => {
     const isLatin = node.language === 'Latin';
     const isGreek = node.language === 'Greek';
-    const bgFill = isLatin ? '#111410' : isGreek ? '#42281D' : '#2F441E';
+    const bgFill = isLatin ? '#1C211B' : isGreek ? '#4A3126' : '#2F441E';
     const effectiveAlpha = currentFocusedId ? 0.25 : node.opacity;
+    const borderRadius = 14;
 
-    drawNeoCard(ctx, node.x, node.y, node.width, node.height, {
+    drawGraphCard(ctx, node.x, node.y, node.width, node.height, {
       fillColor: bgFill,
-      borderColor: isSelected || isHovered ? '#7BB33B' : '#111410',
-      borderWidth: 2,
-      shadowColor: '#111410',
-      shadowOffsetX: 3,
-      shadowOffsetY: 3,
+      borderColor: isSelected || isHovered ? '#7BB33B' : 'rgba(255, 255, 255, 0.14)',
+      borderWidth: isSelected || isHovered ? 2 : 1.25,
+      borderRadius,
+      shadowColor: 'rgba(17, 20, 16, 0.14)',
+      shadowBlur: 14,
+      shadowOffsetY: 4,
       alpha: effectiveAlpha,
     });
 
     ctx.save();
     ctx.globalAlpha = effectiveAlpha;
-    // Green accent line
+    // Rounded-clipped green top accent bar
+    traceRoundedRect(
+      ctx,
+      node.x - node.width / 2,
+      node.y - node.height / 2,
+      node.width,
+      node.height,
+      borderRadius
+    );
+    ctx.clip();
     ctx.fillStyle = '#84C341';
     ctx.fillRect(node.x - node.width / 2, node.y - node.height / 2, node.width, 4);
+    ctx.restore();
 
+    ctx.save();
+    ctx.globalAlpha = effectiveAlpha;
     ctx.fillStyle = '#FAFBF8';
     ctx.font = '900 12px "JetBrains Mono", Menlo, Consolas, monospace';
     ctx.textAlign = 'center';
@@ -1206,32 +1263,48 @@ export default function VocabGraphView({
       effectiveAlpha = 0.15;
     }
 
-    const borderColor = isFocal || isHighlighted ? '#7BB33B' : matchesFilter && filter !== 'ALL' ? '#111410' : '#111410';
-    const borderWidth = isFocal ? 3 : isHighlighted ? 2.5 : 2;
-    const shadowColor = isFocal || isHighlighted ? '#7BB33B' : '#42281D';
+    const borderColor = isFocal || isHighlighted
+      ? '#7BB33B'
+      : matchesFilter && filter !== 'ALL'
+        ? 'rgba(17, 20, 16, 0.34)'
+        : 'rgba(17, 20, 16, 0.18)';
+    const borderWidth = isFocal ? 2.5 : isHighlighted ? 2 : 1.25;
+    const borderRadius = 10;
 
-    drawNeoCard(ctx, node.x, node.y, node.width, node.height, {
-      fillColor: isFocal ? '#FAFBF8' : isHighlighted ? '#FAFBF8' : '#EFE8DF',
+    drawGraphCard(ctx, node.x, node.y, node.width, node.height, {
+      fillColor: isFocal || isHighlighted ? '#FAFBF8' : '#F3EEE7',
       borderColor,
       borderWidth,
-      shadowColor,
-      shadowOffsetX: isFocal ? 4 : 3,
-      shadowOffsetY: isFocal ? 4 : 3,
+      borderRadius,
+      shadowColor: isFocal || isHighlighted ? 'rgba(123, 179, 59, 0.24)' : 'rgba(66, 40, 29, 0.09)',
+      shadowBlur: isFocal || isHighlighted ? 14 : 8,
+      shadowOffsetY: isFocal ? 4 : 2,
       alpha: effectiveAlpha,
     });
 
     ctx.save();
     ctx.globalAlpha = effectiveAlpha;
 
-    // Accent top stripe representing active pathway attribute
+    // Accent top stripe representing active pathway attribute (clipped to rounded top corners)
     let stripeColor = '#7BB33B';
     if (pathway === PATHWAY_YIELD) {
       stripeColor = (node.sat_tier || '').includes('1') ? '#7BB33B' : (node.sat_tier || '').includes('2') ? '#2563eb' : '#7c3aed';
     } else {
       stripeColor = getClusterMeta(node.thematic_cluster).accentColor || '#7BB33B';
     }
+    ctx.save();
+    traceRoundedRect(
+      ctx,
+      node.x - node.width / 2,
+      node.y - node.height / 2,
+      node.width,
+      node.height,
+      borderRadius
+    );
+    ctx.clip();
     ctx.fillStyle = stripeColor;
-    ctx.fillRect(node.x - node.width / 2 + 2, node.y - node.height / 2 + 2, node.width - 4, 3);
+    ctx.fillRect(node.x - node.width / 2, node.y - node.height / 2, node.width, 3);
+    ctx.restore();
 
     // Root Morpheme Typography
     ctx.fillStyle = '#111410';
@@ -1261,15 +1334,16 @@ export default function VocabGraphView({
     const isHighlighted = isSelected || isHovered;
     const effectiveAlpha = isFocal ? 1.0 : isHighlighted ? 1.0 : node.opacity;
 
-    const borderColor = isFocal || isHighlighted ? '#7BB33B' : '#111410';
-    const borderWidth = isFocal ? 2.5 : isHighlighted ? 2 : 1.5;
+    const borderColor = isFocal || isHighlighted ? '#7BB33B' : 'rgba(17, 20, 16, 0.18)';
+    const borderWidth = isFocal ? 2 : isHighlighted ? 1.75 : 1;
 
-    drawNeoCard(ctx, node.x, node.y, node.width, node.height, {
+    drawGraphCard(ctx, node.x, node.y, node.width, node.height, {
       fillColor: isHighlighted ? '#EDF5E5' : '#FFFFFF',
       borderColor,
       borderWidth,
-      shadowColor: '#111410',
-      shadowOffsetX: 2,
+      borderRadius: 14,
+      shadowColor: isFocal || isHighlighted ? 'rgba(123, 179, 59, 0.18)' : 'rgba(17, 20, 16, 0.07)',
+      shadowBlur: isFocal || isHighlighted ? 10 : 6,
       shadowOffsetY: 2,
       alpha: effectiveAlpha,
     });
@@ -1280,10 +1354,10 @@ export default function VocabGraphView({
     // Mastered Green Dot
     if (node.isMastered) {
       ctx.beginPath();
-      ctx.arc(node.x - node.width / 2 + 8, node.y, 3.5, 0, Math.PI * 2);
+      ctx.arc(node.x - node.width / 2 + 10, node.y, 3.5, 0, Math.PI * 2);
       ctx.fillStyle = '#7BB33B';
       ctx.fill();
-      ctx.strokeStyle = '#111410';
+      ctx.strokeStyle = 'rgba(17, 20, 16, 0.45)';
       ctx.lineWidth = 1;
       ctx.stroke();
     }
@@ -1294,7 +1368,7 @@ export default function VocabGraphView({
     ctx.textAlign = node.isMastered ? 'left' : 'center';
     ctx.textBaseline = 'middle';
 
-    const textX = node.isMastered ? node.x - node.width / 2 + 16 : node.x;
+    const textX = node.isMastered ? node.x - node.width / 2 + 18 : node.x;
     ctx.fillText(node.word, textX, node.y);
     ctx.restore();
   };
@@ -1375,7 +1449,7 @@ export default function VocabGraphView({
             smoothPanToNode(hitNode);
           }
         } else {
-          // Clicked background: if a root was focused, clear back to ambient dust motes
+          // Clicked background: if a root was focused, clear back to ambient overview
           if (focusedRootIdRef.current) {
             clearFocus();
           } else {
@@ -1906,7 +1980,7 @@ export default function VocabGraphView({
             <span className={`w-2 h-2 inline-block border border-[#111410] mr-1 ${
               focusedRootId ? 'bg-[#7BB33B] animate-pulse' : 'bg-[#EFE8DF]'
             }`} />
-            <span>{focusedRootId ? 'SHARP FOCUS MODE:' : 'CAVERN OF THE MIND:'}</span>
+            <span>{focusedRootId ? 'FOCUSED ROOT:' : 'ROOT GRAPH:'}</span>
           </div>
 
           <div className="flex items-center space-x-1">
@@ -1932,7 +2006,7 @@ export default function VocabGraphView({
 
           <span className="text-[#111410]/30 hidden lg:inline">|</span>
           <span className="text-[#62685E] hidden lg:inline">
-            {focusedRootId ? 'Peripheral nodes dimmed as dust motes' : 'Floating ambient dust motes'}
+            {focusedRootId ? 'Peripheral nodes dimmed' : 'Click any root to focus its family'}
           </span>
         </div>
       </div>
@@ -1948,7 +2022,7 @@ export default function VocabGraphView({
                 {selectedNode.type === 'origin' 
                   ? 'ETYMOLOGY ORIGIN' 
                   : selectedNode.type === 'root' 
-                    ? 'SHARP FOCUS ROOT' 
+                    ? 'FOCUSED ROOT' 
                     : 'VOCABULARY WORD'}
               </span>
               {selectedNode.type === 'root' && (
@@ -1988,7 +2062,7 @@ export default function VocabGraphView({
                     {selectedNode.morpheme}
                   </div>
                   <p className="text-xs font-mono uppercase text-[#62685E] mt-1 font-bold">
-                    {selectedNode.language} Morpheme · {selectedNode.total_words} Derivative Words in Sharp Focus
+                    {selectedNode.language} Morpheme · {selectedNode.total_words} Derivative Words
                   </p>
                   <div className="flex flex-wrap items-center gap-1.5 mt-2">
                     <span className="text-[10px] font-mono font-bold uppercase px-2 py-0.5 bg-[#EDF5E5] text-[#2F441E] border border-[#111410]">
@@ -2569,7 +2643,7 @@ export default function VocabGraphView({
                 </div>
 
                 <div className="p-3.5 bg-[#FAFBF8] border-2 border-[#111410] shadow-[3px_3px_0px_0px_#111410] text-xs font-sans leading-relaxed text-[#111410]">
-                  Over 60% of academic English and SAT/ACT vocabulary originates from {selectedNode.language} morphemic components. Pick any root morpheme in this cluster to bring it into sharp focus.
+                  Over 60% of academic English and SAT/ACT vocabulary originates from {selectedNode.language} morphemic components. Pick any root morpheme in this cluster to focus its word family.
                 </div>
               </>
             )}
@@ -2759,7 +2833,7 @@ export default function VocabGraphView({
         <div className="absolute inset-0 bg-[#FAFBF8]/90 z-40 flex flex-col items-center justify-center space-y-3">
           <div className="w-8 h-8 border-4 border-[#111410] border-t-[#7BB33B] animate-spin" />
           <span className="text-xs font-mono font-bold uppercase text-[#111410]">
-            Illuminating the Cavern of the Mind...
+            Loading Root Graph...
           </span>
         </div>
       )}
