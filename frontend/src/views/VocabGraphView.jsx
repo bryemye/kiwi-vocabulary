@@ -443,6 +443,9 @@ function buildGraphLayout(roots, masteredSet) {
 
       const seed = idx * 11 + (origin.id === 'origin-greek' ? 500 : 0);
       const rootNodeId = `root-${root.id}`;
+      const rootWords = root.words || [];
+      const masteredCount = rootWords.filter(w => masteredSet && masteredSet.has(w.id)).length;
+      const masteryPct = rootWords.length > 0 ? Math.round((masteredCount / rootWords.length) * 100) : 0;
 
       const rootNode = {
         id: rootNodeId,
@@ -454,7 +457,9 @@ function buildGraphLayout(roots, masteredSet) {
         mnemonic: root.mnemonic,
         thematic_cluster: root.thematic_cluster || 'Motion & Travel',
         sat_tier: root.sat_tier || 'Tier 1 High-Yield',
-        total_words: (root.words || []).length,
+        total_words: rootWords.length,
+        masteredCount,
+        masteryPct,
         data: root,
         homeX: rootX,
         homeY: rootY,
@@ -465,7 +470,7 @@ function buildGraphLayout(roots, masteredSet) {
         x: rootX,
         y: rootY,
         inActiveCluster: true,
-        width: 95,
+        width: 102,
         height: 46,
         originId: origin.id,
         // Gentle Fish-Like Sway Parameters
@@ -626,6 +631,9 @@ export default function VocabGraphView({
   // Dual Learning Pathway State & User Preference Persistence
   const [learningPathway, setLearningPathway] = useState(getStoredPathway);
   const [pathwayFilter, setPathwayFilter] = useState('ALL');
+  const [masteryThreshold, setMasteryThreshold] = useState(100);
+  const [masteryComparator, setMasteryComparator] = useState('lte'); // 'lte' (<=) | 'gte' (>=)
+  const isMasteryFilterActive = !(masteryComparator === 'lte' && masteryThreshold === 100);
 
   useEffect(() => {
     const handlePathwaySync = (e) => {
@@ -828,6 +836,21 @@ export default function VocabGraphView({
     pathwayFilterRef.current = pathwayFilter;
   }, [pathwayFilter]);
 
+  const masteryThresholdRef = useRef(masteryThreshold);
+  useEffect(() => {
+    masteryThresholdRef.current = masteryThreshold;
+  }, [masteryThreshold]);
+
+  const masteryComparatorRef = useRef(masteryComparator);
+  useEffect(() => {
+    masteryComparatorRef.current = masteryComparator;
+  }, [masteryComparator]);
+
+  const isMasteryFilterActiveRef = useRef(isMasteryFilterActive);
+  useEffect(() => {
+    isMasteryFilterActiveRef.current = isMasteryFilterActive;
+  }, [isMasteryFilterActive]);
+
   const activeClusterMetaRef = useRef(null);
   const lastAppliedClusterKeyRef = useRef('init');
 
@@ -1004,6 +1027,19 @@ export default function VocabGraphView({
   const allWords = useMemo(() => {
     return graphData.nodes.filter(n => n.type === 'word');
   }, [graphData.nodes]);
+
+  const matchingMasteryCount = useMemo(() => {
+    return allRoots.filter(rootNode => {
+      if (pathwayFilter && pathwayFilter !== 'ALL') {
+        const matchesCluster = learningPathway === PATHWAY_YIELD
+          ? (rootNode.sat_tier || '').toLowerCase() === pathwayFilter.toLowerCase()
+          : (rootNode.thematic_cluster || '').toLowerCase() === pathwayFilter.toLowerCase();
+        if (!matchesCluster) return false;
+      }
+      const pct = rootNode.masteryPct ?? 0;
+      return masteryComparator === 'gte' ? pct >= masteryThreshold : pct <= masteryThreshold;
+    }).length;
+  }, [allRoots, pathwayFilter, learningPathway, masteryComparator, masteryThreshold]);
 
   const searchResults = useMemo(() => {
     const q = searchQuery.toLowerCase().trim();
@@ -1219,6 +1255,14 @@ export default function VocabGraphView({
         const activeFilter = pathwayFilterRef.current;
         const hasActiveFilter = Boolean(activeFilter && activeFilter !== 'ALL');
         const activeCluster = activeClusterMetaRef.current;
+        const mComparator = masteryComparatorRef.current;
+        const mThreshold = masteryThresholdRef.current;
+        const isMasteryActive = isMasteryFilterActiveRef.current;
+
+        const rootMatchesMastery = (rootNode) => {
+          const pct = rootNode.masteryPct ?? 0;
+          return mComparator === 'gte' ? pct >= mThreshold : pct <= mThreshold;
+        };
 
         // Helper for slow smoothstep breathing
         const computeSparseBreath = (node, threshold) => {
@@ -1257,6 +1301,14 @@ export default function VocabGraphView({
           const isFocalChildWord = currentFocusedId && node.rootNodeId === currentFocusedId;
           const isFocalFamily = isFocalRoot || isFocalChildWord;
 
+          if (node.type === 'root') {
+            node._matchesMastery = rootMatchesMastery(node);
+          } else if (node.type === 'word') {
+            node._matchesMastery = parentNode ? Boolean(parentNode._matchesMastery) : true;
+          } else {
+            node._matchesMastery = true;
+          }
+
           if (!currentFocusedId) {
             // Calm fish-like swaying: slow lateral glide + gentle secondary vertical motion
             const localDriftX = Math.sin(time * node.driftSpeedX + node.driftPhaseX) * node.driftAmpX;
@@ -1277,30 +1329,26 @@ export default function VocabGraphView({
                 node.opacity = node.minFadeOpacity + eased * (node.maxFadeOpacity - node.minFadeOpacity);
               }
             } else if (node.type === 'root') {
-              if (hasActiveFilter) {
-                if (!node.inActiveCluster) {
-                  node.opacity = 0;
-                } else {
-                  const breath = 0.5 + 0.5 * Math.sin(time * node.fadeFreq * 1.4 + node.fadePhase);
-                  const eased = breath * breath * (3 - 2 * breath);
-                  node.opacity = 0.30 + eased * (node.maxFadeOpacity - 0.30);
-                }
+              if (!node._matchesMastery || (hasActiveFilter && !node.inActiveCluster)) {
+                node.opacity = 0;
+              } else if (hasActiveFilter || isMasteryActive) {
+                const breath = 0.5 + 0.5 * Math.sin(time * node.fadeFreq * 1.4 + node.fadePhase);
+                const eased = breath * breath * (3 - 2 * breath);
+                node.opacity = 0.30 + eased * (node.maxFadeOpacity - 0.30);
               } else {
-                // ~28% of roots gently visible at a time in ALL mode
+                // ~28% of roots gently visible at a time in unfiltered ALL mode
                 const sparse = computeSparseBreath(node, 0.62);
                 node.opacity = sparse * node.maxFadeOpacity;
               }
             } else {
               // Child word surfaces softly alongside a surfaced parent root
-              if (hasActiveFilter) {
-                if (!node.inActiveCluster) {
-                  node.opacity = 0;
-                } else {
-                  const parentAlpha = parentNode?.opacity || 0;
-                  const breath = 0.5 + 0.5 * Math.sin(time * node.fadeFreq * 1.3 + node.fadePhase);
-                  const eased = breath * breath * (3 - 2 * breath);
-                  node.opacity = Math.min(parentAlpha, 0.20 + eased * (node.maxFadeOpacity - 0.20));
-                }
+              if (!node._matchesMastery || (hasActiveFilter && !node.inActiveCluster)) {
+                node.opacity = 0;
+              } else if (hasActiveFilter || isMasteryActive) {
+                const parentAlpha = parentNode?.opacity || 0;
+                const breath = 0.5 + 0.5 * Math.sin(time * node.fadeFreq * 1.3 + node.fadePhase);
+                const eased = breath * breath * (3 - 2 * breath);
+                node.opacity = Math.min(parentAlpha, 0.20 + eased * (node.maxFadeOpacity - 0.20));
               } else {
                 const parentAlpha = parentNode?.opacity || 0;
                 if (parentAlpha <= 0.25) {
@@ -1335,7 +1383,7 @@ export default function VocabGraphView({
             if (node.type === 'origin') {
               node.opacity = hasActiveFilter ? 0 : 0.20;
             } else if (node.type === 'root') {
-              if (hasActiveFilter && !node.inActiveCluster) {
+              if (!node._matchesMastery || (hasActiveFilter && !node.inActiveCluster)) {
                 node.opacity = 0;
               } else {
                 node.opacity = computeSparseBreath(node, hasActiveFilter ? clusterRootThreshold : 0.62) * 0.12;
@@ -1754,12 +1802,15 @@ export default function VocabGraphView({
     }
     ctx.fillText(displayMorpheme, node.x, node.y - 4);
 
-    // Subtitle badge showing pathway context
+    // Subtitle badge showing pathway context & mastery percentage
     ctx.fillStyle = isFocal ? '#2F441E' : '#62685E';
     ctx.font = 'bold 8.5px "JetBrains Mono", Menlo, Consolas, monospace';
+    const masteryBadge = (node.masteryPct > 0 || isMasteryFilterActiveRef.current)
+      ? ` · ${node.masteryPct ?? 0}%`
+      : '';
     const pathwaySubtext = pathway === PATHWAY_YIELD
-      ? `${(node.sat_tier || 'T1').replace('Tier ', 'T')} · ${node.total_words}W`
-      : `${(node.thematic_cluster || 'Core').slice(0, 9)} · ${node.total_words}W`;
+      ? `${(node.sat_tier || 'T1').replace('Tier ', 'T')} · ${node.total_words}W${masteryBadge}`
+      : `${(node.thematic_cluster || 'Core').slice(0, 8)} · ${node.total_words}W${masteryBadge}`;
     ctx.fillText(pathwaySubtext, node.x, node.y + 12);
     ctx.restore();
   };
@@ -2108,12 +2159,24 @@ export default function VocabGraphView({
           spread: 65,
           origin: { y: 0.6 }
         });
-        setMasteredWordIds(prev => new Set(prev).add(studyWordModal.id));
+        const nextMastered = new Set(masteredWordIds);
+        nextMastered.add(studyWordModal.id);
+        setMasteredWordIds(nextMastered);
         setGraphData(prev => ({
           ...prev,
-          nodes: prev.nodes.map(n => 
-            n.id === `word-${studyWordModal.id}` ? { ...n, isMastered: true } : n
-          )
+          nodes: prev.nodes.map(n => {
+            if (n.id === `word-${studyWordModal.id}`) {
+              return { ...n, isMastered: true };
+            }
+            if (n.type === 'root' && Array.isArray(n.data?.words)) {
+              const masteredCount = n.data.words.filter(w => nextMastered.has(w.id)).length;
+              const masteryPct = n.data.words.length > 0
+                ? Math.round((masteredCount / n.data.words.length) * 100)
+                : 0;
+              return { ...n, masteredCount, masteryPct };
+            }
+            return n;
+          })
         }));
       }
     } catch (err) {
@@ -2351,8 +2414,8 @@ export default function VocabGraphView({
         </div>
       </div>
 
-      {/* PERSPECTIVE FILTER PILLS RIBBON */}
-      <div className="absolute top-14 sm:top-16 left-2.5 sm:left-4 right-2.5 sm:right-4 z-20 pointer-events-none flex items-center overflow-x-auto no-scrollbar pb-1">
+      {/* PERSPECTIVE FILTER PILLS & MASTERY SLIDER RIBBON */}
+      <div className="absolute top-14 sm:top-16 left-2.5 sm:left-4 right-2.5 sm:right-4 z-20 pointer-events-none flex flex-wrap items-center gap-1.5">
         <div className="pointer-events-auto bg-white/95 backdrop-blur-xs border-2 border-[#111410] shadow-[3px_3px_0px_0px_#111410] p-1 inline-flex items-center space-x-1 font-mono text-[10px] sm:text-[11px] font-black uppercase max-w-full overflow-x-auto no-scrollbar">
           <span className="text-[9px] text-[#62685E] px-1.5 select-none shrink-0">
             {learningPathway === PATHWAY_YIELD ? '⚡ FREQUENCY TIERS:' : '🧠 SEMANTIC CLUSTERS:'}
@@ -2397,6 +2460,53 @@ export default function VocabGraphView({
                   {cluster.icon} {cluster.name}
                 </button>
               ))}
+        </div>
+
+        {/* MASTERY RANGE FILTER (1-100% + <= / >= TOGGLE) */}
+        <div className="pointer-events-auto bg-white/95 backdrop-blur-xs border-2 border-[#111410] shadow-[3px_3px_0px_0px_#111410] px-2 py-1 inline-flex items-center space-x-2 font-mono text-[10px] sm:text-[11px] font-black uppercase shrink-0">
+          <span className="text-[9px] text-[#62685E] select-none shrink-0">
+            MASTERY
+          </span>
+          <button
+            type="button"
+            onClick={() => setMasteryComparator(prev => (prev === 'lte' ? 'gte' : 'lte'))}
+            title={
+              masteryComparator === 'lte'
+                ? 'Showing roots with mastery ≤ threshold (click to switch to ≥)'
+                : 'Showing roots with mastery ≥ threshold (click to switch to ≤)'
+            }
+            className="px-1.5 py-0.5 bg-[#EFE8DF] hover:bg-[#EDF5E5] border border-[#111410] text-[#111410] font-black text-[11px] leading-none cursor-pointer transition"
+          >
+            {masteryComparator === 'lte' ? '≤' : '≥'}
+          </button>
+          <input
+            type="range"
+            min={1}
+            max={100}
+            value={masteryThreshold}
+            onChange={(e) => setMasteryThreshold(Number(e.target.value))}
+            aria-label="Mastery percentage threshold"
+            className="w-20 sm:w-28 accent-[#7BB33B] cursor-pointer h-1.5"
+          />
+          <span className="w-8 text-right text-[#111410] tabular-nums">
+            {masteryThreshold}%
+          </span>
+          <span className="text-[9px] text-[#62685E] tabular-nums">
+            ({matchingMasteryCount})
+          </span>
+          {isMasteryFilterActive && (
+            <button
+              type="button"
+              onClick={() => {
+                setMasteryComparator('lte');
+                setMasteryThreshold(100);
+              }}
+              title="Reset mastery filter"
+              className="text-[#62685E] hover:text-[#991B1B] font-black leading-none px-0.5 cursor-pointer"
+            >
+              ×
+            </button>
+          )}
         </div>
       </div>
 
