@@ -117,7 +117,7 @@ function drawGraphCard(ctx, x, y, width, height, options = {}) {
 /**
  * Ambient background particles for gentle depth
  */
-const AMBIENT_PARTICLES_COUNT = 60;
+const AMBIENT_PARTICLES_COUNT = 28;
 function createAmbientParticles() {
   const particles = [];
   for (let i = 0; i < AMBIENT_PARTICLES_COUNT; i++) {
@@ -154,9 +154,9 @@ function buildGraphLayout(roots, masteredSet) {
     type: 'origin',
     label: 'LATIN ROOTS',
     language: 'Latin',
-    baseX: -800,
+    baseX: -1020,
     baseY: 0,
-    x: -800,
+    x: -1020,
     y: 0,
     width: 174,
     height: 54,
@@ -166,11 +166,11 @@ function buildGraphLayout(roots, masteredSet) {
     driftAmpY: 5,
     driftPhaseX: 0.5,
     driftPhaseY: 1.2,
-    fadeFreq: 0.06,
+    fadeFreq: 0.05,
     fadePhase: 0,
-    minFadeOpacity: 0.62,
-    maxFadeOpacity: 0.92,
-    opacity: 0.92,
+    minFadeOpacity: 0.55,
+    maxFadeOpacity: 0.88,
+    opacity: 0.88,
   };
 
   const originGreek = {
@@ -178,9 +178,9 @@ function buildGraphLayout(roots, masteredSet) {
     type: 'origin',
     label: 'GREEK ROOTS',
     language: 'Greek',
-    baseX: 800,
+    baseX: 1020,
     baseY: 0,
-    x: 800,
+    x: 1020,
     y: 0,
     width: 174,
     height: 54,
@@ -190,11 +190,11 @@ function buildGraphLayout(roots, masteredSet) {
     driftAmpY: 5,
     driftPhaseX: 2.1,
     driftPhaseY: 0.8,
-    fadeFreq: 0.06,
+    fadeFreq: 0.05,
     fadePhase: 1.5,
-    minFadeOpacity: 0.62,
-    maxFadeOpacity: 0.92,
-    opacity: 0.92,
+    minFadeOpacity: 0.55,
+    maxFadeOpacity: 0.88,
+    opacity: 0.88,
   };
 
   nodes.push(originLatin, originGreek);
@@ -212,7 +212,7 @@ function buildGraphLayout(roots, masteredSet) {
 
     const ring1Cap = Math.min(14, Math.ceil(total * 0.35));
     const ring2Cap = Math.min(26, Math.ceil(total * 0.40));
-    const ringRadii = [380, 680, 980];
+    const ringRadii = [400, 720, 1040];
 
     rootList.forEach((root, idx) => {
       let ringIdx = 0;
@@ -264,12 +264,12 @@ function buildGraphLayout(roots, masteredSet) {
         driftAmpY: 7 + pseudoRandom(seed * 7 + 4) * 7,
         driftPhaseX: pseudoRandom(seed * 7 + 5) * Math.PI * 2,
         driftPhaseY: pseudoRandom(seed * 7 + 6) * Math.PI * 2,
-        // Slow Breathing Fade Parameters
-        fadeFreq: 0.06 + pseudoRandom(seed * 7 + 7) * 0.07,
+        // Slow Breathing Fade Parameters (~10-14% active at a time over slow ~2-3 min cycles)
+        fadeFreq: 0.032 + pseudoRandom(seed * 7 + 7) * 0.025,
         fadePhase: pseudoRandom(seed * 7 + 8) * Math.PI * 2,
-        minFadeOpacity: 0.28 + pseudoRandom(seed * 7 + 9) * 0.12,
-        maxFadeOpacity: 0.78 + pseudoRandom(seed * 7 + 10) * 0.18,
-        opacity: 0.78,
+        minFadeOpacity: 0,
+        maxFadeOpacity: 0.78 + pseudoRandom(seed * 7 + 10) * 0.16,
+        opacity: 0,
       };
       nodes.push(rootNode);
 
@@ -328,11 +328,11 @@ function buildGraphLayout(roots, masteredSet) {
           driftPhaseX: pseudoRandom(wordSeed + 5) * Math.PI * 2,
           driftPhaseY: pseudoRandom(wordSeed + 6) * Math.PI * 2,
           // Slow Breathing Fade Parameters
-          fadeFreq: 0.07 + pseudoRandom(wordSeed + 7) * 0.07,
+          fadeFreq: 0.05 + pseudoRandom(wordSeed + 7) * 0.05,
           fadePhase: pseudoRandom(wordSeed + 8) * Math.PI * 2,
-          minFadeOpacity: 0.16 + pseudoRandom(wordSeed + 9) * 0.10,
-          maxFadeOpacity: 0.62 + pseudoRandom(wordSeed + 10) * 0.20,
-          opacity: 0.62,
+          minFadeOpacity: 0,
+          maxFadeOpacity: 0.65 + pseudoRandom(wordSeed + 10) * 0.20,
+          opacity: 0,
         };
         nodes.push(wordNode);
 
@@ -358,9 +358,9 @@ function buildGraphLayout(roots, masteredSet) {
       label: 'OTHER ROOTS',
       language: 'Other',
       baseX: 0,
-      baseY: 850,
+      baseY: 1120,
       x: 0,
-      y: 850,
+      y: 1120,
       width: 174,
       height: 54,
       driftSpeedX: 0.045,
@@ -369,11 +369,11 @@ function buildGraphLayout(roots, masteredSet) {
       driftAmpY: 5,
       driftPhaseX: 1.0,
       driftPhaseY: 1.0,
-      fadeFreq: 0.06,
+      fadeFreq: 0.05,
       fadePhase: 0,
-      minFadeOpacity: 0.62,
-      maxFadeOpacity: 0.92,
-      opacity: 0.92,
+      minFadeOpacity: 0.55,
+      maxFadeOpacity: 0.88,
+      opacity: 0.88,
     };
     nodes.push(originOther);
     positionRoots(otherRoots, originOther);
@@ -585,7 +585,7 @@ export default function VocabGraphView({
   const canvasRef = useRef(null);
   const containerRef = useRef(null);
   const searchInputRef = useRef(null);
-  const cameraRef = useRef({ x: 0, y: 0, zoom: 0.68 });
+  const cameraRef = useRef({ x: 0, y: 0, zoom: 0.56 });
   const targetCameraRef = useRef(null);
   const isDraggingRef = useRef(false);
   const dragStartRef = useRef({ x: 0, y: 0 });
@@ -706,7 +706,7 @@ export default function VocabGraphView({
     setFocusedRootId(null);
     setSelectedNode(null);
     setSearchQuery('');
-    targetCameraRef.current = { x: 0, y: 0, zoom: 0.65 };
+    targetCameraRef.current = { x: 0, y: 0, zoom: 0.56 };
   }, []);
 
   const smoothPanToNode = useCallback((node) => {
@@ -943,11 +943,33 @@ export default function VocabGraphView({
         const nodeMap = new Map();
         graphData.nodes.forEach(n => nodeMap.set(n.id, n));
 
-        // 4. Update Node Positions & Continuous Breathing Opacities
-        // - Ambient Mode (no focus): Nodes sway slowly like fish and breathe smoothly
+        const activeFilter = pathwayFilterRef.current;
+        const activePathway = learningPathwayRef.current;
+        const hasActiveFilter = Boolean(activeFilter && activeFilter !== 'ALL');
+
+        const rootMatchesFilter = (rootNode) => {
+          if (!hasActiveFilter) return true;
+          if (activePathway === PATHWAY_YIELD) {
+            return (rootNode.sat_tier || '').toLowerCase() === activeFilter.toLowerCase();
+          }
+          return (rootNode.thematic_cluster || '').toLowerCase() === activeFilter.toLowerCase();
+        };
+
+        // Helper for slow, sparse smoothstep breathing (only ~12-14% of roots visible at once)
+        const computeSparseBreath = (node, threshold) => {
+          const wave = Math.sin(time * node.fadeFreq + node.fadePhase);
+          if (wave <= threshold) return 0;
+          const t = (wave - threshold) / (1 - threshold);
+          return t * t * (3 - 2 * t);
+        };
+
+        // 4. Update Node Positions & Sparse Continuous Breathing Opacities
+        // - Ambient Mode (no focus): ~10% of the graph gently surfaces at a time, swaying slowly
         // - Focus Mode: The selected root & its children remain clearly visible
         //   while unrelated nodes dim softly into the background
-        const updateNodeMotion = (node, parentDriftX = 0, parentDriftY = 0) => {
+        const updateNodeMotion = (node, parentNode = null) => {
+          const parentDriftX = parentNode?._driftX || 0;
+          const parentDriftY = parentNode?._driftY || 0;
           const isFocalRoot = currentFocusedId && node.id === currentFocusedId;
           const isFocalChildWord = currentFocusedId && node.rootNodeId === currentFocusedId;
           const isFocalFamily = isFocalRoot || isFocalChildWord;
@@ -963,12 +985,33 @@ export default function VocabGraphView({
             node.x = node.baseX + totalDriftX;
             node.y = node.baseY + totalDriftY;
 
-            // Smooth continuous breathing wave (no abrupt fade-out to zero)
-            const breath = 0.5 + 0.5 * Math.sin(time * node.fadeFreq + node.fadePhase);
-            const easedBreath = breath * breath * (3 - 2 * breath);
-            node.opacity =
-              node.minFadeOpacity +
-              easedBreath * (node.maxFadeOpacity - node.minFadeOpacity);
+            if (node.type === 'origin') {
+              const breath = 0.5 + 0.5 * Math.sin(time * node.fadeFreq + node.fadePhase);
+              const eased = breath * breath * (3 - 2 * breath);
+              node.opacity = node.minFadeOpacity + eased * (node.maxFadeOpacity - node.minFadeOpacity);
+            } else if (node.type === 'root') {
+              if (hasActiveFilter) {
+                if (!rootMatchesFilter(node)) {
+                  node.opacity = 0;
+                } else {
+                  const breath = 0.5 + 0.5 * Math.sin(time * node.fadeFreq + node.fadePhase);
+                  node.opacity = 0.55 + breath * 0.35;
+                }
+              } else {
+                const sparse = computeSparseBreath(node, 0.90);
+                node.opacity = sparse * node.maxFadeOpacity;
+              }
+            } else {
+              // Child word only surfaces gently alongside a surfaced parent root
+              const parentAlpha = parentNode?.opacity || 0;
+              if (parentAlpha <= 0.35) {
+                node.opacity = 0;
+              } else {
+                const parentGate = (parentAlpha - 0.35) / 0.65;
+                const wordSparse = computeSparseBreath(node, 0.25);
+                node.opacity = parentGate * wordSparse * node.maxFadeOpacity;
+              }
+            }
           } else if (isFocalFamily) {
             // Focused Mode: anchored calmly with subtle slow sway
             const microDriftX = Math.sin(time * 0.12 + node.driftPhaseX) * 1.5;
@@ -979,7 +1022,7 @@ export default function VocabGraphView({
             node.y = node.baseY + microDriftY;
             node.opacity = 1.0;
           } else {
-            // Peripheral nodes during Focus Mode: slow sway, gently dimmed
+            // Peripheral nodes during Focus Mode: slow sway, sparsely & very faintly visible
             const localDriftX = Math.sin(time * node.driftSpeedX * 0.6 + node.driftPhaseX) * node.driftAmpX;
             const localDriftY = Math.cos(time * node.driftSpeedY * 0.6 + node.driftPhaseY) * node.driftAmpY;
             const totalDriftX = parentDriftX * 0.85 + localDriftX;
@@ -989,23 +1032,28 @@ export default function VocabGraphView({
             node.x = node.baseX + totalDriftX;
             node.y = node.baseY + totalDriftY;
 
-            const bgBreath = 0.5 + 0.5 * Math.sin(time * node.fadeFreq + node.fadePhase);
-            node.opacity = 0.08 + bgBreath * 0.08;
+            if (node.type === 'origin') {
+              node.opacity = 0.20;
+            } else if (node.type === 'root') {
+              node.opacity = computeSparseBreath(node, 0.90) * 0.12;
+            } else {
+              node.opacity = 0;
+            }
           }
         };
 
         // Pass 1: Origins & Roots
         graphData.nodes.forEach(node => {
           if (node.type !== 'word') {
-            updateNodeMotion(node, 0, 0);
+            updateNodeMotion(node, null);
           }
         });
 
-        // Pass 2: Child Words follow their parent root's sway
+        // Pass 2: Child Words follow their parent root's sway & visibility
         graphData.nodes.forEach(node => {
           if (node.type === 'word') {
             const parentRoot = nodeMap.get(node.rootNodeId);
-            updateNodeMotion(node, parentRoot?._driftX || 0, parentRoot?._driftY || 0);
+            updateNodeMotion(node, parentRoot || null);
           }
         });
 
