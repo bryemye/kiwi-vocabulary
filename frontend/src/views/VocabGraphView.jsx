@@ -240,35 +240,35 @@ function assignClusterTargets(nodes, pathway, filterName) {
   let ringSpecs;
   let clusterZoom;
   if (count <= 10) {
-    ringSpecs = [{ cap: count, radius: 250 }];
-    clusterZoom = 0.86;
+    ringSpecs = [{ cap: count, radius: 170 }];
+    clusterZoom = 0.95;
   } else if (count <= 26) {
-    const r1 = Math.min(10, Math.ceil(count * 0.4));
+    const r1 = Math.min(10, Math.ceil(count * 0.42));
     ringSpecs = [
-      { cap: r1, radius: 240 },
-      { cap: count - r1, radius: 450 },
+      { cap: r1, radius: 165 },
+      { cap: count - r1, radius: 300 },
     ];
-    clusterZoom = 0.74;
+    clusterZoom = 0.85;
   } else if (count <= 50) {
     const r1 = 12;
     const r2 = 20;
     ringSpecs = [
-      { cap: r1, radius: 250 },
-      { cap: r2, radius: 470 },
-      { cap: count - r1 - r2, radius: 690 },
+      { cap: r1, radius: 175 },
+      { cap: r2, radius: 320 },
+      { cap: count - r1 - r2, radius: 465 },
     ];
-    clusterZoom = 0.63;
+    clusterZoom = 0.72;
   } else {
     const r1 = 14;
     const r2 = 24;
     const r3 = 32;
     ringSpecs = [
-      { cap: r1, radius: 260 },
-      { cap: r2, radius: 500 },
-      { cap: r3, radius: 740 },
-      { cap: count - r1 - r2 - r3, radius: 980 },
+      { cap: r1, radius: 180 },
+      { cap: r2, radius: 335 },
+      { cap: r3, radius: 490 },
+      { cap: count - r1 - r2 - r3, radius: 645 },
     ];
-    clusterZoom = 0.54;
+    clusterZoom = 0.62;
   }
 
   // Place matching roots in concentric rings around territory center
@@ -322,7 +322,7 @@ function assignClusterTargets(nodes, pathway, filterName) {
         territory.y,
         wIdx,
         wordList.length,
-        135
+        96
       );
       wordNode.targetBaseX = pos.x;
       wordNode.targetBaseY = pos.y;
@@ -851,8 +851,8 @@ export default function VocabGraphView({
       setSelectedNode(null);
       if (clusterMeta) {
         targetCameraRef.current = {
-          x: -clusterMeta.x,
-          y: -clusterMeta.y,
+          x: -clusterMeta.x * clusterMeta.zoom,
+          y: -clusterMeta.y * clusterMeta.zoom + 24,
           zoom: clusterMeta.zoom,
         };
       } else {
@@ -945,12 +945,13 @@ export default function VocabGraphView({
 
     // Smoothly pan camera to center the focused root with comfortable zoom
     const drawerOffset = 180;
+    const zoom = 1.05;
     const targetX = rootNode.targetBaseX ?? rootNode.baseX;
     const targetY = rootNode.targetBaseY ?? rootNode.baseY;
     targetCameraRef.current = {
-      x: -targetX - drawerOffset,
-      y: -targetY,
-      zoom: 1.05,
+      x: -targetX * zoom - drawerOffset,
+      y: -targetY * zoom,
+      zoom,
     };
   }, []);
 
@@ -961,8 +962,8 @@ export default function VocabGraphView({
     const cluster = activeClusterMetaRef.current;
     if (cluster) {
       targetCameraRef.current = {
-        x: -cluster.x,
-        y: -cluster.y,
+        x: -cluster.x * cluster.zoom,
+        y: -cluster.y * cluster.zoom + 24,
         zoom: cluster.zoom,
       };
     } else {
@@ -981,12 +982,13 @@ export default function VocabGraphView({
     }
 
     const drawerOffset = 180;
+    const zoom = node.type === 'word' ? 1.15 : 1.05;
     const targetX = node.targetBaseX ?? node.baseX;
     const targetY = node.targetBaseY ?? node.baseY;
     targetCameraRef.current = {
-      x: -targetX - drawerOffset,
-      y: -targetY,
-      zoom: node.type === 'word' ? 1.15 : 1.05,
+      x: -targetX * zoom - drawerOffset,
+      y: -targetY * zoom,
+      zoom,
     };
   }, []);
 
@@ -1279,8 +1281,9 @@ export default function VocabGraphView({
                 if (!node.inActiveCluster) {
                   node.opacity = 0;
                 } else {
-                  const sparse = computeSparseBreath(node, clusterRootThreshold);
-                  node.opacity = sparse * node.maxFadeOpacity;
+                  const breath = 0.5 + 0.5 * Math.sin(time * node.fadeFreq * 1.4 + node.fadePhase);
+                  const eased = breath * breath * (3 - 2 * breath);
+                  node.opacity = 0.30 + eased * (node.maxFadeOpacity - 0.30);
                 }
               } else {
                 // ~28% of roots gently visible at a time in ALL mode
@@ -1289,8 +1292,15 @@ export default function VocabGraphView({
               }
             } else {
               // Child word surfaces softly alongside a surfaced parent root
-              if (hasActiveFilter && !node.inActiveCluster) {
-                node.opacity = 0;
+              if (hasActiveFilter) {
+                if (!node.inActiveCluster) {
+                  node.opacity = 0;
+                } else {
+                  const parentAlpha = parentNode?.opacity || 0;
+                  const breath = 0.5 + 0.5 * Math.sin(time * node.fadeFreq * 1.3 + node.fadePhase);
+                  const eased = breath * breath * (3 - 2 * breath);
+                  node.opacity = Math.min(parentAlpha, 0.20 + eased * (node.maxFadeOpacity - 0.20));
+                }
               } else {
                 const parentAlpha = parentNode?.opacity || 0;
                 if (parentAlpha <= 0.25) {
@@ -1575,7 +1585,7 @@ export default function VocabGraphView({
     // Subtle territory halo ring
     ctx.save();
     ctx.beginPath();
-    ctx.arc(cluster.x, cluster.y, 175, 0, Math.PI * 2);
+    ctx.arc(cluster.x, cluster.y, 108, 0, Math.PI * 2);
     ctx.strokeStyle = cluster.accentColor || '#7BB33B';
     ctx.lineWidth = 1.25;
     ctx.setLineDash([6, 10]);
