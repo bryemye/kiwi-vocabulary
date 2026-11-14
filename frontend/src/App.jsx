@@ -12,7 +12,6 @@ import ReadingView from './components/ReadingView';
 import DashboardView from './components/DashboardView';
 import AuthModal from './components/AuthModal';
 import AuthVerifyCard from './components/AuthVerifyCard';
-import HomeIntroOverlay from './components/HomeIntroOverlay';
 import {
   fetchDashboardStats,
   fetchRoots,
@@ -73,9 +72,8 @@ export default function App() {
   const [verifyToken, setVerifyToken] = useState(null);
   const [verifySessionId, setVerifySessionId] = useState(null);
 
-  // Guest Mode & Introductory Overlay States
+  // Guest Mode States
   const [isGuestMode, setIsGuestMode] = useState(false);
-  const [showIntroOverlay, setShowIntroOverlay] = useState(false);
   const [preloadedDeck, setPreloadedDeck] = useState([]);
   const [guestSession, setGuestSession] = useState(null);
   const [todayDateStr, setTodayDateStr] = useState(() => getLocalDateString());
@@ -288,7 +286,16 @@ export default function App() {
         ),
       }))
     );
-  }, []);
+    setPreloadedDeck((prev) => {
+      const next = prev.map((w) =>
+        w.id === updatedWord.id ? { ...w, ...updatedWord } : w
+      );
+      if (user?.id) {
+        setCachedUserDeck(user.id, next);
+      }
+      return next;
+    });
+  }, [user?.id]);
 
   // Sync state whenever URL hash or browser history changes
   useEffect(() => {
@@ -379,7 +386,6 @@ export default function App() {
         if (userData) {
           setUser(userData);
           setIsGuestMode(false);
-          setShowIntroOverlay(false);
 
           // Fast 0ms render from cached user deck if available
           const cachedUser = getCachedUserDeck(userData.id);
@@ -396,19 +402,16 @@ export default function App() {
           }
         } else {
           setUser(null);
+          setIsGuestMode(true);
           if (savedGuestSession && savedGuestSession.deck?.length > 0) {
-            // Returning guest from earlier today: restore session without overlay
-            setIsGuestMode(true);
-            setShowIntroOverlay(false);
+            // Returning guest from earlier today: restore session
             setGuestSession(savedGuestSession);
             setPreloadedDeck(savedGuestSession.deck);
           } else {
-            // New visitor: show introductory overlay
-            setShowIntroOverlay(true);
             if (cachedDaily && cachedDaily.length > 0) {
               setPreloadedDeck(cachedDaily);
             } else {
-              // Pre-load today's daily 15 challenge deck in background so it's ready on click
+              // Pre-load today's daily 15 challenge deck for immediate guest study
               const dailyDeck = await fetchDailyDeck(localDate);
               if (isMounted && dailyDeck?.length > 0) {
                 setPreloadedDeck(dailyDeck);
@@ -420,7 +423,7 @@ export default function App() {
       } catch (err) {
         console.warn('Initial session init notice:', err);
         if (isMounted) {
-          setShowIntroOverlay(true);
+          setIsGuestMode(true);
           if (cachedDaily && cachedDaily.length > 0) {
             setPreloadedDeck(cachedDaily);
           }
@@ -566,7 +569,6 @@ export default function App() {
   const handleAuthSuccess = async (userData) => {
     setUser(userData);
     setIsGuestMode(false);
-    setShowIntroOverlay(false);
     setIsAuthModalOpen(false);
     setVerifyToken(null);
     setVerifySessionId(null);
@@ -596,8 +598,7 @@ export default function App() {
       console.error('Error logging out:', err);
     } finally {
       setUser(null);
-      setIsGuestMode(false);
-      setShowIntroOverlay(true);
+      setIsGuestMode(true);
       try {
         const dailyDeck = await fetchDailyDeck(todayDateStr);
         if (dailyDeck && dailyDeck.length > 0) {
@@ -699,23 +700,6 @@ export default function App() {
         isOpen={isAuthModalOpen}
         onClose={() => setIsAuthModalOpen(false)}
         onSuccess={handleAuthSuccess}
-      />
-
-      {/* Home Page Introductory Overlay: Sign In vs Start as Guest */}
-      <HomeIntroOverlay
-        isOpen={showIntroOverlay && !user}
-        todayFormatted={todayFormatted}
-        onStartAsGuest={() => {
-          setIsGuestMode(true);
-          setShowIntroOverlay(false);
-        }}
-        onOpenSignIn={() => {
-          setIsAuthModalOpen(true);
-        }}
-        onClose={() => {
-          setIsGuestMode(true);
-          setShowIntroOverlay(false);
-        }}
       />
 
       {/* Main Workspace: Mutually Exclusive Full Views */}

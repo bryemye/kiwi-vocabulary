@@ -166,6 +166,12 @@ class VocabularyWordViewSet(viewsets.ModelViewSet):
             return [permissions.IsAdminUser()]
         return [permissions.AllowAny()]
 
+    def perform_update(self, serializer):
+        instance = serializer.save()
+        today_str = timezone.now().strftime('%Y-%m-%d')
+        cache.delete(f"kiwi_daily_guest_deck_{today_str}_15")
+        return instance
+
     def get_queryset(self):
         queryset = super().get_queryset()
         root_id = self.request.query_params.get('root')

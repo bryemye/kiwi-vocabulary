@@ -83,6 +83,11 @@ class Command(BaseCommand):
                 else:
                     effective_review = incoming_review
 
+                if existing_word and existing_word.mnemonic and "mnemonic" not in w_item:
+                    effective_mnemonic = existing_word.mnemonic
+                else:
+                    effective_mnemonic = w_item.get("mnemonic", "")
+
                 VocabularyWord.objects.update_or_create(
                     word=word_clean,
                     defaults={
@@ -94,6 +99,7 @@ class Command(BaseCommand):
                         "connotation": w_item.get("connotation", "neutral"),
                         "pronunciation": w_item.get("pronunciation", ""),
                         "part_of_speech": w_item.get("part_of_speech", "adjective"),
+                        "mnemonic": effective_mnemonic,
                         "review": effective_review,
                     }
                 )

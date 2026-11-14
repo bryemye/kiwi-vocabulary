@@ -1,7 +1,10 @@
+from django.contrib.auth import get_user_model
 from django.test import TestCase
 from rest_framework.test import APIClient
 from rest_framework import status
 from kiwi_vocab.models import Root, VocabularyWord
+
+User = get_user_model()
 
 
 class KiwiVocabTests(TestCase):
@@ -98,3 +101,44 @@ class KiwiVocabTests(TestCase):
         res_german = self.client.get('/api/vocab/roots/?language=German')
         self.assertEqual(res_german.status_code, status.HTTP_200_OK)
         self.assertEqual([r['morpheme'] for r in res_german.data], ['wander'])
+
+    def test_word_mnemonic_patch_and_serialization(self):
+        # Default empty mnemonic is exposed on word and nested root endpoints
+        res_get = self.client.get(f'/api/vocab/words/{self.word1.id}/')
+        self.assertEqual(res_get.status_code, status.HTTP_200_OK)
+        self.assertEqual(res_get.data['mnemonic'], '')
+        self.assertEqual(res_get.data['root_details']['mnemonic'], 'chronometer')
+
+        # Non-staff user cannot update word mnemonic
+        regular_user = User.objects.create_user(username='student', password='pw')
+        self.client.force_authenticate(user=regular_user)
+        res_forbidden = self.client.patch(
+            f'/api/vocab/words/{self.word1.id}/',
+            {'mnemonic': 'Should not work'},
+            format='json'
+        )
+        self.assertEqual(res_forbidden.status_code, status.HTTP_403_FORBIDDEN)
+
+        # Staff user can set and clear word-specific mnemonic
+        staff_user = User.objects.create_user(username='editor', password='pw', is_staff=True)
+        self.client.force_authenticate(user=staff_user)
+        res_patch = self.client.patch(
+            f'/api/vocab/words/{self.word1.id}/',
+            {'mnemonic': 'A wristwatch in ancient Rome = out of time'},
+            format='json'
+        )
+        self.assertEqual(res_patch.status_code, status.HTTP_200_OK)
+        self.assertEqual(res_patch.data['mnemonic'], 'A wristwatch in ancient Rome = out of time')
+        self.word1.refresh_from_db()
+        self.assertEqual(self.word1.mnemonic, 'A wristwatch in ancient Rome = out of time')
+
+        # Clearing mnemonic restores empty string so frontend falls back to root mnemonic
+        res_clear = self.client.patch(
+            f'/api/vocab/words/{self.word1.id}/',
+            {'mnemonic': ''},
+            format='json'
+        )
+        self.assertEqual(res_clear.status_code, status.HTTP_200_OK)
+        self.assertEqual(res_clear.data['mnemonic'], '')
+        self.word1.refresh_from_db()
+        self.assertEqual(self.word1.mnemonic, '')

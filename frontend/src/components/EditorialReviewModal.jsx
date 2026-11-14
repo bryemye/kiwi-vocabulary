@@ -50,6 +50,7 @@ export default function EditorialReviewModal({
     prefix: '',
     suffix: '',
     root: '',
+    mnemonic: '',
     definition: '',
     sat_sentence: '',
     connotation: 'neutral',
@@ -88,6 +89,7 @@ export default function EditorialReviewModal({
         prefix: activeWord.prefix || '',
         suffix: activeWord.suffix || '',
         root: activeWord.root || activeWord.root_details?.id || '',
+        mnemonic: activeWord.mnemonic || '',
         definition: activeWord.definition || '',
         sat_sentence: activeWord.sat_sentence || '',
         connotation: activeWord.connotation || 'neutral',
@@ -211,6 +213,7 @@ export default function EditorialReviewModal({
         prefix: (wordFormData.prefix || '').trim(),
         suffix: (wordFormData.suffix || '').trim(),
         root: Number(wordFormData.root),
+        mnemonic: (wordFormData.mnemonic || '').trim(),
         definition: (wordFormData.definition || '').trim(),
         sat_sentence: (wordFormData.sat_sentence || '').trim(),
         connotation: wordFormData.connotation,
@@ -247,7 +250,10 @@ export default function EditorialReviewModal({
     }
   };
 
-  const parentRoot = activeWord?.root_details || roots.find(r => r.id === activeWord?.root);
+  const parentRoot =
+    roots.find(r => r.id === Number(wordFormData.root)) ||
+    activeWord?.root_details ||
+    roots.find(r => r.id === activeWord?.root);
 
   return (
     <div className="fixed inset-0 z-50 bg-[#111410]/70 backdrop-blur-sm flex items-center justify-center p-3 sm:p-5 animate-fade-in">
@@ -605,6 +611,53 @@ export default function EditorialReviewModal({
                           />
                         </div>
                       </div>
+                    </div>
+
+                    {/* Word Key / Memory Mnemonic Override */}
+                    <div>
+                      <div className="flex items-center justify-between gap-2 mb-1">
+                        <label className="text-[10px] font-mono font-black uppercase text-[#62685E]">
+                          Word Key / Mnemonic (Optional Override)
+                        </label>
+                        <div className="flex items-center space-x-2">
+                          {!wordFormData.mnemonic?.trim() && parentRoot?.mnemonic && (
+                            <button
+                              type="button"
+                              onClick={() => setWordFormData(prev => ({ ...prev, mnemonic: parentRoot.mnemonic }))}
+                              className="text-[10px] font-mono font-bold text-[#2F441E] bg-[#EDF5E5] hover:bg-[#DCEDD0] border border-[#7BB33B] px-2 py-0.5 transition"
+                            >
+                              Copy Root Key
+                            </button>
+                          )}
+                          {wordFormData.mnemonic?.trim() && (
+                            <button
+                              type="button"
+                              onClick={() => setWordFormData(prev => ({ ...prev, mnemonic: '' }))}
+                              className="text-[10px] font-mono font-bold text-[#62685E] hover:text-[#991B1B] bg-white border border-[#111410]/40 px-2 py-0.5 transition"
+                            >
+                              {parentRoot?.mnemonic ? 'Reset to Root Key' : 'Clear Key'}
+                            </button>
+                          )}
+                        </div>
+                      </div>
+                      <textarea
+                        rows={2}
+                        value={wordFormData.mnemonic}
+                        onChange={(e) => setWordFormData(prev => ({ ...prev, mnemonic: e.target.value }))}
+                        placeholder={
+                          parentRoot?.mnemonic
+                            ? `Leave blank to fall back to root key: "${parentRoot.mnemonic}"`
+                            : 'Enter a word-specific memory key / mnemonic...'
+                        }
+                        className="w-full text-xs font-serif italic p-2.5 bg-white border-2 border-[#111410] focus:outline-none focus:ring-2 focus:ring-[#7BB33B] resize-y"
+                      />
+                      <span className="text-[10px] font-mono text-[#62685E] mt-1 block">
+                        {wordFormData.mnemonic?.trim()
+                          ? `Custom word key active for "${activeWord.word}" (overrides root key).`
+                          : parentRoot?.mnemonic
+                            ? `Inheriting root key: "${parentRoot.mnemonic}"`
+                            : 'No root key or word key set.'}
+                      </span>
                     </div>
 
                     {/* Lexical Definition Textarea */}

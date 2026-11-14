@@ -8,7 +8,7 @@ class VocabularyWordSimpleSerializer(serializers.ModelSerializer):
         fields = [
             'id', 'word', 'prefix', 'suffix', 'definition',
             'sat_sentence', 'connotation', 'pronunciation', 'part_of_speech',
-            'review'
+            'mnemonic', 'review'
         ]
 
 
@@ -40,5 +40,5 @@ class VocabularyWordSerializer(serializers.ModelSerializer):
         fields = [
             'id', 'word', 'root', 'root_details', 'prefix', 'suffix',
             'definition', 'sat_sentence', 'connotation', 'pronunciation', 'part_of_speech',
-            'review'
+            'mnemonic', 'review'
         ]

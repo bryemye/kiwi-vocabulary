@@ -59,12 +59,17 @@ class Command(BaseCommand):
                 word_clean = w["word"].lower().strip()
                 existing_word = VocabularyWord.objects.filter(word=word_clean).first()
 
-                # Protect existing editorial reviews on PythonAnywhere / DB
+                # Protect existing editorial reviews and word-level mnemonics on DB
                 incoming_review = w.get("review") or {}
                 if existing_word and existing_word.review and not incoming_review:
                     effective_review = existing_word.review
                 else:
                     effective_review = incoming_review
+
+                if existing_word and existing_word.mnemonic and "mnemonic" not in w:
+                    effective_mnemonic = existing_word.mnemonic
+                else:
+                    effective_mnemonic = w.get("mnemonic", "")
 
                 _, w_created = VocabularyWord.objects.update_or_create(
                     word=word_clean,
@@ -77,6 +82,7 @@ class Command(BaseCommand):
                         "connotation": w.get("connotation", "neutral"),
                         "pronunciation": w.get("pronunciation", ""),
                         "part_of_speech": w.get("part_of_speech") or w.get("partOfSpeech", "adjective"),
+                        "mnemonic": effective_mnemonic,
                         "review": effective_review,
                     }
                 )

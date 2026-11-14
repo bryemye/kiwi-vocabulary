@@ -48,6 +48,8 @@ class Command(BaseCommand):
                     "sat_sentence": w.sat_sentence,
                     "connotation": w.connotation,
                 }
+                if w.mnemonic:
+                    word_dict["mnemonic"] = w.mnemonic
                 if w.review and (w.review.get("verified") or w.review.get("notes")):
                     word_dict["review"] = w.review
                 words_list.append(word_dict)

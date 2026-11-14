@@ -850,6 +850,52 @@ export default function VocabView({
 
   const currentWord = sessionDeck[currentIndex] || null;
 
+  // Keep active sessionDeck & activeMorphemeView in sync when words are edited
+  useEffect(() => {
+    if (!words || words.length === 0) return;
+    const wordsById = new Map(words.map((w) => [w.id, w]));
+
+    const hasWordChanges = (card, fresh) =>
+      fresh.word !== card.word ||
+      fresh.mnemonic !== card.mnemonic ||
+      fresh.definition !== card.definition ||
+      fresh.sat_sentence !== card.sat_sentence ||
+      fresh.prefix !== card.prefix ||
+      fresh.suffix !== card.suffix ||
+      fresh.part_of_speech !== card.part_of_speech ||
+      fresh.connotation !== card.connotation ||
+      fresh.pronunciation !== card.pronunciation ||
+      fresh.root !== card.root ||
+      JSON.stringify(fresh.review || {}) !== JSON.stringify(card.review || {});
+
+    setSessionDeck((prev) => {
+      let changed = false;
+      const next = prev.map((card) => {
+        const fresh = wordsById.get(card.id);
+        if (fresh && hasWordChanges(card, fresh)) {
+          changed = true;
+          return { ...card, ...fresh };
+        }
+        return card;
+      });
+      return changed ? next : prev;
+    });
+
+    setActiveMorphemeView((prev) => {
+      if (!prev || !Array.isArray(prev.matchedWords)) return prev;
+      let changed = false;
+      const nextMatched = prev.matchedWords.map((card) => {
+        const fresh = wordsById.get(card.id);
+        if (fresh && hasWordChanges(card, fresh)) {
+          changed = true;
+          return { ...card, ...fresh };
+        }
+        return card;
+      });
+      return changed ? { ...prev, matchedWords: nextMatched } : prev;
+    });
+  }, [words]);
+
   // Reset timer on card change
   useEffect(() => {
     setCardStartTime(Date.now());

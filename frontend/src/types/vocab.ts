@@ -24,6 +24,7 @@ export interface VocabularyWord {
   connotation?: Connotation | string;
   pronunciation?: string;
   part_of_speech?: string;
+  mnemonic?: string;
   root?: number;
   root_details?: RootSummary;
   review?: EditorialReview;
@@ -82,6 +83,7 @@ export interface LexiconSeedEntry {
     definition: string;
     sat_sentence: string;
     connotation?: string;
+    mnemonic?: string;
     review?: EditorialReview;
   }>;
 }

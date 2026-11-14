@@ -76,6 +76,7 @@ class VocabularyWord(models.Model):
     connotation = models.CharField(max_length=20, choices=CONNOTATION_CHOICES, default='neutral')
     pronunciation = models.CharField(max_length=100, blank=True, default='')
     part_of_speech = models.CharField(max_length=50, blank=True, default='adjective')
+    mnemonic = models.TextField(blank=True, default='')
     review = models.JSONField(default=dict, blank=True)
 
     def __str__(self):

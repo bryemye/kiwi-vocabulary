@@ -685,10 +685,10 @@ export default function StudyDeck({
                     )}
                   </div>
 
-                  {currentWord.root_details?.mnemonic && (
+                  {(currentWord.mnemonic || currentWord.root_details?.mnemonic) && (
                     <div className="mt-2.5 pt-2 border-t border-stone-200/60 flex items-start space-x-2 text-xs font-sans text-stone-700">
                       <span className="font-bold uppercase text-[10px] text-[#2F441E] bg-[#EDF5E5] px-1.5 py-0.5 rounded border border-[#7BB33B]/30 shrink-0 font-mono">Key:</span>
-                      <span className="italic font-serif">"{currentWord.root_details.mnemonic}"</span>
+                      <span className="italic font-serif">"{currentWord.mnemonic || currentWord.root_details.mnemonic}"</span>
                     </div>
                   )}
                 </div>

@@ -202,6 +202,7 @@ export function exportUpdatedLexiconJson(rootsList = [], wordsList = []) {
             definition: w.definition,
             sat_sentence: w.sat_sentence,
             connotation: w.connotation || 'neutral',
+            ...(w.mnemonic ? { mnemonic: w.mnemonic } : {}),
           };
           if (review && (review.verified || review.notes)) {
             wordObj.review = {
@@ -241,6 +242,7 @@ export function exportUpdatedLexiconJson(rootsList = [], wordsList = []) {
         definition: w.definition,
         sat_sentence: w.sat_sentence,
         connotation: w.connotation || 'neutral',
+        ...(w.mnemonic ? { mnemonic: w.mnemonic } : {}),
       };
       if (review && (review.verified || review.notes)) {
         wordObj.review = {
