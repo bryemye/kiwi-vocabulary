@@ -142,41 +142,134 @@ function createAmbientParticles() {
 }
 
 /**
- * Deterministic map coordinates for each thematic cluster and SAT tier territory
+ * Filter predicates and composable spatial cluster helpers (Theme x Impact x Mastery)
  */
-function getClusterTerritory(pathway, filterName) {
-  if (!filterName || filterName === 'ALL') return null;
+function isMasteryFilterConfigured(comparator = 'lte', threshold = 100) {
+  return !(comparator === 'lte' && threshold === 100);
+}
 
-  if (pathway === PATHWAY_YIELD) {
-    const idx = SAT_TIER_DEFS.findIndex(
-      t => t.name.toLowerCase() === filterName.toLowerCase()
-    );
-    if (idx === -1) return null;
-    const tier = SAT_TIER_DEFS[idx];
+function hasAnyFilterConfigured(filters = {}) {
+  const {
+    themeFilter = 'ALL',
+    impactFilter = 'ALL',
+    masteryComparator = 'lte',
+    masteryThreshold = 100,
+  } = filters;
+  return Boolean(
+    (themeFilter && themeFilter !== 'ALL') ||
+    (impactFilter && impactFilter !== 'ALL') ||
+    isMasteryFilterConfigured(masteryComparator, masteryThreshold)
+  );
+}
+
+function rootMatchesFilters(rootNode, filters = {}) {
+  if (!rootNode) return false;
+  const {
+    themeFilter = 'ALL',
+    impactFilter = 'ALL',
+    masteryComparator = 'lte',
+    masteryThreshold = 100,
+  } = filters;
+
+  if (themeFilter && themeFilter !== 'ALL') {
+    if ((rootNode.thematic_cluster || '').toLowerCase() !== themeFilter.toLowerCase()) {
+      return false;
+    }
+  }
+  if (impactFilter && impactFilter !== 'ALL') {
+    if ((rootNode.sat_tier || '').toLowerCase() !== impactFilter.toLowerCase()) {
+      return false;
+    }
+  }
+  if (isMasteryFilterConfigured(masteryComparator, masteryThreshold)) {
+    const pct = rootNode.masteryPct ?? 0;
+    const matchesMastery = masteryComparator === 'gte' ? pct >= masteryThreshold : pct <= masteryThreshold;
+    if (!matchesMastery) return false;
+  }
+  return true;
+}
+
+function formatActiveFilterSummary(filters = {}) {
+  const {
+    themeFilter = 'ALL',
+    impactFilter = 'ALL',
+    masteryComparator = 'lte',
+    masteryThreshold = 100,
+  } = filters;
+  const parts = [];
+  if (themeFilter && themeFilter !== 'ALL') {
+    parts.push(themeFilter);
+  }
+  if (impactFilter && impactFilter !== 'ALL') {
+    const tier = SAT_TIER_DEFS.find(t => t.name.toLowerCase() === impactFilter.toLowerCase());
+    parts.push(tier ? tier.badge : impactFilter);
+  }
+  if (isMasteryFilterConfigured(masteryComparator, masteryThreshold)) {
+    const symbol = masteryComparator === 'gte' ? '≥' : '≤';
+    parts.push(`Mastery ${symbol} ${masteryThreshold}%`);
+  }
+  return parts.join(' · ');
+}
+
+/**
+ * Deterministic map coordinates for any active Theme, Impact, Mastery, or combined filter
+ */
+function getClusterTerritory(filters = {}) {
+  if (!hasAnyFilterConfigured(filters)) return null;
+
+  const {
+    themeFilter = 'ALL',
+    impactFilter = 'ALL',
+    masteryComparator = 'lte',
+    masteryThreshold = 100,
+  } = filters;
+
+  const hasTheme = Boolean(themeFilter && themeFilter !== 'ALL');
+  const hasImpact = Boolean(impactFilter && impactFilter !== 'ALL');
+  const themeDef = hasTheme
+    ? THEMATIC_CLUSTER_DEFS.find(c => c.name.toLowerCase() === themeFilter.toLowerCase())
+    : null;
+  const tierIdx = hasImpact
+    ? SAT_TIER_DEFS.findIndex(t => t.name.toLowerCase() === impactFilter.toLowerCase())
+    : -1;
+  const tierDef = tierIdx >= 0 ? SAT_TIER_DEFS[tierIdx] : null;
+
+  let x = 0;
+  let y = -1350;
+  let icon = '📊';
+  let accentColor = '#7BB33B';
+
+  if (themeDef) {
+    const idx = THEMATIC_CLUSTER_DEFS.indexOf(themeDef);
+    const radius = 2000;
+    const angle = (idx / THEMATIC_CLUSTER_DEFS.length) * Math.PI * 2 - Math.PI / 2;
+    x = Math.round(Math.cos(angle) * radius);
+    y = Math.round(Math.sin(angle) * radius);
+    icon = themeDef.icon;
+    accentColor = themeDef.accentColor || '#7BB33B';
+
+    // Nudge radially when intersecting Theme + Impact so each tier feels like a distinct sub-island
+    if (tierDef) {
+      const subAngle = angle + (tierIdx - 1) * 0.55;
+      x = Math.round(x + Math.cos(subAngle) * 320);
+      y = Math.round(y + Math.sin(subAngle) * 320);
+      icon = `${themeDef.icon} ${tierDef.icon}`;
+    }
+  } else if (tierDef) {
     const radius = 1650;
-    const angle = (idx / SAT_TIER_DEFS.length) * Math.PI * 2 - Math.PI / 2;
-    return {
-      x: Math.round(Math.cos(angle) * radius),
-      y: Math.round(Math.sin(angle) * radius),
-      label: tier.badge,
-      icon: tier.icon,
-      accentColor: tier.accentColor || '#7BB33B',
-    };
+    const angle = (tierIdx / SAT_TIER_DEFS.length) * Math.PI * 2 - Math.PI / 2;
+    x = Math.round(Math.cos(angle) * radius);
+    y = Math.round(Math.sin(angle) * radius);
+    icon = tierDef.icon;
+    accentColor = tierDef.accentColor || '#7BB33B';
   }
 
-  const idx = THEMATIC_CLUSTER_DEFS.findIndex(
-    c => c.name.toLowerCase() === filterName.toLowerCase()
-  );
-  if (idx === -1) return null;
-  const cluster = THEMATIC_CLUSTER_DEFS[idx];
-  const radius = 2000;
-  const angle = (idx / THEMATIC_CLUSTER_DEFS.length) * Math.PI * 2 - Math.PI / 2;
   return {
-    x: Math.round(Math.cos(angle) * radius),
-    y: Math.round(Math.sin(angle) * radius),
-    label: cluster.name,
-    icon: cluster.icon,
-    accentColor: cluster.accentColor || '#7BB33B',
+    x,
+    y,
+    label: formatActiveFilterSummary({ themeFilter, impactFilter, masteryComparator, masteryThreshold }),
+    icon,
+    accentColor,
   };
 }
 
@@ -200,19 +293,10 @@ function computeWordPosition(rootX, rootY, hubX, hubY, wordIdx, wordCount, orbit
 }
 
 /**
- * Update targetBaseX/targetBaseY on all nodes to gather a filtered cluster or return home
+ * Update targetBaseX/targetBaseY on all nodes to gather any filtered cluster or return home
  */
-function assignClusterTargets(nodes, pathway, filterName) {
-  if (!filterName || filterName === 'ALL') {
-    nodes.forEach(node => {
-      node.targetBaseX = node.homeX;
-      node.targetBaseY = node.homeY;
-      node.inActiveCluster = true;
-    });
-    return null;
-  }
-
-  const territory = getClusterTerritory(pathway, filterName);
+function assignClusterTargets(nodes, filters, pinnedRootId = null) {
+  const territory = getClusterTerritory(filters);
   if (!territory) {
     nodes.forEach(node => {
       node.targetBaseX = node.homeX;
@@ -227,10 +311,7 @@ function assignClusterTargets(nodes, pathway, filterName) {
 
   nodes.forEach(node => {
     if (node.type !== 'root') return;
-    const matches = pathway === PATHWAY_YIELD
-      ? (node.sat_tier || '').toLowerCase() === filterName.toLowerCase()
-      : (node.thematic_cluster || '').toLowerCase() === filterName.toLowerCase();
-    if (matches) {
+    if (rootMatchesFilters(node, filters) || (pinnedRootId && node.id === pinnedRootId)) {
       matchingRoots.push(node);
       matchingRootIds.add(node.id);
     }
@@ -239,7 +320,10 @@ function assignClusterTargets(nodes, pathway, filterName) {
   const count = matchingRoots.length;
   let ringSpecs;
   let clusterZoom;
-  if (count <= 10) {
+  if (count === 0) {
+    ringSpecs = [];
+    clusterZoom = 0.9;
+  } else if (count <= 10) {
     ringSpecs = [{ cap: count, radius: 170 }];
     clusterZoom = 0.95;
   } else if (count <= 26) {
@@ -629,12 +713,50 @@ export default function VocabGraphView({
   });
   const [saveSuccessToast, setSaveSuccessToast] = useState(null);
 
-  // Dual Learning Pathway State & User Preference Persistence
+  // Dual Learning Pathway Card Lens & Composable Filter State (Theme x Impact x Mastery)
   const [learningPathway, setLearningPathway] = useState(getStoredPathway);
-  const [pathwayFilter, setPathwayFilter] = useState('ALL');
+  const [themeFilter, setThemeFilter] = useState('ALL');
+  const [impactFilter, setImpactFilter] = useState('ALL');
   const [masteryThreshold, setMasteryThreshold] = useState(100);
   const [masteryComparator, setMasteryComparator] = useState('lte'); // 'lte' (<=) | 'gte' (>=)
-  const isMasteryFilterActive = !(masteryComparator === 'lte' && masteryThreshold === 100);
+  const [committedMastery, setCommittedMastery] = useState({ comparator: 'lte', threshold: 100 });
+  const isMasteryFilterActive = isMasteryFilterConfigured(masteryComparator, masteryThreshold);
+  const hasAnyActiveFilter = hasAnyFilterConfigured({
+    themeFilter,
+    impactFilter,
+    masteryComparator,
+    masteryThreshold,
+  });
+  const activeFilterSummary = useMemo(
+    () =>
+      formatActiveFilterSummary({
+        themeFilter,
+        impactFilter,
+        masteryComparator,
+        masteryThreshold,
+      }),
+    [themeFilter, impactFilter, masteryComparator, masteryThreshold]
+  );
+
+  // Settle mastery threshold changes after a short pause (or immediately on pointer release)
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setCommittedMastery({ comparator: masteryComparator, threshold: masteryThreshold });
+    }, 140);
+    return () => clearTimeout(timer);
+  }, [masteryComparator, masteryThreshold]);
+
+  const commitMasteryNow = useCallback((comparator = masteryComparator, threshold = masteryThreshold) => {
+    setCommittedMastery({ comparator, threshold });
+  }, [masteryComparator, masteryThreshold]);
+
+  const resetAllFilters = useCallback(() => {
+    setThemeFilter('ALL');
+    setImpactFilter('ALL');
+    setMasteryComparator('lte');
+    setMasteryThreshold(100);
+    setCommittedMastery({ comparator: 'lte', threshold: 100 });
+  }, []);
 
   useEffect(() => {
     const handlePathwaySync = (e) => {
@@ -650,7 +772,6 @@ export default function VocabGraphView({
   const handlePathwayChange = useCallback((newPathway) => {
     setLearningPathway(newPathway);
     setStoredPathway(newPathway);
-    setPathwayFilter('ALL');
   }, []);
 
   // Focus & Search States
@@ -832,10 +953,15 @@ export default function VocabGraphView({
     learningPathwayRef.current = learningPathway;
   }, [learningPathway]);
 
-  const pathwayFilterRef = useRef(pathwayFilter);
+  const themeFilterRef = useRef(themeFilter);
   useEffect(() => {
-    pathwayFilterRef.current = pathwayFilter;
-  }, [pathwayFilter]);
+    themeFilterRef.current = themeFilter;
+  }, [themeFilter]);
+
+  const impactFilterRef = useRef(impactFilter);
+  useEffect(() => {
+    impactFilterRef.current = impactFilter;
+  }, [impactFilter]);
 
   const masteryThresholdRef = useRef(masteryThreshold);
   useEffect(() => {
@@ -852,21 +978,41 @@ export default function VocabGraphView({
     isMasteryFilterActiveRef.current = isMasteryFilterActive;
   }, [isMasteryFilterActive]);
 
+  const hasAnyActiveFilterRef = useRef(hasAnyActiveFilter);
+  useEffect(() => {
+    hasAnyActiveFilterRef.current = hasAnyActiveFilter;
+  }, [hasAnyActiveFilter]);
+
+  // Keeps the root of a just-mastered card from abruptly disappearing mid-session
+  const graceRootIdRef = useRef(null);
   const activeClusterMetaRef = useRef(null);
   const lastAppliedClusterKeyRef = useRef('init');
 
-  // Gather roots into spatial map clusters and glide camera when filter/pathway changes
+  // Gather matching roots into spatial map clusters whenever any filter is active
   useEffect(() => {
     if (!graphData.nodes || graphData.nodes.length === 0) return;
-    const key = `${learningPathway}::${pathwayFilter}`;
-    const clusterMeta = assignClusterTargets(graphData.nodes, learningPathway, pathwayFilter);
-    activeClusterMetaRef.current = clusterMeta;
 
+    const filterConfig = {
+      themeFilter,
+      impactFilter,
+      masteryComparator: committedMastery.comparator,
+      masteryThreshold: committedMastery.threshold,
+    };
+    const key = `${themeFilter}::${impactFilter}::${committedMastery.comparator}::${committedMastery.threshold}`;
     const prevKey = lastAppliedClusterKeyRef.current;
+
+    if (prevKey !== key && prevKey !== 'init') {
+      graceRootIdRef.current = null;
+    }
+
+    const clusterMeta = assignClusterTargets(graphData.nodes, filterConfig, graceRootIdRef.current);
+    activeClusterMetaRef.current = clusterMeta;
     lastAppliedClusterKeyRef.current = key;
 
-    // On initial mount with default 'ALL' filter, keep existing camera / restore target intact
-    if (prevKey === 'init' && (!pathwayFilter || pathwayFilter === 'ALL')) {
+    const isDefaultUnfiltered = !hasAnyFilterConfigured(filterConfig);
+
+    // On initial mount with no active filters, keep existing camera / restore target intact
+    if (prevKey === 'init' && isDefaultUnfiltered) {
       return;
     }
 
@@ -883,7 +1029,7 @@ export default function VocabGraphView({
         targetCameraRef.current = { x: 0, y: 0, zoom: 0.56 };
       }
     }
-  }, [pathwayFilter, learningPathway, graphData]);
+  }, [themeFilter, impactFilter, committedMastery, graphData]);
 
   // Sync initialRoots if passed or changed
   useEffect(() => {
@@ -980,6 +1126,7 @@ export default function VocabGraphView({
   }, []);
 
   const clearFocus = useCallback(() => {
+    graceRootIdRef.current = null;
     setFocusedRootId(null);
     setSelectedNode(null);
     setSearchQuery('');
@@ -1030,17 +1177,14 @@ export default function VocabGraphView({
   }, [graphData.nodes]);
 
   const matchingMasteryCount = useMemo(() => {
-    return allRoots.filter(rootNode => {
-      if (pathwayFilter && pathwayFilter !== 'ALL') {
-        const matchesCluster = learningPathway === PATHWAY_YIELD
-          ? (rootNode.sat_tier || '').toLowerCase() === pathwayFilter.toLowerCase()
-          : (rootNode.thematic_cluster || '').toLowerCase() === pathwayFilter.toLowerCase();
-        if (!matchesCluster) return false;
-      }
-      const pct = rootNode.masteryPct ?? 0;
-      return masteryComparator === 'gte' ? pct >= masteryThreshold : pct <= masteryThreshold;
-    }).length;
-  }, [allRoots, pathwayFilter, learningPathway, masteryComparator, masteryThreshold]);
+    const activeFilters = {
+      themeFilter,
+      impactFilter,
+      masteryComparator,
+      masteryThreshold,
+    };
+    return allRoots.filter(rootNode => rootMatchesFilters(rootNode, activeFilters)).length;
+  }, [allRoots, themeFilter, impactFilter, masteryComparator, masteryThreshold]);
 
   const searchResults = useMemo(() => {
     const q = searchQuery.toLowerCase().trim();
@@ -1129,8 +1273,8 @@ export default function VocabGraphView({
           clearFocus();
           return;
         }
-        if (pathwayFilterRef.current && pathwayFilterRef.current !== 'ALL') {
-          setPathwayFilter('ALL');
+        if (hasAnyActiveFilterRef.current) {
+          resetAllFilters();
           return;
         }
         clearFocus();
@@ -1253,17 +1397,19 @@ export default function VocabGraphView({
         const nodeMap = new Map();
         graphData.nodes.forEach(n => nodeMap.set(n.id, n));
 
-        const activeFilter = pathwayFilterRef.current;
-        const hasActiveFilter = Boolean(activeFilter && activeFilter !== 'ALL');
+        const hasActiveFilter = hasAnyActiveFilterRef.current;
         const activeCluster = activeClusterMetaRef.current;
-        const mComparator = masteryComparatorRef.current;
-        const mThreshold = masteryThresholdRef.current;
-        const isMasteryActive = isMasteryFilterActiveRef.current;
-
-        const rootMatchesMastery = (rootNode) => {
-          const pct = rootNode.masteryPct ?? 0;
-          return mComparator === 'gte' ? pct >= mThreshold : pct <= mThreshold;
+        const currentFilters = {
+          themeFilter: themeFilterRef.current,
+          impactFilter: impactFilterRef.current,
+          masteryComparator: masteryComparatorRef.current,
+          masteryThreshold: masteryThresholdRef.current,
         };
+        const graceRootId = graceRootIdRef.current;
+
+        const rootMatchesActive = (rootNode) =>
+          rootMatchesFilters(rootNode, currentFilters) ||
+          (graceRootId && rootNode.id === graceRootId);
 
         // Helper for slow smoothstep breathing
         const computeSparseBreath = (node, threshold) => {
@@ -1303,11 +1449,11 @@ export default function VocabGraphView({
           const isFocalFamily = isFocalRoot || isFocalChildWord;
 
           if (node.type === 'root') {
-            node._matchesMastery = rootMatchesMastery(node);
+            node._matchesFilters = rootMatchesActive(node);
           } else if (node.type === 'word') {
-            node._matchesMastery = parentNode ? Boolean(parentNode._matchesMastery) : true;
+            node._matchesFilters = parentNode ? Boolean(parentNode._matchesFilters) : true;
           } else {
-            node._matchesMastery = true;
+            node._matchesFilters = true;
           }
 
           if (!currentFocusedId) {
@@ -1330,9 +1476,9 @@ export default function VocabGraphView({
                 node.opacity = node.minFadeOpacity + eased * (node.maxFadeOpacity - node.minFadeOpacity);
               }
             } else if (node.type === 'root') {
-              if (!node._matchesMastery || (hasActiveFilter && !node.inActiveCluster)) {
+              if (!node._matchesFilters || (hasActiveFilter && !node.inActiveCluster)) {
                 node.opacity = 0;
-              } else if (hasActiveFilter || isMasteryActive) {
+              } else if (hasActiveFilter) {
                 const breath = 0.5 + 0.5 * Math.sin(time * node.fadeFreq * 1.4 + node.fadePhase);
                 const eased = breath * breath * (3 - 2 * breath);
                 node.opacity = 0.30 + eased * (node.maxFadeOpacity - 0.30);
@@ -1343,9 +1489,9 @@ export default function VocabGraphView({
               }
             } else {
               // Child word surfaces softly alongside a surfaced parent root
-              if (!node._matchesMastery || (hasActiveFilter && !node.inActiveCluster)) {
+              if (!node._matchesFilters || (hasActiveFilter && !node.inActiveCluster)) {
                 node.opacity = 0;
-              } else if (hasActiveFilter || isMasteryActive) {
+              } else if (hasActiveFilter) {
                 const parentAlpha = parentNode?.opacity || 0;
                 const breath = 0.5 + 0.5 * Math.sin(time * node.fadeFreq * 1.3 + node.fadePhase);
                 const eased = breath * breath * (3 - 2 * breath);
@@ -1643,10 +1789,13 @@ export default function VocabGraphView({
     ctx.restore();
 
     const titleText = `${cluster.icon || ''} ${cluster.label.toUpperCase()}`.trim();
-    const subText = `${cluster.count} ROOTS`;
+    const subText = cluster.count === 0 ? '0 ROOTS · LOOSEN OR RESET FILTERS' : `${cluster.count} ROOTS`;
     ctx.save();
     ctx.font = '900 12px "JetBrains Mono", Menlo, Consolas, monospace';
-    const cardWidth = Math.max(185, ctx.measureText(titleText).width + 44);
+    const titleWidth = ctx.measureText(titleText).width;
+    ctx.font = 'bold 9.5px "JetBrains Mono", Menlo, Consolas, monospace';
+    const subWidth = ctx.measureText(subText).width;
+    const cardWidth = Math.max(195, titleWidth + 44, subWidth + 36);
     const cardHeight = 56;
     ctx.restore();
 
@@ -1729,17 +1878,16 @@ export default function VocabGraphView({
 
   const drawRootNode = (ctx, node, isSelected, isHovered, isFocal) => {
     const isHighlighted = isSelected || isHovered;
-    const filter = pathwayFilterRef.current;
     const pathway = learningPathwayRef.current;
-
-    let matchesFilter = true;
-    if (filter && filter !== 'ALL') {
-      if (pathway === PATHWAY_YIELD) {
-        matchesFilter = (node.sat_tier || '').toLowerCase() === filter.toLowerCase();
-      } else {
-        matchesFilter = (node.thematic_cluster || '').toLowerCase() === filter.toLowerCase();
-      }
-    }
+    const hasFilter = hasAnyActiveFilterRef.current;
+    const matchesFilter = !hasFilter ||
+      rootMatchesFilters(node, {
+        themeFilter: themeFilterRef.current,
+        impactFilter: impactFilterRef.current,
+        masteryComparator: masteryComparatorRef.current,
+        masteryThreshold: masteryThresholdRef.current,
+      }) ||
+      (graceRootIdRef.current && node.id === graceRootIdRef.current);
 
     let effectiveAlpha = isFocal ? 1.0 : isHighlighted ? 1.0 : node.opacity;
     if (!matchesFilter && !isFocal && !isHighlighted) {
@@ -1748,7 +1896,7 @@ export default function VocabGraphView({
 
     const borderColor = isFocal || isHighlighted
       ? '#7BB33B'
-      : matchesFilter && filter !== 'ALL'
+      : matchesFilter && hasFilter
         ? 'rgba(17, 20, 16, 0.34)'
         : 'rgba(17, 20, 16, 0.18)';
     const borderWidth = isFocal ? 2.5 : isHighlighted ? 2 : 1.25;
@@ -2170,6 +2318,10 @@ export default function VocabGraphView({
               return { ...n, isMastered: true };
             }
             if (n.type === 'root' && Array.isArray(n.data?.words)) {
+              const containsWord = n.data.words.some(w => w.id === studyWordModal.id);
+              if (containsWord) {
+                graceRootIdRef.current = n.id;
+              }
               const masteredCount = n.data.words.filter(w => nextMastered.has(w.id)).length;
               const masteryPct = n.data.words.length > 0
                 ? Math.round((masteredCount / n.data.words.length) * 100)
@@ -2415,97 +2567,137 @@ export default function VocabGraphView({
         </div>
       </div>
 
-      {/* PERSPECTIVE FILTER PILLS & MASTERY SLIDER RIBBON */}
-      <div className="absolute top-14 sm:top-16 left-2.5 sm:left-4 right-2.5 sm:right-4 z-20 pointer-events-none flex flex-wrap items-center gap-1.5">
+      {/* COMPOSABLE FILTER RIBBON: THEMES + IMPACT + MASTERY SLIDER */}
+      <div className="absolute top-14 sm:top-16 left-2.5 sm:left-4 right-2.5 sm:right-4 z-20 pointer-events-none flex flex-col items-start gap-1.5">
+        {/* Row 1: Semantic Themes */}
         <div className="pointer-events-auto bg-white/95 backdrop-blur-xs border-2 border-[#111410] shadow-[3px_3px_0px_0px_#111410] p-1 inline-flex items-center space-x-1 font-mono text-[10px] sm:text-[11px] font-black uppercase max-w-full overflow-x-auto no-scrollbar">
           <span className="text-[9px] text-[#62685E] px-1.5 select-none shrink-0">
-            {learningPathway === PATHWAY_YIELD ? '⚡ FREQUENCY TIERS:' : '🧠 SEMANTIC CLUSTERS:'}
+            🧠 THEMES:
           </span>
           <button
             type="button"
-            onClick={() => setPathwayFilter('ALL')}
-            className={`px-2 py-0.5 border text-center whitespace-nowrap transition ${
-              pathwayFilter === 'ALL'
+            onClick={() => setThemeFilter('ALL')}
+            className={`px-2 py-0.5 border text-center whitespace-nowrap transition cursor-pointer ${
+              themeFilter === 'ALL'
                 ? 'bg-[#111410] text-white border-[#111410]'
                 : 'bg-transparent text-[#111410] border-transparent hover:bg-[#FAFBF8]'
             }`}
           >
             ALL
           </button>
-          {learningPathway === PATHWAY_YIELD
-            ? SAT_TIER_DEFS.map((tier) => (
-                <button
-                  key={tier.name}
-                  type="button"
-                  onClick={() => setPathwayFilter(pathwayFilter === tier.name ? 'ALL' : tier.name)}
-                  className={`px-2 py-0.5 border whitespace-nowrap transition ${
-                    pathwayFilter === tier.name
-                      ? 'bg-[#F59E0B] text-black border-[#111410] font-black shadow-[1px_1px_0px_0px_#111410]'
-                      : 'bg-white text-[#111410] border-[#111410]/20 hover:border-[#111410]'
-                  }`}
-                >
-                  {tier.icon} {tier.badge}
-                </button>
-              ))
-            : THEMATIC_CLUSTER_DEFS.map((cluster) => (
-                <button
-                  key={cluster.name}
-                  type="button"
-                  onClick={() => setPathwayFilter(pathwayFilter === cluster.name ? 'ALL' : cluster.name)}
-                  className={`px-2 py-0.5 border whitespace-nowrap transition ${
-                    pathwayFilter === cluster.name
-                      ? 'bg-[#7BB33B] text-white border-[#111410] font-black shadow-[1px_1px_0px_0px_#111410]'
-                      : 'bg-white text-[#111410] border-[#111410]/20 hover:border-[#111410]'
-                  }`}
-                >
-                  {cluster.icon} {cluster.name}
-                </button>
-              ))}
+          {THEMATIC_CLUSTER_DEFS.map((cluster) => (
+            <button
+              key={cluster.name}
+              type="button"
+              onClick={() => setThemeFilter(themeFilter === cluster.name ? 'ALL' : cluster.name)}
+              className={`px-2 py-0.5 border whitespace-nowrap transition cursor-pointer ${
+                themeFilter === cluster.name
+                  ? 'bg-[#7BB33B] text-white border-[#111410] font-black shadow-[1px_1px_0px_0px_#111410]'
+                  : 'bg-white text-[#111410] border-[#111410]/20 hover:border-[#111410]'
+              }`}
+            >
+              {cluster.icon} {cluster.name}
+            </button>
+          ))}
         </div>
 
-        {/* MASTERY RANGE FILTER (1-100% + <= / >= TOGGLE) */}
-        <div className="pointer-events-auto bg-white/95 backdrop-blur-xs border-2 border-[#111410] shadow-[3px_3px_0px_0px_#111410] px-2 py-1 inline-flex items-center space-x-2 font-mono text-[10px] sm:text-[11px] font-black uppercase shrink-0">
-          <span className="text-[9px] text-[#62685E] select-none shrink-0">
-            MASTERY
-          </span>
-          <button
-            type="button"
-            onClick={() => setMasteryComparator(prev => (prev === 'lte' ? 'gte' : 'lte'))}
-            title={
-              masteryComparator === 'lte'
-                ? 'Showing roots with mastery ≤ threshold (click to switch to ≥)'
-                : 'Showing roots with mastery ≥ threshold (click to switch to ≤)'
-            }
-            className="px-1.5 py-0.5 bg-[#EFE8DF] hover:bg-[#EDF5E5] border border-[#111410] text-[#111410] font-black text-[11px] leading-none cursor-pointer transition"
-          >
-            {masteryComparator === 'lte' ? '≤' : '≥'}
-          </button>
-          <input
-            type="range"
-            min={1}
-            max={100}
-            value={masteryThreshold}
-            onChange={(e) => setMasteryThreshold(Number(e.target.value))}
-            aria-label="Mastery percentage threshold"
-            className="w-20 sm:w-28 accent-[#7BB33B] cursor-pointer h-1.5"
-          />
-          <span className="w-8 text-right text-[#111410] tabular-nums">
-            {masteryThreshold}%
-          </span>
-          <span className="text-[9px] text-[#62685E] tabular-nums">
-            ({matchingMasteryCount})
-          </span>
-          {isMasteryFilterActive && (
+        {/* Row 2: Impact Tiers + Mastery Slider + Reset All */}
+        <div className="flex flex-wrap items-center gap-1.5 max-w-full">
+          <div className="pointer-events-auto bg-white/95 backdrop-blur-xs border-2 border-[#111410] shadow-[3px_3px_0px_0px_#111410] p-1 inline-flex items-center space-x-1 font-mono text-[10px] sm:text-[11px] font-black uppercase max-w-full overflow-x-auto no-scrollbar">
+            <span className="text-[9px] text-[#62685E] px-1.5 select-none shrink-0">
+              ⚡ IMPACT:
+            </span>
+            <button
+              type="button"
+              onClick={() => setImpactFilter('ALL')}
+              className={`px-2 py-0.5 border text-center whitespace-nowrap transition cursor-pointer ${
+                impactFilter === 'ALL'
+                  ? 'bg-[#111410] text-white border-[#111410]'
+                  : 'bg-transparent text-[#111410] border-transparent hover:bg-[#FAFBF8]'
+              }`}
+            >
+              ALL
+            </button>
+            {SAT_TIER_DEFS.map((tier) => (
+              <button
+                key={tier.name}
+                type="button"
+                onClick={() => setImpactFilter(impactFilter === tier.name ? 'ALL' : tier.name)}
+                className={`px-2 py-0.5 border whitespace-nowrap transition cursor-pointer ${
+                  impactFilter === tier.name
+                    ? 'bg-[#F59E0B] text-black border-[#111410] font-black shadow-[1px_1px_0px_0px_#111410]'
+                    : 'bg-white text-[#111410] border-[#111410]/20 hover:border-[#111410]'
+                }`}
+              >
+                {tier.icon} {tier.badge}
+              </button>
+            ))}
+          </div>
+
+          {/* MASTERY RANGE FILTER (1-100% + <= / >= TOGGLE) */}
+          <div className="pointer-events-auto bg-white/95 backdrop-blur-xs border-2 border-[#111410] shadow-[3px_3px_0px_0px_#111410] px-2 py-1 inline-flex items-center space-x-2 font-mono text-[10px] sm:text-[11px] font-black uppercase shrink-0">
+            <span className="text-[9px] text-[#62685E] select-none shrink-0">
+              MASTERY
+            </span>
             <button
               type="button"
               onClick={() => {
-                setMasteryComparator('lte');
-                setMasteryThreshold(100);
+                const nextComp = masteryComparator === 'lte' ? 'gte' : 'lte';
+                setMasteryComparator(nextComp);
+                commitMasteryNow(nextComp, masteryThreshold);
               }}
-              title="Reset mastery filter"
-              className="text-[#62685E] hover:text-[#991B1B] font-black leading-none px-0.5 cursor-pointer"
+              title={
+                masteryComparator === 'lte'
+                  ? 'Showing roots with mastery ≤ threshold (click to switch to ≥)'
+                  : 'Showing roots with mastery ≥ threshold (click to switch to ≤)'
+              }
+              className="px-1.5 py-0.5 bg-[#EFE8DF] hover:bg-[#EDF5E5] border border-[#111410] text-[#111410] font-black text-[11px] leading-none cursor-pointer transition"
             >
-              ×
+              {masteryComparator === 'lte' ? '≤' : '≥'}
+            </button>
+            <input
+              type="range"
+              min={1}
+              max={100}
+              value={masteryThreshold}
+              onChange={(e) => setMasteryThreshold(Number(e.target.value))}
+              onPointerUp={() => commitMasteryNow()}
+              onMouseUp={() => commitMasteryNow()}
+              onTouchEnd={() => commitMasteryNow()}
+              onKeyUp={() => commitMasteryNow()}
+              aria-label="Mastery percentage threshold"
+              className="w-20 sm:w-28 accent-[#7BB33B] cursor-pointer h-1.5"
+            />
+            <span className="w-8 text-right text-[#111410] tabular-nums">
+              {masteryThreshold}%
+            </span>
+            <span className="text-[9px] text-[#62685E] tabular-nums">
+              ({matchingMasteryCount})
+            </span>
+            {isMasteryFilterActive && (
+              <button
+                type="button"
+                onClick={() => {
+                  setMasteryComparator('lte');
+                  setMasteryThreshold(100);
+                  commitMasteryNow('lte', 100);
+                }}
+                title="Reset mastery filter"
+                className="text-[#62685E] hover:text-[#991B1B] font-black leading-none px-0.5 cursor-pointer"
+              >
+                ×
+              </button>
+            )}
+          </div>
+
+          {hasAnyActiveFilter && (
+            <button
+              type="button"
+              onClick={resetAllFilters}
+              title="Clear all active Theme, Impact, and Mastery filters"
+              className="pointer-events-auto px-2.5 py-1 bg-[#111410] hover:bg-[#2F441E] text-white border-2 border-[#111410] shadow-[3px_3px_0px_0px_#7BB33B] font-mono text-[10px] sm:text-[11px] font-black uppercase cursor-pointer transition active:translate-x-[1px] active:translate-y-[1px]"
+            >
+              Reset All ({matchingMasteryCount})
             </button>
           )}
         </div>
@@ -2523,13 +2715,13 @@ export default function VocabGraphView({
         <div className="bg-white border-2 border-[#111410] shadow-[3px_3px_0px_0px_#111410] px-3.5 py-2 font-mono text-xs text-[#111410] flex flex-wrap items-center gap-2">
           <div className="flex items-center space-x-1 font-black">
             <span className={`w-2 h-2 inline-block border border-[#111410] mr-1 ${
-              focusedRootId ? 'bg-[#7BB33B] animate-pulse' : pathwayFilter !== 'ALL' ? 'bg-[#F59E0B]' : 'bg-[#EFE8DF]'
+              focusedRootId ? 'bg-[#7BB33B] animate-pulse' : hasAnyActiveFilter ? 'bg-[#F59E0B]' : 'bg-[#EFE8DF]'
             }`} />
             <span>
               {focusedRootId
                 ? 'FOCUSED ROOT:'
-                : pathwayFilter !== 'ALL'
-                  ? `CLUSTER · ${pathwayFilter.toUpperCase()}:`
+                : hasAnyActiveFilter
+                  ? `CLUSTER · ${activeFilterSummary.toUpperCase()}:`
                   : 'ROOT GRAPH:'}
             </span>
           </div>
@@ -2553,7 +2745,7 @@ export default function VocabGraphView({
           <div className="flex items-center space-x-1">
             <kbd className="px-1.5 py-0.5 bg-[#FAFBF8] border border-[#111410] font-bold text-[10px]">ESC</kbd>
             <span className="text-[#62685E] ml-1">
-              {focusedRootId ? 'Back to Map' : pathwayFilter !== 'ALL' ? 'Show All' : 'Reset'}
+              {focusedRootId ? 'Back to Map' : hasAnyActiveFilter ? 'Show All' : 'Reset'}
             </span>
           </div>
 
