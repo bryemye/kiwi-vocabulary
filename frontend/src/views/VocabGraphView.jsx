@@ -607,6 +607,7 @@ function buildGraphLayout(roots, masteredSet) {
 export default function VocabGraphView({ 
   onNavigateStudy, 
   onNavigateExplorer, 
+  onSelectRootPractice,
   initialRoots = [],
   isAdminMode = false,
   onUpdateWordReview,
@@ -2796,9 +2797,16 @@ export default function VocabGraphView({
                 {/* Quick Action: Study Root in Flashcards Deck */}
                 <div className="pt-2">
                   <button
-                    onClick={() => onNavigateStudy && onNavigateStudy(selectedNode.data?.words?.[0] || null)}
+                    onClick={() => {
+                      const rootId = selectedNode.rawId || selectedNode.data?.id;
+                      if (onSelectRootPractice && rootId) {
+                        onSelectRootPractice(rootId);
+                      } else if (onNavigateStudy) {
+                        onNavigateStudy(selectedNode.data?.words?.[0] || null);
+                      }
+                    }}
                     className="w-full flex items-center justify-center space-x-2 px-4 py-2.5 bg-[#EDF5E5] hover:bg-[#DCEDD0] text-[#2F441E] border-2 border-[#111410] shadow-[2px_2px_0px_0px_#111410] font-mono text-xs font-black uppercase tracking-wider transition active:translate-x-[1px] active:translate-y-[1px]"
-                    title="Study words with this root in the Study Deck"
+                    title="Open custom deck selector with this root added"
                   >
                     <Layers className="w-3.5 h-3.5 text-[#7BB33B]" />
                     <span>Practice Root in Flashcards Deck</span>
