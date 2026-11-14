@@ -155,3 +155,59 @@ class PlatformActivityTests(TestCase):
         self.assertEqual(stats_res.data['overall']['total_attempts'], 1)
         self.assertEqual(stats_res.data['overall']['total_correct'], 1)
         self.assertEqual(stats_res.data['overall']['accuracy_percentage'], 100.0)
+
+    def test_dashboard_stats_includes_last_worked_at_per_root(self):
+        from datetime import timedelta
+        from django.utils import timezone
+
+        older_root = Root.objects.create(
+            morpheme='chron',
+            language='Greek',
+            core_meaning='time',
+        )
+        older_word = VocabularyWord.objects.create(
+            word='chronic',
+            root=older_root,
+            definition='Persisting for a long time.',
+            sat_sentence='Chronic delays frustrated commuters.'
+        )
+        unworked_root = Root.objects.create(
+            morpheme='luc',
+            language='Latin',
+            core_meaning='light',
+        )
+        VocabularyWord.objects.create(
+            word='lucid',
+            root=unworked_root,
+            definition='Expressed clearly; easy to understand.',
+            sat_sentence='She gave a lucid explanation.'
+        )
+
+        now = timezone.now()
+        older_log = StudyLog.objects.create(
+            item_type='WORD',
+            word=older_word,
+            is_correct=False,
+            seconds_spent=8,
+        )
+        StudyLog.objects.filter(id=older_log.id).update(created_at=now - timedelta(hours=3))
+
+        recent_log = StudyLog.objects.create(
+            item_type='WORD',
+            word=self.word,
+            is_correct=True,
+            seconds_spent=12,
+        )
+        StudyLog.objects.filter(id=recent_log.id).update(created_at=now - timedelta(minutes=5))
+
+        for endpoint in ['/api/platform/dashboard/stats/', '/api/vocab/stats/']:
+            res = self.client.get(endpoint)
+            self.assertEqual(res.status_code, status.HTTP_200_OK)
+            by_id = {r['id']: r for r in res.data['root_mastery']}
+            self.assertIsNotNone(by_id[self.root.id]['last_worked_at'])
+            self.assertIsNotNone(by_id[older_root.id]['last_worked_at'])
+            self.assertIsNone(by_id[unworked_root.id]['last_worked_at'])
+            self.assertGreater(
+                by_id[self.root.id]['last_worked_at'],
+                by_id[older_root.id]['last_worked_at'],
+            )

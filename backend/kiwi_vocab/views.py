@@ -290,6 +290,86 @@ class VocabSessionView(APIView):
         return Response(serializer.data)
 
 
+def build_root_mastery_stats(vocab_logs):
+    """
+    Aggregate root-level mastery, accuracy, attempt counts, and most recent
+    study timestamp (`last_worked_at`) from a StudyLog queryset of vocabulary logs.
+    """
+    roots = list(Root.objects.prefetch_related('words').all())
+    vocab_log_entries = (
+        list(
+            vocab_logs.values('word_id', 'word__root_id', 'is_correct', 'created_at')
+            .order_by('created_at')
+        )
+        if hasattr(vocab_logs, 'values')
+        else []
+    )
+
+    latest_word_mastery = {}
+    root_attempts = {}
+    root_correct = {}
+    root_last_worked = {}
+
+    for entry in vocab_log_entries:
+        w_id = entry['word_id']
+        r_id = entry['word__root_id']
+        created_at = entry['created_at']
+        latest_word_mastery[w_id] = bool(entry['is_correct'])
+        if r_id:
+            root_attempts[r_id] = root_attempts.get(r_id, 0) + 1
+            if entry['is_correct']:
+                root_correct[r_id] = root_correct.get(r_id, 0) + 1
+            if created_at and (r_id not in root_last_worked or created_at > root_last_worked[r_id]):
+                root_last_worked[r_id] = created_at
+
+    root_mastery_list = []
+    for root in roots:
+        root_words = root.words.all()
+        total_root_words = len(root_words)
+        r_attempts = root_attempts.get(root.id, 0)
+        r_corr = root_correct.get(root.id, 0)
+        r_accuracy = round((r_corr / r_attempts * 100), 1) if r_attempts > 0 else 0.0
+        last_worked_dt = root_last_worked.get(root.id)
+
+        words_data = []
+        words_mastered_count = 0
+        for w in root_words:
+            is_m = latest_word_mastery.get(w.id, False)
+            if is_m:
+                words_mastered_count += 1
+            words_data.append({
+                'id': w.id,
+                'word': w.word,
+                'is_mastered': is_m
+            })
+
+        mastery_percentage = round((words_mastered_count / total_root_words * 100), 1) if total_root_words > 0 else 0.0
+
+        root_mastery_list.append({
+            'id': root.id,
+            'morpheme': root.morpheme,
+            'language': root.language,
+            'core_meaning': root.core_meaning,
+            'mnemonic': root.mnemonic,
+            'thematic_cluster': getattr(root, 'thematic_cluster', 'Motion & Travel'),
+            'sat_tier': getattr(root, 'sat_tier', 'Tier 1 High-Yield'),
+            'total_words': total_root_words,
+            'mastered_words': words_mastered_count,
+            'mastery_percentage': mastery_percentage,
+            'accuracy_percentage': r_accuracy,
+            'attempts': r_attempts,
+            'last_worked_at': last_worked_dt.isoformat() if last_worked_dt else None,
+            'words': words_data
+        })
+
+    recommended_roots = sorted(
+        root_mastery_list,
+        key=lambda r: (r['mastery_percentage'], r['accuracy_percentage'], -r['total_words'])
+    )[:3]
+
+    return root_mastery_list, recommended_roots, len(roots)
+
+
 class VocabStatsView(APIView):
     """
     Dedicated stats for Kiwi Vocabulary: /api/vocab/stats/
@@ -315,74 +395,12 @@ class VocabStatsView(APIView):
             logs = []
 
         total_words_count = VocabularyWord.objects.count()
-        roots = list(Root.objects.prefetch_related('words').all())
-        total_roots_count = len(roots)
-
         vocab_total = logs.count() if hasattr(logs, 'count') else len(logs)
         vocab_correct = logs.filter(is_correct=True).count() if hasattr(logs, 'filter') else 0
         vocab_accuracy = round((vocab_correct / vocab_total * 100), 1) if vocab_total > 0 else 0.0
         unique_words_reviewed = logs.values('word_id').distinct().count() if hasattr(logs, 'values') else 0
 
-        # In-memory dictionary aggregation to eliminate N+1 queries
-        vocab_log_entries = list(
-            logs.values('word_id', 'word__root_id', 'is_correct', 'created_at')
-            .order_by('created_at')
-        )
-        latest_word_mastery = {}
-        root_attempts = {}
-        root_correct = {}
-
-        for entry in vocab_log_entries:
-            w_id = entry['word_id']
-            r_id = entry['word__root_id']
-            latest_word_mastery[w_id] = bool(entry['is_correct'])
-            if r_id:
-                root_attempts[r_id] = root_attempts.get(r_id, 0) + 1
-                if entry['is_correct']:
-                    root_correct[r_id] = root_correct.get(r_id, 0) + 1
-
-        root_mastery_list = []
-        for root in roots:
-            root_words = root.words.all()
-            total_root_words = len(root_words)
-            r_attempts = root_attempts.get(root.id, 0)
-            r_corr = root_correct.get(root.id, 0)
-            r_accuracy = round((r_corr / r_attempts * 100), 1) if r_attempts > 0 else 0.0
-
-            words_data = []
-            words_mastered_count = 0
-            for w in root_words:
-                is_m = latest_word_mastery.get(w.id, False)
-                if is_m:
-                    words_mastered_count += 1
-                words_data.append({
-                    'id': w.id,
-                    'word': w.word,
-                    'is_mastered': is_m
-                })
-
-            mastery_percentage = round((words_mastered_count / total_root_words * 100), 1) if total_root_words > 0 else 0.0
-
-            root_mastery_list.append({
-                'id': root.id,
-                'morpheme': root.morpheme,
-                'language': root.language,
-                'core_meaning': root.core_meaning,
-                'mnemonic': root.mnemonic,
-                'thematic_cluster': root.thematic_cluster,
-                'sat_tier': root.sat_tier,
-                'total_words': total_root_words,
-                'mastered_words': words_mastered_count,
-                'mastery_percentage': mastery_percentage,
-                'accuracy_percentage': r_accuracy,
-                'attempts': r_attempts,
-                'words': words_data
-            })
-
-        recommendations = sorted(
-            root_mastery_list,
-            key=lambda r: (r['mastery_percentage'], r['accuracy_percentage'], -r['total_words'])
-        )[:3]
+        root_mastery_list, recommendations, total_roots_count = build_root_mastery_stats(logs)
 
         return Response({
             'total_roots': total_roots_count,

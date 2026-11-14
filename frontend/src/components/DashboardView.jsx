@@ -22,6 +22,21 @@ import {
   groupRootsByDomainLens,
 } from '../services/pathwayService';
 
+function formatLastWorked(isoString) {
+  if (!isoString) return null;
+  const date = new Date(isoString);
+  if (Number.isNaN(date.getTime())) return null;
+  const diffMs = Math.max(0, Date.now() - date.getTime());
+  const mins = Math.floor(diffMs / 60000);
+  if (mins < 1) return 'Just now';
+  if (mins < 60) return `${mins}m ago`;
+  const hrs = Math.floor(mins / 60);
+  if (hrs < 24) return `${hrs}h ago`;
+  const days = Math.floor(hrs / 24);
+  if (days < 7) return `${days}d ago`;
+  return date.toLocaleDateString(undefined, { month: 'short', day: 'numeric' });
+}
+
 /**
  * DashboardView: Revamped student expertise dashboard featuring the circular
  * mastery motif (outlined ○ to filled ● circles) and multi-dimensional domain filters.
@@ -32,7 +47,7 @@ export default function DashboardView({ stats, onSelectRoot, onNavigateMode }) {
 
   // Secondary Filters
   const [selectedDomainId, setSelectedDomainId] = useState('ALL');
-  const [maturityFilter, setMaturityFilter] = useState('ALL'); // 'ALL' | 'MASTERED' | 'DEVELOPING' | 'FOCUS'
+  const [maturityFilter, setMaturityFilter] = useState('ALL'); // 'ALL' | 'RECENTLY_WORKED' | 'MASTERED' | 'DEVELOPING' | 'FOCUS'
   const [searchQuery, setSearchQuery] = useState('');
   const [sortBy, setSortBy] = useState('DEFAULT');
 
@@ -204,7 +219,9 @@ export default function DashboardView({ stats, onSelectRoot, onNavigateMode }) {
               No Root Families Match Filter Criteria
             </h3>
             <p className="text-xs text-[#62685E] max-w-md mx-auto uppercase">
-              No morphemes found matching the current search query or expertise maturity filter.
+              {maturityFilter === 'RECENTLY_WORKED'
+                ? 'No studied root families match the current filter criteria yet.'
+                : 'No morphemes found matching the current search query or expertise maturity filter.'}
             </p>
             <button
               onClick={handleResetFilters}
@@ -306,7 +323,7 @@ export default function DashboardView({ stats, onSelectRoot, onNavigateMode }) {
                             "{root.mnemonic || 'Focus on prefix and root composition'}"
                           </p>
 
-                          {/* Secondary Domain & Tier Badges */}
+                          {/* Secondary Domain, Tier & Activity Badges */}
                           <div className="flex flex-wrap items-center gap-1.5 pt-1">
                             {root.thematic_cluster && (
                               <span className="px-2 py-0.5 bg-[#FAFBF8] text-[#2F441E] border border-[#111410] text-[9px] font-mono font-bold uppercase flex items-center space-x-1">
@@ -318,6 +335,15 @@ export default function DashboardView({ stats, onSelectRoot, onNavigateMode }) {
                               <span className="px-2 py-0.5 bg-[#FAF3DD] text-[#42281D] border border-[#111410] text-[9px] font-mono font-bold uppercase flex items-center space-x-1">
                                 <span>⚡</span>
                                 <span>{root.sat_tier}</span>
+                              </span>
+                            )}
+                            {root.last_worked_at && (
+                              <span
+                                className="px-2 py-0.5 bg-[#EDF5E5] text-[#2F441E] border border-[#111410] text-[9px] font-mono font-bold uppercase flex items-center space-x-1"
+                                title={`Last worked on: ${new Date(root.last_worked_at).toLocaleString()}`}
+                              >
+                                <Clock className="w-2.5 h-2.5" />
+                                <span>Worked {formatLastWorked(root.last_worked_at)}</span>
                               </span>
                             )}
                           </div>

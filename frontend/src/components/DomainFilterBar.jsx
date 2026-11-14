@@ -1,5 +1,5 @@
 import React from 'react';
-import { Search, Filter, SlidersHorizontal, CheckCircle2, CircleDashed, Circle } from 'lucide-react';
+import { Search, Clock } from 'lucide-react';
 import { DOMAIN_LENSES } from '../services/pathwayService';
 
 /**
@@ -73,6 +73,19 @@ export default function DomainFilterBar({
           </button>
 
           <button
+            onClick={() => onMaturityFilterChange('RECENTLY_WORKED')}
+            className={`flex items-center space-x-1 px-2.5 py-1 border border-[#111410] uppercase font-bold text-[11px] transition ${
+              maturityFilter === 'RECENTLY_WORKED'
+                ? 'bg-[#EDF5E5] text-[#2F441E] border-[#2F441E] font-black shadow-[1px_1px_0px_0px_#111410]'
+                : 'bg-white hover:bg-[#EDF5E5] text-[#2F441E]'
+            }`}
+            title="Show only roots you have studied, ordered by most recently worked on"
+          >
+            <Clock className="w-3 h-3" />
+            <span>Recently Worked On</span>
+          </button>
+
+          <button
             onClick={() => onMaturityFilterChange('MASTERED')}
             className={`flex items-center space-x-1 px-2.5 py-1 border border-[#111410] uppercase font-bold text-[11px] transition ${
               maturityFilter === 'MASTERED'
@@ -133,6 +146,7 @@ export default function DomainFilterBar({
             className="px-2.5 py-1.5 bg-[#FAFBF8] border-2 border-[#111410] text-xs font-mono font-bold text-[#111410] focus:outline-none focus:bg-white uppercase cursor-pointer"
           >
             <option value="DEFAULT">Sort: Recommended</option>
+            <option value="RECENT_DESC">Most Recently Worked On</option>
             <option value="MASTERY_DESC">Highest Expertise (●)</option>
             <option value="MASTERY_ASC">Lowest Expertise (○)</option>
             <option value="ALPHA">Alphabetical (A-Z)</option>

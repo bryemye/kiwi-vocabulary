@@ -325,6 +325,25 @@ export function getTierMeta(tierName) {
   return SAT_TIER_DEFS[0];
 }
 
+function parseTimestampMs(isoString) {
+  if (!isoString) return 0;
+  const ms = Date.parse(isoString);
+  return Number.isFinite(ms) ? ms : 0;
+}
+
+export function hasBeenWorkedOn(root) {
+  if (!root) return false;
+  return Boolean(root.last_worked_at) || (root.attempts || 0) > 0 || (root.mastered_words || 0) > 0;
+}
+
+function compareByMostRecent(a, b) {
+  const diff = parseTimestampMs(b?.last_worked_at) - parseTimestampMs(a?.last_worked_at);
+  if (diff !== 0) return diff;
+  const attemptDiff = (b?.attempts || 0) - (a?.attempts || 0);
+  if (attemptDiff !== 0) return attemptDiff;
+  return (a?.morpheme || '').localeCompare(b?.morpheme || '');
+}
+
 /**
  * Comprehensive grouping helper supporting all 4 domain lenses with filtering and sorting
  */
@@ -334,10 +353,15 @@ export function groupRootsByDomainLens(
   options = {}
 ) {
   const {
-    maturityFilter = 'ALL', // 'ALL' | 'MASTERED' | 'DEVELOPING' | 'FOCUS'
+    maturityFilter = 'ALL', // 'ALL' | 'RECENTLY_WORKED' | 'MASTERED' | 'DEVELOPING' | 'FOCUS'
     searchQuery = '',
-    sortBy = 'DEFAULT',     // 'DEFAULT' | 'MASTERY_DESC' | 'MASTERY_ASC' | 'ALPHA' | 'WORDS_DESC'
+    sortBy = 'DEFAULT',     // 'DEFAULT' | 'RECENT_DESC' | 'MASTERY_DESC' | 'MASTERY_ASC' | 'ALPHA' | 'WORDS_DESC'
   } = options;
+
+  const effectiveSort =
+    sortBy === 'DEFAULT' && maturityFilter === 'RECENTLY_WORKED'
+      ? 'RECENT_DESC'
+      : sortBy;
 
   // 1. Group definitions based on lens
   let domainDefs = [];
@@ -390,7 +414,7 @@ export function groupRootsByDomainLens(
   // 2. Build grouped data with aggregate mastery statistics
   const cleanQuery = searchQuery.trim().toLowerCase();
 
-  return domainDefs.map((domain) => {
+  const groups = domainDefs.map((domain) => {
     // Filter roots belonging to this domain
     let matchedRoots = roots.filter(domain.filterFn);
 
@@ -407,8 +431,10 @@ export function groupRootsByDomainLens(
       });
     }
 
-    // Apply Maturity Filter (Outlined vs Filled Circles)
-    if (maturityFilter === 'MASTERED') {
+    // Apply Maturity / Activity Filter
+    if (maturityFilter === 'RECENTLY_WORKED') {
+      matchedRoots = matchedRoots.filter(hasBeenWorkedOn);
+    } else if (maturityFilter === 'MASTERED') {
       // 80% to 100% circles filled
       matchedRoots = matchedRoots.filter((r) => (r.mastery_percentage || 0) >= 80);
     } else if (maturityFilter === 'DEVELOPING') {
@@ -422,13 +448,15 @@ export function groupRootsByDomainLens(
     }
 
     // Apply Sorting
-    if (sortBy === 'MASTERY_DESC') {
+    if (effectiveSort === 'RECENT_DESC') {
+      matchedRoots.sort(compareByMostRecent);
+    } else if (effectiveSort === 'MASTERY_DESC') {
       matchedRoots.sort((a, b) => (b.mastery_percentage || 0) - (a.mastery_percentage || 0));
-    } else if (sortBy === 'MASTERY_ASC') {
+    } else if (effectiveSort === 'MASTERY_ASC') {
       matchedRoots.sort((a, b) => (a.mastery_percentage || 0) - (b.mastery_percentage || 0));
-    } else if (sortBy === 'ALPHA') {
+    } else if (effectiveSort === 'ALPHA') {
       matchedRoots.sort((a, b) => (a.morpheme || '').localeCompare(b.morpheme || ''));
-    } else if (sortBy === 'WORDS_DESC') {
+    } else if (effectiveSort === 'WORDS_DESC') {
       matchedRoots.sort((a, b) => (b.total_words || 0) - (a.total_words || 0));
     }
 
@@ -440,6 +468,16 @@ export function groupRootsByDomainLens(
     const fullyMasteredRootsCount = matchedRoots.filter(
       (r) => r.mastered_words === r.total_words && r.total_words > 0
     ).length;
+
+    let lastWorkedAt = null;
+    let lastWorkedMs = 0;
+    for (const r of matchedRoots) {
+      const ms = parseTimestampMs(r.last_worked_at);
+      if (ms > lastWorkedMs) {
+        lastWorkedMs = ms;
+        lastWorkedAt = r.last_worked_at;
+      }
+    }
 
     return {
       id: domain.id || domain.name,
@@ -456,8 +494,19 @@ export function groupRootsByDomainLens(
       totalWords,
       masteredWords,
       masteryPercentage: domainMasteryPercentage,
+      lastWorkedAt,
     };
   });
+
+  if (effectiveSort === 'RECENT_DESC') {
+    groups.sort((a, b) => {
+      const diff = parseTimestampMs(b.lastWorkedAt) - parseTimestampMs(a.lastWorkedAt);
+      if (diff !== 0) return diff;
+      return b.totalRoots - a.totalRoots;
+    });
+  }
+
+  return groups;
 }
 
 /**
