@@ -17,6 +17,7 @@ class Command(BaseCommand):
         )
 
     def handle(self, *args, **options):
+        custom_file = bool(options.get("file"))
         file_path = options.get("file")
         if not file_path:
             file_path = os.path.join(settings.BASE_DIR, "kiwi_vocab", "fixtures", "sat_vocab_seed.json")
@@ -50,7 +51,7 @@ class Command(BaseCommand):
                 }
                 if w.mnemonic:
                     word_dict["mnemonic"] = w.mnemonic
-                if w.review and (w.review.get("verified") or w.review.get("notes")):
+                if w.review and (w.review.get("verified") or w.review.get("notes") or w.review.get("history")):
                     word_dict["review"] = w.review
                 words_list.append(word_dict)
 
@@ -63,12 +64,13 @@ class Command(BaseCommand):
         with open(file_path, "w", encoding="utf-8") as f:
             json.dump(exported_data, f, indent=2, ensure_ascii=False)
 
-        # Also sync to core/fixtures/sat_vocab_seed.json if present
-        core_fixture = os.path.join(settings.BASE_DIR, "core", "fixtures", "sat_vocab_seed.json")
-        if os.path.exists(core_fixture) and os.path.abspath(core_fixture) != os.path.abspath(file_path):
-            with open(core_fixture, "w", encoding="utf-8") as f:
-                json.dump(exported_data, f, indent=2, ensure_ascii=False)
-            self.stdout.write(f"Also synced to core fixture: {core_fixture}")
+        # Also sync to core/fixtures/sat_vocab_seed.json if present on default export
+        if not custom_file:
+            core_fixture = os.path.join(settings.BASE_DIR, "core", "fixtures", "sat_vocab_seed.json")
+            if os.path.exists(core_fixture) and os.path.abspath(core_fixture) != os.path.abspath(file_path):
+                with open(core_fixture, "w", encoding="utf-8") as f:
+                    json.dump(exported_data, f, indent=2, ensure_ascii=False)
+                self.stdout.write(f"Also synced to core fixture: {core_fixture}")
 
         self.stdout.write(self.style.SUCCESS(
             f"Successfully exported {len(exported_data)} root families and {total_words} words to {file_path}."

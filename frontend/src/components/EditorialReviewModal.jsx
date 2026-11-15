@@ -13,10 +13,20 @@ import {
   CheckCircle2,
   Edit3,
   Database,
-  Loader2
+  Loader2,
+  History,
+  Clock
 } from 'lucide-react';
-import { saveWordReview, getWordReview } from '../services/editorialService';
+import {
+  saveWordReview,
+  getWordReview,
+  buildUpdatedReview,
+  formatVerificationTimestamp,
+  normalizeHistoryEntries,
+  getAllVerificationHistory,
+} from '../services/editorialService';
 import { updateVocabularyWord } from '../services/api';
+import VerificationHistoryList from './VerificationHistoryList';
 
 export default function EditorialReviewModal({
   isOpen,
@@ -24,6 +34,7 @@ export default function EditorialReviewModal({
   words = [],
   roots = [],
   initialWord = null,
+  initialTab = 'LEXICON',
   onSaveReview,
   onUpdateWord
 }) {
@@ -36,8 +47,10 @@ export default function EditorialReviewModal({
 
   const [searchTerm, setSearchTerm] = useState('');
   const [filterMode, setFilterMode] = useState('ALL'); // 'ALL' | 'UNREVIEWED' | 'VERIFIED'
-  const [activeTabMode, setActiveTabMode] = useState('LEXICON'); // 'LEXICON' | 'CERTIFICATION'
-  const [mobileView, setMobileView] = useState(() => (initialWord ? 'detail' : 'list'));
+  const [activeTabMode, setActiveTabMode] = useState(initialTab || 'LEXICON'); // 'LEXICON' | 'CERTIFICATION' | 'HISTORY'
+  const [historySearch, setHistorySearch] = useState('');
+  const [historyActionFilter, setHistoryActionFilter] = useState('ALL');
+  const [mobileView, setMobileView] = useState(() => (initialWord || initialTab === 'HISTORY' ? 'detail' : 'list'));
   const [isSavingWord, setIsSavingWord] = useState(false);
   const [autoMarkVerified, setAutoMarkVerified] = useState(true);
   const [reviewFormData, setReviewFormData] = useState({
@@ -59,13 +72,23 @@ export default function EditorialReviewModal({
   });
   const [saveToast, setSaveToast] = useState(null);
 
-  // Sync initial word if passed
+  // Sync initial word and tab when modal opens
   useEffect(() => {
     if (initialWord) {
       const name = typeof initialWord === 'string' ? initialWord : initialWord.word;
       if (name) setSelectedWordName(name);
     }
   }, [initialWord]);
+
+  useEffect(() => {
+    if (isOpen) {
+      const nextTab = initialTab || 'LEXICON';
+      setActiveTabMode(nextTab);
+      if (nextTab === 'HISTORY' || initialWord) {
+        setMobileView('detail');
+      }
+    }
+  }, [isOpen, initialTab, initialWord]);
 
   // Find active word object
   const activeWord = useMemo(() => {
@@ -123,35 +146,81 @@ export default function EditorialReviewModal({
     });
   }, [words, filterMode, searchTerm]);
 
+  const activeWordHistory = useMemo(
+    () => normalizeHistoryEntries(activeWord?.review),
+    [activeWord]
+  );
+
+  const allHistoryEvents = useMemo(
+    () => (isOpen ? getAllVerificationHistory(words) : []),
+    [isOpen, words]
+  );
+
+  const filteredHistoryEvents = useMemo(() => {
+    return allHistoryEvents.filter((entry) => {
+      if (historyActionFilter !== 'ALL' && entry.action !== historyActionFilter) {
+        return false;
+      }
+      if (!historySearch.trim()) return true;
+      const q = historySearch.toLowerCase().trim();
+      return (
+        entry.word?.toLowerCase().includes(q) ||
+        entry.by?.toLowerCase().includes(q) ||
+        entry.notes?.toLowerCase().includes(q) ||
+        entry.summary?.toLowerCase().includes(q)
+      );
+    });
+  }, [allHistoryEvents, historyActionFilter, historySearch]);
+
   if (!isOpen) return null;
 
-  const handleSave = (moveToNext = false) => {
-    if (!activeWord) return;
-    const wordKey = activeWord.word;
-    const isVerified = Boolean(reviewFormData.verified);
+  const handleSave = async (moveToNext = false) => {
+    if (!activeWord || isSavingWord) return;
+    setIsSavingWord(true);
+    try {
+      const wordKey = activeWord.word;
+      const isVerified = Boolean(reviewFormData.verified);
 
-    const updatedReview = {
-      verified: isVerified,
-      verifiedAt: isVerified 
-        ? (activeWord.review?.verifiedAt || new Date().toISOString())
-        : null,
-      verifiedBy: (reviewFormData.verifiedBy || 'Admin').trim(),
-      notes: (reviewFormData.notes || '').trim()
-    };
+      const updatedReview = buildUpdatedReview(activeWord.review, {
+        verified: isVerified,
+        verifiedBy: reviewFormData.verifiedBy,
+        notes: reviewFormData.notes,
+      });
 
-    saveWordReview(wordKey, updatedReview);
-    if (onSaveReview) {
-      onSaveReview(wordKey, updatedReview);
-    }
-
-    setSaveToast(`Attestation saved for "${wordKey}"!`);
-    setTimeout(() => setSaveToast(null), 3000);
-
-    if (moveToNext) {
-      const currentIndex = filteredWords.findIndex(w => w.word === activeWord.word);
-      if (currentIndex !== -1 && currentIndex < filteredWords.length - 1) {
-        setSelectedWordName(filteredWords[currentIndex + 1].word);
+      let savedWordPayload = null;
+      if (activeWord.id) {
+        try {
+          const updated = await updateVocabularyWord(activeWord.id, { review: updatedReview });
+          savedWordPayload = {
+            ...activeWord,
+            ...updated,
+            review: updated?.review || updatedReview,
+          };
+        } catch (err) {
+          console.warn('Backend review sync failed, falling back to localStorage:', err);
+        }
       }
+
+      const finalReview = savedWordPayload?.review || updatedReview;
+      saveWordReview(wordKey, finalReview);
+      if (savedWordPayload && onUpdateWord) {
+        onUpdateWord(savedWordPayload);
+      }
+      if (onSaveReview) {
+        onSaveReview(wordKey, finalReview);
+      }
+
+      setSaveToast(`Verification & history saved for "${wordKey}"!`);
+      setTimeout(() => setSaveToast(null), 3000);
+
+      if (moveToNext) {
+        const currentIndex = filteredWords.findIndex(w => w.word === activeWord.word);
+        if (currentIndex !== -1 && currentIndex < filteredWords.length - 1) {
+          setSelectedWordName(filteredWords[currentIndex + 1].word);
+        }
+      }
+    } finally {
+      setIsSavingWord(false);
     }
   };
 
@@ -160,22 +229,28 @@ export default function EditorialReviewModal({
     setIsSavingWord(true);
     try {
       const isVerified = !reviewFormData.verified;
-      const updatedReview = {
-        verified: isVerified,
-        verifiedAt: isVerified ? new Date().toISOString() : null,
-        verifiedBy: (reviewFormData.verifiedBy || 'Admin').trim(),
-        notes: (reviewFormData.notes || '').trim()
-      };
+      const updatedReview = buildUpdatedReview(
+        activeWord.review,
+        {
+          verified: isVerified,
+          verifiedBy: reviewFormData.verifiedBy,
+          notes: reviewFormData.notes,
+        },
+        {
+          action: isVerified ? 'verified' : 'unverified',
+        }
+      );
 
       const updated = await updateVocabularyWord(activeWord.id, { review: updatedReview });
-      const completeUpdatedWord = { ...activeWord, ...updated, review: updatedReview };
+      const finalReview = updated?.review || updatedReview;
+      const completeUpdatedWord = { ...activeWord, ...updated, review: finalReview };
 
       if (onUpdateWord) {
         onUpdateWord(completeUpdatedWord);
       }
-      saveWordReview(activeWord.word, updatedReview);
+      saveWordReview(activeWord.word, finalReview);
       if (onSaveReview) {
-        onSaveReview(activeWord.word, updatedReview);
+        onSaveReview(activeWord.word, finalReview);
       }
       setReviewFormData(prev => ({ ...prev, verified: isVerified }));
       setSaveToast(isVerified ? `"${activeWord.word}" marked as verified!` : `"${activeWord.word}" marked unverified`);
@@ -198,15 +273,38 @@ export default function EditorialReviewModal({
     if (!activeWord || isSavingWord) return;
     setIsSavingWord(true);
     try {
+      const changedFields = [];
+      if ((wordFormData.prefix || '').trim() !== (activeWord.prefix || '').trim()) changedFields.push('prefix');
+      if ((wordFormData.suffix || '').trim() !== (activeWord.suffix || '').trim()) changedFields.push('suffix');
+      if (Number(wordFormData.root) !== Number(activeWord.root || activeWord.root_details?.id)) changedFields.push('root');
+      if ((wordFormData.mnemonic || '').trim() !== (activeWord.mnemonic || '').trim()) changedFields.push('mnemonic');
+      if ((wordFormData.definition || '').trim() !== (activeWord.definition || '').trim()) changedFields.push('definition');
+      if ((wordFormData.sat_sentence || '').trim() !== (activeWord.sat_sentence || '').trim()) changedFields.push('sat_sentence');
+      if (wordFormData.connotation !== (activeWord.connotation || 'neutral')) changedFields.push('connotation');
+      if ((wordFormData.part_of_speech || '').trim() !== (activeWord.part_of_speech || '').trim()) changedFields.push('part_of_speech');
+      if ((wordFormData.pronunciation || '').trim() !== (activeWord.pronunciation || '').trim()) changedFields.push('pronunciation');
+
       const isVerified = autoMarkVerified || Boolean(reviewFormData.verified);
-      const updatedReview = {
-        verified: isVerified,
-        verifiedAt: isVerified 
-          ? (activeWord.review?.verifiedAt || new Date().toISOString())
-          : null,
-        verifiedBy: (reviewFormData.verifiedBy || 'Admin').trim(),
-        notes: (reviewFormData.notes || '').trim()
-      };
+      const wasVerified = Boolean(activeWord.review?.verified);
+      const notesChanged = (reviewFormData.notes || '').trim() !== (activeWord.review?.notes || '').trim();
+
+      const updatedReview =
+        isVerified || wasVerified || notesChanged
+          ? buildUpdatedReview(
+              activeWord.review,
+              {
+                verified: isVerified,
+                verifiedBy: reviewFormData.verifiedBy,
+                notes: reviewFormData.notes,
+              },
+              {
+                action: isVerified
+                  ? (changedFields.length > 0 ? 'edited_and_verified' : 'verified')
+                  : undefined,
+                changedFields,
+              }
+            )
+          : (activeWord.review || {});
 
       const payload = {
         word: (wordFormData.word || '').trim(),
@@ -223,14 +321,15 @@ export default function EditorialReviewModal({
       };
 
       const updated = await updateVocabularyWord(activeWord.id, payload);
-      const completeUpdatedWord = { ...activeWord, ...updated, review: updatedReview };
+      const finalReview = updated?.review || updatedReview;
+      const completeUpdatedWord = { ...activeWord, ...updated, review: finalReview };
 
       if (onUpdateWord) {
         onUpdateWord(completeUpdatedWord);
       }
-      saveWordReview(activeWord.word, updatedReview);
+      saveWordReview(activeWord.word, finalReview);
       if (onSaveReview) {
-        onSaveReview(activeWord.word, updatedReview);
+        onSaveReview(activeWord.word, finalReview);
       }
       setReviewFormData(prev => ({ ...prev, verified: isVerified }));
 
@@ -425,11 +524,121 @@ export default function EditorialReviewModal({
             </div>
           </div>
 
-          {/* RIGHT: Active Entry Inspection & Verification Form */}
+          {/* RIGHT: Active Entry Inspection, Verification Form & History */}
           <div className={`flex-1 overflow-y-auto p-4 sm:p-6 space-y-4 sm:space-y-5 bg-white ${
             mobileView === 'detail' ? 'block' : 'hidden md:block'
           }`}>
-            {activeWord ? (
+            {activeTabMode === 'HISTORY' ? (
+              <div className="space-y-4 animate-fade-in">
+                {/* Mobile Back Button */}
+                <button
+                  onClick={() => setMobileView('list')}
+                  className="md:hidden flex items-center space-x-1.5 px-3 py-1.5 bg-[#FAFBF8] border border-[#111410] text-xs font-mono font-bold uppercase text-[#111410] shadow-[1px_1px_0px_0px_#111410]"
+                >
+                  <ArrowLeft className="w-3.5 h-3.5" />
+                  <span>← Back to Word List</span>
+                </button>
+
+                {/* Sub-Tab Switcher at top when in HISTORY mode */}
+                <div className="flex flex-wrap border-b-2 border-[#111410] font-mono text-xs bg-[#FAFBF8]">
+                  <button
+                    type="button"
+                    onClick={() => setActiveTabMode('LEXICON')}
+                    className="flex-1 sm:flex-none px-4 py-2.5 font-black uppercase flex items-center justify-center space-x-2 border-r-2 border-[#111410] text-[#111410] hover:bg-white transition"
+                  >
+                    <Edit3 className="w-3.5 h-3.5" />
+                    <span>Edit Lexicon &amp; Affixes</span>
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setActiveTabMode('CERTIFICATION')}
+                    className="flex-1 sm:flex-none px-4 py-2.5 font-black uppercase flex items-center justify-center space-x-2 border-r-2 border-[#111410] text-[#111410] hover:bg-white transition"
+                  >
+                    <ShieldCheck className="w-3.5 h-3.5" />
+                    <span>Certification &amp; Notes</span>
+                    {activeWordHistory.length > 0 && (
+                      <span className="px-1.5 py-0.2 bg-[#111410] text-white text-[9px] font-black">
+                        {activeWordHistory.length}
+                      </span>
+                    )}
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setActiveTabMode('HISTORY')}
+                    className="flex-1 sm:flex-none px-4 py-2.5 font-black uppercase flex items-center justify-center space-x-2 bg-[#7BB33B] text-white shadow-[inset_0_-2px_0_0_#111410] transition"
+                  >
+                    <History className="w-3.5 h-3.5" />
+                    <span>Verification History</span>
+                    <span className="px-1.5 py-0.2 bg-[#111410] text-white text-[9px] font-black">
+                      {allHistoryEvents.length}
+                    </span>
+                  </button>
+                </div>
+
+                {/* Global Verification History Panel */}
+                <div className="p-3.5 sm:p-5 bg-[#FAFBF8] border-2 border-[#111410] shadow-[3px_3px_0px_0px_#111410] space-y-4">
+                  <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-[#111410]/20 pb-3">
+                    <div>
+                      <div className="flex items-center space-x-2 text-xs font-mono font-black uppercase text-[#111410]">
+                        <History className="w-4 h-4 text-[#7BB33B]" />
+                        <span>GLOBAL VERIFICATION AUDIT LOG</span>
+                      </div>
+                      <p className="text-[11px] font-mono text-[#62685E] mt-0.5">
+                        Chronological record of all word verifications, edits, and status changes with timestamps.
+                      </p>
+                    </div>
+                    <div className="text-[11px] font-mono font-bold text-[#111410] bg-white px-2.5 py-1 border border-[#111410] shrink-0">
+                      {filteredHistoryEvents.length} of {allHistoryEvents.length} events
+                    </div>
+                  </div>
+
+                  {/* Search & Action Filter Controls */}
+                  <div className="flex flex-col sm:flex-row gap-2">
+                    <div className="relative flex-1">
+                      <Search className="w-3.5 h-3.5 absolute left-2.5 top-1/2 -translate-y-1/2 text-[#62685E]" />
+                      <input
+                        type="text"
+                        value={historySearch}
+                        onChange={(e) => setHistorySearch(e.target.value)}
+                        placeholder="Filter by word, editor, or notes..."
+                        className="w-full pl-8 pr-3 py-1.5 bg-white border border-[#111410] text-xs font-mono placeholder:text-[#62685E] focus:outline-none focus:ring-1 focus:ring-[#7BB33B]"
+                      />
+                    </div>
+                    <div className="flex items-center gap-1 flex-wrap text-[10px] font-mono font-bold">
+                      {[
+                        { key: 'ALL', label: 'All' },
+                        { key: 'verified', label: 'Verified' },
+                        { key: 'edited_and_verified', label: 'Edited & Verified' },
+                        { key: 'unverified', label: 'Unverified' },
+                      ].map((tab) => (
+                        <button
+                          key={tab.key}
+                          type="button"
+                          onClick={() => setHistoryActionFilter(tab.key)}
+                          className={`px-2.5 py-1.5 border transition ${
+                            historyActionFilter === tab.key
+                              ? 'bg-[#111410] text-white border-[#111410]'
+                              : 'bg-white text-[#62685E] border-[#111410]/30 hover:border-[#111410]'
+                          }`}
+                        >
+                          {tab.label}
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+
+                  <VerificationHistoryList
+                    entries={filteredHistoryEvents}
+                    showWord
+                    onSelectWord={(wordName) => {
+                      setSelectedWordName(wordName);
+                      setActiveTabMode('CERTIFICATION');
+                    }}
+                    emptyMessage="No verification history events match the current filter."
+                  />
+                </div>
+              </div>
+            ) : activeWord ? (
               <>
                 {/* Mobile Back Button */}
                 <button
@@ -496,7 +705,7 @@ export default function EditorialReviewModal({
                       </div>
                     </div>
 
-                    <div className="flex items-center space-x-2 mt-1.5 font-mono text-xs text-[#62685E]">
+                    <div className="flex items-center space-x-2 mt-1.5 font-mono text-xs text-[#62685E] flex-wrap gap-y-1">
                       <span>{activeWord.pronunciation || '/phonetic/'}</span>
                       <span>·</span>
                       <span className="uppercase font-bold">{activeWord.part_of_speech || 'word'}</span>
@@ -504,6 +713,19 @@ export default function EditorialReviewModal({
                         <>
                           <span>·</span>
                           <span className="uppercase">{activeWord.connotation}</span>
+                        </>
+                      )}
+                      {(activeWord.review?.verifiedAt || activeWordHistory[0]?.timestamp) && (
+                        <>
+                          <span>·</span>
+                          <span className="inline-flex items-center space-x-1 text-[11px] text-[#2F441E]">
+                            <Clock className="w-3 h-3 text-[#7BB33B]" />
+                            <span>
+                              {activeWord.review?.verified && activeWord.review?.verifiedAt
+                                ? `Verified ${formatVerificationTimestamp(activeWord.review.verifiedAt)}`
+                                : `Last event ${formatVerificationTimestamp(activeWordHistory[0].timestamp)}`}
+                            </span>
+                          </span>
                         </>
                       )}
                     </div>
@@ -518,8 +740,8 @@ export default function EditorialReviewModal({
                   )}
                 </div>
 
-                {/* Sub-Tab Switcher: Word Lexicon Editor vs Editorial Certification */}
-                <div className="flex border-b-2 border-[#111410] font-mono text-xs bg-[#FAFBF8]">
+                {/* Sub-Tab Switcher: Word Lexicon Editor vs Editorial Certification vs History */}
+                <div className="flex flex-wrap border-b-2 border-[#111410] font-mono text-xs bg-[#FAFBF8]">
                   <button
                     type="button"
                     onClick={() => setActiveTabMode('LEXICON')}
@@ -535,7 +757,7 @@ export default function EditorialReviewModal({
                   <button
                     type="button"
                     onClick={() => setActiveTabMode('CERTIFICATION')}
-                    className={`flex-1 sm:flex-none px-4 py-2.5 font-black uppercase flex items-center justify-center space-x-2 transition ${
+                    className={`flex-1 sm:flex-none px-4 py-2.5 font-black uppercase flex items-center justify-center space-x-2 border-r-2 border-[#111410] transition ${
                       activeTabMode === 'CERTIFICATION'
                         ? 'bg-[#7BB33B] text-white shadow-[inset_0_-2px_0_0_#111410]'
                         : 'text-[#111410] hover:bg-white'
@@ -543,6 +765,22 @@ export default function EditorialReviewModal({
                   >
                     <ShieldCheck className="w-3.5 h-3.5" />
                     <span>Certification &amp; Notes</span>
+                    {activeWordHistory.length > 0 && (
+                      <span className="px-1.5 py-0.2 bg-[#111410] text-white text-[9px] font-black">
+                        {activeWordHistory.length}
+                      </span>
+                    )}
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setActiveTabMode('HISTORY')}
+                    className="flex-1 sm:flex-none px-4 py-2.5 font-black uppercase flex items-center justify-center space-x-2 text-[#111410] hover:bg-white transition"
+                  >
+                    <History className="w-3.5 h-3.5" />
+                    <span>Verification History</span>
+                    <span className="px-1.5 py-0.2 bg-[#111410] text-white text-[9px] font-black">
+                      {allHistoryEvents.length}
+                    </span>
                   </button>
                 </div>
 
@@ -777,89 +1015,116 @@ export default function EditorialReviewModal({
                   </div>
                 )}
 
-                {/* TAB 2: EDITORIAL CERTIFICATION FORM */}
+                {/* TAB 2: EDITORIAL CERTIFICATION FORM & WORD HISTORY */}
                 {activeTabMode === 'CERTIFICATION' && (
-                  <div className="p-3.5 sm:p-5 bg-[#FAFBF8] border-2 border-[#111410] shadow-[3px_3px_0px_0px_#111410] sm:shadow-[4px_4px_0px_0px_#111410] space-y-3.5 sm:space-y-4 animate-fade-in">
-                    <div className="flex items-center justify-between border-b border-[#111410]/20 pb-2">
-                      <div className="flex items-center space-x-2 text-xs font-mono font-black uppercase text-[#111410]">
-                        <ShieldCheck className="w-4 h-4 text-[#7BB33B]" />
-                        <span>EDITORIAL VERIFICATION &amp; ATTESTATION</span>
+                  <div className="space-y-4 animate-fade-in">
+                    <div className="p-3.5 sm:p-5 bg-[#FAFBF8] border-2 border-[#111410] shadow-[3px_3px_0px_0px_#111410] sm:shadow-[4px_4px_0px_0px_#111410] space-y-3.5 sm:space-y-4">
+                      <div className="flex items-center justify-between border-b border-[#111410]/20 pb-2 flex-wrap gap-2">
+                        <div className="flex items-center space-x-2 text-xs font-mono font-black uppercase text-[#111410]">
+                          <ShieldCheck className="w-4 h-4 text-[#7BB33B]" />
+                          <span>EDITORIAL VERIFICATION &amp; ATTESTATION</span>
+                        </div>
+                        {activeWord.review?.verifiedAt && (
+                          <span className="inline-flex items-center space-x-1 text-[10px] font-mono text-[#62685E]">
+                            <Clock className="w-3 h-3 text-[#7BB33B]" />
+                            <span>{formatVerificationTimestamp(activeWord.review.verifiedAt)}</span>
+                          </span>
+                        )}
                       </div>
-                      {activeWord.review?.verifiedAt && (
-                        <span className="text-[10px] font-mono text-[#62685E]">
-                          {new Date(activeWord.review.verifiedAt).toLocaleDateString()}
-                        </span>
-                      )}
-                    </div>
 
-                    {/* 1. Checkbox: Mark as Independently Verified */}
-                    <label className="flex items-start space-x-3 cursor-pointer select-none bg-white p-3 border-2 border-[#111410] shadow-[2px_2px_0px_0px_#111410] hover:bg-[#FAFBF8] transition">
-                      <input
-                        type="checkbox"
-                        checked={reviewFormData.verified}
-                        onChange={(e) => setReviewFormData(prev => ({ ...prev, verified: e.target.checked }))}
-                        className="mt-0.5 w-5 h-5 text-[#7BB33B] border-2 border-[#111410] rounded-none focus:ring-0 accent-[#7BB33B] cursor-pointer shrink-0"
-                      />
+                      {/* 1. Checkbox: Mark as Independently Verified */}
+                      <label className="flex items-start space-x-3 cursor-pointer select-none bg-white p-3 border-2 border-[#111410] shadow-[2px_2px_0px_0px_#111410] hover:bg-[#FAFBF8] transition">
+                        <input
+                          type="checkbox"
+                          checked={reviewFormData.verified}
+                          onChange={(e) => setReviewFormData(prev => ({ ...prev, verified: e.target.checked }))}
+                          className="mt-0.5 w-5 h-5 text-[#7BB33B] border-2 border-[#111410] rounded-none focus:ring-0 accent-[#7BB33B] cursor-pointer shrink-0"
+                        />
+                        <div>
+                          <span className="text-xs sm:text-sm font-mono font-black uppercase text-[#111410] block">
+                            Mark as Independently Verified by Editor
+                          </span>
+                          <span className="text-[11px] sm:text-xs font-mono text-[#62685E] leading-relaxed block mt-0.5">
+                            Certifies definition accuracy, morpheme formula decomposition, and SAT/ACT relevance.
+                          </span>
+                        </div>
+                      </label>
+
+                      {/* 2. Reviewer Name Input */}
                       <div>
-                        <span className="text-xs sm:text-sm font-mono font-black uppercase text-[#111410] block">
-                          Mark as Independently Verified by Editor
-                        </span>
-                        <span className="text-[11px] sm:text-xs font-mono text-[#62685E] leading-relaxed block mt-0.5">
-                          Certifies definition accuracy, morpheme formula decomposition, and SAT/ACT relevance.
+                        <label className="text-[10px] font-mono font-black uppercase text-[#62685E] block mb-1">
+                          Verified By (Editor Name / Affiliation)
+                        </label>
+                        <input
+                          type="text"
+                          value={reviewFormData.verifiedBy}
+                          onChange={(e) => setReviewFormData(prev => ({ ...prev, verifiedBy: e.target.value }))}
+                          placeholder="e.g. Admin, Senior Lexicographer"
+                          className="w-full text-base sm:text-xs font-mono px-3 py-2 bg-white border-2 border-[#111410] focus:outline-none focus:ring-2 focus:ring-[#7BB33B]"
+                        />
+                      </div>
+
+                      {/* 3. Text area: Editorial Notes / Source Attestation */}
+                      <div>
+                        <label className="text-[10px] font-mono font-black uppercase text-[#62685E] block mb-1">
+                          Editorial Notes / Source Attestation
+                        </label>
+                        <textarea
+                          rows={3}
+                          value={reviewFormData.notes}
+                          onChange={(e) => setReviewFormData(prev => ({ ...prev, notes: e.target.value }))}
+                          placeholder="e.g. Checked against Merriam-Webster Unabridged; Latin root and etymology verified."
+                          className="w-full text-base sm:text-xs font-sans p-2.5 sm:p-3 bg-white border-2 border-[#111410] focus:outline-none focus:ring-2 focus:ring-[#7BB33B] resize-y"
+                        />
+                        <span className="text-[10px] font-mono text-[#62685E] mt-1 block">
+                          Internal editorial notes are strictly hidden from student views and preserved in exports.
                         </span>
                       </div>
-                    </label>
 
-                    {/* 2. Reviewer Name Input */}
-                    <div>
-                      <label className="text-[10px] font-mono font-black uppercase text-[#62685E] block mb-1">
-                        Verified By (Editor Name / Affiliation)
-                      </label>
-                      <input
-                        type="text"
-                        value={reviewFormData.verifiedBy}
-                        onChange={(e) => setReviewFormData(prev => ({ ...prev, verifiedBy: e.target.value }))}
-                        placeholder="e.g. Admin, Senior Lexicographer"
-                        className="w-full text-base sm:text-xs font-mono px-3 py-2 bg-white border-2 border-[#111410] focus:outline-none focus:ring-2 focus:ring-[#7BB33B]"
-                      />
+                      {/* Commit Action Buttons */}
+                      <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2 pt-2 border-t border-[#111410]/15">
+                        <button
+                          type="button"
+                          onClick={() => handleSave(false)}
+                          disabled={isSavingWord}
+                          className="flex-1 flex items-center justify-center space-x-2 px-4 py-3 sm:py-2.5 bg-[#7BB33B] hover:bg-[#84C341] text-white border-2 border-[#111410] shadow-[2px_2px_0px_0px_#111410] font-mono text-xs font-black uppercase tracking-wider transition active:translate-x-[1px] active:translate-y-[1px] min-h-[44px] disabled:opacity-50"
+                        >
+                          {isSavingWord ? (
+                            <Loader2 className="w-4 h-4 animate-spin" />
+                          ) : (
+                            <Check className="w-4 h-4" />
+                          )}
+                          <span>{isSavingWord ? 'Saving...' : 'Save Verification'}</span>
+                        </button>
+
+                        <button
+                          type="button"
+                          onClick={() => handleSave(true)}
+                          disabled={isSavingWord}
+                          className="flex-1 flex items-center justify-center space-x-2 px-4 py-3 sm:py-2.5 bg-[#EDF5E5] hover:bg-[#DCEDD0] text-[#2F441E] border-2 border-[#111410] shadow-[2px_2px_0px_0px_#111410] font-mono text-xs font-black uppercase tracking-wider transition active:translate-x-[1px] active:translate-y-[1px] min-h-[44px] disabled:opacity-50"
+                        >
+                          <span>Save &amp; Next Word</span>
+                          <ArrowRight className="w-4 h-4" />
+                        </button>
+                      </div>
                     </div>
 
-                    {/* 3. Text area: Editorial Notes / Source Attestation */}
-                    <div>
-                      <label className="text-[10px] font-mono font-black uppercase text-[#62685E] block mb-1">
-                        Editorial Notes / Source Attestation
-                      </label>
-                      <textarea
-                        rows={3}
-                        value={reviewFormData.notes}
-                        onChange={(e) => setReviewFormData(prev => ({ ...prev, notes: e.target.value }))}
-                        placeholder="e.g. Checked against Merriam-Webster Unabridged; Latin root and etymology verified."
-                        className="w-full text-base sm:text-xs font-sans p-2.5 sm:p-3 bg-white border-2 border-[#111410] focus:outline-none focus:ring-2 focus:ring-[#7BB33B] resize-y"
+                    {/* Per-word Verification History Timeline */}
+                    <div className="p-3.5 sm:p-5 bg-[#FAFBF8] border-2 border-[#111410] shadow-[3px_3px_0px_0px_#111410] space-y-3">
+                      <div className="flex items-center justify-between border-b border-[#111410]/20 pb-2">
+                        <div className="flex items-center space-x-2 text-xs font-mono font-black uppercase text-[#111410]">
+                          <History className="w-4 h-4 text-[#7BB33B]" />
+                          <span>VERIFICATION HISTORY FOR &ldquo;{activeWord.word}&rdquo;</span>
+                        </div>
+                        <span className="text-[10px] font-mono font-bold text-[#62685E]">
+                          {activeWordHistory.length} {activeWordHistory.length === 1 ? 'event' : 'events'}
+                        </span>
+                      </div>
+
+                      <VerificationHistoryList
+                        entries={activeWordHistory}
+                        emptyMessage={`No verification history recorded yet for "${activeWord.word}".`}
                       />
-                      <span className="text-[10px] font-mono text-[#62685E] mt-1 block">
-                        Internal editorial notes are strictly hidden from student views and preserved in exports.
-                      </span>
-                    </div>
-
-                    {/* Commit Action Buttons */}
-                    <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2 pt-2 border-t border-[#111410]/15">
-                      <button
-                        type="button"
-                        onClick={() => handleSave(false)}
-                        className="flex-1 flex items-center justify-center space-x-2 px-4 py-3 sm:py-2.5 bg-[#7BB33B] hover:bg-[#84C341] text-white border-2 border-[#111410] shadow-[2px_2px_0px_0px_#111410] font-mono text-xs font-black uppercase tracking-wider transition active:translate-x-[1px] active:translate-y-[1px] min-h-[44px]"
-                      >
-                        <Check className="w-4 h-4" />
-                        <span>Save Verification</span>
-                      </button>
-
-                      <button
-                        type="button"
-                        onClick={() => handleSave(true)}
-                        className="flex-1 flex items-center justify-center space-x-2 px-4 py-3 sm:py-2.5 bg-[#EDF5E5] hover:bg-[#DCEDD0] text-[#2F441E] border-2 border-[#111410] shadow-[2px_2px_0px_0px_#111410] font-mono text-xs font-black uppercase tracking-wider transition active:translate-x-[1px] active:translate-y-[1px] min-h-[44px]"
-                      >
-                        <span>Save &amp; Next Word</span>
-                        <ArrowRight className="w-4 h-4" />
-                      </button>
                     </div>
                   </div>
                 )}

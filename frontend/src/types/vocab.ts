@@ -5,11 +5,28 @@
  * verifying accurate SAT/ACT definitions, morpheme decompositions, and contextual exemplars.
  */
 
+export type VerificationAction =
+  | 'verified'
+  | 'unverified'
+  | 'edited_and_verified'
+  | 'attestation_updated';
+
+export interface VerificationHistoryEntry {
+  id: string;
+  action: VerificationAction | string;
+  verified: boolean;
+  timestamp: string; // ISO date-time string (e.g. "2026-11-14T21:30:00.000Z")
+  by: string;        // e.g. "Admin" or editor username/email
+  notes?: string;
+  summary?: string;
+}
+
 export interface EditorialReview {
   verified: boolean;
-  verifiedAt?: string; // ISO date string (e.g. "2026-11-02T14:28:16.000Z")
-  verifiedBy?: string; // e.g. "Admin" or editor username/email
-  notes?: string;       // Internal editorial notes (e.g. "Checked against Merriam-Webster / Latin etymology confirmed")
+  verifiedAt?: string | null; // ISO date string (e.g. "2026-11-02T14:28:16.000Z")
+  verifiedBy?: string;        // e.g. "Admin" or editor username/email
+  notes?: string;             // Internal editorial notes (e.g. "Checked against Merriam-Webster / Latin etymology confirmed")
+  history?: VerificationHistoryEntry[];
 }
 
 export type Connotation = 'positive' | 'negative' | 'neutral';

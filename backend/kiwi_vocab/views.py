@@ -10,6 +10,7 @@ import hashlib
 from django.core.cache import cache
 from django.utils import timezone
 from .models import Root, VocabularyWord
+from .review_utils import build_review_with_history
 from .serializers import (
     RootSerializer,
     VocabularyWordSerializer,
@@ -167,7 +168,33 @@ class VocabularyWordViewSet(viewsets.ModelViewSet):
         return [permissions.AllowAny()]
 
     def perform_update(self, serializer):
-        instance = serializer.save()
+        save_kwargs = {}
+        if 'review' in serializer.validated_data:
+            existing_instance = serializer.instance
+            existing_review = getattr(existing_instance, 'review', None) or {}
+            incoming_review = serializer.validated_data.get('review') or {}
+            changed_fields = []
+            for field, new_val in serializer.validated_data.items():
+                if field == 'review':
+                    continue
+                old_val = getattr(existing_instance, field, None)
+                if old_val != new_val:
+                    changed_fields.append(field)
+
+            user = getattr(self.request, 'user', None)
+            actor_name = (
+                getattr(user, 'email', '') or getattr(user, 'username', '') or 'Admin'
+                if user and user.is_authenticated
+                else 'Admin'
+            )
+            save_kwargs['review'] = build_review_with_history(
+                existing_review,
+                incoming_review,
+                actor_name=actor_name,
+                changed_fields=changed_fields,
+            )
+
+        instance = serializer.save(**save_kwargs)
         today_str = timezone.now().strftime('%Y-%m-%d')
         cache.delete(f"kiwi_daily_guest_deck_{today_str}_15")
         return instance

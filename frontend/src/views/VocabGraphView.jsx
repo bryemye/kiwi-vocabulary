@@ -15,15 +15,21 @@ import {
   Check,
   AlertCircle,
   Edit3,
-  ShieldCheck
+  ShieldCheck,
+  History,
+  Clock
 } from 'lucide-react';
 import confetti from 'canvas-confetti';
-import { fetchRoots, fetchVocabStats, logStudyAttempt } from '../services/api';
+import { fetchRoots, fetchVocabStats, logStudyAttempt, updateVocabularyWord } from '../services/api';
 import { 
   saveWordReview, 
   getWordReview, 
-  mergeReviewsIntoRoots 
+  mergeReviewsIntoRoots,
+  buildUpdatedReview,
+  formatVerificationTimestamp,
+  normalizeHistoryEntries
 } from '../services/editorialService';
+import VerificationHistoryList from '../components/VerificationHistoryList';
 import { useCelestialTrajectory } from '../context/CelestialTrajectoryContext';
 import PathwayToggle from '../components/PathwayToggle';
 import {
@@ -841,23 +847,36 @@ export default function VocabGraphView({
   }, [selectedNode]);
 
   // Handler to save verification review
-  const handleSaveReview = () => {
+  const handleSaveReview = async () => {
     if (!selectedNode || selectedNode.type !== 'word') return;
     const wordKey = selectedNode.word;
+    const wordId = selectedNode.rawId || selectedNode.data?.id;
     const isVerified = Boolean(reviewFormData.verified);
-    const updatedReview = {
-      verified: isVerified,
-      verifiedAt: isVerified 
-        ? (selectedNode.data?.review?.verifiedAt || new Date().toISOString())
-        : null,
-      verifiedBy: (reviewFormData.verifiedBy || 'Admin').trim(),
-      notes: (reviewFormData.notes || '').trim(),
-    };
 
-    saveWordReview(wordKey, updatedReview);
+    const updatedReview = buildUpdatedReview(selectedNode.data?.review, {
+      verified: isVerified,
+      verifiedBy: reviewFormData.verifiedBy,
+      notes: reviewFormData.notes,
+    });
+
+    let persistedReview = updatedReview;
+    let savedToBackend = false;
+    if (wordId) {
+      try {
+        const updated = await updateVocabularyWord(wordId, { review: updatedReview });
+        if (updated?.review) {
+          persistedReview = updated.review;
+        }
+        savedToBackend = true;
+      } catch (err) {
+        console.warn('Backend verification save failed, keeping localStorage entry:', err);
+      }
+    }
+
+    saveWordReview(wordKey, persistedReview);
 
     // Update locally in selectedNode
-    const updatedWordData = { ...selectedNode.data, review: updatedReview };
+    const updatedWordData = { ...selectedNode.data, review: persistedReview };
     setSelectedNode(prev => ({
       ...prev,
       data: updatedWordData,
@@ -881,7 +900,7 @@ export default function VocabGraphView({
         ...r,
         words: (r.words || []).map(w => {
           if (w.word?.toLowerCase() === wordKey.toLowerCase()) {
-            return { ...w, review: updatedReview };
+            return { ...w, review: persistedReview };
           }
           return w;
         })
@@ -889,11 +908,15 @@ export default function VocabGraphView({
     });
 
     if (onUpdateWordReview) {
-      onUpdateWordReview(wordKey, updatedReview);
+      onUpdateWordReview(wordKey, persistedReview);
     }
 
     setIsEditingReview(false);
-    setSaveSuccessToast('Editorial verification saved to localStorage!');
+    setSaveSuccessToast(
+      savedToBackend
+        ? 'Editorial verification & history saved!'
+        : 'Editorial verification & history saved locally!'
+    );
     setTimeout(() => {
       setSaveSuccessToast(null);
     }, 3500);
@@ -3078,32 +3101,55 @@ export default function VocabGraphView({
                       </div>
 
                       {/* Read-Only Editorial Details when not editing */}
-                      {!isEditingReview && (
-                        <div className="text-[11px] font-mono text-[#62685E] pt-1 border-t border-[#111410]/15 space-y-1.5">
-                          {selectedNode.data?.review?.verified ? (
-                            <>
-                              <div className="flex items-center justify-between text-[10px]">
-                                <span>Attested by: <strong className="text-[#111410]">{selectedNode.data.review.verifiedBy || 'Admin'}</strong></span>
-                                {selectedNode.data.review.verifiedAt && (
-                                  <span>{new Date(selectedNode.data.review.verifiedAt).toLocaleDateString()}</span>
-                                )}
-                              </div>
-                              {selectedNode.data.review.notes && (
-                                <div className="mt-1 bg-white p-2 border border-[#111410] text-[#111410] font-sans text-xs italic">
-                                  <span className="block text-[9px] font-mono not-italic uppercase font-bold text-[#62685E] mb-0.5">
-                                    Editorial Notes / Source Attestation:
-                                  </span>
-                                  "{selectedNode.data.review.notes}"
+                      {!isEditingReview && (() => {
+                        const wordHistory = normalizeHistoryEntries(selectedNode.data?.review);
+                        return (
+                          <div className="text-[11px] font-mono text-[#62685E] pt-1 border-t border-[#111410]/15 space-y-2">
+                            {selectedNode.data?.review?.verified ? (
+                              <>
+                                <div className="flex items-center justify-between text-[10px] flex-wrap gap-1">
+                                  <span>Attested by: <strong className="text-[#111410]">{selectedNode.data.review.verifiedBy || 'Admin'}</strong></span>
+                                  {selectedNode.data.review.verifiedAt && (
+                                    <span className="inline-flex items-center space-x-1 text-[#2F441E]">
+                                      <Clock className="w-3 h-3 text-[#7BB33B]" />
+                                      <span>{formatVerificationTimestamp(selectedNode.data.review.verifiedAt)}</span>
+                                    </span>
+                                  )}
                                 </div>
-                              )}
-                            </>
-                          ) : (
-                            <p className="text-[10px] italic text-[#62685E]">
-                              AI-generated entry has not yet been verified by an editor. Click <strong>[Edit Verification]</strong> to certify.
-                            </p>
-                          )}
-                        </div>
-                      )}
+                                {selectedNode.data.review.notes && (
+                                  <div className="mt-1 bg-white p-2 border border-[#111410] text-[#111410] font-sans text-xs italic">
+                                    <span className="block text-[9px] font-mono not-italic uppercase font-bold text-[#62685E] mb-0.5">
+                                      Editorial Notes / Source Attestation:
+                                    </span>
+                                    "{selectedNode.data.review.notes}"
+                                  </div>
+                                )}
+                              </>
+                            ) : (
+                              <p className="text-[10px] italic text-[#62685E]">
+                                AI-generated entry has not yet been verified by an editor. Click <strong>[Edit Verification]</strong> to certify.
+                              </p>
+                            )}
+
+                            {wordHistory.length > 0 && (
+                              <div className="pt-2 border-t border-[#111410]/15 space-y-1.5">
+                                <div className="flex items-center justify-between text-[9px] font-mono font-black uppercase text-[#111410]">
+                                  <span className="inline-flex items-center space-x-1">
+                                    <History className="w-3 h-3 text-[#7BB33B]" />
+                                    <span>Verification History</span>
+                                  </span>
+                                  <span className="text-[#62685E]">{wordHistory.length}</span>
+                                </div>
+                                <VerificationHistoryList
+                                  entries={wordHistory}
+                                  compact
+                                  initialLimit={3}
+                                />
+                              </div>
+                            )}
+                          </div>
+                        );
+                      })()}
 
                       {/* Review Panel / UI Form when editing */}
                       {isEditingReview && (

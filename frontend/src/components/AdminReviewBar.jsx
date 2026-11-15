@@ -8,9 +8,14 @@ import {
   Sparkles,
   FileCheck,
   Edit3,
-  Search
+  Search,
+  History
 } from 'lucide-react';
-import { exportUpdatedLexiconJson, countVerifiedWords } from '../services/editorialService';
+import {
+  exportUpdatedLexiconJson,
+  countVerifiedWords,
+  getAllVerificationHistory
+} from '../services/editorialService';
 import EditorialReviewModal from './EditorialReviewModal';
 
 export default function AdminReviewBar({ 
@@ -23,6 +28,7 @@ export default function AdminReviewBar({
 }) {
   const [exportNotice, setExportNotice] = useState(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [modalInitialTab, setModalInitialTab] = useState('LEXICON');
   const [selectedWordToEdit, setSelectedWordToEdit] = useState('');
 
   if (!isAdminMode) return null;
@@ -31,6 +37,7 @@ export default function AdminReviewBar({
   const totalCount = words.length || 0;
   const verifiedPercent = totalCount > 0 ? Math.round((verifiedCount / totalCount) * 100) : 0;
   const unreviewedCount = totalCount - verifiedCount;
+  const historyEventCount = getAllVerificationHistory(words).length;
 
   const handleExport = () => {
     const result = exportUpdatedLexiconJson(roots, words);
@@ -40,8 +47,9 @@ export default function AdminReviewBar({
     }, 4500);
   };
 
-  const handleOpenReviewModal = (wordName = null) => {
+  const handleOpenReviewModal = (wordName = null, tab = 'LEXICON') => {
     setSelectedWordToEdit(wordName || 'intermittent');
+    setModalInitialTab(tab);
     setIsModalOpen(true);
   };
 
@@ -101,7 +109,7 @@ export default function AdminReviewBar({
             <div className="flex items-center space-x-2">
               {/* Primary Action: Open Full Lexicon Reviewer Modal */}
               <button
-                onClick={() => handleOpenReviewModal(selectedWordToEdit || 'intermittent')}
+                onClick={() => handleOpenReviewModal(selectedWordToEdit || 'intermittent', 'LEXICON')}
                 className="flex items-center space-x-1.5 px-2.5 sm:px-3 py-1 bg-[#7BB33B] hover:bg-[#84C341] text-white font-bold uppercase transition active:translate-x-[1px] active:translate-y-[1px] border border-white shadow-[2px_2px_0px_0px_#FFFFFF]"
                 title="Open full interactive Lexicon Reviewer panel to edit and verify entries"
               >
@@ -113,6 +121,19 @@ export default function AdminReviewBar({
                     {unreviewedCount}
                   </span>
                 )}
+              </button>
+
+              {/* Verification History Log button */}
+              <button
+                onClick={() => handleOpenReviewModal(selectedWordToEdit || 'intermittent', 'HISTORY')}
+                className="flex items-center space-x-1 px-2.5 py-1 bg-white/10 hover:bg-white/20 text-white font-bold uppercase transition active:translate-x-[1px] active:translate-y-[1px] border border-white/60"
+                title="View timestamped verification history across all words"
+              >
+                <History className="w-3.5 h-3.5 text-[#7BB33B]" />
+                <span>History</span>
+                <span className="ml-0.5 px-1 py-0.2 bg-[#7BB33B] text-[#111410] text-[9px] rounded font-black">
+                  {historyEventCount}
+                </span>
               </button>
 
               {/* Export Updated Lexicon JSON button */}
@@ -154,6 +175,7 @@ export default function AdminReviewBar({
         words={words}
         roots={roots}
         initialWord={selectedWordToEdit || 'intermittent'}
+        initialTab={modalInitialTab}
         onSaveReview={onUpdateWordReview}
         onUpdateWord={onUpdateWord}
       />

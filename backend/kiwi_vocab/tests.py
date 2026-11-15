@@ -1,8 +1,13 @@
+import json
+import os
+import tempfile
 from django.contrib.auth import get_user_model
+from django.core.management import call_command
 from django.test import TestCase
 from rest_framework.test import APIClient
 from rest_framework import status
 from kiwi_vocab.models import Root, VocabularyWord
+from kiwi_vocab.review_utils import normalize_review_history
 
 User = get_user_model()
 
@@ -142,3 +147,168 @@ class KiwiVocabTests(TestCase):
         self.assertEqual(res_clear.data['mnemonic'], '')
         self.word1.refresh_from_db()
         self.assertEqual(self.word1.mnemonic, '')
+
+    def test_verification_history_tracks_timestamps_across_transitions(self):
+        staff_user = User.objects.create_user(
+            username='reviewer',
+            email='reviewer@kiwi.edu',
+            password='pw',
+            is_staff=True,
+        )
+        self.client.force_authenticate(user=staff_user)
+
+        # 1. Verify word without explicit history array -> backend records timestamped entry
+        res_verify = self.client.patch(
+            f'/api/vocab/words/{self.word1.id}/',
+            {
+                'review': {
+                    'verified': True,
+                    'verifiedBy': 'Dr. Lin',
+                    'notes': 'Checked against OED.',
+                }
+            },
+            format='json',
+        )
+        self.assertEqual(res_verify.status_code, status.HTTP_200_OK)
+        rev1 = res_verify.data['review']
+        self.assertTrue(rev1['verified'])
+        self.assertIsNotNone(rev1['verifiedAt'])
+        self.assertEqual(len(rev1['history']), 1)
+        self.assertEqual(rev1['history'][0]['action'], 'verified')
+        self.assertEqual(rev1['history'][0]['by'], 'Dr. Lin')
+        self.assertEqual(rev1['history'][0]['notes'], 'Checked against OED.')
+        first_timestamp = rev1['history'][0]['timestamp']
+
+        # 2. Unverify word -> verifiedAt cleared, previous verification remains in history
+        res_unverify = self.client.patch(
+            f'/api/vocab/words/{self.word1.id}/',
+            {
+                'review': {
+                    'verified': False,
+                    'verifiedBy': 'Dr. Lin',
+                    'notes': 'Needs updated SAT sentence.',
+                }
+            },
+            format='json',
+        )
+        self.assertEqual(res_unverify.status_code, status.HTTP_200_OK)
+        rev2 = res_unverify.data['review']
+        self.assertFalse(rev2['verified'])
+        self.assertIsNone(rev2['verifiedAt'])
+        self.assertEqual(len(rev2['history']), 2)
+        self.assertEqual(rev2['history'][0]['action'], 'unverified')
+        self.assertFalse(rev2['history'][0]['verified'])
+        self.assertEqual(rev2['history'][1]['action'], 'verified')
+        self.assertEqual(rev2['history'][1]['timestamp'], first_timestamp)
+
+        # 3. Edit definition and re-verify -> records edited_and_verified entry
+        res_reverify = self.client.patch(
+            f'/api/vocab/words/{self.word1.id}/',
+            {
+                'definition': 'An object or custom belonging to a different historical period.',
+                'review': {
+                    'verified': True,
+                    'verifiedBy': 'Dr. Lin',
+                    'notes': 'Clarified SAT definition.',
+                },
+            },
+            format='json',
+        )
+        self.assertEqual(res_reverify.status_code, status.HTTP_200_OK)
+        rev3 = res_reverify.data['review']
+        self.assertTrue(rev3['verified'])
+        self.assertEqual(len(rev3['history']), 3)
+        self.assertEqual(rev3['history'][0]['action'], 'edited_and_verified')
+        self.assertIn('definition', rev3['history'][0]['summary'])
+
+    def test_verification_history_merges_legacy_and_client_entries_without_duplicates(self):
+        # Seed legacy review lacking a history array
+        self.word2.review = {
+            'verified': True,
+            'verifiedAt': '2026-10-01T12:00:00+00:00',
+            'verifiedBy': 'Legacy Editor',
+            'notes': 'Initial seed verification.',
+        }
+        self.word2.save()
+
+        legacy_normalized = normalize_review_history(self.word2.review)
+        self.assertEqual(len(legacy_normalized), 1)
+        self.assertEqual(legacy_normalized[0]['timestamp'], '2026-10-01T12:00:00+00:00')
+
+        staff_user = User.objects.create_user(username='editor2', password='pw', is_staff=True)
+        self.client.force_authenticate(user=staff_user)
+
+        client_entry = {
+            'id': 'client-evt-1',
+            'action': 'attestation_updated',
+            'verified': True,
+            'timestamp': '2026-11-14T21:00:00+00:00',
+            'by': 'Editor Two',
+            'notes': 'Confirmed Greek root chron.',
+            'summary': 'Updated editorial attestation',
+        }
+        res = self.client.patch(
+            f'/api/vocab/words/{self.word2.id}/',
+            {
+                'review': {
+                    'verified': True,
+                    'verifiedAt': '2026-11-14T21:00:00+00:00',
+                    'verifiedBy': 'Editor Two',
+                    'notes': 'Confirmed Greek root chron.',
+                    'history': [client_entry],
+                }
+            },
+            format='json',
+        )
+        self.assertEqual(res.status_code, status.HTTP_200_OK)
+        history = res.data['review']['history']
+        self.assertEqual(len(history), 2)
+        self.assertEqual(history[0]['id'], 'client-evt-1')
+        self.assertEqual(history[1]['by'], 'Legacy Editor')
+
+        # Re-sending the same client entry does not duplicate it
+        res_dup = self.client.patch(
+            f'/api/vocab/words/{self.word2.id}/',
+            {
+                'review': {
+                    'verified': True,
+                    'verifiedAt': '2026-11-14T21:00:00+00:00',
+                    'verifiedBy': 'Editor Two',
+                    'notes': 'Confirmed Greek root chron.',
+                    'history': [client_entry],
+                }
+            },
+            format='json',
+        )
+        self.assertEqual(res_dup.status_code, status.HTTP_200_OK)
+        self.assertEqual(len(res_dup.data['review']['history']), 2)
+
+    def test_export_vocab_seed_preserves_history_when_unverified(self):
+        self.word1.review = {
+            'verified': False,
+            'verifiedAt': None,
+            'verifiedBy': 'Admin',
+            'notes': '',
+            'history': [
+                {
+                    'id': 'vh-unverify-1',
+                    'action': 'unverified',
+                    'verified': False,
+                    'timestamp': '2026-11-14T20:00:00+00:00',
+                    'by': 'Admin',
+                    'notes': '',
+                    'summary': 'Marked as unverified',
+                }
+            ],
+        }
+        self.word1.save()
+
+        with tempfile.TemporaryDirectory() as tmpdir:
+            out_path = os.path.join(tmpdir, 'seed_out.json')
+            call_command('export_vocab_seed', file=out_path)
+            with open(out_path, 'r', encoding='utf-8') as f:
+                exported = json.load(f)
+
+        words_by_name = {w['word']: w for r in exported for w in r['words']}
+        self.assertIn('review', words_by_name['anachronism'])
+        self.assertEqual(len(words_by_name['anachronism']['review']['history']), 1)
