@@ -245,6 +245,10 @@ export function buildUpdatedReview(previousReview, reviewData = {}, options = {}
       summary = 'Marked as verified';
     } else if (action === 'unverified') {
       summary = 'Marked as unverified';
+    } else if (action === 'unpublished') {
+      summary = 'Unpublished word from student lexicon';
+    } else if (action === 'published') {
+      summary = 'Re-published word to student lexicon';
     } else if (isVerified) {
       summary = 'Updated editorial attestation';
     } else {
@@ -263,10 +267,12 @@ export function buildUpdatedReview(previousReview, reviewData = {}, options = {}
   };
 
   const history = mergeHistories([newEntry], existingHistory);
+  const preserveVerifiedAt =
+    (action === 'published' || action === 'unpublished') && isVerified && prevNorm?.verifiedAt;
 
   return {
     verified: isVerified,
-    verifiedAt: isVerified ? nowIso : null,
+    verifiedAt: isVerified ? (preserveVerifiedAt ? prevNorm.verifiedAt : nowIso) : null,
     verifiedBy: by,
     notes,
     history,
@@ -518,6 +524,7 @@ export function exportUpdatedLexiconJson(rootsList = [], wordsList = []) {
             sat_sentence: w.sat_sentence,
             connotation: w.connotation || 'neutral',
             ...(w.mnemonic ? { mnemonic: w.mnemonic } : {}),
+            ...(w.is_published === false ? { is_published: false } : {}),
           };
           const reviewPayload = buildWordReviewPayload(review);
           if (reviewPayload) {
@@ -553,6 +560,7 @@ export function exportUpdatedLexiconJson(rootsList = [], wordsList = []) {
         sat_sentence: w.sat_sentence,
         connotation: w.connotation || 'neutral',
         ...(w.mnemonic ? { mnemonic: w.mnemonic } : {}),
+        ...(w.is_published === false ? { is_published: false } : {}),
       };
       const reviewPayload = buildWordReviewPayload(review);
       if (reviewPayload) {

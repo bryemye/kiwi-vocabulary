@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Check, X, Edit3, ShieldCheck, Clock } from 'lucide-react';
+import { Check, X, Edit3, ShieldCheck, Clock, Eye, EyeOff } from 'lucide-react';
 import {
   formatVerificationTimestamp,
   formatRelativeTimestamp,
@@ -20,6 +20,16 @@ const ACTION_META = {
     label: 'Unverified',
     badgeClass: 'bg-[#FDF2F2] text-[#991B1B] border-[#DC2626]/50',
     Icon: X,
+  },
+  unpublished: {
+    label: 'Unpublished',
+    badgeClass: 'bg-[#FDF2F2] text-[#991B1B] border-[#DC2626]/50',
+    Icon: EyeOff,
+  },
+  published: {
+    label: 'Published',
+    badgeClass: 'bg-[#EDF5E5] text-[#2F441E] border-[#7BB33B]',
+    Icon: Eye,
   },
   attestation_updated: {
     label: 'Attestation Updated',

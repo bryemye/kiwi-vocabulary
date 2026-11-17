@@ -112,10 +112,11 @@ def build_review_with_history(
     incoming_review,
     actor_name='Admin',
     changed_fields=None,
+    publish_change=None,
 ):
     """
     Combine existing DB review state with an incoming review payload,
-    ensuring every verification/unverification/update records a timestamped history entry.
+    ensuring every verification/unverification/publish/unpublish/update records a timestamped history entry.
     """
     existing = existing_review if isinstance(existing_review, dict) else {}
     incoming = incoming_review if isinstance(incoming_review, dict) else {}
@@ -132,8 +133,15 @@ def build_review_with_history(
     if isinstance(incoming_history_raw, list) and len(incoming_history_raw) > 0:
         merged_history = merge_review_histories(incoming_history_raw, existing_history)
     else:
-        changed = [f for f in (changed_fields or []) if f != 'review']
-        if is_verified and not was_verified:
+        changed = [f for f in (changed_fields or []) if f not in ('review', 'is_published')]
+        if publish_change in ('published', 'unpublished') and is_verified == was_verified and not changed:
+            action = publish_change
+            summary = (
+                'Unpublished word from student lexicon'
+                if publish_change == 'unpublished'
+                else 'Re-published word to student lexicon'
+            )
+        elif is_verified and not was_verified:
             action = 'edited_and_verified' if changed else 'verified'
             summary = (
                 f"Updated {', '.join(changed)} & verified"
@@ -174,6 +182,7 @@ def build_review_with_history(
         latest_verified = next((e for e in merged_history if e.get('verified')), None)
         verified_at = (
             incoming.get('verifiedAt')
+            or existing.get('verifiedAt')
             or (latest_verified['timestamp'] if latest_verified else None)
             or now_iso
         )

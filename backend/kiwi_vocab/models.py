@@ -78,6 +78,7 @@ class VocabularyWord(models.Model):
     part_of_speech = models.CharField(max_length=50, blank=True, default='adjective')
     mnemonic = models.TextField(blank=True, default='')
     review = models.JSONField(default=dict, blank=True)
+    is_published = models.BooleanField(default=True, db_index=True)
 
     def __str__(self):
         return self.word

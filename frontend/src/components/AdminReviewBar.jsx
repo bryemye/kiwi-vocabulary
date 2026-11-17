@@ -33,8 +33,10 @@ export default function AdminReviewBar({
 
   if (!isAdminMode) return null;
 
-  const verifiedCount = countVerifiedWords(words);
-  const totalCount = words.length || 0;
+  const publishedWords = words.filter(w => w.is_published !== false);
+  const unpublishedCount = words.length - publishedWords.length;
+  const verifiedCount = countVerifiedWords(publishedWords);
+  const totalCount = publishedWords.length || 0;
   const verifiedPercent = totalCount > 0 ? Math.round((verifiedCount / totalCount) * 100) : 0;
   const unreviewedCount = totalCount - verifiedCount;
   const historyEventCount = getAllVerificationHistory(words).length;
@@ -71,6 +73,11 @@ export default function AdminReviewBar({
                 Verified: <strong className="text-white">{verifiedCount}</strong>/{totalCount}
               </span>
               <span className="text-[#7BB33B] font-bold">({verifiedPercent}%)</span>
+              {unpublishedCount > 0 && (
+                <span className="px-1.5 py-0.5 bg-[#991B1B]/80 text-white border border-white/40 text-[10px] font-bold">
+                  {unpublishedCount} hidden
+                </span>
+              )}
             </div>
 
             {/* Quick Word Select Dropdown */}
@@ -89,7 +96,7 @@ export default function AdminReviewBar({
                   <option value="" disabled>-- Select word --</option>
                   {words.map(w => (
                     <option key={w.word} value={w.word} className="bg-[#111410] text-white">
-                      {w.word} {w.review?.verified ? '✓' : '(unreviewed)'}
+                      {w.word} {w.is_published === false ? '(unpublished)' : (w.review?.verified ? '✓' : '(unreviewed)')}
                     </option>
                   ))}
                 </select>

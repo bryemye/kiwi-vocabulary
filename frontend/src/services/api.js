@@ -4,8 +4,10 @@ const API_BASE = (import.meta.env.VITE_API_BASE || '/api').replace(/\/$/, '');
 // Kiwi Vocabulary Product APIs
 // --------------------------------------------------------------------------------
 
-export async function fetchRoots() {
-  const res = await fetch(`${API_BASE}/vocab/roots/`, { credentials: 'include' });
+export async function fetchRoots(params = {}) {
+  const query = new URLSearchParams(params).toString();
+  const url = `${API_BASE}/vocab/roots/${query ? `?${query}` : ''}`;
+  const res = await fetch(url, { credentials: 'include' });
   if (!res.ok) throw new Error(`Failed to fetch roots (HTTP ${res.status})`);
   return res.json();
 }

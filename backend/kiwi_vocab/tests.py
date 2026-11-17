@@ -312,3 +312,96 @@ class KiwiVocabTests(TestCase):
         words_by_name = {w['word']: w for r in exported for w in r['words']}
         self.assertIn('review', words_by_name['anachronism'])
         self.assertEqual(len(words_by_name['anachronism']['review']['history']), 1)
+
+    def test_unpublish_and_republish_word_visibility_and_history(self):
+        # Verify word1 first
+        staff_user = User.objects.create_user(
+            username='publisher_admin',
+            email='admin@kiwi.edu',
+            password='pw',
+            is_staff=True,
+        )
+        regular_user = User.objects.create_user(username='student2', password='pw')
+
+        self.client.force_authenticate(user=regular_user)
+        res_forbidden = self.client.patch(
+            f'/api/vocab/words/{self.word1.id}/',
+            {'is_published': False},
+            format='json',
+        )
+        self.assertEqual(res_forbidden.status_code, status.HTTP_403_FORBIDDEN)
+
+        self.client.force_authenticate(user=staff_user)
+        res_verify = self.client.patch(
+            f'/api/vocab/words/{self.word1.id}/',
+            {'review': {'verified': True, 'verifiedBy': 'Admin', 'notes': 'Verified entry'}},
+            format='json',
+        )
+        self.assertEqual(res_verify.status_code, status.HTTP_200_OK)
+        self.assertTrue(res_verify.data['is_published'])
+
+        # Unpublish word1 without sending review -> preserves verified status & logs 'unpublished'
+        res_unpub = self.client.patch(
+            f'/api/vocab/words/{self.word1.id}/',
+            {'is_published': False},
+            format='json',
+        )
+        self.assertEqual(res_unpub.status_code, status.HTTP_200_OK)
+        self.assertFalse(res_unpub.data['is_published'])
+        self.assertTrue(res_unpub.data['review']['verified'])
+        self.assertIsNotNone(res_unpub.data['review']['verifiedAt'])
+        self.assertEqual(res_unpub.data['review']['history'][0]['action'], 'unpublished')
+
+        # Public/student endpoints exclude unpublished word1
+        self.client.force_authenticate(user=regular_user)
+        res_words_student = self.client.get('/api/vocab/words/')
+        self.assertEqual([w['word'] for w in res_words_student.data], ['chronic'])
+
+        res_roots_student = self.client.get('/api/vocab/roots/')
+        self.assertEqual([w['word'] for w in res_roots_student.data[0]['words']], ['chronic'])
+
+        res_session = self.client.get('/api/vocab/session/?count=5')
+        self.assertEqual([w['word'] for w in res_session.data], ['chronic'])
+
+        res_daily = self.client.get('/api/vocab/session/?daily=1&date=2026-11-16')
+        self.assertEqual([w['word'] for w in res_daily.data], ['chronic'])
+
+        res_stats = self.client.get('/api/vocab/stats/')
+        self.assertEqual(res_stats.data['total_words'], 1)
+        self.assertEqual(res_stats.data['root_mastery'][0]['total_words'], 1)
+
+        # Even if a student passes include_unpublished=1, it is ignored
+        res_student_bypass = self.client.get('/api/vocab/words/?include_unpublished=1')
+        self.assertEqual([w['word'] for w in res_student_bypass.data], ['chronic'])
+
+        # Staff with include_unpublished=1 sees both words
+        self.client.force_authenticate(user=staff_user)
+        res_staff_all = self.client.get('/api/vocab/words/?include_unpublished=1')
+        self.assertEqual(sorted(w['word'] for w in res_staff_all.data), ['anachronism', 'chronic'])
+
+        res_roots_staff = self.client.get('/api/vocab/roots/?include_unpublished=1')
+        self.assertEqual(sorted(w['word'] for w in res_roots_staff.data[0]['words']), ['anachronism', 'chronic'])
+
+        # Export preserves is_published=False
+        with tempfile.TemporaryDirectory() as tmpdir:
+            out_path = os.path.join(tmpdir, 'seed_unpub.json')
+            call_command('export_vocab_seed', file=out_path)
+            with open(out_path, 'r', encoding='utf-8') as f:
+                exported = json.load(f)
+        words_by_name = {w['word']: w for r in exported for w in r['words']}
+        self.assertIs(words_by_name['anachronism']['is_published'], False)
+        self.assertNotIn('is_published', words_by_name['chronic'])
+
+        # Staff can re-publish word1
+        res_repub = self.client.patch(
+            f'/api/vocab/words/{self.word1.id}/',
+            {'is_published': True},
+            format='json',
+        )
+        self.assertEqual(res_repub.status_code, status.HTTP_200_OK)
+        self.assertTrue(res_repub.data['is_published'])
+        self.assertEqual(res_repub.data['review']['history'][0]['action'], 'published')
+
+        self.client.force_authenticate(user=regular_user)
+        res_words_after = self.client.get('/api/vocab/words/')
+        self.assertEqual(sorted(w['word'] for w in res_words_after.data), ['anachronism', 'chronic'])

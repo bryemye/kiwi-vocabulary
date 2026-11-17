@@ -71,6 +71,13 @@ class Command(BaseCommand):
                 else:
                     effective_mnemonic = w.get("mnemonic", "")
 
+                if "is_published" in w:
+                    effective_published = bool(w["is_published"])
+                elif existing_word is not None:
+                    effective_published = existing_word.is_published
+                else:
+                    effective_published = True
+
                 _, w_created = VocabularyWord.objects.update_or_create(
                     word=word_clean,
                     defaults={
@@ -84,6 +91,7 @@ class Command(BaseCommand):
                         "part_of_speech": w.get("part_of_speech") or w.get("partOfSpeech", "adjective"),
                         "mnemonic": effective_mnemonic,
                         "review": effective_review,
+                        "is_published": effective_published,
                     }
                 )
                 if w_created:

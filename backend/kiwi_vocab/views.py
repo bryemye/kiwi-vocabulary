@@ -1,5 +1,5 @@
 import random
-from django.db.models import Q
+from django.db.models import Q, Prefetch
 from django.contrib.auth import get_user_model
 from rest_framework import viewsets, permissions
 from rest_framework.decorators import action
@@ -17,6 +17,13 @@ from .serializers import (
 )
 
 User = get_user_model()
+
+
+def _should_include_unpublished(request):
+    user = getattr(request, 'user', None)
+    if not (user and user.is_authenticated and user.is_staff):
+        return False
+    return request.query_params.get('include_unpublished') in ['1', 'true', 'True']
 
 
 def get_daily_guest_deck(count=15, date_str=None):
@@ -38,8 +45,13 @@ def get_daily_guest_deck(count=15, date_str=None):
     seed_val = int(hashlib.md5(f"kiwi-daily-{date_str}".encode('utf-8')).hexdigest()[:8], 16)
     rng = random.Random(seed_val)
 
-    # Fetch roots with their words preloaded
-    roots = list(Root.objects.prefetch_related('words').filter(words__isnull=False).distinct())
+    # Fetch roots with their published words preloaded
+    published_words_qs = VocabularyWord.objects.filter(is_published=True)
+    roots = list(
+        Root.objects.prefetch_related(Prefetch('words', queryset=published_words_qs))
+        .filter(words__is_published=True)
+        .distinct()
+    )
     rng.shuffle(roots)
 
     selected_words = []
@@ -55,9 +67,13 @@ def get_daily_guest_deck(count=15, date_str=None):
         if len(selected_words) >= count:
             break
 
-    # If roots ran out before count (should not happen with 175 roots), fill with remaining words
+    # If roots ran out before count (should not happen with 175 roots), fill with remaining published words
     if len(selected_words) < count:
-        remaining_words = list(VocabularyWord.objects.exclude(id__in=used_word_ids).select_related('root'))
+        remaining_words = list(
+            VocabularyWord.objects.filter(is_published=True)
+            .exclude(id__in=used_word_ids)
+            .select_related('root')
+        )
         rng.shuffle(remaining_words)
         selected_words.extend(remaining_words[:count - len(selected_words)])
 
@@ -75,6 +91,7 @@ def get_vocab_session_deck(queryset, user=None, count=15):
     2. Unstudied words
     3. Oldest reviewed words / random selection from base queryset
     """
+    queryset = queryset.filter(is_published=True)
     try:
         from platform_core.models import StudyLog
         if user and user.is_authenticated:
@@ -129,12 +146,14 @@ class RootViewSet(viewsets.ReadOnlyModelViewSet):
     List and retrieve etymological roots with associated vocabulary word families.
     Supports filtering by language, thematic_cluster, sat_tier, or search query.
     """
-    queryset = Root.objects.prefetch_related('words').all()
+    queryset = Root.objects.all()
     serializer_class = RootSerializer
     permission_classes = [permissions.AllowAny]
 
     def get_queryset(self):
-        queryset = super().get_queryset()
+        include_unpub = _should_include_unpublished(self.request)
+        word_qs = VocabularyWord.objects.all() if include_unpub else VocabularyWord.objects.filter(is_published=True)
+        queryset = Root.objects.prefetch_related(Prefetch('words', queryset=word_qs)).all()
         cluster = self.request.query_params.get('cluster') or self.request.query_params.get('thematic_cluster')
         tier = self.request.query_params.get('tier') or self.request.query_params.get('sat_tier')
         language = self.request.query_params.get('language')
@@ -169,13 +188,27 @@ class VocabularyWordViewSet(viewsets.ModelViewSet):
 
     def perform_update(self, serializer):
         save_kwargs = {}
-        if 'review' in serializer.validated_data:
-            existing_instance = serializer.instance
+        existing_instance = serializer.instance
+        old_is_published = bool(getattr(existing_instance, 'is_published', True))
+        new_is_published = bool(serializer.validated_data.get('is_published', old_is_published))
+        publish_change = None
+        if 'is_published' in serializer.validated_data and new_is_published != old_is_published:
+            publish_change = 'published' if new_is_published else 'unpublished'
+
+        if 'review' in serializer.validated_data or publish_change:
             existing_review = getattr(existing_instance, 'review', None) or {}
-            incoming_review = serializer.validated_data.get('review') or {}
+            if 'review' in serializer.validated_data:
+                incoming_review = serializer.validated_data.get('review') or {}
+            else:
+                incoming_review = {
+                    'verified': bool(existing_review.get('verified', False)),
+                    'verifiedAt': existing_review.get('verifiedAt'),
+                    'verifiedBy': existing_review.get('verifiedBy') or 'Admin',
+                    'notes': existing_review.get('notes') or '',
+                }
             changed_fields = []
             for field, new_val in serializer.validated_data.items():
-                if field == 'review':
+                if field in ('review', 'is_published'):
                     continue
                 old_val = getattr(existing_instance, field, None)
                 if old_val != new_val:
@@ -192,6 +225,7 @@ class VocabularyWordViewSet(viewsets.ModelViewSet):
                 incoming_review,
                 actor_name=actor_name,
                 changed_fields=changed_fields,
+                publish_change=publish_change,
             )
 
         instance = serializer.save(**save_kwargs)
@@ -201,6 +235,15 @@ class VocabularyWordViewSet(viewsets.ModelViewSet):
 
     def get_queryset(self):
         queryset = super().get_queryset()
+        user = getattr(self.request, 'user', None)
+        is_staff_detail = (
+            self.action in ['retrieve', 'update', 'partial_update', 'destroy']
+            and user
+            and user.is_authenticated
+            and user.is_staff
+        )
+        if not is_staff_detail and not _should_include_unpublished(self.request):
+            queryset = queryset.filter(is_published=True)
         root_id = self.request.query_params.get('root')
         language = self.request.query_params.get('language')
         cluster = self.request.query_params.get('cluster') or self.request.query_params.get('thematic_cluster')
@@ -297,8 +340,8 @@ class VocabSessionView(APIView):
             serializer = VocabularyWordSerializer(deck, many=True)
             return Response(serializer.data)
 
-        # Otherwise, prepare filtered queryset
-        qs = VocabularyWord.objects.select_related('root').all()
+        # Otherwise, prepare filtered queryset (published words only)
+        qs = VocabularyWord.objects.filter(is_published=True).select_related('root')
         root_id = request.query_params.get('root')
         language = request.query_params.get('language')
         prefix = request.query_params.get('prefix')
@@ -328,13 +371,18 @@ def build_root_mastery_stats(vocab_logs):
     Aggregate root-level mastery, accuracy, attempt counts, and most recent
     study timestamp (`last_worked_at`) from a StudyLog queryset of vocabulary logs.
     """
-    roots = list(Root.objects.prefetch_related('words').all())
+    roots = list(
+        Root.objects.prefetch_related(
+            Prefetch('words', queryset=VocabularyWord.objects.filter(is_published=True))
+        ).all()
+    )
+    published_logs = vocab_logs.filter(word__is_published=True) if hasattr(vocab_logs, 'filter') else vocab_logs
     vocab_log_entries = (
         list(
-            vocab_logs.values('word_id', 'word__root_id', 'is_correct', 'created_at')
+            published_logs.values('word_id', 'word__root_id', 'is_correct', 'created_at')
             .order_by('created_at')
         )
-        if hasattr(vocab_logs, 'values')
+        if hasattr(published_logs, 'values')
         else []
     )
 
@@ -427,7 +475,10 @@ class VocabStatsView(APIView):
         except Exception:
             logs = []
 
-        total_words_count = VocabularyWord.objects.count()
+        if hasattr(logs, 'filter'):
+            logs = logs.filter(word__is_published=True)
+
+        total_words_count = VocabularyWord.objects.filter(is_published=True).count()
         vocab_total = logs.count() if hasattr(logs, 'count') else len(logs)
         vocab_correct = logs.filter(is_correct=True).count() if hasattr(logs, 'filter') else 0
         vocab_accuracy = round((vocab_correct / vocab_total * 100), 1) if vocab_total > 0 else 0.0

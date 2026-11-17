@@ -51,7 +51,9 @@ class Command(BaseCommand):
                 }
                 if w.mnemonic:
                     word_dict["mnemonic"] = w.mnemonic
-                if w.review and (w.review.get("verified") or w.review.get("notes") or w.review.get("history")):
+                if not w.is_published:
+                    word_dict["is_published"] = False
+                if w.review and (w.review.get("verified") or w.review.get("notes") or w.review.get("history") or not w.is_published):
                     word_dict["review"] = w.review
                 words_list.append(word_dict)
 

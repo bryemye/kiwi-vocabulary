@@ -9,7 +9,9 @@ export type VerificationAction =
   | 'verified'
   | 'unverified'
   | 'edited_and_verified'
-  | 'attestation_updated';
+  | 'attestation_updated'
+  | 'published'
+  | 'unpublished';
 
 export interface VerificationHistoryEntry {
   id: string;
@@ -45,6 +47,7 @@ export interface VocabularyWord {
   root?: number;
   root_details?: RootSummary;
   review?: EditorialReview;
+  is_published?: boolean;
 }
 
 export type LearningPathway = 'thematic' | 'yield';
@@ -102,5 +105,6 @@ export interface LexiconSeedEntry {
     connotation?: string;
     mnemonic?: string;
     review?: EditorialReview;
+    is_published?: boolean;
   }>;
 }

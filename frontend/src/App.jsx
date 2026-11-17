@@ -287,9 +287,9 @@ export default function App() {
       }))
     );
     setPreloadedDeck((prev) => {
-      const next = prev.map((w) =>
-        w.id === updatedWord.id ? { ...w, ...updatedWord } : w
-      );
+      const next = prev
+        .map((w) => (w.id === updatedWord.id ? { ...w, ...updatedWord } : w))
+        .filter((w) => w.is_published !== false);
       if (user?.id) {
         setCachedUserDeck(user.id, next);
       }
@@ -447,9 +447,10 @@ export default function App() {
     let isMounted = true;
     const timer = setTimeout(async () => {
       try {
+        const staffQuery = user?.is_staff ? { include_unpublished: 1 } : {};
         const [rootsData, wordsData, statsData] = await Promise.all([
-          fetchRoots().catch(err => { console.warn('Roots background sync note:', err); return []; }),
-          fetchWords().catch(err => { console.warn('Words background sync note:', err); return []; }),
+          fetchRoots(staffQuery).catch(err => { console.warn('Roots background sync note:', err); return []; }),
+          fetchWords(staffQuery).catch(err => { console.warn('Words background sync note:', err); return []; }),
           fetchDashboardStats().catch(err => { console.warn('Dashboard stats sync note:', err); return null; }),
         ]);
 

@@ -11,6 +11,7 @@ import {
   Layers, 
   CheckCircle2, 
   Eye,
+  EyeOff,
   Compass,
   Check,
   AlertCircle,
@@ -613,6 +614,7 @@ function buildGraphLayout(roots, masteredSet) {
           type: 'word',
           word: word.word,
           isMastered,
+          isUnpublished: word.is_published === false,
           data: word,
           parentRoot: root,
           homeX: wordX,
@@ -701,6 +703,7 @@ export default function VocabGraphView({
   initialRoots = [],
   isAdminMode = false,
   onUpdateWordReview,
+  onUpdateWord,
   onOpenMorpheme,
   trajectoryRestoreTarget = null
 }) {
@@ -922,6 +925,107 @@ export default function VocabGraphView({
     }, 3500);
   };
 
+  // Handler to unpublish or re-publish a word from the edit verification panel
+  const handleTogglePublishWord = async () => {
+    if (!selectedNode || selectedNode.type !== 'word') return;
+    const wordKey = selectedNode.word;
+    const wordId = selectedNode.rawId || selectedNode.data?.id;
+    const nextPublished = selectedNode.data?.is_published === false;
+
+    const updatedReview = buildUpdatedReview(
+      selectedNode.data?.review,
+      {
+        verified: Boolean(selectedNode.data?.review?.verified),
+        verifiedBy: reviewFormData.verifiedBy,
+        notes: reviewFormData.notes,
+      },
+      {
+        action: nextPublished ? 'published' : 'unpublished',
+      }
+    );
+
+    let persistedReview = updatedReview;
+    let persistedPublished = nextPublished;
+    let updatedWordFromBackend = null;
+
+    if (wordId) {
+      try {
+        const updated = await updateVocabularyWord(wordId, {
+          is_published: nextPublished,
+          review: updatedReview,
+        });
+        updatedWordFromBackend = updated;
+        if (updated?.review) {
+          persistedReview = updated.review;
+        }
+        if (typeof updated?.is_published === 'boolean') {
+          persistedPublished = updated.is_published;
+        }
+      } catch (err) {
+        alert(`Failed to update publication status: ${err.message}`);
+        return;
+      }
+    }
+
+    saveWordReview(wordKey, persistedReview);
+
+    const updatedWordData = {
+      ...selectedNode.data,
+      ...(updatedWordFromBackend || {}),
+      is_published: persistedPublished,
+      review: persistedReview,
+    };
+
+    setSelectedNode(prev => (prev ? {
+      ...prev,
+      isUnpublished: !persistedPublished,
+      data: updatedWordData,
+    } : null));
+
+    setGraphData(prev => ({
+      ...prev,
+      nodes: prev.nodes.map(n => {
+        if (n.id === selectedNode.id) {
+          return {
+            ...n,
+            isUnpublished: !persistedPublished,
+            data: updatedWordData,
+          };
+        }
+        return n;
+      }),
+    }));
+
+    setRootsData(prev => {
+      if (!prev) return prev;
+      return prev.map(r => ({
+        ...r,
+        words: (r.words || []).map(w => {
+          if (w.word?.toLowerCase() === wordKey.toLowerCase()) {
+            return { ...w, is_published: persistedPublished, review: persistedReview };
+          }
+          return w;
+        }),
+      }));
+    });
+
+    if (onUpdateWordReview) {
+      onUpdateWordReview(wordKey, persistedReview);
+    }
+    if (onUpdateWord) {
+      onUpdateWord(updatedWordData);
+    }
+
+    setSaveSuccessToast(
+      persistedPublished
+        ? `"${wordKey}" re-published to student lexicon!`
+        : `"${wordKey}" unpublished (hidden from students)`
+    );
+    setTimeout(() => {
+      setSaveSuccessToast(null);
+    }, 3500);
+  };
+
   // Ambient background particles
   const ambientParticlesRef = useRef(createAmbientParticles());
 
@@ -1079,7 +1183,7 @@ export default function VocabGraphView({
         setError(null);
 
         const [rootsRes, statsRes] = await Promise.allSettled([
-          fetchRoots(),
+          fetchRoots(isAdminMode ? { include_unpublished: 1 } : {}),
           fetchVocabStats()
         ]);
 
@@ -1088,7 +1192,13 @@ export default function VocabGraphView({
         }
 
         const rawRoots = rootsRes.value || [];
-        const roots = mergeReviewsIntoRoots(rawRoots);
+        const visibleRoots = isAdminMode
+          ? rawRoots
+          : rawRoots.map(r => ({
+              ...r,
+              words: (r.words || []).filter(w => w.is_published !== false),
+            }));
+        const roots = mergeReviewsIntoRoots(visibleRoots);
         if (isCancelled) return;
         setRootsData(roots);
 
@@ -1109,6 +1219,9 @@ export default function VocabGraphView({
 
         const layout = buildGraphLayout(roots, mastered);
         setGraphData(layout);
+        if (!isAdminMode) {
+          setSelectedNode(prev => (prev?.type === 'word' && prev.data?.is_published === false ? null : prev));
+        }
       } catch (err) {
         console.error('Error initializing Vocab Graph:', err);
         if (!isCancelled) {
@@ -1125,7 +1238,7 @@ export default function VocabGraphView({
       isCancelled = true;
       isComponentMountedRef.current = false;
     };
-  }, []);
+  }, [isAdminMode]);
 
   // ---------------------------------------------------------------------------
   // 2. ROOT FOCUS ENGINE & CAMERA GLIDE
@@ -1989,13 +2102,16 @@ export default function VocabGraphView({
 
   const drawWordNode = (ctx, node, isSelected, isHovered, isFocal) => {
     const isHighlighted = isSelected || isHovered;
-    const effectiveAlpha = isFocal ? 1.0 : isHighlighted ? 1.0 : node.opacity;
+    const isUnpub = Boolean(node.isUnpublished);
+    const effectiveAlpha = isFocal ? (isUnpub ? 0.85 : 1.0) : isHighlighted ? 1.0 : (isUnpub ? node.opacity * 0.65 : node.opacity);
 
-    const borderColor = isFocal || isHighlighted ? '#7BB33B' : 'rgba(17, 20, 16, 0.18)';
+    const borderColor = isUnpub
+      ? 'rgba(153, 27, 27, 0.55)'
+      : (isFocal || isHighlighted ? '#7BB33B' : 'rgba(17, 20, 16, 0.18)');
     const borderWidth = isFocal ? 2 : isHighlighted ? 1.75 : 1;
 
     drawGraphCard(ctx, node.x, node.y, node.width, node.height, {
-      fillColor: isHighlighted ? '#EDF5E5' : '#FFFFFF',
+      fillColor: isUnpub ? '#FDF2F2' : (isHighlighted ? '#EDF5E5' : '#FFFFFF'),
       borderColor,
       borderWidth,
       borderRadius: 14,
@@ -2009,7 +2125,7 @@ export default function VocabGraphView({
     ctx.globalAlpha = effectiveAlpha;
 
     // Mastered Green Dot
-    if (node.isMastered) {
+    if (node.isMastered && !isUnpub) {
       ctx.beginPath();
       ctx.arc(node.x - node.width / 2 + 10, node.y, 3.5, 0, Math.PI * 2);
       ctx.fillStyle = '#7BB33B';
@@ -2020,12 +2136,12 @@ export default function VocabGraphView({
     }
 
     // Word Text
-    ctx.fillStyle = '#111410';
+    ctx.fillStyle = isUnpub ? '#991B1B' : '#111410';
     ctx.font = isFocal ? '700 11px Inter, system-ui, sans-serif' : '600 11px Inter, system-ui, sans-serif';
-    ctx.textAlign = node.isMastered ? 'left' : 'center';
+    ctx.textAlign = (node.isMastered && !isUnpub) ? 'left' : 'center';
     ctx.textBaseline = 'middle';
 
-    const textX = node.isMastered ? node.x - node.width / 2 + 18 : node.x;
+    const textX = (node.isMastered && !isUnpub) ? node.x - node.width / 2 + 18 : node.x;
     ctx.fillText(node.word, textX, node.y);
     ctx.restore();
   };
@@ -2866,45 +2982,55 @@ export default function VocabGraphView({
                 )}
 
                 {/* Derivative Words List */}
-                <div>
-                  <div className="flex items-center justify-between mb-2">
-                    <span className="text-xs font-mono font-black uppercase text-[#111410]">
-                      Connected Derivatives ({selectedNode.data?.words?.length || 0})
-                    </span>
-                    <span className="text-[10px] font-mono text-[#62685E]">Click to inspect</span>
-                  </div>
+                {(() => {
+                  const visibleDerivatives = (selectedNode.data?.words || []).filter(
+                    w => isAdminMode || w.is_published !== false
+                  );
+                  return (
+                    <div>
+                      <div className="flex items-center justify-between mb-2">
+                        <span className="text-xs font-mono font-black uppercase text-[#111410]">
+                          Connected Derivatives ({visibleDerivatives.length})
+                        </span>
+                        <span className="text-[10px] font-mono text-[#62685E]">Click to inspect</span>
+                      </div>
 
-                  <div className="space-y-2.5">
-                    {(selectedNode.data?.words || []).map(w => {
-                      const isMastered = masteredWordIds.has(w.id);
-                      return (
-                        <div
-                          key={w.id}
-                          onClick={() => {
-                            const wordNode = graphData.nodes.find(n => n.id === `word-${w.id}`);
-                            if (wordNode) smoothPanToNode(wordNode);
-                          }}
-                          className="p-3 bg-white hover:bg-[#FAFBF8] border-2 border-[#111410] shadow-[2px_2px_0px_0px_#111410] transition group"
-                        >
-                          <div 
-                            className="flex items-start justify-between cursor-pointer"
-                            onClick={() => {
-                              const wordNode = graphData.nodes.find(n => n.id === `word-${w.id}`);
-                              if (wordNode) smoothPanToNode(wordNode);
-                            }}
-                          >
-                            <div>
-                              <div className="flex items-center space-x-2">
-                                <span className="font-sans font-black text-sm text-[#111410] group-hover:text-[#2F441E]">
-                                  {w.word}
-                                </span>
-                                {isMastered && (
-                                  <span className="w-2 h-2 rounded-full bg-[#7BB33B] border border-[#111410]" title="Mastered" />
-                                )}
-                                <span className="text-[10px] font-mono text-[#62685E]">
-                                  {w.part_of_speech}
-                                </span>
-                              </div>
+                      <div className="space-y-2.5">
+                        {visibleDerivatives.map(w => {
+                          const isMastered = masteredWordIds.has(w.id);
+                          return (
+                            <div
+                              key={w.id}
+                              onClick={() => {
+                                const wordNode = graphData.nodes.find(n => n.id === `word-${w.id}`);
+                                if (wordNode) smoothPanToNode(wordNode);
+                              }}
+                              className="p-3 bg-white hover:bg-[#FAFBF8] border-2 border-[#111410] shadow-[2px_2px_0px_0px_#111410] transition group"
+                            >
+                              <div 
+                                className="flex items-start justify-between cursor-pointer"
+                                onClick={() => {
+                                  const wordNode = graphData.nodes.find(n => n.id === `word-${w.id}`);
+                                  if (wordNode) smoothPanToNode(wordNode);
+                                }}
+                              >
+                                <div>
+                                  <div className="flex items-center space-x-2 flex-wrap gap-y-0.5">
+                                    <span className="font-sans font-black text-sm text-[#111410] group-hover:text-[#2F441E]">
+                                      {w.word}
+                                    </span>
+                                    {isMastered && (
+                                      <span className="w-2 h-2 rounded-full bg-[#7BB33B] border border-[#111410]" title="Mastered" />
+                                    )}
+                                    {w.is_published === false && (
+                                      <span className="px-1.5 py-0.2 bg-[#FDF2F2] text-[#991B1B] border border-[#DC2626]/50 text-[9px] font-mono font-black uppercase">
+                                        UNPUBLISHED
+                                      </span>
+                                    )}
+                                    <span className="text-[10px] font-mono text-[#62685E]">
+                                      {w.part_of_speech}
+                                    </span>
+                                  </div>
                               <p className="text-xs text-[#42281D] line-clamp-1 mt-0.5 font-sans">
                                 {w.definition}
                               </p>
@@ -3008,6 +3134,8 @@ export default function VocabGraphView({
                     })}
                   </div>
                 </div>
+                  );
+                })()}
 
                 {/* Quick Action: Study Root in Flashcards Deck */}
                 <div className="pt-2">
@@ -3076,18 +3204,26 @@ export default function VocabGraphView({
                   {isAdminMode && (
                     <div className="mt-3 p-3.5 bg-[#FAFBF8] border-2 border-[#111410] shadow-[3px_3px_0px_0px_#111410] space-y-3">
                       <div className="flex items-center justify-between flex-wrap gap-2">
-                        {/* Editorial Status Badge */}
-                        {selectedNode.data?.review?.verified ? (
-                          <span className="inline-flex items-center space-x-1.5 px-2 py-0.5 bg-[#EDF5E5] text-[#2F441E] border border-[#111410] text-[10px] font-mono font-black uppercase">
-                            <Check className="w-3 h-3 text-[#7BB33B] stroke-[3]" />
-                            <span>EDITORIAL STATUS: VERIFIED</span>
-                          </span>
-                        ) : (
-                          <span className="inline-flex items-center space-x-1.5 px-2 py-0.5 bg-[#FEF3C7] text-[#92400E] border border-[#111410] text-[10px] font-mono font-black uppercase">
-                            <AlertCircle className="w-3 h-3 text-[#D97706]" />
-                            <span>EDITORIAL STATUS: UNREVIEWED</span>
-                          </span>
-                        )}
+                        <div className="flex items-center flex-wrap gap-1.5">
+                          {/* Editorial Status Badge */}
+                          {selectedNode.data?.review?.verified ? (
+                            <span className="inline-flex items-center space-x-1.5 px-2 py-0.5 bg-[#EDF5E5] text-[#2F441E] border border-[#111410] text-[10px] font-mono font-black uppercase">
+                              <Check className="w-3 h-3 text-[#7BB33B] stroke-[3]" />
+                              <span>EDITORIAL STATUS: VERIFIED</span>
+                            </span>
+                          ) : (
+                            <span className="inline-flex items-center space-x-1.5 px-2 py-0.5 bg-[#FEF3C7] text-[#92400E] border border-[#111410] text-[10px] font-mono font-black uppercase">
+                              <AlertCircle className="w-3 h-3 text-[#D97706]" />
+                              <span>EDITORIAL STATUS: UNREVIEWED</span>
+                            </span>
+                          )}
+                          {selectedNode.data?.is_published === false && (
+                            <span className="inline-flex items-center space-x-1 px-2 py-0.5 bg-[#FDF2F2] text-[#991B1B] border border-[#111410] text-[10px] font-mono font-black uppercase">
+                              <EyeOff className="w-3 h-3 text-[#991B1B]" />
+                              <span>UNPUBLISHED</span>
+                            </span>
+                          )}
+                        </div>
 
                         {/* [Edit Verification] button */}
                         <button
@@ -3217,6 +3353,36 @@ export default function VocabGraphView({
                               className="px-3 py-2 bg-white hover:bg-[#FAFBF8] text-[#111410] border border-[#111410] shadow-[1px_1px_0px_0px_#111410] font-mono text-xs font-bold uppercase transition"
                             >
                               Cancel
+                            </button>
+                          </div>
+
+                          {/* Publication Visibility Action */}
+                          <div className="pt-2 border-t border-[#111410]/15 flex items-center justify-between gap-2">
+                            <span className="text-[10px] font-mono text-[#62685E]">
+                              {selectedNode.data?.is_published === false
+                                ? 'Hidden from students'
+                                : 'Published to students'}
+                            </span>
+                            <button
+                              type="button"
+                              onClick={handleTogglePublishWord}
+                              className={`flex items-center space-x-1.5 px-2.5 py-1.5 border border-[#111410] shadow-[1px_1px_0px_0px_#111410] font-mono text-[10px] font-black uppercase transition active:translate-x-[1px] active:translate-y-[1px] ${
+                                selectedNode.data?.is_published === false
+                                  ? 'bg-[#EDF5E5] hover:bg-[#DCEDD0] text-[#2F441E]'
+                                  : 'bg-[#FDF2F2] hover:bg-red-100 text-[#991B1B]'
+                              }`}
+                            >
+                              {selectedNode.data?.is_published === false ? (
+                                <>
+                                  <Eye className="w-3 h-3" />
+                                  <span>Re-publish Word</span>
+                                </>
+                              ) : (
+                                <>
+                                  <EyeOff className="w-3 h-3" />
+                                  <span>Unpublish Word</span>
+                                </>
+                              )}
                             </button>
                           </div>
                         </div>

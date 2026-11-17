@@ -15,7 +15,9 @@ import {
   Database,
   Loader2,
   History,
-  Clock
+  Clock,
+  Eye,
+  EyeOff
 } from 'lucide-react';
 import {
   saveWordReview,
@@ -137,14 +139,21 @@ export default function EditorialReviewModal({
   const filteredWords = useMemo(() => {
     return words.filter(w => {
       const isVerified = Boolean(w.review?.verified);
+      const isPublished = w.is_published !== false;
       if (filterMode === 'VERIFIED' && !isVerified) return false;
       if (filterMode === 'UNREVIEWED' && isVerified) return false;
+      if (filterMode === 'UNPUBLISHED' && isPublished) return false;
 
       if (!searchTerm.trim()) return true;
       const q = searchTerm.toLowerCase().trim();
       return w.word?.toLowerCase().includes(q) || w.definition?.toLowerCase().includes(q);
     });
   }, [words, filterMode, searchTerm]);
+
+  const unpublishedCount = useMemo(
+    () => words.filter(w => w.is_published === false).length,
+    [words]
+  );
 
   const activeWordHistory = useMemo(
     () => normalizeHistoryEntries(activeWord?.review),
@@ -264,6 +273,65 @@ export default function EditorialReviewModal({
       }
     } catch (err) {
       alert(`Failed to verify word: ${err.message}`);
+    } finally {
+      setIsSavingWord(false);
+    }
+  };
+
+  const handleTogglePublish = async () => {
+    if (!activeWord || isSavingWord) return;
+    setIsSavingWord(true);
+    try {
+      const nextPublished = activeWord.is_published === false;
+      const updatedReview = buildUpdatedReview(
+        activeWord.review,
+        {
+          verified: Boolean(activeWord.review?.verified),
+          verifiedBy: reviewFormData.verifiedBy,
+          notes: reviewFormData.notes,
+        },
+        {
+          action: nextPublished ? 'published' : 'unpublished',
+        }
+      );
+
+      let savedWordPayload = null;
+      if (activeWord.id) {
+        const updated = await updateVocabularyWord(activeWord.id, {
+          is_published: nextPublished,
+          review: updatedReview,
+        });
+        savedWordPayload = {
+          ...activeWord,
+          ...updated,
+          is_published: updated?.is_published ?? nextPublished,
+          review: updated?.review || updatedReview,
+        };
+      } else {
+        savedWordPayload = {
+          ...activeWord,
+          is_published: nextPublished,
+          review: updatedReview,
+        };
+      }
+
+      const finalReview = savedWordPayload.review;
+      if (onUpdateWord) {
+        onUpdateWord(savedWordPayload);
+      }
+      saveWordReview(activeWord.word, finalReview);
+      if (onSaveReview) {
+        onSaveReview(activeWord.word, finalReview);
+      }
+
+      setSaveToast(
+        nextPublished
+          ? `"${activeWord.word}" re-published to student lexicon!`
+          : `"${activeWord.word}" unpublished (hidden from students)`
+      );
+      setTimeout(() => setSaveToast(null), 3500);
+    } catch (err) {
+      alert(`Failed to update publication status: ${err.message}`);
     } finally {
       setIsSavingWord(false);
     }
@@ -436,10 +504,10 @@ export default function EditorialReviewModal({
               </div>
 
               {/* Filter Tabs */}
-              <div className="flex items-center space-x-1 text-[10px] font-mono font-bold">
+              <div className="grid grid-cols-2 sm:grid-cols-4 gap-1 text-[10px] font-mono font-bold">
                 <button
                   onClick={() => setFilterMode('ALL')}
-                  className={`flex-1 py-1 border transition ${
+                  className={`py-1 px-1 border transition truncate ${
                     filterMode === 'ALL'
                       ? 'bg-[#111410] text-white border-[#111410]'
                       : 'bg-[#FAFBF8] hover:bg-white text-[#62685E] border-gray-300'
@@ -449,23 +517,33 @@ export default function EditorialReviewModal({
                 </button>
                 <button
                   onClick={() => setFilterMode('UNREVIEWED')}
-                  className={`flex-1 py-1 border transition ${
+                  className={`py-1 px-1 border transition truncate ${
                     filterMode === 'UNREVIEWED'
                       ? 'bg-[#FEF3C7] text-[#92400E] border-[#111410] font-black'
                       : 'bg-[#FAFBF8] hover:bg-white text-[#62685E] border-gray-300'
                   }`}
                 >
-                  Unreviewed ({words.filter(w => !w.review?.verified).length})
+                  Unrev ({words.filter(w => !w.review?.verified).length})
                 </button>
                 <button
                   onClick={() => setFilterMode('VERIFIED')}
-                  className={`flex-1 py-1 border transition ${
+                  className={`py-1 px-1 border transition truncate ${
                     filterMode === 'VERIFIED'
                       ? 'bg-[#EDF5E5] text-[#2F441E] border-[#111410] font-black'
                       : 'bg-[#FAFBF8] hover:bg-white text-[#62685E] border-gray-300'
                   }`}
                 >
-                  Verified ({words.filter(w => w.review?.verified).length})
+                  Verif ({words.filter(w => w.review?.verified).length})
+                </button>
+                <button
+                  onClick={() => setFilterMode('UNPUBLISHED')}
+                  className={`py-1 px-1 border transition truncate ${
+                    filterMode === 'UNPUBLISHED'
+                      ? 'bg-[#FDF2F2] text-[#991B1B] border-[#111410] font-black'
+                      : 'bg-[#FAFBF8] hover:bg-white text-[#62685E] border-gray-300'
+                  }`}
+                >
+                  Hidden ({unpublishedCount})
                 </button>
               </div>
             </div>
@@ -508,7 +586,12 @@ export default function EditorialReviewModal({
                         </p>
                       </div>
 
-                      <div className="shrink-0">
+                      <div className="shrink-0 flex items-center space-x-1">
+                        {w.is_published === false && (
+                          <span className="px-1.5 py-0.5 bg-[#FDF2F2] text-[#991B1B] border border-[#DC2626]/50 text-[9px] font-mono font-black uppercase" title="Unpublished (hidden from students)">
+                            HIDDEN
+                          </span>
+                        )}
                         {isVerified ? (
                           <span className="px-1.5 py-0.5 bg-[#EDF5E5] text-[#2F441E] border border-[#7BB33B] text-[9px] font-mono font-black uppercase" title="Verified by editor">
                             ✓
@@ -610,6 +693,8 @@ export default function EditorialReviewModal({
                         { key: 'verified', label: 'Verified' },
                         { key: 'edited_and_verified', label: 'Edited & Verified' },
                         { key: 'unverified', label: 'Unverified' },
+                        { key: 'unpublished', label: 'Unpublished' },
+                        { key: 'published', label: 'Published' },
                       ].map((tab) => (
                         <button
                           key={tab.key}
@@ -677,8 +762,15 @@ export default function EditorialReviewModal({
                         </span>
                       )}
 
-                      {/* 1-Click Quick Verification Actions */}
-                      <div className="flex items-center space-x-1.5 ml-0 sm:ml-2">
+                      {activeWord.is_published === false && (
+                        <span className="px-2 sm:px-2.5 py-0.5 sm:py-1 bg-[#FDF2F2] text-[#991B1B] border-2 border-[#111410] text-[10px] font-mono font-black uppercase shadow-[2px_2px_0px_0px_#111410] inline-flex items-center space-x-1">
+                          <EyeOff className="w-3 h-3" />
+                          <span>UNPUBLISHED</span>
+                        </span>
+                      )}
+
+                      {/* 1-Click Quick Verification & Publication Actions */}
+                      <div className="flex items-center space-x-1.5 ml-0 sm:ml-2 flex-wrap gap-y-1">
                         {!reviewFormData.verified && (
                           <button
                             type="button"
@@ -701,6 +793,33 @@ export default function EditorialReviewModal({
                           <Check className="w-3.5 h-3.5 text-[#7BB33B]" />
                           <span>Verify &amp; Next</span>
                           <ArrowRight className="w-3 h-3 ml-0.5" />
+                        </button>
+                        <button
+                          type="button"
+                          onClick={handleTogglePublish}
+                          disabled={isSavingWord}
+                          className={`flex items-center space-x-1 px-2.5 py-1 border-2 border-[#111410] text-[10px] font-mono font-black uppercase shadow-[2px_2px_0px_0px_#111410] active:translate-x-[1px] active:translate-y-[1px] transition ${
+                            activeWord.is_published === false
+                              ? 'bg-[#EDF5E5] hover:bg-[#DCEDD0] text-[#2F441E]'
+                              : 'bg-[#FDF2F2] hover:bg-red-100 text-[#991B1B]'
+                          }`}
+                          title={
+                            activeWord.is_published === false
+                              ? 'Re-publish word so it appears for students'
+                              : 'Unpublish word to hide it from student study decks, explorer, and graph'
+                          }
+                        >
+                          {activeWord.is_published === false ? (
+                            <>
+                              <Eye className="w-3.5 h-3.5 text-[#7BB33B]" />
+                              <span>Publish</span>
+                            </>
+                          ) : (
+                            <>
+                              <EyeOff className="w-3.5 h-3.5 text-[#991B1B]" />
+                              <span>Unpublish</span>
+                            </>
+                          )}
                         </button>
                       </div>
                     </div>
@@ -1105,6 +1224,53 @@ export default function EditorialReviewModal({
                         >
                           <span>Save &amp; Next Word</span>
                           <ArrowRight className="w-4 h-4" />
+                        </button>
+                      </div>
+
+                      {/* Publication Visibility Control */}
+                      <div className="pt-3 border-t border-[#111410]/15 flex flex-col sm:flex-row sm:items-center justify-between gap-2.5 bg-white p-3 border border-[#111410]/30">
+                        <div>
+                          <div className="text-[10px] font-mono font-black uppercase text-[#111410] flex items-center space-x-1.5">
+                            {activeWord.is_published === false ? (
+                              <>
+                                <EyeOff className="w-3.5 h-3.5 text-[#991B1B]" />
+                                <span>Status: Unpublished (Hidden from Students)</span>
+                              </>
+                            ) : (
+                              <>
+                                <Eye className="w-3.5 h-3.5 text-[#7BB33B]" />
+                                <span>Status: Published in Student Lexicon</span>
+                              </>
+                            )}
+                          </div>
+                          <p className="text-[10px] font-mono text-[#62685E] mt-0.5">
+                            {activeWord.is_published === false
+                              ? 'Excluded from student study decks, explorer, and root graph until re-published.'
+                              : 'Visible in student study decks, explorer, and root graph. Unpublish to remove from circulation.'}
+                          </p>
+                        </div>
+
+                        <button
+                          type="button"
+                          onClick={handleTogglePublish}
+                          disabled={isSavingWord}
+                          className={`shrink-0 flex items-center justify-center space-x-1.5 px-3 py-2 border-2 border-[#111410] shadow-[2px_2px_0px_0px_#111410] font-mono text-xs font-black uppercase transition active:translate-x-[1px] active:translate-y-[1px] disabled:opacity-50 ${
+                            activeWord.is_published === false
+                              ? 'bg-[#EDF5E5] hover:bg-[#DCEDD0] text-[#2F441E]'
+                              : 'bg-[#FDF2F2] hover:bg-red-100 text-[#991B1B]'
+                          }`}
+                        >
+                          {activeWord.is_published === false ? (
+                            <>
+                              <Eye className="w-3.5 h-3.5" />
+                              <span>Re-publish Word</span>
+                            </>
+                          ) : (
+                            <>
+                              <EyeOff className="w-3.5 h-3.5" />
+                              <span>Unpublish Word</span>
+                            </>
+                          )}
                         </button>
                       </div>
                     </div>

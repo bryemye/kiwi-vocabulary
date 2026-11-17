@@ -195,8 +195,22 @@ export default function VocabView({
   // Morpheme Explorer Sub-type State ('ROOT' | 'PREFIX' | 'SUFFIX')
   const [explorerMorphemeType, setExplorerMorphemeType] = useState('ROOT');
 
+  // Published-only collections for student study, explorer, and practice builders
+  const publishedWords = useMemo(
+    () => words.filter((w) => w.is_published !== false),
+    [words]
+  );
+  const publishedRoots = useMemo(
+    () =>
+      roots.map((r) => ({
+        ...r,
+        words: (r.words || []).filter((w) => w.is_published !== false),
+      })),
+    [roots]
+  );
+
   // Extract all catalog morphemes
-  const allMorphemes = useMemo(() => extractMorphemesFromWords(words, roots), [words, roots]);
+  const allMorphemes = useMemo(() => extractMorphemesFromWords(publishedWords, publishedRoots), [publishedWords, publishedRoots]);
   const prefixMorphemes = useMemo(() => allMorphemes.filter(m => m.type === 'prefix'), [allMorphemes]);
   const suffixMorphemes = useMemo(() => allMorphemes.filter(m => m.type === 'suffix'), [allMorphemes]);
 
@@ -277,9 +291,9 @@ export default function VocabView({
 
   // Filter available roots based on selected language
   const availableRoots = useMemo(() => {
-    if (selectedLanguage === 'ALL') return roots;
-    return roots.filter(r => matchesOriginFilter(r.language, selectedLanguage));
-  }, [roots, selectedLanguage]);
+    if (selectedLanguage === 'ALL') return publishedRoots;
+    return publishedRoots.filter(r => matchesOriginFilter(r.language, selectedLanguage));
+  }, [publishedRoots, selectedLanguage]);
 
   // Grouped roots for the Root select in Study tab (grouped by active pathway)
   const groupedRootsForSelect = useMemo(() => {
@@ -342,9 +356,9 @@ export default function VocabView({
 
   // Build filtered master list (supporting root, prefix, and suffix filtering)
   const filteredWords = useMemo(() => {
-    return words.filter((w) => {
+    return publishedWords.filter((w) => {
       if (selectedLanguage !== 'ALL') {
-        const rootLang = w.root_details?.language || roots.find(r => r.id === w.root)?.language;
+        const rootLang = w.root_details?.language || publishedRoots.find(r => r.id === w.root)?.language;
         if (!matchesOriginFilter(rootLang, selectedLanguage)) {
           return false;
         }
@@ -373,7 +387,7 @@ export default function VocabView({
       }
       return true;
     });
-  }, [words, selectedLanguage, selectedRootId, searchTerm, roots]);
+  }, [publishedWords, selectedLanguage, selectedRootId, searchTerm, publishedRoots]);
 
   // Initialize or re-shuffle session deck (15-word slice with morpheme variety)
   const initializeSession = useCallback((advanceRound = false) => {
@@ -427,7 +441,7 @@ export default function VocabView({
       mnemonic = rootObj?.mnemonic || '';
       definitionText = `A root is the foundational base morpheme of a word that carries its primary semantic essence. Roots cannot be reduced to smaller grammatical units without destroying their conceptual core. The root "[${morpheme.toUpperCase()}]" originates from classical ${language} and embodies the core meaning "${meaning}".`;
 
-      matchedWords = words.filter(w => {
+      matchedWords = publishedWords.filter(w => {
         if (word && w.id === word.id) return true;
         if (rootObj?.id && (w.root === rootObj.id || w.root_details?.id === rootObj.id)) return true;
         if (morpheme && w.root_details?.morpheme?.toLowerCase() === morpheme.toLowerCase()) return true;
@@ -445,7 +459,7 @@ export default function VocabView({
       definitionText = `A prefix is an affix morpheme attached to the front of a stem or root word to alter its meaning by conveying direction, negation, relationship, or intensity. In this context, the prefix morpheme "${cleanToken}" introduces the modifier "${meaning || 'derivational prefix'}" to construct specialized words.`;
 
       const basePrefix = cleanToken.toLowerCase().replace(/[^a-z]/g, '');
-      matchedWords = words.filter(w => {
+      matchedWords = publishedWords.filter(w => {
         if (word && w.id === word.id) return true;
         if (!w.prefix) return false;
         const pRaw = w.prefix.toLowerCase();
@@ -464,7 +478,7 @@ export default function VocabView({
       definitionText = `A suffix is a bound affix morpheme joined to the conclusion of a root or base stem to establish its grammatical role (such as noun, adjective, or verb) or impart fine shades of meaning. Here, the suffix morpheme "${cleanToken}" functions as "${meaning || 'derivational ending'}" across related English terms.`;
 
       const baseSuffix = cleanToken.toLowerCase().replace(/[^a-z]/g, '');
-      matchedWords = words.filter(w => {
+      matchedWords = publishedWords.filter(w => {
         if (word && w.id === word.id) return true;
         if (!w.suffix) return false;
         const sRaw = w.suffix.toLowerCase();
@@ -492,7 +506,7 @@ export default function VocabView({
       root: rootObj,
       sourceTab: sourceTabOverride || subTab,
     };
-  }, [roots, words, subTab]);
+  }, [roots, publishedWords, subTab]);
 
   // Open Morpheme Detail View (for prefix, root, or suffix)
   const handleOpenMorpheme = useCallback(({ type, raw = '', root = null, word = null }) => {
@@ -635,7 +649,7 @@ export default function VocabView({
 
   const activateWordFocus = useCallback((wordItem) => {
     if (!wordItem) return;
-    const remainingWords = words.filter(w => w.id !== wordItem.id);
+    const remainingWords = publishedWords.filter(w => w.id !== wordItem.id);
     // Keep the focused word pinned as card #1, with variety-shuffled backfill cards after it
     const customDeck = [wordItem, ...shuffleWithMorphemeVariety(remainingWords.slice(0, SESSION_SIZE - 1))];
     const nextSubsetInfo = {
@@ -656,7 +670,7 @@ export default function VocabView({
     setIsSessionComplete(false);
     setSubTab('study');
     setActiveMorphemeView(null);
-  }, [words]);
+  }, [publishedWords]);
 
   // Select a single word to practice from the morpheme word list
   const handleSelectSingleWord = useCallback((wordItem) => {
@@ -866,32 +880,52 @@ export default function VocabView({
       fresh.connotation !== card.connotation ||
       fresh.pronunciation !== card.pronunciation ||
       fresh.root !== card.root ||
+      Boolean(fresh.is_published !== false) !== Boolean(card.is_published !== false) ||
       JSON.stringify(fresh.review || {}) !== JSON.stringify(card.review || {});
 
     setSessionDeck((prev) => {
       let changed = false;
-      const next = prev.map((card) => {
+      const next = [];
+      for (const card of prev) {
         const fresh = wordsById.get(card.id);
-        if (fresh && hasWordChanges(card, fresh)) {
-          changed = true;
-          return { ...card, ...fresh };
+        if (fresh) {
+          if (fresh.is_published === false) {
+            changed = true;
+            continue;
+          }
+          if (hasWordChanges(card, fresh)) {
+            changed = true;
+            next.push({ ...card, ...fresh });
+            continue;
+          }
         }
-        return card;
-      });
+        next.push(card);
+      }
+      if (changed && next.length > 0) {
+        setCurrentIndex((idx) => (idx >= next.length ? next.length - 1 : idx));
+      }
       return changed ? next : prev;
     });
 
     setActiveMorphemeView((prev) => {
       if (!prev || !Array.isArray(prev.matchedWords)) return prev;
       let changed = false;
-      const nextMatched = prev.matchedWords.map((card) => {
+      const nextMatched = [];
+      for (const card of prev.matchedWords) {
         const fresh = wordsById.get(card.id);
-        if (fresh && hasWordChanges(card, fresh)) {
-          changed = true;
-          return { ...card, ...fresh };
+        if (fresh) {
+          if (fresh.is_published === false) {
+            changed = true;
+            continue;
+          }
+          if (hasWordChanges(card, fresh)) {
+            changed = true;
+            nextMatched.push({ ...card, ...fresh });
+            continue;
+          }
         }
-        return card;
-      });
+        nextMatched.push(card);
+      }
       return changed ? { ...prev, matchedWords: nextMatched } : prev;
     });
   }, [words]);
@@ -1016,8 +1050,8 @@ export default function VocabView({
   if (practiceSetupConfig) {
     return (
       <PracticeSetupView
-        roots={roots}
-        words={words}
+        roots={publishedRoots}
+        words={publishedWords}
         stats={stats || vocabStats}
         initialSelectedRootIds={practiceSetupConfig.selectedRootIds || []}
         initialSelectedMorphemeIds={practiceSetupConfig.selectedMorphemeIds || []}
@@ -1048,8 +1082,8 @@ export default function VocabView({
             setCustomModalInitialMorpheme(null);
             setCustomModalInitialMorphemes([]);
           }}
-          roots={roots}
-          words={words}
+          roots={publishedRoots}
+          words={publishedWords}
           initialSelectedRootIds={customModalInitialRoots}
           initialSelectedMorphemes={customModalInitialMorphemes}
           initialMorpheme={customModalInitialMorpheme}
@@ -1692,7 +1726,7 @@ export default function VocabView({
                     {/* Root Bento Grid for this group */}
                     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
                       {group.roots.map((root) => {
-                        const rootWords = words.filter(w => w.root === root.id || w.root_details?.id === root.id);
+                        const rootWords = publishedWords.filter(w => w.root === root.id || w.root_details?.id === root.id);
                         const isHighlightedRoot = Number(highlightedExplorerRootId) === Number(root.id);
 
                         return (
@@ -1856,9 +1890,10 @@ export default function VocabView({
       {/* ---------------------------------------------------------------------- */}
       {subTab === 'graph' && (
         <VocabGraphView
-          initialRoots={roots}
+          initialRoots={isAdminMode ? roots : publishedRoots}
           isAdminMode={isAdminMode}
           onUpdateWordReview={onUpdateWordReview}
+          onUpdateWord={onUpdateWord}
           onNavigateStudy={(word) => {
             if (word) {
               handleSelectSingleWord(word);
@@ -1882,8 +1917,8 @@ export default function VocabView({
           setCustomModalInitialMorpheme(null);
           setCustomModalInitialMorphemes([]);
         }}
-        roots={roots}
-        words={words}
+        roots={publishedRoots}
+        words={publishedWords}
         initialSelectedRootIds={customModalInitialRoots}
         initialSelectedMorphemes={customModalInitialMorphemes}
         initialMorpheme={customModalInitialMorpheme}
