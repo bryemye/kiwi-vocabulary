@@ -11,7 +11,13 @@ import {
   Monitor,
   Smartphone
 } from 'lucide-react';
-import { verifyMagicLink } from '../services/api';
+import {
+  verifyMagicLink,
+  fetchCurrentUser,
+  isMatchingPendingAuthSession,
+  broadcastAuthLogin,
+  clearPendingAuthSession,
+} from '../services/api';
 
 function parseTokenAndSid(rawInput, fallbackSid = null) {
   if (!rawInput || typeof rawInput !== 'string') return { token: '', sid: fallbackSid };
@@ -63,6 +69,17 @@ export default function AuthVerifyCard({
   const [manualInput, setManualInput] = useState('');
   const hasTriggeredRef = useRef(false);
 
+  const completeLocalLogin = (userData, delayMs = 700) => {
+    broadcastAuthLogin(userData);
+    setUser(userData);
+    setStatus('success');
+    setTimeout(() => {
+      if (onSuccess) {
+        onSuccess(userData);
+      }
+    }, delayMs);
+  };
+
   const initVerification = async (candidateToken, candidateSid) => {
     const { token: cleaned, sid } = parseTokenAndSid(candidateToken, candidateSid);
     if (!cleaned) {
@@ -73,12 +90,17 @@ export default function AuthVerifyCard({
 
     setActiveSid(sid);
 
-    // If cross-device sid is provided, inspect the session first to show the 2-digit confirmation screen
-    if (sid) {
+    // If this same browser initiated the magic link request, sign in directly without a phone-approval prompt
+    if (sid && !isMatchingPendingAuthSession(sid)) {
       try {
         setStatus('verifying');
         setErrorMessage(null);
         const checkData = await verifyMagicLink(cleaned, sid, 'check');
+
+        if (checkData.already_authenticated && checkData.user) {
+          completeLocalLogin(checkData.user, 400);
+          return;
+        }
 
         if (checkData.status === 'APPROVED') {
           setStatus('cross_device_approved');
@@ -91,31 +113,33 @@ export default function AuthVerifyCard({
         setStatus('confirm_prompt');
       } catch (err) {
         console.error('Failed to inspect magic link session:', err);
-        // If check failed with expired or used, report error
+        const existingUser = await fetchCurrentUser();
+        if (existingUser) {
+          completeLocalLogin(existingUser, 300);
+          return;
+        }
         setStatus('error');
         setErrorMessage(err.message || 'Invalid or expired magic link.');
       }
     } else {
       // Direct same-device login
-      runDirectLogin(cleaned);
+      runDirectLogin(cleaned, sid || null);
     }
   };
 
-  const runDirectLogin = async (cleanedToken) => {
+  const runDirectLogin = async (cleanedToken, sidForSecondary = null) => {
     try {
       setStatus('verifying');
       setErrorMessage(null);
-      const userData = await verifyMagicLink(cleanedToken, null, 'verify');
-      setUser(userData);
-      setStatus('success');
-
-      setTimeout(() => {
-        if (onSuccess) {
-          onSuccess(userData);
-        }
-      }, 1000);
+      const userData = await verifyMagicLink(cleanedToken, sidForSecondary, 'verify');
+      completeLocalLogin(userData, 700);
     } catch (err) {
       console.error('Direct magic link verification failed:', err);
+      const existingUser = await fetchCurrentUser();
+      if (existingUser) {
+        completeLocalLogin(existingUser, 300);
+        return;
+      }
       setStatus('error');
       setErrorMessage(err.message || 'Invalid or expired magic link.');
     }
@@ -141,6 +165,7 @@ export default function AuthVerifyCard({
       setIsSubmitting(true);
       setErrorMessage(null);
       await verifyMagicLink(cleaned, activeSid, 'approve');
+      clearPendingAuthSession();
       setStatus('cross_device_approved');
     } catch (err) {
       console.error('Failed to approve cross-device sign-in:', err);
@@ -158,6 +183,7 @@ export default function AuthVerifyCard({
       setIsSubmitting(true);
       setErrorMessage(null);
       await verifyMagicLink(cleaned, activeSid, 'deny');
+      clearPendingAuthSession();
       setStatus('denied');
     } catch (err) {
       console.error('Failed to deny sign-in:', err);
@@ -171,7 +197,12 @@ export default function AuthVerifyCard({
   // Handle "Also sign in on this phone" option after approving
   const handleAlsoSignInLocally = async () => {
     const { token: cleaned } = parseTokenAndSid(initialToken, activeSid);
-    await runDirectLogin(cleaned);
+    await runDirectLogin(cleaned, activeSid);
+  };
+
+  const handleSignInHereInstead = async () => {
+    const { token: cleaned } = parseTokenAndSid(initialToken, activeSid);
+    await runDirectLogin(cleaned, activeSid);
   };
 
   const handleManualSubmit = (e) => {
@@ -273,6 +304,16 @@ export default function AuthVerifyCard({
                       <ArrowRight className="w-4 h-4" />
                     </>
                   )}
+                </button>
+
+                <button
+                  type="button"
+                  onClick={handleSignInHereInstead}
+                  disabled={isSubmitting}
+                  className="w-full flex items-center justify-center space-x-1.5 bg-white hover:bg-[#EDF5E5] text-[#111410] border-2 border-[#111410] shadow-[2px_2px_0px_0px_#111410] py-2.5 px-3 text-xs font-mono font-bold uppercase transition-all disabled:opacity-50"
+                >
+                  <Smartphone className="w-3.5 h-3.5 text-[#7BB33B]" />
+                  <span>SIGN IN ON THIS DEVICE INSTEAD</span>
                 </button>
 
                 <button

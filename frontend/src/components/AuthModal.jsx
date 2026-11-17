@@ -10,15 +10,23 @@ import {
   ShieldCheck,
   Smartphone
 } from 'lucide-react';
-import { requestMagicLink, pollMagicLinkStatus } from '../services/api';
+import {
+  requestMagicLink,
+  pollMagicLinkStatus,
+  fetchCurrentUser,
+  savePendingAuthSession,
+  clearPendingAuthSession,
+  subscribeAuthLogin,
+} from '../services/api';
 
 export default function AuthModal({ isOpen, onClose, onSuccess }) {
-  const [step, setStep] = useState(1); // 1 = Email Form, 2 = Check Inbox & Waiting for Phone
+  const [step, setStep] = useState(1); // 1 = Email Form, 2 = Check Inbox
   const [email, setEmail] = useState('');
+  const [crossDevice, setCrossDevice] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
 
-  // Cross-device pairing states
+  // Cross-device pairing states (only used when crossDevice === true)
   const [sessionId, setSessionId] = useState(null);
   const [deviceSecret, setDeviceSecret] = useState(null);
   const [matchCode, setMatchCode] = useState(null);
@@ -38,6 +46,15 @@ export default function AuthModal({ isOpen, onClose, onSuccess }) {
     if (onClose) onClose();
   };
 
+  const completeModalLogin = (userData) => {
+    clearPendingAuthSession();
+    setPollState('approved');
+    setTimeout(() => {
+      if (onSuccess) onSuccess(userData);
+      handleModalClose();
+    }, 600);
+  };
+
   const handleSubmitEmail = async (e) => {
     if (e && e.preventDefault) e.preventDefault();
     if (!email || !email.trim()) {
@@ -48,7 +65,12 @@ export default function AuthModal({ isOpen, onClose, onSuccess }) {
     try {
       setLoading(true);
       setError(null);
-      const data = await requestMagicLink(email.trim());
+      const data = await requestMagicLink(email.trim(), { crossDevice });
+      if (data.session_id) {
+        savePendingAuthSession(data.session_id, email.trim());
+      } else {
+        clearPendingAuthSession();
+      }
       setSessionId(data.session_id || null);
       setDeviceSecret(data.device_secret || null);
       setMatchCode(data.match_code || null);
@@ -62,9 +84,45 @@ export default function AuthModal({ isOpen, onClose, onSuccess }) {
     }
   };
 
-  // Cross-device polling effect: runs when in Step 2 on the initiating device
+  // Same-browser cross-tab sync + focus/visibility check when waiting on Step 2
   useEffect(() => {
-    if (step !== 2 || !sessionId || !deviceSecret || pollState === 'approved') return;
+    if (!isOpen || step !== 2 || pollState === 'approved') return;
+
+    let isCancelled = false;
+
+    const checkExistingSession = async () => {
+      const existing = await fetchCurrentUser();
+      if (!isCancelled && existing) {
+        completeModalLogin(existing);
+      }
+    };
+
+    const unsubscribe = subscribeAuthLogin((userData) => {
+      if (!isCancelled && userData) {
+        completeModalLogin(userData);
+      }
+    });
+
+    const handleVisibilityOrFocus = () => {
+      if (document.visibilityState === 'visible') {
+        checkExistingSession();
+      }
+    };
+
+    window.addEventListener('focus', handleVisibilityOrFocus);
+    document.addEventListener('visibilitychange', handleVisibilityOrFocus);
+
+    return () => {
+      isCancelled = true;
+      unsubscribe();
+      window.removeEventListener('focus', handleVisibilityOrFocus);
+      document.removeEventListener('visibilitychange', handleVisibilityOrFocus);
+    };
+  }, [isOpen, step, pollState]);
+
+  // Cross-device polling effect: runs only when crossDevice pairing is active on Step 2
+  useEffect(() => {
+    if (!isOpen || step !== 2 || !sessionId || !deviceSecret || pollState === 'approved') return;
 
     let isCancelled = false;
     let intervalId = null;
@@ -75,12 +133,8 @@ export default function AuthModal({ isOpen, onClose, onSuccess }) {
         if (isCancelled) return;
 
         if (res.status === 'APPROVED' && res.user) {
-          setPollState('approved');
           if (intervalId) clearInterval(intervalId);
-          setTimeout(() => {
-            if (onSuccess) onSuccess(res.user);
-            handleModalClose();
-          }, 900);
+          completeModalLogin(res.user);
         } else if (res.status === 'DENIED') {
           setPollState('denied');
           setError('Sign-in request was rejected on your mobile device.');
@@ -100,6 +154,12 @@ export default function AuthModal({ isOpen, onClose, onSuccess }) {
           setPollState('expired');
           setError('Login link has expired. Please request a new link.');
           if (intervalId) clearInterval(intervalId);
+        } else if (err.status === 400 && err.data?.status === 'CONSUMED') {
+          if (intervalId) clearInterval(intervalId);
+          const existing = await fetchCurrentUser();
+          if (!isCancelled && existing) {
+            completeModalLogin(existing);
+          }
         }
         // Transient network issues: keep polling
       }
@@ -114,7 +174,7 @@ export default function AuthModal({ isOpen, onClose, onSuccess }) {
       clearTimeout(timeoutId);
       if (intervalId) clearInterval(intervalId);
     };
-  }, [step, sessionId, deviceSecret, pollState]);
+  }, [isOpen, step, sessionId, deviceSecret, pollState]);
 
   if (!isOpen) return null;
 
@@ -141,7 +201,9 @@ export default function AuthModal({ isOpen, onClose, onSuccess }) {
                 </span>
               </div>
               <p className="text-[11px] font-mono text-[#62685E]">
-                {step === 1 ? 'Instant registration & sign in via email' : 'Cross-device verification active'}
+                {step === 1
+                  ? 'Instant registration & sign in via email'
+                  : (crossDevice ? 'Cross-device verification active' : 'Check your inbox to complete sign in')}
               </p>
             </div>
           </div>
@@ -194,6 +256,26 @@ export default function AuthModal({ isOpen, onClose, onSuccess }) {
                 </p>
               </div>
 
+              {/* Optional Cross-Device Approval Toggle (Opt-in only) */}
+              <label className="flex items-start space-x-2.5 p-2.5 bg-white border border-[#111410]/40 hover:border-[#111410] cursor-pointer transition-colors">
+                <input
+                  type="checkbox"
+                  checked={crossDevice}
+                  onChange={(e) => setCrossDevice(e.target.checked)}
+                  disabled={loading}
+                  className="mt-0.5 h-4 w-4 accent-[#7BB33B] border border-[#111410] cursor-pointer shrink-0"
+                />
+                <div className="text-[11px] font-mono text-[#42281D] leading-snug">
+                  <span className="font-bold text-[#111410] inline-flex items-center space-x-1">
+                    <Smartphone className="w-3 h-3 text-[#7BB33B]" />
+                    <span>Approve from another device (e.g. phone)</span>
+                  </span>
+                  <span className="block text-[10px] text-[#62685E] mt-0.5">
+                    Leave unchecked to sign in directly on this device when you tap the link.
+                  </span>
+                </div>
+              </label>
+
               {/* Submit Button in Kiwi Green */}
               <button
                 type="submit"
@@ -220,7 +302,7 @@ export default function AuthModal({ isOpen, onClose, onSuccess }) {
               </div>
             </form>
           ) : (
-            /* STEP 2: "Check your inbox" & Waiting for Phone Confirmation */
+            /* STEP 2: "Check your inbox" */
             <div>
               {pollState === 'approved' ? (
                 <div className="space-y-4 py-4 text-center flex flex-col items-center animate-in zoom-in-95 duration-200">
@@ -229,10 +311,10 @@ export default function AuthModal({ isOpen, onClose, onSuccess }) {
                   </div>
                   <div>
                     <h3 className="font-mono font-black text-base uppercase tracking-tight text-[#111410]">
-                      CONFIRMED FROM PHONE!
+                      {crossDevice ? 'CONFIRMED FROM PHONE!' : 'SIGN-IN VERIFIED!'}
                     </h3>
                     <p className="mt-1 text-xs font-mono text-[#2F441E]">
-                      Session established. Redirecting to Kiwi Learning...
+                      Session established. Entering Kiwi Learning...
                     </p>
                   </div>
                 </div>
@@ -248,39 +330,51 @@ export default function AuthModal({ isOpen, onClose, onSuccess }) {
                     </p>
                   </div>
 
-                  {/* 2-Digit Verification Match Code Card */}
-                  {matchCode && (
-                    <div className="bg-white border-2 border-[#111410] shadow-[4px_4px_0px_0px_#111410] p-4 text-center space-y-2">
-                      <div className="text-[10px] font-mono font-black uppercase tracking-wider text-[#62685E] flex items-center justify-center space-x-1.5">
-                        <ShieldCheck className="w-4 h-4 text-[#7BB33B]" />
-                        <span>VERIFICATION MATCH CODE</span>
+                  {crossDevice && matchCode ? (
+                    <>
+                      {/* 2-Digit Verification Match Code Card */}
+                      <div className="bg-white border-2 border-[#111410] shadow-[4px_4px_0px_0px_#111410] p-4 text-center space-y-2">
+                        <div className="text-[10px] font-mono font-black uppercase tracking-wider text-[#62685E] flex items-center justify-center space-x-1.5">
+                          <ShieldCheck className="w-4 h-4 text-[#7BB33B]" />
+                          <span>VERIFICATION MATCH CODE</span>
+                        </div>
+                        <div className="inline-flex items-center justify-center bg-[#EDF5E5] border-2 border-[#111410] shadow-[3px_3px_0px_0px_#111410] px-6 py-2">
+                          <span className="text-3xl font-mono font-black tracking-widest text-[#111410]">
+                            {matchCode}
+                          </span>
+                        </div>
+                        <p className="text-[11px] font-mono text-[#52594D] max-w-xs mx-auto leading-relaxed">
+                          Open the email on your phone and tap the link. Verify that this <strong>2-digit code</strong> matches before tapping <strong>Approve</strong>.
+                        </p>
                       </div>
-                      <div className="inline-flex items-center justify-center bg-[#EDF5E5] border-2 border-[#111410] shadow-[3px_3px_0px_0px_#111410] px-6 py-2">
-                        <span className="text-3xl font-mono font-black tracking-widest text-[#111410]">
-                          {matchCode}
-                        </span>
+
+                      {/* Pulsing Active Pairing Status */}
+                      <div className="bg-[#FAFBF8] border-2 border-[#111410] p-3 flex items-center space-x-3 shadow-[2px_2px_0px_0px_#111410]">
+                        <div className="relative flex items-center justify-center w-5 h-5 shrink-0">
+                          <span className="w-3.5 h-3.5 bg-[#7BB33B] rounded-full animate-ping absolute opacity-75" />
+                          <span className="w-2.5 h-2.5 bg-[#7BB33B] rounded-full relative" />
+                        </div>
+                        <div className="flex-1 text-left">
+                          <div className="text-[11px] font-mono font-black uppercase text-[#111410]">
+                            WAITING FOR PHONE CONFIRMATION...
+                          </div>
+                          <div className="text-[10px] font-mono text-[#62685E] leading-tight mt-0.5">
+                            This device will log in automatically once you approve on your phone.
+                          </div>
+                        </div>
                       </div>
-                      <p className="text-[11px] font-mono text-[#52594D] max-w-xs mx-auto leading-relaxed">
-                        Open the email on your phone and tap the link. Verify that this <strong>2-digit code</strong> matches before tapping <strong>Approve</strong>.
+                    </>
+                  ) : (
+                    /* Standard Direct Magic Link Instructions */
+                    <div className="bg-white border-2 border-[#111410] shadow-[3px_3px_0px_0px_#111410] p-4 text-center space-y-2">
+                      <div className="text-[11px] font-mono font-black uppercase text-[#111410]">
+                        TAP THE LINK IN YOUR EMAIL
+                      </div>
+                      <p className="text-[11px] font-mono text-[#52594D] leading-relaxed">
+                        Open your email app on this device and tap <strong>Sign In to Kiwi</strong>. You'll be logged in automatically.
                       </p>
                     </div>
                   )}
-
-                  {/* Pulsing Active Pairing Status */}
-                  <div className="bg-[#FAFBF8] border-2 border-[#111410] p-3 flex items-center space-x-3 shadow-[2px_2px_0px_0px_#111410]">
-                    <div className="relative flex items-center justify-center w-5 h-5 shrink-0">
-                      <span className="w-3.5 h-3.5 bg-[#7BB33B] rounded-full animate-ping absolute opacity-75" />
-                      <span className="w-2.5 h-2.5 bg-[#7BB33B] rounded-full relative" />
-                    </div>
-                    <div className="flex-1 text-left">
-                      <div className="text-[11px] font-mono font-black uppercase text-[#111410]">
-                        WAITING FOR PHONE CONFIRMATION...
-                      </div>
-                      <div className="text-[10px] font-mono text-[#62685E] leading-tight mt-0.5">
-                        This computer will log in automatically without needing your email password here.
-                      </div>
-                    </div>
-                  </div>
 
                   {/* Action Buttons */}
                   <div className="pt-1 flex flex-col sm:flex-row gap-2">

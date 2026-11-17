@@ -27,6 +27,8 @@ import {
   saveGuestSession,
   getCachedUserDeck,
   setCachedUserDeck,
+  broadcastAuthLogin,
+  subscribeAuthLogin,
 } from './services/api';
 import {
   getStoredAdminMode,
@@ -567,12 +569,17 @@ export default function App() {
   };
 
   // Auth Handlers
-  const handleAuthSuccess = async (userData) => {
+  const handleAuthSuccess = useCallback(async (userData, { broadcast = true } = {}) => {
+    if (!userData) return;
     setUser(userData);
     setIsGuestMode(false);
     setIsAuthModalOpen(false);
     setVerifyToken(null);
     setVerifySessionId(null);
+
+    if (broadcast) {
+      broadcastAuthLogin(userData);
+    }
 
     if (window.history && window.history.replaceState) {
       const cleanUrl = window.location.pathname.replace(/\/auth\/verify\/?/, '') || '/';
@@ -590,7 +597,17 @@ export default function App() {
     } catch (err) {
       console.error('Failed to refresh data post-login:', err);
     }
-  };
+  }, []);
+
+  // Cross-tab auth synchronization so login in another tab updates immediately without refresh
+  useEffect(() => {
+    const unsubscribe = subscribeAuthLogin((userData) => {
+      if (userData) {
+        handleAuthSuccess(userData, { broadcast: false });
+      }
+    });
+    return unsubscribe;
+  }, [handleAuthSuccess]);
 
   const handleLogout = async () => {
     try {
@@ -613,12 +630,18 @@ export default function App() {
     }
   };
 
-  const handleDismissVerify = () => {
+  const handleDismissVerify = async () => {
     setVerifyToken(null);
     setVerifySessionId(null);
     if (window.history && window.history.replaceState) {
       const cleanUrl = window.location.pathname.replace(/\/auth\/verify\/?/, '') || '/';
       window.history.replaceState({}, document.title, cleanUrl);
+    }
+    if (!user) {
+      const existing = await fetchCurrentUser();
+      if (existing) {
+        handleAuthSuccess(existing, { broadcast: false });
+      }
     }
   };
 

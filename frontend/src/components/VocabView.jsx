@@ -1010,10 +1010,10 @@ export default function VocabView({
             deck: sessionDeck
           });
         }
+        setSubmitting(false);
       }, 1000);
     } catch (err) {
       console.error('Error logging study attempt:', err);
-    } finally {
       setSubmitting(false);
     }
   }, [currentWord, submitting, isSessionComplete, cardStartTime, onAttemptLogged, isFlipped, currentIndex, sessionDeck, roundStats, isGuestMode, onSaveGuestSession]);

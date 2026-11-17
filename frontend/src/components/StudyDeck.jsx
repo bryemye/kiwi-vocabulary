@@ -1,4 +1,4 @@
-import React, { useState, useRef } from 'react';
+import React, { useState, useRef, useEffect, useCallback } from 'react';
 import { 
   Layers, 
   RotateCcw, 
@@ -50,10 +50,13 @@ export default function StudyDeck({
   const [pendingAction, setPendingAction] = useState(null);
 
   // Touch Swipe Gesture State
+  const cardSwipeRef = useRef(null);
   const touchStartRef = useRef(null);
   const touchDeltaRef = useRef({ x: 0, y: 0 });
+  const gestureAxisRef = useRef(null); // null | 'x' | 'y'
+  const touchStartedOnInteractiveRef = useRef(false);
   const [touchOffset, setTouchOffset] = useState(0);
-  const [isSwiping, setIsSwiping] = useState(false);
+  const [isDragging, setIsDragging] = useState(false);
   const ignoreNextClickRef = useRef(false);
 
   const currentWord = sessionDeck[currentIndex] || null;
@@ -98,9 +101,59 @@ export default function StudyDeck({
     setPendingAction(null);
   };
 
+  const resetGesture = useCallback(() => {
+    touchStartRef.current = null;
+    touchDeltaRef.current = { x: 0, y: 0 };
+    gestureAxisRef.current = null;
+    touchStartedOnInteractiveRef.current = false;
+    setIsDragging(false);
+    setTouchOffset(0);
+  }, []);
+
+  useEffect(() => {
+    resetGesture();
+  }, [currentIndex, resetGesture]);
+
+  // Attach non-passive touchmove listener so horizontal swipes lock cleanly without browser scroll/edge hijack
+  useEffect(() => {
+    const el = cardSwipeRef.current;
+    if (!el || isSessionComplete || !currentWord) return;
+
+    const onTouchMoveNative = (e) => {
+      if (!touchStartRef.current || e.touches.length !== 1) return;
+      const touch = e.touches[0];
+      const dx = touch.clientX - touchStartRef.current.x;
+      const dy = touch.clientY - touchStartRef.current.y;
+      touchDeltaRef.current = { x: dx, y: dy };
+
+      if (!gestureAxisRef.current) {
+        const absX = Math.abs(dx);
+        const absY = Math.abs(dy);
+        if (absX > 8 || absY > 8) {
+          gestureAxisRef.current = absX >= absY ? 'x' : 'y';
+          if (gestureAxisRef.current === 'x') {
+            setIsDragging(true);
+          }
+        }
+      }
+
+      if (gestureAxisRef.current === 'x') {
+        if (e.cancelable) {
+          e.preventDefault();
+        }
+        setTouchOffset(dx * 0.75);
+      }
+    };
+
+    el.addEventListener('touchmove', onTouchMoveNative, { passive: false });
+    return () => {
+      el.removeEventListener('touchmove', onTouchMoveNative);
+    };
+  }, [isSessionComplete, currentWord]);
+
   // Touch Gesture Handlers (Swipe left = Needs Review, Swipe right = Mastered, Tap = Flip)
   const handleTouchStart = (e) => {
-    if (isSessionComplete || submitting || !currentWord) return;
+    if (isSessionComplete || submitting || !currentWord || e.touches.length !== 1) return;
     const touch = e.touches[0];
     touchStartRef.current = {
       x: touch.clientX,
@@ -108,36 +161,39 @@ export default function StudyDeck({
       time: Date.now()
     };
     touchDeltaRef.current = { x: 0, y: 0 };
-    setIsSwiping(false);
-  };
-
-  const handleTouchMove = (e) => {
-    if (!touchStartRef.current) return;
-    const touch = e.touches[0];
-    const dx = touch.clientX - touchStartRef.current.x;
-    const dy = touch.clientY - touchStartRef.current.y;
-    touchDeltaRef.current = { x: dx, y: dy };
-
-    if (Math.abs(dx) > Math.abs(dy) && Math.abs(dx) > 10) {
-      setIsSwiping(true);
-      // Dampen translation slightly for physics feel
-      setTouchOffset(dx * 0.7);
-    }
-  };
-
-  const handleTouchEnd = () => {
-    if (!touchStartRef.current) return;
-    const { x: dx, y: dy } = touchDeltaRef.current;
-    const elapsed = Date.now() - touchStartRef.current.time;
-    touchStartRef.current = null;
+    gestureAxisRef.current = null;
+    touchStartedOnInteractiveRef.current = Boolean(
+      e.target && e.target.closest && e.target.closest('button, a, input, select, textarea')
+    );
+    setIsDragging(false);
     setTouchOffset(0);
+  };
 
-    const SWIPE_THRESHOLD = 70;
+  const handleTouchEnd = (e) => {
+    if (!touchStartRef.current) return;
+    const start = touchStartRef.current;
+    const changed = e.changedTouches && e.changedTouches[0];
+    const dx = changed ? changed.clientX - start.x : touchDeltaRef.current.x;
+    const dy = changed ? changed.clientY - start.y : touchDeltaRef.current.y;
+    const elapsed = Math.max(1, Date.now() - start.time);
+    const axis = gestureAxisRef.current;
+    const startedOnInteractive = touchStartedOnInteractiveRef.current;
 
-    if (isSwiping && Math.abs(dx) > SWIPE_THRESHOLD) {
+    resetGesture();
+
+    const SWIPE_DISTANCE = 60;
+    const FLICK_DISTANCE = 35;
+    const FLICK_VELOCITY = 0.35; // px/ms
+    const velocity = Math.abs(dx) / elapsed;
+    const isHorizontalSwipe =
+      axis === 'x' || (axis === null && Math.abs(dx) > Math.abs(dy) && Math.abs(dx) > 25);
+
+    if (
+      isHorizontalSwipe &&
+      (Math.abs(dx) >= SWIPE_DISTANCE || (Math.abs(dx) >= FLICK_DISTANCE && velocity >= FLICK_VELOCITY))
+    ) {
       ignoreNextClickRef.current = true;
-      setTimeout(() => { ignoreNextClickRef.current = false; }, 350);
-      setIsSwiping(false);
+      setTimeout(() => { ignoreNextClickRef.current = false; }, 400);
       if (dx > 0) {
         onResponse(true); // Mastered
       } else {
@@ -146,17 +202,20 @@ export default function StudyDeck({
       return;
     }
 
-    setIsSwiping(false);
-    // If it was a quick tap with minimal movement, flip card
-    if (Math.abs(dx) < 15 && Math.abs(dy) < 15 && elapsed < 350) {
+    // Quick tap with minimal movement flips card unless tap started on an interactive child button
+    if (!startedOnInteractive && Math.abs(dx) < 12 && Math.abs(dy) < 12 && elapsed < 350) {
       ignoreNextClickRef.current = true;
-      setTimeout(() => { ignoreNextClickRef.current = false; }, 350);
+      setTimeout(() => { ignoreNextClickRef.current = false; }, 400);
       setIsFlipped(prev => !prev);
     }
   };
 
+  const handleTouchCancel = () => {
+    resetGesture();
+  };
+
   const handleCardClick = () => {
-    if (ignoreNextClickRef.current || isSwiping) return;
+    if (ignoreNextClickRef.current || isDragging) return;
     setIsFlipped(prev => !prev);
   };
 
@@ -471,32 +530,41 @@ export default function StudyDeck({
 
           {/* 3D FLASHCARD CONTAINER WITH TOUCH SWIPE GESTURES */}
           <div className="relative min-h-[480px] sm:min-h-[520px] lg:min-h-[530px] w-full [perspective:1200px] mb-3 sm:mb-5 select-none">
-            <div 
+            {/* Outer Swipe Wrapper (keeps horizontal drag & badges upright even when flipped) */}
+            <div
+              ref={cardSwipeRef}
               onClick={handleCardClick}
               onTouchStart={handleTouchStart}
-              onTouchMove={handleTouchMove}
               onTouchEnd={handleTouchEnd}
+              onTouchCancel={handleTouchCancel}
               style={{
-                transformStyle: 'preserve-3d',
-                WebkitTransformStyle: 'preserve-3d',
-                transform: `${isFlipped ? 'rotateY(180deg)' : 'rotateY(0deg)'} ${
-                  touchOffset ? `translateX(${touchOffset}px) rotate(${touchOffset * 0.04}deg)` : ''
-                }`,
-                transition: touchOffset ? 'none' : 'transform 0.45s ease-in-out',
+                transform: touchOffset ? `translateX(${touchOffset}px) rotate(${touchOffset * 0.04}deg)` : 'translateX(0px)',
+                transition: isDragging ? 'none' : 'transform 0.25s ease-out',
               }}
               className="w-full min-h-[480px] sm:min-h-[520px] lg:min-h-[530px] relative cursor-pointer touch-pan-y"
             >
               {/* Dynamic On-Card Swipe Feedback Badges */}
-              {touchOffset > 30 && (
+              {touchOffset > 25 && (
                 <div className="absolute top-6 right-6 z-40 pointer-events-none bg-[#7BB33B] text-white font-sans font-bold text-xs sm:text-sm uppercase px-3.5 py-1.5 rounded-xl shadow-soft-lg rotate-6 animate-pulse">
                   ✓ Mastered →
                 </div>
               )}
-              {touchOffset < -30 && (
+              {touchOffset < -25 && (
                 <div className="absolute top-6 left-6 z-40 pointer-events-none bg-rose-600 text-white font-sans font-bold text-xs sm:text-sm uppercase px-3.5 py-1.5 rounded-xl shadow-soft-lg -rotate-6 animate-pulse">
                   ← Needs Review ✗
                 </div>
               )}
+
+              {/* Inner 3D Flip Container */}
+              <div
+                style={{
+                  transformStyle: 'preserve-3d',
+                  WebkitTransformStyle: 'preserve-3d',
+                  transform: isFlipped ? 'rotateY(180deg)' : 'rotateY(0deg)',
+                  transition: 'transform 0.45s ease-in-out',
+                }}
+                className="w-full min-h-[480px] sm:min-h-[520px] lg:min-h-[530px] relative"
+              >
 
               {/* FRONT OF CARD */}
               <div 
@@ -791,6 +859,7 @@ export default function StudyDeck({
                   </div>
                   <span className="text-xs font-bold uppercase text-[#7BB33B] shrink-0 ml-2">Explore ↗</span>
                 </div>
+              </div>
               </div>
             </div>
           </div>

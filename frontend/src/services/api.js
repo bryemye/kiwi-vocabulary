@@ -200,14 +200,105 @@ export async function logStudyAttempt({
 // Platform Core Magic Link Authentication APIs
 // --------------------------------------------------------------------------------
 
-export async function requestMagicLink(email) {
+const PENDING_AUTH_STORAGE_KEY = 'kiwi_pending_auth_session';
+const AUTH_SYNC_STORAGE_KEY = 'kiwi_auth_sync_event';
+const AUTH_BROADCAST_CHANNEL = 'kiwi-auth-sync';
+
+export function savePendingAuthSession(sessionId, email) {
+  if (!sessionId) return;
+  try {
+    localStorage.setItem(
+      PENDING_AUTH_STORAGE_KEY,
+      JSON.stringify({ sessionId: String(sessionId), email: email || '', createdAt: Date.now() })
+    );
+  } catch (e) {}
+}
+
+export function isMatchingPendingAuthSession(sessionId) {
+  if (!sessionId) return false;
+  try {
+    const raw = localStorage.getItem(PENDING_AUTH_STORAGE_KEY);
+    if (!raw) return false;
+    const parsed = JSON.parse(raw);
+    const maxAgeMs = 20 * 60 * 1000;
+    if (!parsed?.sessionId || Date.now() - (parsed.createdAt || 0) > maxAgeMs) {
+      localStorage.removeItem(PENDING_AUTH_STORAGE_KEY);
+      return false;
+    }
+    return String(parsed.sessionId) === String(sessionId);
+  } catch (e) {
+    return false;
+  }
+}
+
+export function clearPendingAuthSession() {
+  try {
+    localStorage.removeItem(PENDING_AUTH_STORAGE_KEY);
+  } catch (e) {}
+}
+
+export function broadcastAuthLogin(user) {
+  clearPendingAuthSession();
+  if (!user) return;
+  try {
+    if (typeof BroadcastChannel !== 'undefined') {
+      const ch = new BroadcastChannel(AUTH_BROADCAST_CHANNEL);
+      ch.postMessage({ type: 'AUTH_LOGIN', user });
+      ch.close();
+    }
+  } catch (e) {}
+  try {
+    localStorage.setItem(
+      AUTH_SYNC_STORAGE_KEY,
+      JSON.stringify({ type: 'AUTH_LOGIN', user, ts: Date.now() })
+    );
+  } catch (e) {}
+}
+
+export function subscribeAuthLogin(onLogin) {
+  if (typeof onLogin !== 'function') return () => {};
+  let channel = null;
+
+  try {
+    if (typeof BroadcastChannel !== 'undefined') {
+      channel = new BroadcastChannel(AUTH_BROADCAST_CHANNEL);
+      channel.onmessage = (event) => {
+        if (event?.data?.type === 'AUTH_LOGIN' && event.data.user) {
+          onLogin(event.data.user);
+        }
+      };
+    }
+  } catch (e) {}
+
+  const handleStorage = (event) => {
+    if (event.key !== AUTH_SYNC_STORAGE_KEY || !event.newValue) return;
+    try {
+      const parsed = JSON.parse(event.newValue);
+      if (parsed?.type === 'AUTH_LOGIN' && parsed.user) {
+        onLogin(parsed.user);
+      }
+    } catch (e) {}
+  };
+
+  window.addEventListener('storage', handleStorage);
+  return () => {
+    window.removeEventListener('storage', handleStorage);
+    if (channel) {
+      try {
+        channel.close();
+      } catch (e) {}
+    }
+  };
+}
+
+export async function requestMagicLink(email, { crossDevice = false } = {}) {
   const res = await fetch(`${API_BASE}/platform/auth/magic-link/`, {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
     },
     credentials: 'include',
-    body: JSON.stringify({ email }),
+    body: JSON.stringify({ email, cross_device: Boolean(crossDevice) }),
   });
 
   const data = await res.json().catch(() => ({}));

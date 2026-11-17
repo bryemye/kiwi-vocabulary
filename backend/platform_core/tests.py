@@ -18,11 +18,15 @@ class PlatformAuthTests(TestCase):
         response = self.client.post('/api/platform/auth/magic-link/', {'email': email}, format='json')
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertTrue(response.data.get('success'))
+        self.assertFalse(response.data.get('cross_device'))
+        self.assertIsNone(response.data.get('session_id'))
+        self.assertIsNone(response.data.get('match_code'))
 
         user = User.objects.filter(email=email).first()
         self.assertIsNotNone(user)
         self.assertFalse(user.has_usable_password())
         self.assertEqual(len(mail.outbox), 1)
+        self.assertNotIn('&sid=', mail.outbox[0].body)
 
     def test_verify_magic_link(self):
         email = "verify_student@example.com"
@@ -39,13 +43,24 @@ class PlatformAuthTests(TestCase):
         reused = self.client.post('/api/platform/auth/verify-magic-link/', {'token': token_record.token}, format='json')
         self.assertEqual(reused.status_code, status.HTTP_400_BAD_REQUEST)
 
+        # Check action recognizes already-authenticated user
+        check_authed = self.client.post('/api/platform/auth/verify-magic-link/', {
+            'token': token_record.token,
+            'action': 'check',
+        }, format='json')
+        self.assertEqual(check_authed.status_code, status.HTTP_200_OK)
+        self.assertTrue(check_authed.data.get('already_authenticated'))
+
     def test_cross_device_auth_flow(self):
         computer_client = APIClient()
         phone_client = APIClient()
 
         email = "cross_device_user@example.com"
-        # 1. Computer initiates magic link request
-        req_res = computer_client.post('/api/platform/auth/magic-link/', {'email': email}, format='json')
+        # 1. Computer initiates opt-in cross-device magic link request
+        req_res = computer_client.post('/api/platform/auth/magic-link/', {
+            'email': email,
+            'cross_device': True,
+        }, format='json')
         self.assertEqual(req_res.status_code, status.HTTP_200_OK)
         session_id = req_res.data.get('session_id')
         device_secret = req_res.data.get('device_secret')
@@ -93,17 +108,76 @@ class PlatformAuthTests(TestCase):
         self.assertEqual(final_poll.data['user']['email'], email)
         self.assertIn('sessionid', computer_client.cookies)
 
-        # 6. Computer can now call authenticated /me/ endpoint
+        # 6. Phone clicks "Also sign in on this phone" even AFTER desktop polled
+        phone_local_res = phone_client.post('/api/platform/auth/verify-magic-link/', {
+            'token': token_record.token,
+            'sid': session_id,
+            'action': 'verify',
+        }, format='json')
+        self.assertEqual(phone_local_res.status_code, status.HTTP_200_OK)
+        self.assertEqual(phone_local_res.data['email'], email)
+        self.assertIn('sessionid', phone_client.cookies)
+
+        # 7. Token cannot be replayed again after secondary phone claim
+        replay_res = APIClient().post('/api/platform/auth/verify-magic-link/', {
+            'token': token_record.token,
+            'sid': session_id,
+            'action': 'verify',
+        }, format='json')
+        self.assertEqual(replay_res.status_code, status.HTTP_400_BAD_REQUEST)
+
+        # 8. Computer can now call authenticated /me/ endpoint
         me_res = computer_client.get('/api/platform/auth/me/')
         self.assertEqual(me_res.status_code, status.HTTP_200_OK)
         self.assertEqual(me_res.data['email'], email)
+
+    def test_cross_device_phone_signs_in_before_desktop_poll(self):
+        computer_client = APIClient()
+        phone_client = APIClient()
+
+        email = "race_order_user@example.com"
+        req_res = computer_client.post('/api/platform/auth/magic-link/', {
+            'email': email,
+            'cross_device': True,
+        }, format='json')
+        session_id = req_res.data['session_id']
+        device_secret = req_res.data['device_secret']
+        token_record = MagicLoginToken.objects.get(session_id=session_id)
+
+        approve_res = phone_client.post('/api/platform/auth/verify-magic-link/', {
+            'token': token_record.token,
+            'sid': session_id,
+            'action': 'approve',
+        }, format='json')
+        self.assertEqual(approve_res.status_code, status.HTTP_200_OK)
+
+        # Phone immediately claims local sign-in BEFORE computer polls
+        phone_local = phone_client.post('/api/platform/auth/verify-magic-link/', {
+            'token': token_record.token,
+            'sid': session_id,
+            'action': 'verify',
+        }, format='json')
+        self.assertEqual(phone_local.status_code, status.HTTP_200_OK)
+        self.assertIn('sessionid', phone_client.cookies)
+
+        # Computer poll still succeeds
+        final_poll = computer_client.post('/api/platform/auth/poll-status/', {
+            'session_id': session_id,
+            'device_secret': device_secret,
+        }, format='json')
+        self.assertEqual(final_poll.status_code, status.HTTP_200_OK)
+        self.assertEqual(final_poll.data.get('status'), 'APPROVED')
+        self.assertIn('sessionid', computer_client.cookies)
 
     def test_cross_device_denial_flow(self):
         computer_client = APIClient()
         phone_client = APIClient()
 
         email = "denied_user@example.com"
-        req_res = computer_client.post('/api/platform/auth/magic-link/', {'email': email}, format='json')
+        req_res = computer_client.post('/api/platform/auth/magic-link/', {
+            'email': email,
+            'cross_device': True,
+        }, format='json')
         session_id = req_res.data['session_id']
         device_secret = req_res.data['device_secret']
 

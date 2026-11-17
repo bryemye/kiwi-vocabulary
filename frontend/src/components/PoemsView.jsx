@@ -352,6 +352,10 @@ export default function PoemsView({ onNavigateHome, initialPoemId, poemRestoreTa
     }
   };
 
+  const handleTouchCancel = () => {
+    touchStartRef.current = null;
+  };
+
   // Add Custom Poem Submission
   const handleSaveCustomPoem = (e) => {
     e.preventDefault();
@@ -444,6 +448,7 @@ export default function PoemsView({ onNavigateHome, initialPoemId, poemRestoreTa
         ref={cinemaContainerRef}
         onTouchStart={handleTouchStart}
         onTouchEnd={handleTouchEnd}
+        onTouchCancel={handleTouchCancel}
         className={`relative flex-1 flex flex-col items-center justify-center overflow-hidden bg-black transition-all touch-manipulation select-none ${
           isFullscreen ? 'h-screen w-screen' : 'min-h-[460px] sm:min-h-[640px] max-h-[85vh] sm:max-h-[820px] w-full'
         }`}

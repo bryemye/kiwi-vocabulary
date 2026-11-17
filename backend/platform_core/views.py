@@ -66,6 +66,12 @@ class RequestMagicLinkView(APIView):
         except ValidationError:
             return Response({'error': 'Please enter a valid email address.'}, status=status.HTTP_400_BAD_REQUEST)
 
+        raw_cross_device = request.data.get('cross_device', False)
+        if isinstance(raw_cross_device, str):
+            cross_device = raw_cross_device.strip().lower() in ('true', '1', 'yes')
+        else:
+            cross_device = bool(raw_cross_device)
+
         # 1. Registration & Login in One Flow
         user = User.objects.filter(email__iexact=email).first()
         if not user:
@@ -85,10 +91,10 @@ class RequestMagicLinkView(APIView):
         payload = f"{user.id}:{nonce}"
         token = signer.sign(payload)
 
-        # 3. Generate cross-device session pairing credentials
+        # 3. Generate optional cross-device session pairing credentials
         session_id = uuid.uuid4()
         device_secret = secrets.token_urlsafe(32)
-        match_code = str(secrets.randbelow(90) + 10)  # 2-digit confirmation code: 10 - 99
+        match_code = str(secrets.randbelow(90) + 10) if cross_device else ''
 
         MagicLoginToken.objects.create(
             user=user,
@@ -107,19 +113,28 @@ class RequestMagicLinkView(APIView):
         else:
             frontend_url = getattr(settings, 'FRONTEND_URL', 'http://localhost:5173').rstrip('/')
 
-        magic_link = f"{frontend_url}/auth/verify?token={token}&sid={session_id}"
+        if cross_device:
+            magic_link = f"{frontend_url}/auth/verify?token={token}&sid={session_id}"
+        else:
+            magic_link = f"{frontend_url}/auth/verify?token={token}"
 
         # 5. Dispatch email via configured EMAIL_BACKEND (Resend SMTP or Console)
-        send_magic_link_email(to_email=user.email, magic_link=magic_link, match_code=match_code)
+        send_magic_link_email(to_email=user.email, magic_link=magic_link, match_code=match_code or None)
 
-        print(f"\n{'='*80}\n[KIWI MAGIC LOGIN LINK] (DIRECT CLICK / SINGLE-LINE COPY):\n-> {magic_link}\n[MATCH CODE]: {match_code}\n{'='*80}\n", flush=True)
+        print(
+            f"\n{'='*80}\n[KIWI MAGIC LOGIN LINK] (DIRECT CLICK / SINGLE-LINE COPY):\n-> {magic_link}\n"
+            + (f"[MATCH CODE]: {match_code}\n" if match_code else "")
+            + f"{'='*80}\n",
+            flush=True
+        )
 
         return Response({
             "success": True,
             "message": "Login link sent to your email.",
-            "session_id": str(session_id),
-            "device_secret": device_secret,
-            "match_code": match_code,
+            "cross_device": cross_device,
+            "session_id": str(session_id) if cross_device else None,
+            "device_secret": device_secret if cross_device else None,
+            "match_code": match_code or None,
         }, status=status.HTTP_200_OK)
 
 
@@ -191,7 +206,7 @@ class PollMagicLinkStatusView(APIView):
                     }
                 }, status=status.HTTP_200_OK)
 
-        if token_record.status == 'CONSUMED':
+        if token_record.status in ('CONSUMED', 'FULLY_CONSUMED'):
             return Response({'status': 'CONSUMED', 'error': 'Session already completed.'}, status=status.HTTP_400_BAD_REQUEST)
 
         return Response({'status': token_record.status}, status=status.HTTP_200_OK)
@@ -246,6 +261,23 @@ class VerifyMagicLinkView(APIView):
 
         # 1. ACTION: CHECK (Mobile inspects request before approving)
         if action == 'check':
+            if request.user and request.user.is_authenticated and request.user.id == token_record.user_id:
+                return Response({
+                    "valid": True,
+                    "already_authenticated": True,
+                    "email": token_record.user.email,
+                    "match_code": token_record.match_code,
+                    "status": token_record.status,
+                    "session_id": str(token_record.session_id) if token_record.session_id else None,
+                    "user": {
+                        "id": token_record.user.id,
+                        "email": token_record.user.email,
+                        "username": token_record.user.username,
+                        "is_staff": bool(token_record.user.is_staff),
+                        "is_superuser": bool(token_record.user.is_superuser),
+                    },
+                }, status=status.HTTP_200_OK)
+
             if token_record.is_used and token_record.status != 'APPROVED':
                 return Response({'error': 'This login link has already been used.', 'status': token_record.status}, status=status.HTTP_400_BAD_REQUEST)
             return Response({
@@ -262,15 +294,22 @@ class VerifyMagicLinkView(APIView):
                 locked = MagicLoginToken.objects.select_for_update().get(id=token_record.id)
                 locked.status = 'DENIED'
                 locked.is_used = True
+                locked.match_code = ''
                 locked.used_at = timezone.now()
-                locked.save(update_fields=['status', 'is_used', 'used_at'])
+                locked.save(update_fields=['status', 'is_used', 'match_code', 'used_at'])
             return Response({"success": True, "message": "Sign-in request denied."}, status=status.HTTP_200_OK)
 
         # 3. ACTION: APPROVE (User confirms login from their phone)
         if action == 'approve':
             with transaction.atomic():
                 locked = MagicLoginToken.objects.select_for_update().get(id=token_record.id)
-                if locked.is_used and locked.status != 'PENDING':
+                if locked.status == 'APPROVED':
+                    return Response({
+                        "success": True,
+                        "cross_device": True,
+                        "message": "Authorized! Your computer will log in momentarily."
+                    }, status=status.HTTP_200_OK)
+                if locked.is_used or locked.status not in ('PENDING',):
                     return Response({'error': 'This request has already been processed or expired.'}, status=status.HTTP_400_BAD_REQUEST)
                 locked.status = 'APPROVED'
                 locked.save(update_fields=['status'])
@@ -283,13 +322,42 @@ class VerifyMagicLinkView(APIView):
         # 4. ACTION: VERIFY (Default / Same-Device Direct Login)
         with transaction.atomic():
             locked = MagicLoginToken.objects.select_for_update().get(id=token_record.id)
-            if locked.is_used:
+            matching_sid = bool(session_id and str(locked.session_id) == str(session_id))
+            secondary_before_poll = (
+                locked.status == 'APPROVED'
+                and not locked.is_used
+                and bool(locked.match_code)
+                and matching_sid
+            )
+            secondary_after_poll = (
+                locked.status == 'CONSUMED'
+                and bool(locked.match_code)
+                and matching_sid
+                and locked.used_at is not None
+                and (timezone.now() - locked.used_at).total_seconds() <= 300
+            )
+
+            if locked.is_used and not secondary_after_poll:
                 return Response({'error': 'This login link has already been used or is invalid.'}, status=status.HTTP_400_BAD_REQUEST)
 
-            locked.is_used = True
-            locked.status = 'CONSUMED'
-            locked.used_at = timezone.now()
-            locked.save(update_fields=['is_used', 'status', 'used_at'])
+            if secondary_before_poll:
+                # Phone signs in locally while keeping status='APPROVED' for the initiating device's poll
+                locked.is_used = True
+                locked.match_code = ''
+                locked.used_at = timezone.now()
+                locked.save(update_fields=['is_used', 'match_code', 'used_at'])
+            elif secondary_after_poll:
+                # Initiating device already polled; allow one secondary local login on the approving device
+                locked.is_used = True
+                locked.status = 'FULLY_CONSUMED'
+                locked.match_code = ''
+                locked.save(update_fields=['is_used', 'status', 'match_code'])
+            else:
+                locked.is_used = True
+                locked.status = 'CONSUMED'
+                locked.match_code = ''
+                locked.used_at = timezone.now()
+                locked.save(update_fields=['is_used', 'status', 'match_code', 'used_at'])
 
             user = locked.user
             admin_emails = [e.lower() for e in getattr(settings, 'ADMIN_EMAILS', [])]
