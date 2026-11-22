@@ -141,7 +141,7 @@ export default function EditorialReviewModal({
       const isVerified = Boolean(w.review?.verified);
       const isPublished = w.is_published !== false;
       if (filterMode === 'VERIFIED' && !isVerified) return false;
-      if (filterMode === 'UNREVIEWED' && isVerified) return false;
+      if (filterMode === 'UNREVIEWED' && (isVerified || !isPublished)) return false;
       if (filterMode === 'UNPUBLISHED' && isPublished) return false;
 
       if (!searchTerm.trim()) return true;
@@ -149,6 +149,11 @@ export default function EditorialReviewModal({
       return w.word?.toLowerCase().includes(q) || w.definition?.toLowerCase().includes(q);
     });
   }, [words, filterMode, searchTerm]);
+
+  const unreviewedCount = useMemo(
+    () => words.filter(w => !w.review?.verified && w.is_published !== false).length,
+    [words]
+  );
 
   const unpublishedCount = useMemo(
     () => words.filter(w => w.is_published === false).length,
@@ -523,7 +528,7 @@ export default function EditorialReviewModal({
                       : 'bg-[#FAFBF8] hover:bg-white text-[#62685E] border-gray-300'
                   }`}
                 >
-                  Unrev ({words.filter(w => !w.review?.verified).length})
+                  Unrev ({unreviewedCount})
                 </button>
                 <button
                   onClick={() => setFilterMode('VERIFIED')}
