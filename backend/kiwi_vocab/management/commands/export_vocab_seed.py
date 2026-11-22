@@ -49,6 +49,8 @@ class Command(BaseCommand):
                     "sat_sentence": w.sat_sentence,
                     "connotation": w.connotation,
                 }
+                if w.pronunciation:
+                    word_dict["pronunciation"] = w.pronunciation
                 if w.mnemonic:
                     word_dict["mnemonic"] = w.mnemonic
                 if not w.is_published:

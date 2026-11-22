@@ -649,7 +649,7 @@ export default function StudyDeck({
                   </h1>
                   {currentWord.pronunciation && (
                     <p className="text-stone-500 text-xs sm:text-sm mt-1 sm:mt-1.5 font-mono font-medium tracking-wide">
-                      /{currentWord.pronunciation}/
+                      {currentWord.pronunciation}
                     </p>
                   )}
                 </div>

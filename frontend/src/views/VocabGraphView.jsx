@@ -3174,7 +3174,7 @@ export default function VocabGraphView({
                   </div>
 
                   <div className="flex items-center space-x-2 mt-1.5 font-mono text-xs text-[#62685E]">
-                    <span>{selectedNode.data?.pronunciation || '/phonetic/'}</span>
+                    <span>{selectedNode.data?.pronunciation || 'phonetic'}</span>
                     <span>·</span>
                     <span className="uppercase font-bold">{selectedNode.data?.part_of_speech || 'word'}</span>
                   </div>

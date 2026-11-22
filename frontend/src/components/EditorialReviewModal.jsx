@@ -825,7 +825,7 @@ export default function EditorialReviewModal({
                     </div>
 
                     <div className="flex items-center space-x-2 mt-1.5 font-mono text-xs text-[#62685E] flex-wrap gap-y-1">
-                      <span>{activeWord.pronunciation || '/phonetic/'}</span>
+                      <span>{activeWord.pronunciation || 'phonetic'}</span>
                       <span>·</span>
                       <span className="uppercase font-bold">{activeWord.part_of_speech || 'word'}</span>
                       {activeWord.connotation && (
@@ -1083,7 +1083,7 @@ export default function EditorialReviewModal({
                           type="text"
                           value={wordFormData.pronunciation}
                           onChange={(e) => setWordFormData(prev => ({ ...prev, pronunciation: e.target.value }))}
-                          placeholder="/fəˈnɛtɪk/"
+                          placeholder="fuh-NET-ik"
                           className="w-full text-xs font-mono px-2.5 py-1.5 bg-white border-2 border-[#111410] focus:outline-none focus:ring-1 focus:ring-[#7BB33B]"
                         />
                       </div>

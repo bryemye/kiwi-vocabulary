@@ -7,6 +7,7 @@ from django.test import TestCase
 from rest_framework.test import APIClient
 from rest_framework import status
 from kiwi_vocab.models import Root, VocabularyWord
+from kiwi_vocab.phonetics import word_to_respelling
 from kiwi_vocab.review_utils import normalize_review_history
 
 User = get_user_model()
@@ -405,3 +406,57 @@ class KiwiVocabTests(TestCase):
         self.client.force_authenticate(user=regular_user)
         res_words_after = self.client.get('/api/vocab/words/')
         self.assertEqual(sorted(w['word'] for w in res_words_after.data), ['anachronism', 'chronic'])
+
+    def test_word_to_respelling_student_friendly_style(self):
+        self.assertEqual(word_to_respelling('audit'), 'AW-dit')
+        self.assertEqual(word_to_respelling('captivate'), 'KAP-tih-vayt')
+        self.assertEqual(word_to_respelling('susceptible', '/səˈsɛptəbəl/'), 'suh-SEP-tuh-buhl')
+        self.assertEqual(word_to_respelling('acclivity'), 'uh-KLIV-uh-tee')
+        # Falls back to IPA when word is not in CMUdict or overrides
+        self.assertEqual(word_to_respelling('customword', '/kəˈstʌmwɜːrd/'), 'kuh-STUM-wurd')
+
+    def test_update_phonetic_pronunciations_preserves_all_other_fields(self):
+        self.word1.pronunciation = '/əˈnækrənɪzəm/'
+        self.word1.mnemonic = 'ana (back) + chron (time)'
+        self.word1.review = {'verified': True, 'notes': 'Keep intact'}
+        self.word1.is_published = False
+        self.word1.save()
+
+        audit_root = Root.objects.create(morpheme='aud', language='Latin', core_meaning='hear')
+        audit_word = VocabularyWord.objects.create(
+            word='audit',
+            root=audit_root,
+            prefix='aud-',
+            suffix='',
+            definition='An official inspection of accounts.',
+            sat_sentence='The agency initiated an audit.',
+            connotation='negative',
+            part_of_speech='noun',
+            pronunciation='',
+        )
+
+        call_command('update_phonetic_pronunciations', skip_fixtures=True)
+
+        self.word1.refresh_from_db()
+        audit_word.refresh_from_db()
+
+        self.assertEqual(audit_word.pronunciation, 'AW-dit')
+        self.assertEqual(audit_word.definition, 'An official inspection of accounts.')
+        self.assertEqual(audit_word.sat_sentence, 'The agency initiated an audit.')
+        self.assertEqual(audit_word.prefix, 'aud-')
+        self.assertEqual(audit_word.connotation, 'negative')
+        self.assertEqual(audit_word.part_of_speech, 'noun')
+
+        self.assertEqual(self.word1.pronunciation, 'uh-NAK-ruh-niz-uhm')
+        self.assertEqual(self.word1.mnemonic, 'ana (back) + chron (time)')
+        self.assertEqual(self.word1.review, {'verified': True, 'notes': 'Keep intact'})
+        self.assertFalse(self.word1.is_published)
+
+        with tempfile.TemporaryDirectory() as tmpdir:
+            out_path = os.path.join(tmpdir, 'seed_pron.json')
+            call_command('export_vocab_seed', file=out_path)
+            with open(out_path, 'r', encoding='utf-8') as f:
+                exported = json.load(f)
+        words_by_name = {w['word']: w for r in exported for w in r['words']}
+        self.assertEqual(words_by_name['audit']['pronunciation'], 'AW-dit')
+        self.assertEqual(words_by_name['anachronism']['pronunciation'], 'uh-NAK-ruh-niz-uhm')

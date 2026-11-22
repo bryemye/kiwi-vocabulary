@@ -268,7 +268,7 @@ export default function MorphemeDetailView({
                 </h3>
                 {wordItem.pronunciation && (
                   <p className="text-xs font-mono font-medium text-stone-400 mt-0.5">
-                    /{wordItem.pronunciation}/
+                    {wordItem.pronunciation}
                   </p>
                 )}
 
