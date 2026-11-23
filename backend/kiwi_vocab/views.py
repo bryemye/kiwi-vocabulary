@@ -9,7 +9,7 @@ from rest_framework.response import Response
 import hashlib
 from django.core.cache import cache
 from django.utils import timezone
-from .models import Root, VocabularyWord
+from .models import Root, VocabularyWord, WordRoot
 from .review_utils import build_review_with_history
 from .serializers import (
     RootSerializer,
@@ -46,7 +46,12 @@ def get_daily_guest_deck(count=15, date_str=None):
     rng = random.Random(seed_val)
 
     # Fetch roots with their published words preloaded
-    published_words_qs = VocabularyWord.objects.filter(is_published=True)
+    published_words_qs = (
+        VocabularyWord.objects.filter(is_published=True)
+        .select_related('root', 'prefix_root', 'suffix_root')
+        .prefetch_related('word_roots__root')
+        .distinct()
+    )
     roots = list(
         Root.objects.prefetch_related(Prefetch('words', queryset=published_words_qs))
         .filter(words__is_published=True)
@@ -72,7 +77,8 @@ def get_daily_guest_deck(count=15, date_str=None):
         remaining_words = list(
             VocabularyWord.objects.filter(is_published=True)
             .exclude(id__in=used_word_ids)
-            .select_related('root')
+            .select_related('root', 'prefix_root', 'suffix_root')
+            .prefetch_related('word_roots__root')
         )
         rng.shuffle(remaining_words)
         selected_words.extend(remaining_words[:count - len(selected_words)])
@@ -117,42 +123,66 @@ def get_vocab_session_deck(queryset, user=None, count=15):
     if incorrect_ids:
         incorrect_qs = queryset.filter(id__in=incorrect_ids).order_by('?')
         for w in incorrect_qs[:count]:
-            deck.append(w)
-            deck_ids.add(w.id)
+            if w.id not in deck_ids:
+                deck.append(w)
+                deck_ids.add(w.id)
 
     # 2. Medium priority: unstudied words
     if len(deck) < count:
         remaining = count - len(deck)
         unstudied_qs = queryset.exclude(id__in=studied_ids).exclude(id__in=deck_ids).order_by('?')
         for w in unstudied_qs[:remaining]:
-            deck.append(w)
-            deck_ids.add(w.id)
+            if w.id not in deck_ids:
+                deck.append(w)
+                deck_ids.add(w.id)
 
     # 3. Low priority / fill: review words or random from base queryset
     if len(deck) < count:
         remaining = count - len(deck)
         fill_qs = queryset.exclude(id__in=deck_ids).order_by('?')
         for w in fill_qs[:remaining]:
-            deck.append(w)
-            deck_ids.add(w.id)
+            if w.id not in deck_ids:
+                deck.append(w)
+                deck_ids.add(w.id)
 
     # Final shuffle for natural variety
     random.shuffle(deck)
     return deck
 
 
-class RootViewSet(viewsets.ReadOnlyModelViewSet):
+class RootViewSet(viewsets.ModelViewSet):
     """
-    List and retrieve etymological roots with associated vocabulary word families.
+    List, retrieve, and (for staff) create/update etymological roots with associated vocabulary word families.
     Supports filtering by language, thematic_cluster, sat_tier, or search query.
     """
     queryset = Root.objects.all()
     serializer_class = RootSerializer
-    permission_classes = [permissions.AllowAny]
+
+    def get_permissions(self):
+        if self.action in ['create', 'update', 'partial_update', 'destroy']:
+            return [permissions.IsAdminUser()]
+        return [permissions.AllowAny()]
+
+    def perform_create(self, serializer):
+        instance = serializer.save()
+        today_str = timezone.now().strftime('%Y-%m-%d')
+        cache.delete(f"kiwi_daily_guest_deck_{today_str}_15")
+        return instance
+
+    def perform_update(self, serializer):
+        instance = serializer.save()
+        today_str = timezone.now().strftime('%Y-%m-%d')
+        cache.delete(f"kiwi_daily_guest_deck_{today_str}_15")
+        return instance
 
     def get_queryset(self):
         include_unpub = _should_include_unpublished(self.request)
-        word_qs = VocabularyWord.objects.all() if include_unpub else VocabularyWord.objects.filter(is_published=True)
+        base_word_qs = VocabularyWord.objects.all() if include_unpub else VocabularyWord.objects.filter(is_published=True)
+        word_qs = (
+            base_word_qs.select_related('root', 'prefix_root', 'suffix_root')
+            .prefetch_related('word_roots__root')
+            .distinct()
+        )
         queryset = Root.objects.prefetch_related(Prefetch('words', queryset=word_qs)).all()
         cluster = self.request.query_params.get('cluster') or self.request.query_params.get('thematic_cluster')
         tier = self.request.query_params.get('tier') or self.request.query_params.get('sat_tier')
@@ -178,7 +208,11 @@ class VocabularyWordViewSet(viewsets.ModelViewSet):
     Explore and filter vocabulary words by root, origin language, connotation, or search query.
     Allows staff/admin users to create, update, or patch word definitions, affixes, and metadata.
     """
-    queryset = VocabularyWord.objects.select_related('root').all()
+    queryset = (
+        VocabularyWord.objects.select_related('root', 'prefix_root', 'suffix_root')
+        .prefetch_related('word_roots__root')
+        .all()
+    )
     serializer_class = VocabularyWordSerializer
 
     def get_permissions(self):
@@ -206,9 +240,23 @@ class VocabularyWordViewSet(viewsets.ModelViewSet):
                     'verifiedBy': existing_review.get('verifiedBy') or 'Admin',
                     'notes': existing_review.get('notes') or '',
                 }
+            has_roots_field = 'roots' in serializer.validated_data
             changed_fields = []
             for field, new_val in serializer.validated_data.items():
                 if field in ('review', 'is_published'):
+                    continue
+                if field == 'root' and has_roots_field:
+                    continue
+                if field == 'roots':
+                    old_ids = [r.id for r in existing_instance.get_ordered_roots()]
+                    new_ids = []
+                    seen = set()
+                    for r in (new_val or []):
+                        if r and r.id not in seen:
+                            seen.add(r.id)
+                            new_ids.append(r.id)
+                    if old_ids != new_ids:
+                        changed_fields.append('roots')
                     continue
                 old_val = getattr(existing_instance, field, None)
                 if old_val != new_val:
@@ -254,13 +302,20 @@ class VocabularyWordViewSet(viewsets.ModelViewSet):
         connotation = self.request.query_params.get('connotation')
 
         if root_id:
-            queryset = queryset.filter(root_id=root_id)
+            queryset = queryset.filter(Q(root_id=root_id) | Q(roots__id=root_id)).distinct()
         if language and language.upper() != 'ALL':
-            queryset = queryset.filter(root__language__icontains=language.strip())
+            lang = language.strip()
+            queryset = queryset.filter(
+                Q(root__language__icontains=lang) | Q(roots__language__icontains=lang)
+            ).distinct()
         if cluster and cluster.upper() != 'ALL':
-            queryset = queryset.filter(root__thematic_cluster__iexact=cluster)
+            queryset = queryset.filter(
+                Q(root__thematic_cluster__iexact=cluster) | Q(roots__thematic_cluster__iexact=cluster)
+            ).distinct()
         if tier and tier.upper() != 'ALL':
-            queryset = queryset.filter(root__sat_tier__iexact=tier)
+            queryset = queryset.filter(
+                Q(root__sat_tier__iexact=tier) | Q(roots__sat_tier__iexact=tier)
+            ).distinct()
         if prefix:
             queryset = queryset.filter(prefix__icontains=prefix.strip())
         if suffix:
@@ -272,8 +327,11 @@ class VocabularyWordViewSet(viewsets.ModelViewSet):
                 Q(definition__icontains=search) |
                 Q(prefix__icontains=search) |
                 Q(suffix__icontains=search) |
-                Q(root__morpheme__icontains=search)
-            )
+                Q(root__morpheme__icontains=search) |
+                Q(roots__morpheme__icontains=search) |
+                Q(prefix_root__morpheme__icontains=search) |
+                Q(suffix_root__morpheme__icontains=search)
+            ).distinct()
         if connotation:
             queryset = queryset.filter(connotation=connotation)
 
@@ -341,15 +399,22 @@ class VocabSessionView(APIView):
             return Response(serializer.data)
 
         # Otherwise, prepare filtered queryset (published words only)
-        qs = VocabularyWord.objects.filter(is_published=True).select_related('root')
+        qs = (
+            VocabularyWord.objects.filter(is_published=True)
+            .select_related('root', 'prefix_root', 'suffix_root')
+            .prefetch_related('word_roots__root')
+        )
         root_id = request.query_params.get('root')
         language = request.query_params.get('language')
         prefix = request.query_params.get('prefix')
         suffix = request.query_params.get('suffix')
         if root_id:
-            qs = qs.filter(root_id=root_id)
+            qs = qs.filter(Q(root_id=root_id) | Q(roots__id=root_id)).distinct()
         if language and language.upper() != 'ALL':
-            qs = qs.filter(root__language__icontains=language.strip())
+            lang = language.strip()
+            qs = qs.filter(
+                Q(root__language__icontains=lang) | Q(roots__language__icontains=lang)
+            ).distinct()
         if prefix:
             qs = qs.filter(prefix__icontains=prefix.strip())
         if suffix:
@@ -370,12 +435,19 @@ def build_root_mastery_stats(vocab_logs):
     """
     Aggregate root-level mastery, accuracy, attempt counts, and most recent
     study timestamp (`last_worked_at`) from a StudyLog queryset of vocabulary logs.
+    Multi-root words contribute to each root in their `roots` relationship (excluding
+    affix cross-links `prefix_root` / `suffix_root`).
     """
     roots = list(
         Root.objects.prefetch_related(
-            Prefetch('words', queryset=VocabularyWord.objects.filter(is_published=True))
+            Prefetch('words', queryset=VocabularyWord.objects.filter(is_published=True).distinct())
         ).all()
     )
+
+    word_to_root_ids = {}
+    for w_id, r_id in WordRoot.objects.filter(word__is_published=True).values_list('word_id', 'root_id'):
+        word_to_root_ids.setdefault(w_id, []).append(r_id)
+
     published_logs = vocab_logs.filter(word__is_published=True) if hasattr(vocab_logs, 'filter') else vocab_logs
     vocab_log_entries = (
         list(
@@ -393,10 +465,15 @@ def build_root_mastery_stats(vocab_logs):
 
     for entry in vocab_log_entries:
         w_id = entry['word_id']
-        r_id = entry['word__root_id']
+        fallback_r_id = entry['word__root_id']
         created_at = entry['created_at']
         latest_word_mastery[w_id] = bool(entry['is_correct'])
-        if r_id:
+
+        target_root_ids = word_to_root_ids.get(w_id)
+        if not target_root_ids:
+            target_root_ids = [fallback_r_id] if fallback_r_id else []
+
+        for r_id in target_root_ids:
             root_attempts[r_id] = root_attempts.get(r_id, 0) + 1
             if entry['is_correct']:
                 root_correct[r_id] = root_correct.get(r_id, 0) + 1
@@ -405,7 +482,12 @@ def build_root_mastery_stats(vocab_logs):
 
     root_mastery_list = []
     for root in roots:
-        root_words = root.words.all()
+        seen_w_ids = set()
+        root_words = []
+        for w in root.words.all():
+            if w.id not in seen_w_ids:
+                seen_w_ids.add(w.id)
+                root_words.append(w)
         total_root_words = len(root_words)
         r_attempts = root_attempts.get(root.id, 0)
         r_corr = root_correct.get(root.id, 0)

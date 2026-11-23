@@ -21,12 +21,14 @@ class Command(BaseCommand):
         mode = "DRY-RUN" if dry_run else "APPLYING"
         self.stdout.write(f"Scanning vocabulary words [{mode}]...")
 
-        words = VocabularyWord.objects.select_related("root").all()
+        words = VocabularyWord.objects.select_related("root").prefetch_related("word_roots__root").all()
         to_update = []
 
         for word_obj in words:
-            root_morpheme = word_obj.root.morpheme if word_obj.root else ""
-            new_prefix = _classify_prefix(word_obj.word, root_morpheme, word_obj.prefix)
+            if word_obj.prefix_root_id:
+                continue
+            root_morphemes = " / ".join(r.morpheme for r in word_obj.get_ordered_roots() if r.morpheme)
+            new_prefix = _classify_prefix(word_obj.word, root_morphemes, word_obj.prefix)
             if new_prefix is not None:
                 to_update.append((word_obj, word_obj.prefix, new_prefix))
 

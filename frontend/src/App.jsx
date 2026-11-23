@@ -274,20 +274,31 @@ export default function App() {
     );
   }, []);
 
-  // Reactive handler for full word updates (lexical definition, affixes, sentence, etc.)
+  // Reactive handler for full word updates (lexical definition, affixes, roots, sentence, etc.)
   const handleUpdateWord = useCallback((updatedWord) => {
     if (!updatedWord || !updatedWord.id) return;
     setWords((prev) =>
       prev.map((w) => (w.id === updatedWord.id ? { ...w, ...updatedWord } : w))
     );
-    setRoots((prev) =>
-      prev.map((r) => ({
-        ...r,
-        words: (r.words || []).map((w) =>
-          w.id === updatedWord.id ? { ...w, ...updatedWord } : w
-        ),
-      }))
-    );
+    setRoots((prev) => {
+      const targetRootIds = new Set(
+        Array.isArray(updatedWord.roots) && updatedWord.roots.length > 0
+          ? updatedWord.roots.map(Number)
+          : (updatedWord.roots_details?.length
+              ? updatedWord.roots_details.map((r) => Number(r.id))
+              : (updatedWord.root ? [Number(updatedWord.root)] : []))
+      );
+
+      return prev.map((r) => {
+        const existingEntry = (r.words || []).find((w) => w.id === updatedWord.id);
+        const remainingWords = (r.words || []).filter((w) => w.id !== updatedWord.id);
+        if (targetRootIds.has(Number(r.id))) {
+          const mergedWord = existingEntry ? { ...existingEntry, ...updatedWord } : updatedWord;
+          return { ...r, words: [...remainingWords, mergedWord] };
+        }
+        return existingEntry ? { ...r, words: remainingWords } : r;
+      });
+    });
     setPreloadedDeck((prev) => {
       const next = prev
         .map((w) => (w.id === updatedWord.id ? { ...w, ...updatedWord } : w))
@@ -298,6 +309,15 @@ export default function App() {
       return next;
     });
   }, [user?.id]);
+
+  // Reactive handler when staff creates a new Root inline from Edit Lexicon
+  const handleCreateRoot = useCallback((createdRoot) => {
+    if (!createdRoot || !createdRoot.id) return;
+    setRoots((prev) => {
+      if (prev.some((r) => Number(r.id) === Number(createdRoot.id))) return prev;
+      return [...prev, { ...createdRoot, words: createdRoot.words || [] }];
+    });
+  }, []);
 
   // Sync state whenever URL hash or browser history changes
   useEffect(() => {
@@ -689,6 +709,7 @@ export default function App() {
         roots={roots}
         onUpdateWordReview={handleUpdateWordReview}
         onUpdateWord={handleUpdateWord}
+        onCreateRoot={handleCreateRoot}
       />
 
       {/* Error notification banner if API is unreachable */}
@@ -754,6 +775,7 @@ export default function App() {
             isAdminMode={effectiveAdminMode}
             onUpdateWordReview={handleUpdateWordReview}
             onUpdateWord={handleUpdateWord}
+            onCreateRoot={handleCreateRoot}
             externalMorphemeView={externalMorphemeView}
             onClearExternalMorphemeView={() => setExternalMorphemeView(null)}
             trajectoryRestoreTarget={trajectoryRestoreTarget}

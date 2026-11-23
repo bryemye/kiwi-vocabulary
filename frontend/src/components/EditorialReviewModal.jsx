@@ -17,7 +17,11 @@ import {
   History,
   Clock,
   Eye,
-  EyeOff
+  EyeOff,
+  Plus,
+  ArrowUp,
+  ArrowDown,
+  Link2
 } from 'lucide-react';
 import {
   saveWordReview,
@@ -27,8 +31,65 @@ import {
   normalizeHistoryEntries,
   getAllVerificationHistory,
 } from '../services/editorialService';
-import { updateVocabularyWord } from '../services/api';
+import { updateVocabularyWord, createRoot } from '../services/api';
 import VerificationHistoryList from './VerificationHistoryList';
+
+const ROOT_LANGUAGES = [
+  'Latin',
+  'Greek',
+  'French',
+  'Old French',
+  'German',
+  'Old English',
+  'Old Norse',
+  'Arabic',
+  'Sanskrit',
+  'Tamil / Indian',
+  'Latin / Greek',
+  'Greek / Latin',
+  'Latin / Old French',
+  'Old English / Old Norse',
+];
+
+const ROOT_CLUSTERS = [
+  'Motion & Travel',
+  'Force & Transformation',
+  'Position & Holding',
+  'Senses & Perception',
+  'Communication',
+  'Cognition',
+  'Emotion',
+  'Power & Conflict',
+  'Law & Morality',
+  'Form & Nature',
+  'Quantity & Relation',
+];
+
+const ROOT_TIERS = [
+  'Tier 1 High-Yield',
+  'Tier 2 Multipliers',
+  'Tier 3 Advanced',
+];
+
+function extractInitialRootIds(wordObj) {
+  if (!wordObj) return [];
+  if (Array.isArray(wordObj.roots) && wordObj.roots.length > 0) {
+    return wordObj.roots.map(Number).filter((id) => !Number.isNaN(id) && id > 0);
+  }
+  if (Array.isArray(wordObj.roots_details) && wordObj.roots_details.length > 0) {
+    return wordObj.roots_details.map((r) => Number(r?.id)).filter((id) => !Number.isNaN(id) && id > 0);
+  }
+  const single = Number(wordObj.root || wordObj.root_details?.id);
+  return single && !Number.isNaN(single) ? [single] : [];
+}
+
+function formatRootAffixLabel(rootObj, kind) {
+  if (!rootObj) return '';
+  const morph = String(rootObj.morpheme || '').split('/')[0].trim().toLowerCase();
+  const meaning = String(rootObj.core_meaning || '').trim();
+  const token = kind === 'prefix' ? `${morph}-` : `-${morph}`;
+  return meaning ? `${token} (${meaning})` : token;
+}
 
 export default function EditorialReviewModal({
   isOpen,
@@ -38,7 +99,8 @@ export default function EditorialReviewModal({
   initialWord = null,
   initialTab = 'LEXICON',
   onSaveReview,
-  onUpdateWord
+  onUpdateWord,
+  onCreateRoot
 }) {
   const [selectedWordName, setSelectedWordName] = useState(() => {
     if (initialWord) {
@@ -63,14 +125,30 @@ export default function EditorialReviewModal({
   const [wordFormData, setWordFormData] = useState({
     word: '',
     prefix: '',
+    prefixMode: 'custom',
+    prefixRoot: '',
     suffix: '',
-    root: '',
+    suffixMode: 'custom',
+    suffixRoot: '',
+    roots: [],
     mnemonic: '',
     definition: '',
     sat_sentence: '',
     connotation: 'neutral',
     part_of_speech: 'adjective',
     pronunciation: '',
+  });
+  const [rootToAddId, setRootToAddId] = useState('');
+  const [rootPickerFilter, setRootPickerFilter] = useState('');
+  const [showNewRootForm, setShowNewRootForm] = useState(false);
+  const [isCreatingRoot, setIsCreatingRoot] = useState(false);
+  const [newRootForm, setNewRootForm] = useState({
+    morpheme: '',
+    language: 'Latin',
+    core_meaning: '',
+    mnemonic: '',
+    thematic_cluster: 'Motion & Travel',
+    sat_tier: 'Tier 1 High-Yield',
   });
   const [saveToast, setSaveToast] = useState(null);
 
@@ -109,11 +187,17 @@ export default function EditorialReviewModal({
         notes: rev?.notes || '',
         verifiedBy: rev?.verifiedBy || 'Admin'
       });
+      const prefixRootId = activeWord.prefix_root || activeWord.prefix_root_details?.id || '';
+      const suffixRootId = activeWord.suffix_root || activeWord.suffix_root_details?.id || '';
       setWordFormData({
         word: activeWord.word || '',
         prefix: activeWord.prefix || '',
+        prefixMode: prefixRootId ? 'root' : 'custom',
+        prefixRoot: prefixRootId ? String(prefixRootId) : '',
         suffix: activeWord.suffix || '',
-        root: activeWord.root || activeWord.root_details?.id || '',
+        suffixMode: suffixRootId ? 'root' : 'custom',
+        suffixRoot: suffixRootId ? String(suffixRootId) : '',
+        roots: extractInitialRootIds(activeWord),
         mnemonic: activeWord.mnemonic || '',
         definition: activeWord.definition || '',
         sat_sentence: activeWord.sat_sentence || '',
@@ -121,6 +205,8 @@ export default function EditorialReviewModal({
         part_of_speech: activeWord.part_of_speech || 'adjective',
         pronunciation: activeWord.pronunciation || '',
       });
+      setRootToAddId('');
+      setRootPickerFilter('');
     }
   }, [activeWord]);
 
@@ -185,6 +271,31 @@ export default function EditorialReviewModal({
       );
     });
   }, [allHistoryEvents, historyActionFilter, historySearch]);
+
+  const sortedRoots = useMemo(() => {
+    return [...roots].sort((a, b) => (a.morpheme || '').localeCompare(b.morpheme || ''));
+  }, [roots]);
+
+  const attachedRootObjects = useMemo(() => {
+    const byId = new Map(roots.map((r) => [Number(r.id), r]));
+    return (wordFormData.roots || [])
+      .map((id) => byId.get(Number(id)))
+      .filter(Boolean);
+  }, [roots, wordFormData.roots]);
+
+  const availableRootsToAdd = useMemo(() => {
+    const attached = new Set((wordFormData.roots || []).map(Number));
+    const q = rootPickerFilter.trim().toLowerCase();
+    return sortedRoots.filter((r) => {
+      if (attached.has(Number(r.id))) return false;
+      if (!q) return true;
+      return (
+        (r.morpheme || '').toLowerCase().includes(q) ||
+        (r.core_meaning || '').toLowerCase().includes(q) ||
+        (r.language || '').toLowerCase().includes(q)
+      );
+    });
+  }, [sortedRoots, wordFormData.roots, rootPickerFilter]);
 
   if (!isOpen) return null;
 
@@ -342,14 +453,136 @@ export default function EditorialReviewModal({
     }
   };
 
+  const handleAddRoot = (rootIdToAdd) => {
+    const numId = Number(rootIdToAdd);
+    if (!numId || Number.isNaN(numId)) return;
+    setWordFormData((prev) => {
+      if (prev.roots.includes(numId)) return prev;
+      return { ...prev, roots: [...prev.roots, numId] };
+    });
+    setRootToAddId('');
+  };
+
+  const handleRemoveRoot = (rootIdToRemove) => {
+    setWordFormData((prev) => {
+      if (prev.roots.length <= 1) return prev;
+      return {
+        ...prev,
+        roots: prev.roots.filter((id) => Number(id) !== Number(rootIdToRemove)),
+      };
+    });
+  };
+
+  const handleMoveRoot = (index, direction) => {
+    setWordFormData((prev) => {
+      const targetIdx = index + direction;
+      if (targetIdx < 0 || targetIdx >= prev.roots.length) return prev;
+      const nextRoots = [...prev.roots];
+      const [moved] = nextRoots.splice(index, 1);
+      nextRoots.splice(targetIdx, 0, moved);
+      return { ...prev, roots: nextRoots };
+    });
+  };
+
+  const handleSelectAffixRoot = (kind, rootIdStr) => {
+    const chosenRoot = roots.find((r) => Number(r.id) === Number(rootIdStr));
+    if (kind === 'prefix') {
+      setWordFormData((prev) => {
+        const prevRoot = roots.find((r) => Number(r.id) === Number(prev.prefixRoot));
+        const prevAuto = prevRoot ? formatRootAffixLabel(prevRoot, 'prefix') : '';
+        const shouldAutoFill = !prev.prefix.trim() || prev.prefix.trim() === prevAuto;
+        return {
+          ...prev,
+          prefixMode: 'root',
+          prefixRoot: rootIdStr,
+          prefix: chosenRoot && shouldAutoFill ? formatRootAffixLabel(chosenRoot, 'prefix') : prev.prefix,
+        };
+      });
+    } else {
+      setWordFormData((prev) => {
+        const prevRoot = roots.find((r) => Number(r.id) === Number(prev.suffixRoot));
+        const prevAuto = prevRoot ? formatRootAffixLabel(prevRoot, 'suffix') : '';
+        const shouldAutoFill = !prev.suffix.trim() || prev.suffix.trim() === prevAuto;
+        return {
+          ...prev,
+          suffixMode: 'root',
+          suffixRoot: rootIdStr,
+          suffix: chosenRoot && shouldAutoFill ? formatRootAffixLabel(chosenRoot, 'suffix') : prev.suffix,
+        };
+      });
+    }
+  };
+
+  const handleCreateInlineRoot = async () => {
+    const morpheme = newRootForm.morpheme.trim();
+    const coreMeaning = newRootForm.core_meaning.trim();
+    if (!morpheme || !coreMeaning || isCreatingRoot) return;
+    setIsCreatingRoot(true);
+    try {
+      const created = await createRoot({
+        morpheme,
+        language: newRootForm.language || 'Latin',
+        core_meaning: coreMeaning,
+        mnemonic: newRootForm.mnemonic.trim(),
+        thematic_cluster: newRootForm.thematic_cluster,
+        sat_tier: newRootForm.sat_tier,
+      });
+      if (onCreateRoot) {
+        onCreateRoot(created);
+      }
+      if (created?.id) {
+        setWordFormData((prev) => ({
+          ...prev,
+          roots: prev.roots.includes(Number(created.id)) ? prev.roots : [...prev.roots, Number(created.id)],
+        }));
+      }
+      setShowNewRootForm(false);
+      setNewRootForm({
+        morpheme: '',
+        language: 'Latin',
+        core_meaning: '',
+        mnemonic: '',
+        thematic_cluster: 'Motion & Travel',
+        sat_tier: 'Tier 1 High-Yield',
+      });
+      setSaveToast(`Created & attached root [${created.morpheme.toUpperCase()}]!`);
+      setTimeout(() => setSaveToast(null), 3000);
+    } catch (err) {
+      alert(`Failed to create root: ${err.message}`);
+    } finally {
+      setIsCreatingRoot(false);
+    }
+  };
+
   const handleSaveWordDetails = async (moveToNext = false) => {
     if (!activeWord || isSavingWord) return;
+    const normalizedRoots = (wordFormData.roots || []).map(Number).filter((id) => !Number.isNaN(id) && id > 0);
+    if (normalizedRoots.length === 0) {
+      alert('A vocabulary word must have at least one root.');
+      return;
+    }
+
+    const effectivePrefixRoot =
+      wordFormData.prefixMode === 'root' && wordFormData.prefixRoot
+        ? Number(wordFormData.prefixRoot)
+        : null;
+    const effectiveSuffixRoot =
+      wordFormData.suffixMode === 'root' && wordFormData.suffixRoot
+        ? Number(wordFormData.suffixRoot)
+        : null;
+
     setIsSavingWord(true);
     try {
+      const oldRoots = extractInitialRootIds(activeWord);
+      const oldPrefixRoot = activeWord.prefix_root || activeWord.prefix_root_details?.id || null;
+      const oldSuffixRoot = activeWord.suffix_root || activeWord.suffix_root_details?.id || null;
+
       const changedFields = [];
       if ((wordFormData.prefix || '').trim() !== (activeWord.prefix || '').trim()) changedFields.push('prefix');
+      if (effectivePrefixRoot !== (oldPrefixRoot ? Number(oldPrefixRoot) : null)) changedFields.push('prefix_root');
       if ((wordFormData.suffix || '').trim() !== (activeWord.suffix || '').trim()) changedFields.push('suffix');
-      if (Number(wordFormData.root) !== Number(activeWord.root || activeWord.root_details?.id)) changedFields.push('root');
+      if (effectiveSuffixRoot !== (oldSuffixRoot ? Number(oldSuffixRoot) : null)) changedFields.push('suffix_root');
+      if (JSON.stringify(normalizedRoots) !== JSON.stringify(oldRoots)) changedFields.push('roots');
       if ((wordFormData.mnemonic || '').trim() !== (activeWord.mnemonic || '').trim()) changedFields.push('mnemonic');
       if ((wordFormData.definition || '').trim() !== (activeWord.definition || '').trim()) changedFields.push('definition');
       if ((wordFormData.sat_sentence || '').trim() !== (activeWord.sat_sentence || '').trim()) changedFields.push('sat_sentence');
@@ -382,8 +615,11 @@ export default function EditorialReviewModal({
       const payload = {
         word: (wordFormData.word || '').trim(),
         prefix: (wordFormData.prefix || '').trim(),
+        prefix_root: effectivePrefixRoot,
         suffix: (wordFormData.suffix || '').trim(),
-        root: Number(wordFormData.root),
+        suffix_root: effectiveSuffixRoot,
+        root: normalizedRoots[0],
+        roots: normalizedRoots,
         mnemonic: (wordFormData.mnemonic || '').trim(),
         definition: (wordFormData.definition || '').trim(),
         sat_sentence: (wordFormData.sat_sentence || '').trim(),
@@ -423,7 +659,8 @@ export default function EditorialReviewModal({
   };
 
   const parentRoot =
-    roots.find(r => r.id === Number(wordFormData.root)) ||
+    attachedRootObjects[0] ||
+    activeWord?.roots_details?.[0] ||
     activeWord?.root_details ||
     roots.find(r => r.id === activeWord?.root);
 
@@ -921,55 +1158,306 @@ export default function EditorialReviewModal({
                       </span>
                     </div>
 
-                    {/* Morpheme Formula Row: Prefix, Root, Suffix */}
-                    <div>
-                      <span className="text-[10px] font-mono font-black uppercase text-[#62685E] block mb-1">
+                    {/* Morpheme Formula Row: Multi-Root + Custom/Root-Linked Prefix & Suffix */}
+                    <div className="space-y-3">
+                      <span className="text-[10px] font-mono font-black uppercase text-[#62685E] block">
                         Morpheme Formula Deconstruction
                       </span>
-                      <div className="grid grid-cols-1 sm:grid-cols-3 gap-2.5">
-                        {/* Prefix Input */}
-                        <div>
-                          <label className="text-[9px] font-mono font-bold uppercase text-[#42281D] block mb-0.5">
-                            Prefix (with gloss)
+
+                      {/* Ordered Multi-Root Manager */}
+                      <div className="bg-white border-2 border-[#111410] p-3 space-y-2.5">
+                        <div className="flex items-center justify-between gap-2 flex-wrap">
+                          <label className="text-[9px] font-mono font-black uppercase text-[#42281D]">
+                            Root Families ({attachedRootObjects.length} attached · #1 = Primary)
                           </label>
-                          <input
-                            type="text"
-                            value={wordFormData.prefix}
-                            onChange={(e) => setWordFormData(prev => ({ ...prev, prefix: e.target.value }))}
-                            placeholder="e.g. dis- (apart, away)"
-                            className="w-full text-xs font-mono px-2.5 py-1.5 bg-white border-2 border-[#111410] focus:outline-none focus:ring-1 focus:ring-[#7BB33B]"
-                          />
+                          <button
+                            type="button"
+                            onClick={() => setShowNewRootForm((prev) => !prev)}
+                            className="inline-flex items-center space-x-1 px-2 py-0.5 bg-[#EDF5E5] hover:bg-[#DCEDD0] text-[#2F441E] border border-[#111410] text-[10px] font-mono font-black uppercase transition"
+                          >
+                            <Plus className="w-3 h-3" />
+                            <span>{showNewRootForm ? 'Cancel New Root' : 'New Root'}</span>
+                          </button>
                         </div>
 
-                        {/* Root Dropdown */}
-                        <div>
-                          <label className="text-[9px] font-mono font-bold uppercase text-[#42281D] block mb-0.5">
-                            Root Family
-                          </label>
+                        {/* Attached Roots Ordered List */}
+                        <div className="space-y-1.5">
+                          {attachedRootObjects.map((r, idx) => (
+                            <div
+                              key={r.id}
+                              className="flex items-center justify-between gap-2 px-2.5 py-1.5 bg-[#EFE8DF]/70 border border-[#111410]"
+                            >
+                              <div className="flex items-center space-x-2 min-w-0">
+                                <span className={`px-1.5 py-0.5 text-[9px] font-mono font-black uppercase border border-[#111410] shrink-0 ${
+                                  idx === 0 ? 'bg-[#7BB33B] text-white' : 'bg-white text-[#42281D]'
+                                }`}>
+                                  {idx === 0 ? '#1 Primary' : `#${idx + 1}`}
+                                </span>
+                                <span className="font-mono text-xs font-black text-[#42281D] shrink-0">
+                                  [{r.morpheme.toUpperCase()}]
+                                </span>
+                                <span className="text-[11px] font-mono text-[#62685E] truncate">
+                                  ({r.language} · {r.core_meaning})
+                                </span>
+                              </div>
+                              <div className="flex items-center space-x-1 shrink-0">
+                                <button
+                                  type="button"
+                                  onClick={() => handleMoveRoot(idx, -1)}
+                                  disabled={idx === 0}
+                                  className="p-1 bg-white border border-[#111410] disabled:opacity-35 hover:bg-[#FAFBF8]"
+                                  title="Move root earlier"
+                                >
+                                  <ArrowUp className="w-3 h-3" />
+                                </button>
+                                <button
+                                  type="button"
+                                  onClick={() => handleMoveRoot(idx, 1)}
+                                  disabled={idx === attachedRootObjects.length - 1}
+                                  className="p-1 bg-white border border-[#111410] disabled:opacity-35 hover:bg-[#FAFBF8]"
+                                  title="Move root later"
+                                >
+                                  <ArrowDown className="w-3 h-3" />
+                                </button>
+                                <button
+                                  type="button"
+                                  onClick={() => handleRemoveRoot(r.id)}
+                                  disabled={attachedRootObjects.length <= 1}
+                                  className="p-1 bg-white border border-[#111410] text-[#991B1B] disabled:opacity-35 hover:bg-[#FDF2F2]"
+                                  title={attachedRootObjects.length <= 1 ? 'At least 1 root is required' : 'Remove root from word'}
+                                >
+                                  <X className="w-3 h-3" />
+                                </button>
+                              </div>
+                            </div>
+                          ))}
+                        </div>
+
+                        {/* Add Another Root Picker */}
+                        <div className="flex flex-col sm:flex-row gap-2 pt-1">
+                          <input
+                            type="text"
+                            value={rootPickerFilter}
+                            onChange={(e) => setRootPickerFilter(e.target.value)}
+                            placeholder="Filter roots to add..."
+                            className="sm:w-44 text-xs font-mono px-2.5 py-1.5 bg-[#FAFBF8] border border-[#111410] focus:outline-none focus:ring-1 focus:ring-[#7BB33B]"
+                          />
                           <select
-                            value={wordFormData.root}
-                            onChange={(e) => setWordFormData(prev => ({ ...prev, root: e.target.value }))}
-                            className="w-full text-xs font-mono px-2 py-1.5 bg-white border-2 border-[#111410] focus:outline-none focus:ring-1 focus:ring-[#7BB33B]"
+                            value={rootToAddId}
+                            onChange={(e) => setRootToAddId(e.target.value)}
+                            className="flex-1 text-xs font-mono px-2 py-1.5 bg-[#FAFBF8] border border-[#111410] focus:outline-none focus:ring-1 focus:ring-[#7BB33B]"
                           >
-                            {roots.map(r => (
+                            <option value="">-- Select another root to add ({availableRootsToAdd.length}) --</option>
+                            {availableRootsToAdd.map((r) => (
                               <option key={r.id} value={r.id}>
                                 [{r.morpheme.toUpperCase()}] ({r.language} · {r.core_meaning})
                               </option>
                             ))}
                           </select>
+                          <button
+                            type="button"
+                            onClick={() => handleAddRoot(rootToAddId)}
+                            disabled={!rootToAddId}
+                            className="px-3 py-1.5 bg-[#111410] hover:bg-[#2F441E] text-white text-[11px] font-mono font-black uppercase border border-[#111410] disabled:opacity-40 inline-flex items-center justify-center space-x-1 shrink-0"
+                          >
+                            <Plus className="w-3.5 h-3.5" />
+                            <span>Add Root</span>
+                          </button>
                         </div>
 
-                        {/* Suffix Input */}
-                        <div>
-                          <label className="text-[9px] font-mono font-bold uppercase text-[#42281D] block mb-0.5">
-                            Suffix (with gloss)
-                          </label>
+                        {/* Inline Quick-Create Root Form */}
+                        {showNewRootForm && (
+                          <div className="p-3 bg-[#EDF5E5]/60 border-2 border-[#111410] space-y-2.5 mt-2">
+                            <div className="text-[10px] font-mono font-black uppercase text-[#2F441E]">
+                              Create New Root &amp; Attach to Word
+                            </div>
+                            <div className="grid grid-cols-1 sm:grid-cols-3 gap-2">
+                              <input
+                                type="text"
+                                value={newRootForm.morpheme}
+                                onChange={(e) => setNewRootForm((p) => ({ ...p, morpheme: e.target.value }))}
+                                placeholder="Morpheme (e.g. metr / meter)"
+                                className="text-xs font-mono px-2.5 py-1.5 bg-white border border-[#111410]"
+                              />
+                              <select
+                                value={newRootForm.language}
+                                onChange={(e) => setNewRootForm((p) => ({ ...p, language: e.target.value }))}
+                                className="text-xs font-mono px-2 py-1.5 bg-white border border-[#111410]"
+                              >
+                                {ROOT_LANGUAGES.map((lang) => (
+                                  <option key={lang} value={lang}>{lang}</option>
+                                ))}
+                              </select>
+                              <input
+                                type="text"
+                                value={newRootForm.core_meaning}
+                                onChange={(e) => setNewRootForm((p) => ({ ...p, core_meaning: e.target.value }))}
+                                placeholder="Core meaning (e.g. measure)"
+                                className="text-xs font-mono px-2.5 py-1.5 bg-white border border-[#111410]"
+                              />
+                            </div>
+                            <div className="grid grid-cols-1 sm:grid-cols-3 gap-2">
+                              <select
+                                value={newRootForm.thematic_cluster}
+                                onChange={(e) => setNewRootForm((p) => ({ ...p, thematic_cluster: e.target.value }))}
+                                className="text-xs font-mono px-2 py-1.5 bg-white border border-[#111410]"
+                              >
+                                {ROOT_CLUSTERS.map((c) => (
+                                  <option key={c} value={c}>{c}</option>
+                                ))}
+                              </select>
+                              <select
+                                value={newRootForm.sat_tier}
+                                onChange={(e) => setNewRootForm((p) => ({ ...p, sat_tier: e.target.value }))}
+                                className="text-xs font-mono px-2 py-1.5 bg-white border border-[#111410]"
+                              >
+                                {ROOT_TIERS.map((t) => (
+                                  <option key={t} value={t}>{t}</option>
+                                ))}
+                              </select>
+                              <input
+                                type="text"
+                                value={newRootForm.mnemonic}
+                                onChange={(e) => setNewRootForm((p) => ({ ...p, mnemonic: e.target.value }))}
+                                placeholder="Root mnemonic (optional)"
+                                className="text-xs font-mono px-2.5 py-1.5 bg-white border border-[#111410]"
+                              />
+                            </div>
+                            <div className="flex justify-end">
+                              <button
+                                type="button"
+                                onClick={handleCreateInlineRoot}
+                                disabled={isCreatingRoot || !newRootForm.morpheme.trim() || !newRootForm.core_meaning.trim()}
+                                className="px-3 py-1.5 bg-[#7BB33B] hover:bg-[#84C341] text-white border-2 border-[#111410] text-[10px] font-mono font-black uppercase disabled:opacity-40"
+                              >
+                                {isCreatingRoot ? 'Creating...' : 'Create & Attach Root'}
+                              </button>
+                            </div>
+                          </div>
+                        )}
+                      </div>
+
+                      {/* Prefix & Suffix (Custom vs. Belongs to a Root) */}
+                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                        {/* Prefix Card */}
+                        <div className="bg-white border-2 border-[#111410] p-3 space-y-2">
+                          <div className="flex items-center justify-between gap-2">
+                            <label className="text-[9px] font-mono font-black uppercase text-[#42281D]">
+                              Prefix
+                            </label>
+                            <div className="inline-flex border border-[#111410] text-[9px] font-mono font-black uppercase">
+                              <button
+                                type="button"
+                                onClick={() => setWordFormData((prev) => ({ ...prev, prefixMode: 'custom', prefixRoot: '' }))}
+                                className={`px-2 py-0.5 transition ${
+                                  wordFormData.prefixMode === 'custom'
+                                    ? 'bg-[#111410] text-white'
+                                    : 'bg-[#FAFBF8] text-[#62685E] hover:bg-white'
+                                }`}
+                              >
+                                Custom
+                              </button>
+                              <button
+                                type="button"
+                                onClick={() => setWordFormData((prev) => ({ ...prev, prefixMode: 'root' }))}
+                                className={`px-2 py-0.5 border-l border-[#111410] inline-flex items-center space-x-1 transition ${
+                                  wordFormData.prefixMode === 'root'
+                                    ? 'bg-[#7BB33B] text-white'
+                                    : 'bg-[#FAFBF8] text-[#62685E] hover:bg-white'
+                                }`}
+                              >
+                                <Link2 className="w-2.5 h-2.5" />
+                                <span>Belongs to Root</span>
+                              </button>
+                            </div>
+                          </div>
+
+                          {wordFormData.prefixMode === 'root' && (
+                            <select
+                              value={wordFormData.prefixRoot}
+                              onChange={(e) => handleSelectAffixRoot('prefix', e.target.value)}
+                              className="w-full text-xs font-mono px-2 py-1.5 bg-[#EDF5E5]/50 border border-[#111410] focus:outline-none focus:ring-1 focus:ring-[#7BB33B]"
+                            >
+                              <option value="">-- Select linked root --</option>
+                              {sortedRoots.map((r) => (
+                                <option key={r.id} value={r.id}>
+                                  [{r.morpheme.toUpperCase()}] ({r.language} · {r.core_meaning})
+                                </option>
+                              ))}
+                            </select>
+                          )}
+
+                          <input
+                            type="text"
+                            value={wordFormData.prefix}
+                            onChange={(e) => setWordFormData(prev => ({ ...prev, prefix: e.target.value }))}
+                            placeholder={
+                              wordFormData.prefixMode === 'root'
+                                ? 'Display label (e.g. auto- (self))'
+                                : 'e.g. dis- (apart, away)'
+                            }
+                            className="w-full text-xs font-mono px-2.5 py-1.5 bg-white border border-[#111410] focus:outline-none focus:ring-1 focus:ring-[#7BB33B]"
+                          />
+                        </div>
+
+                        {/* Suffix Card */}
+                        <div className="bg-white border-2 border-[#111410] p-3 space-y-2">
+                          <div className="flex items-center justify-between gap-2">
+                            <label className="text-[9px] font-mono font-black uppercase text-[#42281D]">
+                              Suffix
+                            </label>
+                            <div className="inline-flex border border-[#111410] text-[9px] font-mono font-black uppercase">
+                              <button
+                                type="button"
+                                onClick={() => setWordFormData((prev) => ({ ...prev, suffixMode: 'custom', suffixRoot: '' }))}
+                                className={`px-2 py-0.5 transition ${
+                                  wordFormData.suffixMode === 'custom'
+                                    ? 'bg-[#111410] text-white'
+                                    : 'bg-[#FAFBF8] text-[#62685E] hover:bg-white'
+                                }`}
+                              >
+                                Custom
+                              </button>
+                              <button
+                                type="button"
+                                onClick={() => setWordFormData((prev) => ({ ...prev, suffixMode: 'root' }))}
+                                className={`px-2 py-0.5 border-l border-[#111410] inline-flex items-center space-x-1 transition ${
+                                  wordFormData.suffixMode === 'root'
+                                    ? 'bg-[#7BB33B] text-white'
+                                    : 'bg-[#FAFBF8] text-[#62685E] hover:bg-white'
+                                }`}
+                              >
+                                <Link2 className="w-2.5 h-2.5" />
+                                <span>Belongs to Root</span>
+                              </button>
+                            </div>
+                          </div>
+
+                          {wordFormData.suffixMode === 'root' && (
+                            <select
+                              value={wordFormData.suffixRoot}
+                              onChange={(e) => handleSelectAffixRoot('suffix', e.target.value)}
+                              className="w-full text-xs font-mono px-2 py-1.5 bg-[#EDF5E5]/50 border border-[#111410] focus:outline-none focus:ring-1 focus:ring-[#7BB33B]"
+                            >
+                              <option value="">-- Select linked root --</option>
+                              {sortedRoots.map((r) => (
+                                <option key={r.id} value={r.id}>
+                                  [{r.morpheme.toUpperCase()}] ({r.language} · {r.core_meaning})
+                                </option>
+                              ))}
+                            </select>
+                          )}
+
                           <input
                             type="text"
                             value={wordFormData.suffix}
                             onChange={(e) => setWordFormData(prev => ({ ...prev, suffix: e.target.value }))}
-                            placeholder="e.g. -ous (full of)"
-                            className="w-full text-xs font-mono px-2.5 py-1.5 bg-white border-2 border-[#111410] focus:outline-none focus:ring-1 focus:ring-[#7BB33B]"
+                            placeholder={
+                              wordFormData.suffixMode === 'root'
+                                ? 'Display label (e.g. -graph (write))'
+                                : 'e.g. -ous (full of)'
+                            }
+                            className="w-full text-xs font-mono px-2.5 py-1.5 bg-white border border-[#111410] focus:outline-none focus:ring-1 focus:ring-[#7BB33B]"
                           />
                         </div>
                       </div>

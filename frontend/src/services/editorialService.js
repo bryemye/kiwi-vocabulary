@@ -444,7 +444,10 @@ export function getAllVerificationHistory(wordsList = []) {
         word: wordObj?.word || key,
         wordId: wordObj?.id ?? null,
         partOfSpeech: wordObj?.part_of_speech || '',
-        rootMorpheme: wordObj?.root_details?.morpheme || '',
+        rootMorpheme:
+          wordObj?.roots_details?.length > 0
+            ? wordObj.roots_details.map((r) => r.morpheme).join(' + ')
+            : (wordObj?.root_details?.morpheme || ''),
         currentVerified: Boolean(merged.verified),
       });
     });
@@ -505,6 +508,11 @@ export function exportUpdatedLexiconJson(rootsList = [], wordsList = []) {
   let formattedData = [];
 
   if (rootsList && rootsList.length > 0) {
+    const wordsById = new Map();
+    (wordsList || []).forEach((w) => {
+      if (w?.id != null) wordsById.set(Number(w.id), w);
+    });
+
     formattedData = rootsList.map((root) => {
       const rootEntry = {
         root: {
@@ -512,26 +520,49 @@ export function exportUpdatedLexiconJson(rootsList = [], wordsList = []) {
           language: root.language || 'Latin',
           core_meaning: root.core_meaning,
           mnemonic: root.mnemonic || '',
+          thematic_cluster: root.thematic_cluster || 'Motion & Travel',
+          sat_tier: root.sat_tier || 'Tier 1 High-Yield',
         },
-        words: (root.words || []).map((w) => {
-          const key = w.word?.toLowerCase().trim();
-          const review = mergeReviewObjects(w.review, reviews[key]);
-          const wordObj = {
-            word: w.word,
-            prefix: w.prefix || '',
-            suffix: w.suffix || '',
-            definition: w.definition,
-            sat_sentence: w.sat_sentence,
-            connotation: w.connotation || 'neutral',
-            ...(w.mnemonic ? { mnemonic: w.mnemonic } : {}),
-            ...(w.is_published === false ? { is_published: false } : {}),
-          };
-          const reviewPayload = buildWordReviewPayload(review);
-          if (reviewPayload) {
-            wordObj.review = reviewPayload;
-          }
-          return wordObj;
-        }),
+        words: (root.words || [])
+          .filter((w) => {
+            const fullWord = (w?.id != null ? wordsById.get(Number(w.id)) : null) || w;
+            const primaryRootId = Number(
+              fullWord.root ||
+              fullWord.roots?.[0] ||
+              fullWord.root_details?.id ||
+              fullWord.roots_details?.[0]?.id ||
+              root.id
+            );
+            return primaryRootId === Number(root.id);
+          })
+          .map((w) => {
+            const fullWord = (w?.id != null ? wordsById.get(Number(w.id)) : null) || w;
+            const key = fullWord.word?.toLowerCase().trim();
+            const review = mergeReviewObjects(fullWord.review, reviews[key]);
+            const orderedRoots =
+              Array.isArray(fullWord.roots_details) && fullWord.roots_details.length > 0
+                ? fullWord.roots_details
+                : (fullWord.root_details ? [fullWord.root_details] : []);
+            const wordObj = {
+              word: fullWord.word,
+              prefix: fullWord.prefix || '',
+              ...(fullWord.prefix_root_details?.morpheme ? { prefix_root: fullWord.prefix_root_details.morpheme } : {}),
+              suffix: fullWord.suffix || '',
+              ...(fullWord.suffix_root_details?.morpheme ? { suffix_root: fullWord.suffix_root_details.morpheme } : {}),
+              ...(orderedRoots.length > 1 ? { extra_roots: orderedRoots.slice(1).map((r) => r.morpheme) } : {}),
+              definition: fullWord.definition,
+              sat_sentence: fullWord.sat_sentence,
+              connotation: fullWord.connotation || 'neutral',
+              ...(fullWord.pronunciation ? { pronunciation: fullWord.pronunciation } : {}),
+              ...(fullWord.mnemonic ? { mnemonic: fullWord.mnemonic } : {}),
+              ...(fullWord.is_published === false ? { is_published: false } : {}),
+            };
+            const reviewPayload = buildWordReviewPayload(review);
+            if (reviewPayload) {
+              wordObj.review = reviewPayload;
+            }
+            return wordObj;
+          }),
       };
       return rootEntry;
     });

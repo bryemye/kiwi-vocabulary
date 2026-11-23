@@ -55,7 +55,9 @@ import {
   extractMorphemesFromWords,
   wordMatchesPrefix,
   wordMatchesSuffix,
-  matchesOriginFilter
+  matchesOriginFilter,
+  getWordRoots,
+  wordHasRootId
 } from '../services/studySessionService';
 import { useCelestialTrajectory } from '../context/CelestialTrajectoryContext';
 
@@ -73,6 +75,7 @@ export default function VocabView({
   isAdminMode = false,
   onUpdateWordReview,
   onUpdateWord,
+  onCreateRoot,
   externalMorphemeView,
   onClearExternalMorphemeView,
   trajectoryRestoreTarget = null,
@@ -354,12 +357,15 @@ export default function VocabView({
     }
   };
 
-  // Build filtered master list (supporting root, prefix, and suffix filtering)
+  // Build filtered master list (supporting multi-root, prefix, and suffix filtering)
   const filteredWords = useMemo(() => {
     return publishedWords.filter((w) => {
+      const wRoots = getWordRoots(w);
       if (selectedLanguage !== 'ALL') {
-        const rootLang = w.root_details?.language || publishedRoots.find(r => r.id === w.root)?.language;
-        if (!matchesOriginFilter(rootLang, selectedLanguage)) {
+        const rootLangs = wRoots.length > 0
+          ? wRoots.map((r) => r.language).filter(Boolean)
+          : [publishedRoots.find(r => r.id === w.root)?.language].filter(Boolean);
+        if (!rootLangs.some((lang) => matchesOriginFilter(lang, selectedLanguage))) {
           return false;
         }
       }
@@ -370,7 +376,7 @@ export default function VocabView({
         } else if (String(selectedRootId).startsWith('suffix:')) {
           const sToken = String(selectedRootId).slice(7);
           if (!wordMatchesSuffix(w, sToken)) return false;
-        } else if (w.root !== Number(selectedRootId)) {
+        } else if (!wordHasRootId(w, selectedRootId)) {
           return false;
         }
       }
@@ -378,7 +384,7 @@ export default function VocabView({
         const query = searchTerm.toLowerCase();
         const wordMatch = w.word.toLowerCase().includes(query);
         const defMatch = w.definition.toLowerCase().includes(query);
-        const rootMatch = w.root_details?.morpheme?.toLowerCase().includes(query);
+        const rootMatch = wRoots.some((r) => r.morpheme?.toLowerCase().includes(query));
         const prefixMatch = w.prefix && w.prefix.toLowerCase().includes(query);
         const suffixMatch = w.suffix && w.suffix.toLowerCase().includes(query);
         if (!wordMatch && !defMatch && !rootMatch && !prefixMatch && !suffixMatch) {
@@ -443,8 +449,8 @@ export default function VocabView({
 
       matchedWords = publishedWords.filter(w => {
         if (word && w.id === word.id) return true;
-        if (rootObj?.id && (w.root === rootObj.id || w.root_details?.id === rootObj.id)) return true;
-        if (morpheme && w.root_details?.morpheme?.toLowerCase() === morpheme.toLowerCase()) return true;
+        if (rootObj?.id && wordHasRootId(w, rootObj.id)) return true;
+        if (morpheme && getWordRoots(w).some(r => r.morpheme?.toLowerCase() === morpheme.toLowerCase())) return true;
         return false;
       });
     } else if (type === 'prefix') {
@@ -880,6 +886,9 @@ export default function VocabView({
       fresh.connotation !== card.connotation ||
       fresh.pronunciation !== card.pronunciation ||
       fresh.root !== card.root ||
+      fresh.prefix_root !== card.prefix_root ||
+      fresh.suffix_root !== card.suffix_root ||
+      JSON.stringify(fresh.roots || []) !== JSON.stringify(card.roots || []) ||
       Boolean(fresh.is_published !== false) !== Boolean(card.is_published !== false) ||
       JSON.stringify(fresh.review || {}) !== JSON.stringify(card.review || {});
 
@@ -1726,7 +1735,7 @@ export default function VocabView({
                     {/* Root Bento Grid for this group */}
                     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
                       {group.roots.map((root) => {
-                        const rootWords = publishedWords.filter(w => w.root === root.id || w.root_details?.id === root.id);
+                        const rootWords = publishedWords.filter(w => wordHasRootId(w, root.id));
                         const isHighlightedRoot = Number(highlightedExplorerRootId) === Number(root.id);
 
                         return (
@@ -1938,6 +1947,7 @@ export default function VocabView({
           }
         }}
         onUpdateWord={onUpdateWord}
+        onCreateRoot={onCreateRoot}
       />
 
     </div>

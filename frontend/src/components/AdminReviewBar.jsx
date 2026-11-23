@@ -24,7 +24,8 @@ export default function AdminReviewBar({
   words = [], 
   roots = [],
   onUpdateWordReview,
-  onUpdateWord
+  onUpdateWord,
+  onCreateRoot
 }) {
   const [exportNotice, setExportNotice] = useState(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -185,6 +186,7 @@ export default function AdminReviewBar({
         initialTab={modalInitialTab}
         onSaveReview={onUpdateWordReview}
         onUpdateWord={onUpdateWord}
+        onCreateRoot={onCreateRoot}
       />
     </>
   );

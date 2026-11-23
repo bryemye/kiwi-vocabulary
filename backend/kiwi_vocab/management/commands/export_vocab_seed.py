@@ -24,7 +24,11 @@ class Command(BaseCommand):
 
         self.stdout.write(f"Exporting vocabulary database to fixture: {file_path}")
 
-        roots = Root.objects.prefetch_related('words').order_by('id')
+        roots = Root.objects.prefetch_related(
+            'primary_words__word_roots__root',
+            'primary_words__prefix_root',
+            'primary_words__suffix_root',
+        ).order_by('id')
         exported_data = []
 
         total_words = 0
@@ -39,7 +43,7 @@ class Command(BaseCommand):
             }
 
             words_list = []
-            for w in root.words.order_by('id'):
+            for w in root.primary_words.order_by('id'):
                 total_words += 1
                 word_dict = {
                     "word": w.word,
@@ -49,6 +53,13 @@ class Command(BaseCommand):
                     "sat_sentence": w.sat_sentence,
                     "connotation": w.connotation,
                 }
+                ordered_roots = w.get_ordered_roots()
+                if len(ordered_roots) > 1:
+                    word_dict["extra_roots"] = [r.morpheme for r in ordered_roots[1:]]
+                if w.prefix_root:
+                    word_dict["prefix_root"] = w.prefix_root.morpheme
+                if w.suffix_root:
+                    word_dict["suffix_root"] = w.suffix_root.morpheme
                 if w.pronunciation:
                     word_dict["pronunciation"] = w.pronunciation
                 if w.mnemonic:

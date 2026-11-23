@@ -460,3 +460,191 @@ class KiwiVocabTests(TestCase):
         words_by_name = {w['word']: w for r in exported for w in r['words']}
         self.assertEqual(words_by_name['audit']['pronunciation'], 'AW-dit')
         self.assertEqual(words_by_name['anachronism']['pronunciation'], 'uh-NAK-ruh-niz-uhm')
+
+    def test_multi_root_word_assignment_ordering_filtering_and_stats(self):
+        from platform_core.models import StudyLog
+
+        metr_root = Root.objects.create(
+            morpheme='metr / meter',
+            language='Greek',
+            core_meaning='measure',
+            thematic_cluster='Quantity & Relation',
+            sat_tier='Tier 2 Multipliers',
+        )
+        # Seed existing verification on word2 to ensure editing roots preserves history
+        self.word2.review = {
+            'verified': True,
+            'verifiedAt': '2026-11-01T10:00:00+00:00',
+            'verifiedBy': 'Admin',
+            'notes': 'Previously verified.',
+            'history': [
+                {
+                    'id': 'vh-existing-1',
+                    'action': 'verified',
+                    'verified': True,
+                    'timestamp': '2026-11-01T10:00:00+00:00',
+                    'by': 'Admin',
+                    'notes': 'Previously verified.',
+                    'summary': 'Marked as verified',
+                }
+            ],
+        }
+        self.word2.save()
+
+        staff_user = User.objects.create_user(username='multi_admin', password='pw', is_staff=True)
+        self.client.force_authenticate(user=staff_user)
+
+        # Reject empty roots list
+        res_empty = self.client.patch(
+            f'/api/vocab/words/{self.word2.id}/',
+            {'roots': []},
+            format='json',
+        )
+        self.assertEqual(res_empty.status_code, status.HTTP_400_BAD_REQUEST)
+
+        # Assign ordered multi-roots [metr_root, self.root] -> metr_root becomes primary root
+        res_patch = self.client.patch(
+            f'/api/vocab/words/{self.word2.id}/',
+            {
+                'roots': [metr_root.id, self.root.id],
+                'review': {
+                    'verified': True,
+                    'verifiedBy': 'Admin',
+                    'notes': 'Assigned multiple roots.',
+                },
+            },
+            format='json',
+        )
+        self.assertEqual(res_patch.status_code, status.HTTP_200_OK)
+        self.assertEqual(res_patch.data['roots'], [metr_root.id, self.root.id])
+        self.assertEqual([r['id'] for r in res_patch.data['roots_details']], [metr_root.id, self.root.id])
+        self.assertEqual(res_patch.data['root'], metr_root.id)
+        self.assertTrue(res_patch.data['review']['verified'])
+        self.assertEqual(len(res_patch.data['review']['history']), 2)
+        self.assertIn('roots', res_patch.data['review']['history'][0]['summary'])
+
+        # Word appears under BOTH roots in /api/vocab/roots/ and /api/vocab/words/?root=...
+        res_roots = self.client.get('/api/vocab/roots/')
+        self.assertEqual(res_roots.status_code, status.HTTP_200_OK)
+        roots_by_id = {r['id']: r for r in res_roots.data}
+        self.assertIn(self.word2.id, [w['id'] for w in roots_by_id[metr_root.id]['words']])
+        self.assertIn(self.word2.id, [w['id'] for w in roots_by_id[self.root.id]['words']])
+
+        res_filter_chron = self.client.get(f'/api/vocab/words/?root={self.root.id}')
+        self.assertEqual(sorted(w['id'] for w in res_filter_chron.data), sorted([self.word1.id, self.word2.id]))
+        res_filter_metr = self.client.get(f'/api/vocab/words/?root={metr_root.id}')
+        self.assertEqual([w['id'] for w in res_filter_metr.data], [self.word2.id])
+
+        # StudyLog on multi-root word contributes to BOTH roots' mastery without inflating total_words
+        StudyLog.objects.create(user=staff_user, item_type='WORD', word=self.word2, is_correct=True)
+        res_stats = self.client.get('/api/vocab/stats/')
+        self.assertEqual(res_stats.status_code, status.HTTP_200_OK)
+        self.assertEqual(res_stats.data['total_words'], 2)
+        self.assertEqual(res_stats.data['words_reviewed'], 1)
+        mastery_by_id = {r['id']: r for r in res_stats.data['root_mastery']}
+        self.assertEqual(mastery_by_id[metr_root.id]['mastered_words'], 1)
+        self.assertEqual(mastery_by_id[metr_root.id]['attempts'], 1)
+        self.assertEqual(mastery_by_id[self.root.id]['mastered_words'], 1)
+        self.assertEqual(mastery_by_id[self.root.id]['attempts'], 1)
+
+    def test_root_linked_affixes_strict_cross_link_and_inline_root_create(self):
+        regular_user = User.objects.create_user(username='student_affix', password='pw')
+        staff_user = User.objects.create_user(username='editor_affix', password='pw', is_staff=True)
+
+        # Non-staff cannot create a root inline
+        self.client.force_authenticate(user=regular_user)
+        res_forbidden = self.client.post(
+            '/api/vocab/roots/',
+            {'morpheme': 'auto', 'language': 'Greek', 'core_meaning': 'self'},
+            format='json',
+        )
+        self.assertEqual(res_forbidden.status_code, status.HTTP_403_FORBIDDEN)
+
+        # Staff can create roots inline
+        self.client.force_authenticate(user=staff_user)
+        res_create_auto = self.client.post(
+            '/api/vocab/roots/',
+            {'morpheme': 'auto', 'language': 'Greek', 'core_meaning': 'self'},
+            format='json',
+        )
+        self.assertEqual(res_create_auto.status_code, status.HTTP_201_CREATED)
+        auto_root_id = res_create_auto.data['id']
+
+        res_create_graph = self.client.post(
+            '/api/vocab/roots/',
+            {'morpheme': 'graph', 'language': 'Greek', 'core_meaning': 'write'},
+            format='json',
+        )
+        self.assertEqual(res_create_graph.status_code, status.HTTP_201_CREATED)
+        graph_root_id = res_create_graph.data['id']
+
+        # Link prefix_root and suffix_root on word1
+        res_link = self.client.patch(
+            f'/api/vocab/words/{self.word1.id}/',
+            {
+                'prefix': 'auto- (self)',
+                'prefix_root': auto_root_id,
+                'suffix': '-graph (write)',
+                'suffix_root': graph_root_id,
+            },
+            format='json',
+        )
+        self.assertEqual(res_link.status_code, status.HTTP_200_OK)
+        self.assertEqual(res_link.data['prefix_root'], auto_root_id)
+        self.assertEqual(res_link.data['prefix_root_details']['morpheme'], 'auto')
+        self.assertEqual(res_link.data['suffix_root'], graph_root_id)
+        self.assertEqual(res_link.data['suffix_root_details']['morpheme'], 'graph')
+
+        # Strictly clickable cross-link: word1 must NOT appear in auto or graph word families or mastery stats
+        res_roots = self.client.get('/api/vocab/roots/')
+        roots_by_id = {r['id']: r for r in res_roots.data}
+        self.assertEqual(roots_by_id[auto_root_id]['words'], [])
+        self.assertEqual(roots_by_id[graph_root_id]['words'], [])
+
+        res_stats = self.client.get('/api/vocab/stats/')
+        mastery_by_id = {r['id']: r for r in res_stats.data['root_mastery']}
+        self.assertEqual(mastery_by_id[auto_root_id]['total_words'], 0)
+        self.assertEqual(mastery_by_id[graph_root_id]['total_words'], 0)
+
+        # Round-trip export + import preserves extra_roots, prefix_root, suffix_root, and review
+        metr_root = Root.objects.create(morpheme='metr', language='Greek', core_meaning='measure')
+        self.client.patch(
+            f'/api/vocab/words/{self.word1.id}/',
+            {'roots': [self.root.id, metr_root.id]},
+            format='json',
+        )
+        with tempfile.TemporaryDirectory() as tmpdir:
+            out_path = os.path.join(tmpdir, 'seed_multi.json')
+            call_command('export_vocab_seed', file=out_path)
+            with open(out_path, 'r', encoding='utf-8') as f:
+                exported = json.load(f)
+            words_by_name = {w['word']: w for r in exported for w in r['words']}
+            self.assertEqual(words_by_name['anachronism']['extra_roots'], ['metr'])
+            self.assertEqual(words_by_name['anachronism']['prefix_root'], 'auto')
+            self.assertEqual(words_by_name['anachronism']['suffix_root'], 'graph')
+
+            # Reset word1 links and re-import from exported seed
+            self.word1.prefix_root = None
+            self.word1.suffix_root = None
+            self.word1.save()
+            self.word1.set_ordered_roots([self.root])
+            call_command('import_vocab', file=out_path)
+            self.word1.refresh_from_db()
+            self.assertEqual([r.morpheme for r in self.word1.get_ordered_roots()], ['chron', 'metr'])
+            self.assertEqual(self.word1.prefix_root.morpheme, 'auto')
+            self.assertEqual(self.word1.suffix_root.morpheme, 'graph')
+
+        # Switching prefix/suffix back to custom clears prefix_root/suffix_root
+        res_custom = self.client.patch(
+            f'/api/vocab/words/{self.word1.id}/',
+            {
+                'prefix': 'ana- (back)',
+                'prefix_root': None,
+                'suffix': '-ism (noun)',
+                'suffix_root': None,
+            },
+            format='json',
+        )
+        self.assertEqual(res_custom.status_code, status.HTTP_200_OK)
+        self.assertIsNone(res_custom.data['prefix_root'])
+        self.assertIsNone(res_custom.data['suffix_root'])

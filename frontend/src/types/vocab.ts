@@ -37,7 +37,11 @@ export interface VocabularyWord {
   id?: number;
   word: string;
   prefix?: string;
+  prefix_root?: number | null;
+  prefix_root_details?: RootSummary | null;
   suffix?: string;
+  suffix_root?: number | null;
+  suffix_root_details?: RootSummary | null;
   definition: string;
   sat_sentence: string;
   connotation?: Connotation | string;
@@ -46,6 +50,8 @@ export interface VocabularyWord {
   mnemonic?: string;
   root?: number;
   root_details?: RootSummary;
+  roots?: number[];
+  roots_details?: RootSummary[];
   review?: EditorialReview;
   is_published?: boolean;
 }
@@ -99,7 +105,10 @@ export interface LexiconSeedEntry {
   words: Array<{
     word: string;
     prefix?: string;
+    prefix_root?: string;
     suffix?: string;
+    suffix_root?: string;
+    extra_roots?: string[];
     definition: string;
     sat_sentence: string;
     connotation?: string;

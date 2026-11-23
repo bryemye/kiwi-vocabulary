@@ -39,7 +39,10 @@ class Command(BaseCommand):
             data = json.load(f)
 
         roots_created, words_created = 0, 0
+        roots_by_morpheme = {}
+        entry_root_pairs = []
 
+        # Pass 1: Create/update all Root records so cross-links & extra_roots can resolve
         for entry in data:
             root_data = entry["root"]
             root, created = Root.objects.update_or_create(
@@ -54,8 +57,18 @@ class Command(BaseCommand):
             )
             if created:
                 roots_created += 1
+            roots_by_morpheme[root.morpheme.lower().strip()] = root
+            entry_root_pairs.append((root, entry.get("words", [])))
 
-            for w in entry.get("words", []):
+        def resolve_root_ref(ref):
+            if not ref:
+                return None
+            key = str(ref).lower().strip()
+            return roots_by_morpheme.get(key) or Root.objects.filter(morpheme__iexact=key).first()
+
+        # Pass 2: Create/update VocabularyWord records and link ordered roots + affix roots
+        for root, words in entry_root_pairs:
+            for w in words:
                 word_clean = w["word"].lower().strip()
                 existing_word = VocabularyWord.objects.filter(word=word_clean).first()
 
@@ -78,12 +91,17 @@ class Command(BaseCommand):
                 else:
                     effective_published = True
 
-                _, w_created = VocabularyWord.objects.update_or_create(
+                prefix_root_obj = resolve_root_ref(w.get("prefix_root"))
+                suffix_root_obj = resolve_root_ref(w.get("suffix_root"))
+
+                word_obj, w_created = VocabularyWord.objects.update_or_create(
                     word=word_clean,
                     defaults={
                         "root": root,
                         "prefix": w.get("prefix", ""),
+                        "prefix_root": prefix_root_obj,
                         "suffix": w.get("suffix", ""),
+                        "suffix_root": suffix_root_obj,
                         "definition": w.get("definition") or w.get("officialContextDefinition", ""),
                         "sat_sentence": w.get("sat_sentence") or w.get("examContextSentence", ""),
                         "connotation": w.get("connotation", "neutral"),
@@ -94,6 +112,11 @@ class Command(BaseCommand):
                         "is_published": effective_published,
                     }
                 )
+                extra_root_objs = [
+                    r for r in (resolve_root_ref(m) for m in w.get("extra_roots", []))
+                    if r is not None
+                ]
+                word_obj.set_ordered_roots([root, *extra_root_objs])
                 if w_created:
                     words_created += 1
 

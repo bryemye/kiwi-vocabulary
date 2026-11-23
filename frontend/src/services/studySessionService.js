@@ -12,6 +12,45 @@ export const MAX_SELECTED_ROOTS = 5;
 export const MAX_SELECTED_MORPHEMES = 5;
 
 /**
+ * Return ordered Root objects attached to a word, falling back to root_details.
+ */
+export function getWordRoots(word) {
+  if (!word) return [];
+  if (Array.isArray(word.roots_details) && word.roots_details.length > 0) {
+    return word.roots_details.filter(Boolean);
+  }
+  if (word.root_details) {
+    return [word.root_details];
+  }
+  return [];
+}
+
+/**
+ * Return ordered Root numeric IDs attached to a word.
+ */
+export function getWordRootIds(word) {
+  if (!word) return [];
+  if (Array.isArray(word.roots) && word.roots.length > 0) {
+    return word.roots.map((id) => Number(id)).filter((id) => !Number.isNaN(id) && id > 0);
+  }
+  if (Array.isArray(word.roots_details) && word.roots_details.length > 0) {
+    return word.roots_details.map((r) => Number(r?.id)).filter((id) => !Number.isNaN(id) && id > 0);
+  }
+  const fallback = Number(word.root || word.root_details?.id);
+  return fallback && !Number.isNaN(fallback) ? [fallback] : [];
+}
+
+/**
+ * Check whether a word belongs to the given root ID (across any of its roots).
+ */
+export function wordHasRootId(word, rootId) {
+  if (!word || rootId == null) return false;
+  const target = Number(rootId);
+  if (Number.isNaN(target)) return false;
+  return getWordRootIds(word).includes(target);
+}
+
+/**
  * Parse an affix string into clean token, alphanumeric base, and meaning.
  * e.g. "dis- (apart, away)" -> { cleanToken: "dis-", base: "dis", meaning: "apart, away" }
  * e.g. "-ous (full of)" -> { cleanToken: "-ous", base: "ous", meaning: "full of" }
@@ -74,7 +113,7 @@ export function extractMorphemesFromWords(words = [], roots = []) {
 
   // 1. Add Roots
   roots.forEach(r => {
-    const rootWords = words.filter(w => Number(w.root || w.root_details?.id) === Number(r.id));
+    const rootWords = words.filter(w => wordHasRootId(w, r.id));
     result.push({
       id: `root_${r.id}`,
       key: `root_${r.id}`,
@@ -308,10 +347,14 @@ export function getReviewEligibleWords(allWords) {
 export function shuffleWithMorphemeVariety(cards) {
   if (!cards || cards.length <= 1) return [...(cards || [])];
 
-  // Group cards by root identifier
+  // Group cards by primary/combined root identifier
   const groups = new Map();
   for (const card of cards) {
-    const rootKey = card.root_details?.morpheme || card.root || card.root_details?.id || 'general';
+    const cardRoots = getWordRoots(card);
+    const rootKey =
+      cardRoots.length > 0
+        ? cardRoots.map((r) => r.morpheme || r.id).join('+')
+        : (card.root_details?.morpheme || card.root || card.root_details?.id || 'general');
     if (!groups.has(rootKey)) {
       groups.set(rootKey, []);
     }
@@ -455,7 +498,7 @@ export function generateMorphemeDeck({
     if (m.words && m.words.length > 0) {
       pool = m.words;
     } else if (m.type === 'root') {
-      pool = allWords.filter(w => Number(w.root || w.root_details?.id) === Number(m.numericId || m.id));
+      pool = allWords.filter(w => wordHasRootId(w, m.numericId || m.id));
     } else if (m.type === 'prefix') {
       pool = allWords.filter(w => wordMatchesPrefix(w, m.cleanToken || m.morpheme));
     } else if (m.type === 'suffix') {
@@ -495,8 +538,11 @@ export function generateMorphemeDeck({
       let relatedCandidates = allWords.filter(w => {
         if (chosenWordIds.has(w.id)) return false;
         if (hasRoot) {
-          const wLang = w.root_details?.language || allRoots.find(r => r.id === w.root)?.language;
-          return wLang && wLang.toLowerCase() === dominantLanguage.toLowerCase();
+          const wRoots = getWordRoots(w);
+          const langs = wRoots.length > 0
+            ? wRoots.map((r) => r.language).filter(Boolean)
+            : [allRoots.find(r => r.id === w.root)?.language].filter(Boolean);
+          return langs.some((l) => l.toLowerCase() === dominantLanguage.toLowerCase());
         }
         return true;
       }).sort(() => 0.5 - Math.random());
@@ -607,12 +653,17 @@ export function generateTier1Deck({
   const tier1WordsByRoot = {};
   
   allWords.forEach(w => {
-    const rootMorpheme = (w.root_details?.morpheme || '').toLowerCase();
-    const isTier1Root = tier1MorphemeSet.has(rootMorpheme) || 
-      HIGH_FREQUENCY_TIER1_MORPHEMES.some(m => rootMorpheme.includes(m.split(' ')[0]));
+    const wRoots = getWordRoots(w);
+    const matchingRoot = wRoots.find((r) => {
+      const rootMorpheme = (r.morpheme || '').toLowerCase();
+      return (
+        tier1MorphemeSet.has(rootMorpheme) ||
+        HIGH_FREQUENCY_TIER1_MORPHEMES.some(m => rootMorpheme.includes(m.split(' ')[0]))
+      );
+    });
 
-    if (isTier1Root) {
-      const rootKey = w.root || w.root_details?.id || rootMorpheme;
+    if (matchingRoot) {
+      const rootKey = matchingRoot.id || matchingRoot.morpheme;
       if (!tier1WordsByRoot[rootKey]) {
         tier1WordsByRoot[rootKey] = [];
       }
@@ -621,7 +672,7 @@ export function generateTier1Deck({
   });
 
   // Sample balanced words across Tier 1 roots
-  let chosenWords = drawBalancedSampleFromRoots(tier1WordsByRoot, targetCount);
+  let chosenWords = drawBalancedSampleFromPools(tier1WordsByRoot, targetCount);
 
   // If tier 1 roots yielded fewer than targetCount, fill with highest-yield words
   if (chosenWords.length < targetCount) {
@@ -660,11 +711,12 @@ export function getMatchingTargetMorphemes(word, targetMorphemes = []) {
     if (!m) return false;
     if (m.type === 'root') {
       const targetRootId = Number(m.numericId ?? m.rootId);
-      const wordRootId = Number(word.root || word.root_details?.id);
-      if (targetRootId && wordRootId === targetRootId) return true;
+      if (targetRootId && wordHasRootId(word, targetRootId)) return true;
       const targetToken = (m.cleanToken || m.morpheme || '').toLowerCase();
-      const wordToken = (word.root_details?.morpheme || '').toLowerCase();
-      return Boolean(targetToken && wordToken && targetToken === wordToken);
+      return Boolean(
+        targetToken &&
+        getWordRoots(word).some((r) => (r.morpheme || '').toLowerCase() === targetToken)
+      );
     }
     if (m.type === 'prefix') {
       return wordMatchesPrefix(word, m.cleanToken || m.morpheme);

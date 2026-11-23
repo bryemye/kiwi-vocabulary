@@ -408,3 +408,24 @@ export async function updateVocabularyWord(id, wordData) {
   }
   return data;
 }
+
+export async function createRoot(rootData) {
+  const res = await fetch(`${API_BASE}/vocab/roots/`, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    credentials: 'include',
+    body: JSON.stringify(rootData),
+  });
+
+  const data = await res.json().catch(() => ({}));
+  if (!res.ok) {
+    const firstFieldError =
+      typeof data === 'object' && data !== null
+        ? Object.values(data).flat().find(Boolean)
+        : null;
+    throw new Error(data.detail || data.error || firstFieldError || 'Failed to create root');
+  }
+  return data;
+}

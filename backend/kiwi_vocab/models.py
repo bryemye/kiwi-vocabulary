@@ -68,9 +68,24 @@ class VocabularyWord(models.Model):
     ]
 
     word = models.CharField(max_length=100, unique=True)
-    root = models.ForeignKey(Root, on_delete=models.CASCADE, related_name='words')
-    prefix = models.CharField(max_length=50, blank=True, default='')
-    suffix = models.CharField(max_length=50, blank=True, default='')
+    root = models.ForeignKey(Root, on_delete=models.CASCADE, related_name='primary_words')
+    roots = models.ManyToManyField(Root, through='WordRoot', related_name='words')
+    prefix = models.CharField(max_length=120, blank=True, default='')
+    prefix_root = models.ForeignKey(
+        Root,
+        null=True,
+        blank=True,
+        on_delete=models.SET_NULL,
+        related_name='prefix_words',
+    )
+    suffix = models.CharField(max_length=120, blank=True, default='')
+    suffix_root = models.ForeignKey(
+        Root,
+        null=True,
+        blank=True,
+        on_delete=models.SET_NULL,
+        related_name='suffix_words',
+    )
     definition = models.TextField()
     sat_sentence = models.TextField()
     connotation = models.CharField(max_length=20, choices=CONNOTATION_CHOICES, default='neutral')
@@ -80,5 +95,58 @@ class VocabularyWord(models.Model):
     review = models.JSONField(default=dict, blank=True)
     is_published = models.BooleanField(default=True, db_index=True)
 
+    def save(self, *args, **kwargs):
+        skip_root_sync = kwargs.pop('_skip_root_sync', False)
+        super().save(*args, **kwargs)
+        if not skip_root_sync and self.root_id and not self.word_roots.exists():
+            WordRoot.objects.get_or_create(
+                word=self,
+                root_id=self.root_id,
+                defaults={'order': 0},
+            )
+
+    def get_ordered_roots(self):
+        """Return ordered Root instances for this word, using prefetch cache when available."""
+        prefetched = getattr(self, '_prefetched_objects_cache', {})
+        if 'word_roots' in prefetched:
+            word_roots = sorted(self.word_roots.all(), key=lambda wr: (wr.order, wr.id or 0))
+        else:
+            word_roots = list(self.word_roots.select_related('root').order_by('order', 'id'))
+        if word_roots:
+            return [wr.root for wr in word_roots]
+        return [self.root] if self.root_id else []
+
+    def set_ordered_roots(self, ordered_roots):
+        """Sync ordered WordRoot entries and primary root FK."""
+        deduped = []
+        seen_ids = set()
+        for r in ordered_roots:
+            if r and r.id not in seen_ids:
+                seen_ids.add(r.id)
+                deduped.append(r)
+        if not deduped:
+            return
+        if self.root_id != deduped[0].id:
+            self.root = deduped[0]
+            super(VocabularyWord, self).save(update_fields=['root'])
+        WordRoot.objects.filter(word=self).delete()
+        WordRoot.objects.bulk_create([
+            WordRoot(word=self, root=r, order=idx)
+            for idx, r in enumerate(deduped)
+        ])
+
     def __str__(self):
         return self.word
+
+
+class WordRoot(models.Model):
+    word = models.ForeignKey(VocabularyWord, on_delete=models.CASCADE, related_name='word_roots')
+    root = models.ForeignKey(Root, on_delete=models.CASCADE, related_name='root_words')
+    order = models.PositiveSmallIntegerField(default=0)
+
+    class Meta:
+        ordering = ['order', 'id']
+        unique_together = [('word', 'root')]
+
+    def __str__(self):
+        return f"{self.word.word} -> {self.root.morpheme} (#{self.order})"

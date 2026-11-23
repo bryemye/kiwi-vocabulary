@@ -12,6 +12,7 @@ import {
   CheckCircle,
   HelpCircle
 } from 'lucide-react';
+import { getWordRoots } from '../services/studySessionService';
 
 export default function MorphemeDetailView({ 
   morphemeData, 
@@ -284,19 +285,25 @@ export default function MorphemeDetailView({
 
                 {/* Morpheme Chips */}
                 <div className="mt-3 flex flex-wrap items-center gap-1.5 font-mono text-[10px]">
-                  {wordItem.prefix && (
+                  {(wordItem.prefix || wordItem.prefix_root_details) && (
                     <span className="px-2 py-0.5 bg-[#EDF5E5] text-[#2F441E] border border-[#7BB33B]/30 rounded-md">
-                      {wordItem.prefix}
+                      {wordItem.prefix || `${wordItem.prefix_root_details?.morpheme}-`}
+                      {wordItem.prefix_root_details && (
+                        <span className="ml-1 opacity-75">[{wordItem.prefix_root_details.morpheme}]</span>
+                      )}
                     </span>
                   )}
-                  {wordItem.root_details?.morpheme && (
-                    <span className="px-2 py-0.5 bg-[#EFE8DF] text-[#42281D] border border-[#C29B78]/40 font-bold rounded-md">
-                      [{wordItem.root_details.morpheme}]
+                  {getWordRoots(wordItem).map((r, rIdx) => (
+                    <span key={r.id || rIdx} className="px-2 py-0.5 bg-[#EFE8DF] text-[#42281D] border border-[#C29B78]/40 font-bold rounded-md">
+                      [{r.morpheme}]
                     </span>
-                  )}
-                  {wordItem.suffix && (
+                  ))}
+                  {(wordItem.suffix || wordItem.suffix_root_details) && (
                     <span className="px-2 py-0.5 bg-white text-stone-700 border border-stone-200 rounded-md">
-                      {wordItem.suffix}
+                      {wordItem.suffix || `-${wordItem.suffix_root_details?.morpheme}`}
+                      {wordItem.suffix_root_details && (
+                        <span className="ml-1 opacity-75">[{wordItem.suffix_root_details.morpheme}]</span>
+                      )}
                     </span>
                   )}
                 </div>
@@ -305,7 +312,10 @@ export default function MorphemeDetailView({
               {/* Study Card Quick Action */}
               <div className="mt-4 pt-3 border-t border-stone-100 flex items-center justify-between">
                 <span className="text-xs font-sans text-stone-500">
-                  Root: <strong className="font-mono text-stone-800">[{wordItem.root_details?.morpheme}]</strong>
+                  {getWordRoots(wordItem).length > 1 ? 'Roots:' : 'Root:'}{' '}
+                  <strong className="font-mono text-stone-800">
+                    {getWordRoots(wordItem).map((r) => `[${r.morpheme}]`).join(' + ')}
+                  </strong>
                 </span>
                 {onSelectWordCard && (
                   <button
