@@ -27,7 +27,7 @@ export default function WheelInspectorPanel({
           <div>
             <div className="flex flex-wrap items-center gap-2 mb-1.5">
               <span className="px-2.5 py-0.5 rounded-full bg-[#EDF5E5] text-[#2F441E] border border-[#7BB33B]/40 text-xs font-mono font-bold">
-                [{root.morpheme.toUpperCase()}]
+                [{(root.morpheme || '').toUpperCase()}]
               </span>
               {root.sat_tier && (
                 <span className="text-xs text-[#62685E] font-medium">

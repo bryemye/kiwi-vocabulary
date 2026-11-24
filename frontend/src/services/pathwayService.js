@@ -618,7 +618,7 @@ function buildRootOrbs(roots = [], accentColor = '#7BB33B', overflowPage = 0, cl
     id: `root:${r.id}`,
     kind: 'ROOT',
     rootId: r.id,
-    label: r.morpheme.toUpperCase(),
+    label: (r.morpheme || '').toUpperCase(),
     subtitle: r.core_meaning,
     tier: r.sat_tier,
     language: r.language,
@@ -693,10 +693,11 @@ export function buildHarmonicWheelModel(allRoots = [], options = {}) {
     overflowPage = 0,
   } = options;
 
+  const safeRoots = Array.isArray(allRoots) ? allRoots : [];
   const cleanQuery = (searchQuery || '').trim().toLowerCase();
 
   // Apply all orthogonal filters simultaneously
-  const filteredRoots = allRoots.filter(
+  const filteredRoots = safeRoots.filter(
     (r) =>
       matchesTierFilter(r, tierFilter) &&
       matchesThemeFilter(r, themeFilter) &&

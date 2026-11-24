@@ -217,33 +217,11 @@ export default function DashboardView({ stats, onSelectRoot, onNavigateMode }) {
     }
   };
 
-  if (!stats) {
-    return (
-      <div className="max-w-6xl mx-auto px-4 py-24 text-center text-[#111410]">
-        <div className="w-9 h-9 mx-auto rounded-full border-2 border-[#7BB33B]/30 border-t-[#7BB33B] animate-spin mb-4" />
-        <p className="text-xs font-mono uppercase tracking-wider text-[#62685E]">
-          Gathering mastery telemetry...
-        </p>
-      </div>
-    );
-  }
-
-  const {
-    overall = {},
-    sections = {},
-    root_mastery = [],
-    recommendations = [],
-    recent_logs = [],
-  } = stats;
-
-  const totalWordsInLexicon =
-    root_mastery.reduce((acc, r) => acc + (r.total_words || 0), 0) || 700;
-  const totalMasteredWords =
-    root_mastery.reduce((acc, r) => acc + (r.mastered_words || 0), 0) ||
-    overall.unique_words_reviewed ||
-    0;
-  const accuracyPct =
-    overall.accuracy_percentage || sections.vocab?.accuracy_percentage || 0;
+  const overall = stats?.overall || {};
+  const sections = stats?.sections || {};
+  const root_mastery = Array.isArray(stats?.root_mastery) ? stats.root_mastery : [];
+  const recommendations = Array.isArray(stats?.recommendations) ? stats.recommendations : [];
+  const recent_logs = Array.isArray(stats?.recent_logs) ? stats.recent_logs : [];
 
   const hasAnyFilter =
     tierFilter !== 'ALL' ||
@@ -291,6 +269,26 @@ export default function DashboardView({ stats, onSelectRoot, onNavigateMode }) {
       searchQuery,
     }).filter((g) => g.roots.length > 0);
   }, [showDetailsDrawer, root_mastery, activeLens, maturityFilter, searchQuery]);
+
+  if (!stats) {
+    return (
+      <div className="max-w-6xl mx-auto px-4 py-24 text-center text-[#111410]">
+        <div className="w-9 h-9 mx-auto rounded-full border-2 border-[#7BB33B]/30 border-t-[#7BB33B] animate-spin mb-4" />
+        <p className="text-xs font-mono uppercase tracking-wider text-[#62685E]">
+          Gathering mastery telemetry...
+        </p>
+      </div>
+    );
+  }
+
+  const totalWordsInLexicon =
+    root_mastery.reduce((acc, r) => acc + (r.total_words || 0), 0) || 700;
+  const totalMasteredWords =
+    root_mastery.reduce((acc, r) => acc + (r.mastered_words || 0), 0) ||
+    overall.unique_words_reviewed ||
+    0;
+  const accuracyPct =
+    overall.accuracy_percentage || sections.vocab?.accuracy_percentage || 0;
 
   const sliderNumericValue = sampleLimit === 'ALL' ? 12 : sampleLimit;
 
@@ -622,7 +620,7 @@ export default function DashboardView({ stats, onSelectRoot, onNavigateMode }) {
                         <div>
                           <div className="flex items-center gap-1.5 text-xs font-mono">
                             <span className="font-bold text-[#111410]">
-                              [{root.morpheme.toUpperCase()}]
+                              [{(root.morpheme || '').toUpperCase()}]
                             </span>
                             <span className="text-[11px] text-[#62685E]">
                               {root.language}
@@ -688,7 +686,7 @@ export default function DashboardView({ stats, onSelectRoot, onNavigateMode }) {
                       <div className="min-w-0">
                         <div className="flex items-center gap-1.5">
                           <span className="text-xs font-mono font-bold text-[#2F441E]">
-                            [{root.morpheme.toUpperCase()}]
+                            [{(root.morpheme || '').toUpperCase()}]
                           </span>
                           <span className="text-[11px] text-[#62685E] truncate">
                             “{root.core_meaning}”

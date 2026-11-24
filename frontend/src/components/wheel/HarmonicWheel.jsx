@@ -176,10 +176,11 @@ export default function HarmonicWheel({
 
           // Position label just outside the orb radially so labels never collide
           const labelAnchorPos = polarToXY(cx, cy, currentR + orbR + 15, node._angle);
-          const displayLabel =
+          const displayLabel = String(
             node.kind === 'ROOT'
-              ? node.label
-              : node.shortLabel || node.label;
+              ? node.label || ''
+              : node.shortLabel || node.label || ''
+          );
 
           return (
             <g
