@@ -515,3 +515,371 @@ export function groupRootsByDomainLens(
 export function groupRootsByPathway(roots = [], pathway = PATHWAY_THEMATIC) {
   return groupRootsByDomainLens(roots, pathway);
 }
+
+export const MAX_WHEEL_PARTITIONS = 12;
+
+function getTierRank(satTier = '') {
+  const lower = String(satTier).toLowerCase();
+  if (lower.includes('1')) return 1;
+  if (lower.includes('2')) return 2;
+  if (lower.includes('3')) return 3;
+  return 4;
+}
+
+function matchesTierFilter(root, tierFilter) {
+  if (!tierFilter || tierFilter === 'ALL') return true;
+  const rank = getTierRank(root?.sat_tier);
+  if (tierFilter === 'TIER_1') return rank === 1;
+  if (tierFilter === 'TIER_2') return rank === 2;
+  if (tierFilter === 'TIER_3') return rank === 3;
+  return true;
+}
+
+function matchesMaturityFilter(root, maturityFilter) {
+  if (!maturityFilter || maturityFilter === 'ALL') return true;
+  if (maturityFilter === 'RECENTLY_WORKED') return hasBeenWorkedOn(root);
+  const pct = root?.mastery_percentage || 0;
+  if (maturityFilter === 'MASTERED') return pct >= 80;
+  if (maturityFilter === 'DEVELOPING') return pct >= 30 && pct < 80;
+  if (maturityFilter === 'FOCUS') return pct < 30;
+  return true;
+}
+
+function sortRootsForSampling(roots = []) {
+  return [...roots].sort((a, b) => {
+    // Highest test yield (Tier 1 -> 2 -> 3), then lowest mastery so priority roots surface first
+    const tierDiff = getTierRank(a.sat_tier) - getTierRank(b.sat_tier);
+    if (tierDiff !== 0) return tierDiff;
+    const masteryDiff = (a.mastery_percentage || 0) - (b.mastery_percentage || 0);
+    if (masteryDiff !== 0) return masteryDiff;
+    return (a.morpheme || '').localeCompare(b.morpheme || '');
+  });
+}
+
+function takeSampleSlice(roots = [], sampleLimit = 'ALL', sampleOffset = 0) {
+  const sorted = sortRootsForSampling(roots);
+  const total = sorted.length;
+  if (total === 0) {
+    return { active: [], latent: [], total: 0 };
+  }
+  if (sampleLimit === 'ALL' || sampleLimit >= total) {
+    return { active: sorted, latent: [], total };
+  }
+  const safeOffset = ((sampleOffset % total) + total) % total;
+  const rotated = [...sorted.slice(safeOffset), ...sorted.slice(0, safeOffset)];
+  return {
+    active: rotated.slice(0, sampleLimit),
+    latent: rotated.slice(sampleLimit),
+    total,
+  };
+}
+
+function computeAggregateFromRoots(roots = []) {
+  const totalWords = roots.reduce((acc, r) => acc + (r.total_words || 0), 0);
+  const masteredWords = roots.reduce((acc, r) => acc + (r.mastered_words || 0), 0);
+  const pct = totalWords > 0 ? Math.round((masteredWords / totalWords) * 100) : 0;
+  return { totalWords, masteredWords, pct };
+}
+
+function buildRootOrbs(roots = [], accentColor = '#7BB33B', overflowPage = 0) {
+  if (roots.length <= MAX_WHEEL_PARTITIONS) {
+    return {
+      nodes: roots.map((r) => ({
+        id: `root:${r.id}`,
+        kind: 'ROOT',
+        rootId: r.id,
+        label: r.morpheme.toUpperCase(),
+        subtitle: r.core_meaning,
+        tier: r.sat_tier,
+        language: r.language,
+        cluster: r.thematic_cluster,
+        percentage: Math.round(r.mastery_percentage || 0),
+        masteredWords: r.mastered_words || 0,
+        totalWords: r.total_words || 0,
+        accentColor,
+        root: r,
+      })),
+      hasOverflow: false,
+      totalPages: 1,
+      currentPage: 0,
+    };
+  }
+
+  // Cap strictly at 12: 11 individual root orbs + 12th "More (+N)" pod (or paginated 11-item window)
+  const pageSize = MAX_WHEEL_PARTITIONS - 1;
+  const totalPages = Math.ceil(roots.length / pageSize);
+  const safePage = ((overflowPage % totalPages) + totalPages) % totalPages;
+  const start = safePage * pageSize;
+  const pageRoots = roots.slice(start, start + pageSize);
+  const remainingCount = roots.length - pageRoots.length;
+  const remainingRoots = [...roots.slice(0, start), ...roots.slice(start + pageSize)];
+  const remAgg = computeAggregateFromRoots(remainingRoots);
+
+  const nodes = pageRoots.map((r) => ({
+    id: `root:${r.id}`,
+    kind: 'ROOT',
+    rootId: r.id,
+    label: r.morpheme.toUpperCase(),
+    subtitle: r.core_meaning,
+    tier: r.sat_tier,
+    language: r.language,
+    cluster: r.thematic_cluster,
+    percentage: Math.round(r.mastery_percentage || 0),
+    masteredWords: r.mastered_words || 0,
+    totalWords: r.total_words || 0,
+    accentColor,
+    root: r,
+  }));
+
+  nodes.push({
+    id: `overflow:page:${safePage + 1}`,
+    kind: 'OVERFLOW',
+    nextPage: (safePage + 1) % totalPages,
+    label: `+${remainingCount} MORE`,
+    subtitle: `Cycle next ${Math.min(pageSize, remainingCount)} roots (${safePage + 1}/${totalPages})`,
+    percentage: remAgg.pct,
+    masteredWords: remAgg.masteredWords,
+    totalWords: remAgg.totalWords,
+    totalRoots: remainingCount,
+    accentColor: '#C29B78',
+  });
+
+  return {
+    nodes,
+    hasOverflow: true,
+    totalPages,
+    currentPage: safePage,
+  };
+}
+
+/**
+ * Build a progressive-disclosure Harmonic Wheel model guaranteed to have <= 12 partitions.
+ * Supports dual-axis filtering (Thematic Cluster × SAT Tier), sample-size scooping, and drill-down.
+ */
+export function buildHarmonicWheelModel(allRoots = [], options = {}) {
+  const {
+    primaryLens = PATHWAY_THEMATIC,
+    tierFilter = 'ALL',       // 'ALL' | 'TIER_1' | 'TIER_2' | 'TIER_3'
+    maturityFilter = 'ALL',   // 'ALL' | 'FOCUS' | 'DEVELOPING' | 'MASTERED' | 'RECENTLY_WORKED'
+    drillDomainId = null,
+    drillSubId = null,        // Tier id (when drilling Theme -> Tier) or Theme id (when drilling Yield -> Theme)
+    sampleLimit = 5,          // 1..12 or 'ALL'
+    sampleOffset = 0,
+    overflowPage = 0,
+  } = options;
+
+  // Apply global orthogonal filters (Test Relevance + Maturity)
+  const filteredRoots = allRoots.filter(
+    (r) => matchesTierFilter(r, tierFilter) && matchesMaturityFilter(r, maturityFilter)
+  );
+
+  // Build base groups for the primary lens
+  const rawGroups = groupRootsByDomainLens(filteredRoots, primaryLens);
+
+  // Depth 0: Domain Overview (3 to 11 orbs — always <= 12)
+  if (!drillDomainId) {
+    let totalLatentCount = 0;
+    let totalActiveCount = 0;
+    const sampledAllRoots = [];
+
+    const nodes = rawGroups
+      .filter((g) => g.roots.length > 0 || tierFilter === 'ALL')
+      .slice(0, MAX_WHEEL_PARTITIONS)
+      .map((group) => {
+        const sample = takeSampleSlice(group.roots, sampleLimit, sampleOffset);
+        totalLatentCount += sample.latent.length;
+        totalActiveCount += sample.active.length;
+        sampledAllRoots.push(...sample.active);
+
+        const agg = computeAggregateFromRoots(sample.active);
+        return {
+          id: `domain:${group.id}`,
+          kind: 'DOMAIN',
+          domainId: group.id,
+          label: group.name,
+          shortLabel: group.name.split('&')[0].trim(),
+          icon: group.icon,
+          subtitle: group.description,
+          percentage: agg.pct,
+          fullPercentage: group.masteryPercentage,
+          masteredWords: agg.masteredWords,
+          totalWords: agg.totalWords,
+          activeRootsCount: sample.active.length,
+          totalRootsCount: group.roots.length,
+          latentRootsCount: sample.latent.length,
+          accentColor: group.accentColor || '#7BB33B',
+          isEmpty: group.roots.length === 0,
+          sampledRoots: sample.active,
+        };
+      });
+
+    const centerAgg = computeAggregateFromRoots(
+      sampleLimit === 'ALL' ? filteredRoots : sampledAllRoots
+    );
+
+    return {
+      depth: 0,
+      title: 'Lexicon Constellation',
+      subtitle:
+        sampleLimit === 'ALL'
+          ? `${filteredRoots.length} roots across ${nodes.filter((n) => !n.isEmpty).length} clusters`
+          : `Sampling up to ${sampleLimit} per cluster (${totalActiveCount} drawn, ${totalLatentCount} resting)`,
+      centerPct: centerAgg.pct,
+      centerLabel: sampleLimit === 'ALL' ? 'OVERALL' : 'SAMPLED',
+      activeCount: totalActiveCount,
+      latentCount: totalLatentCount,
+      totalPoolCount: filteredRoots.length,
+      nodes,
+      breadcrumbs: [{ depth: 0, label: 'All Clusters' }],
+    };
+  }
+
+  // Depth 1+: A domain is selected
+  const selectedDomain = rawGroups.find((g) => g.id === drillDomainId) || rawGroups[0];
+  if (!selectedDomain) {
+    return buildHarmonicWheelModel(allRoots, { ...options, drillDomainId: null, drillSubId: null });
+  }
+
+  const domainRoots = selectedDomain.roots;
+
+  // If primaryLens === 'yield' (Tier first) and no sub-theme is selected yet, partition by Thematic Clusters (<= 11)
+  if (primaryLens === PATHWAY_YIELD && !drillSubId && domainRoots.length > MAX_WHEEL_PARTITIONS && sampleLimit === 'ALL') {
+    const themeGroups = groupRootsByDomainLens(domainRoots, PATHWAY_THEMATIC).filter((g) => g.roots.length > 0);
+    const nodes = themeGroups.slice(0, MAX_WHEEL_PARTITIONS).map((tg) => ({
+      id: `sub:${tg.id}`,
+      kind: 'SUB_DOMAIN',
+      subId: tg.id,
+      label: tg.name,
+      shortLabel: tg.name.split('&')[0].trim(),
+      icon: tg.icon,
+      subtitle: tg.description,
+      percentage: tg.masteryPercentage,
+      masteredWords: tg.masteredWords,
+      totalWords: tg.totalWords,
+      activeRootsCount: tg.roots.length,
+      totalRootsCount: tg.roots.length,
+      latentRootsCount: 0,
+      accentColor: tg.accentColor || selectedDomain.accentColor,
+    }));
+    return {
+      depth: 1,
+      title: selectedDomain.name,
+      subtitle: `${domainRoots.length} roots organized by theme`,
+      centerPct: selectedDomain.masteryPercentage,
+      centerLabel: 'CLUSTER',
+      activeCount: domainRoots.length,
+      latentCount: 0,
+      totalPoolCount: domainRoots.length,
+      selectedDomain,
+      nodes,
+      breadcrumbs: [
+        { depth: 0, label: 'All Tiers' },
+        { depth: 1, label: selectedDomain.name },
+      ],
+    };
+  }
+
+  // If a non-yield domain has >12 roots, user wants ALL, and no Tier filter/sub-drill is active -> partition by SAT Tiers (3 orbs)
+  if (
+    primaryLens !== PATHWAY_YIELD &&
+    !drillSubId &&
+    tierFilter === 'ALL' &&
+    sampleLimit === 'ALL' &&
+    domainRoots.length > MAX_WHEEL_PARTITIONS
+  ) {
+    const tierGroups = groupRootsByDomainLens(domainRoots, PATHWAY_YIELD).filter((g) => g.roots.length > 0);
+    const nodes = tierGroups.map((tg) => ({
+      id: `sub:${tg.id}`,
+      kind: 'SUB_DOMAIN',
+      subId: tg.id,
+      label: tg.name,
+      shortLabel: tg.name.replace('High-Yield', '').replace('Multipliers', '').replace('Advanced', '').trim(),
+      icon: tg.icon,
+      subtitle: `${tg.roots.length} roots in ${selectedDomain.name}`,
+      percentage: tg.masteryPercentage,
+      masteredWords: tg.masteredWords,
+      totalWords: tg.totalWords,
+      activeRootsCount: tg.roots.length,
+      totalRootsCount: tg.roots.length,
+      latentRootsCount: 0,
+      accentColor: tg.accentColor || '#7BB33B',
+    }));
+
+    return {
+      depth: 1,
+      title: selectedDomain.name,
+      subtitle: `${domainRoots.length} roots grouped by test relevance`,
+      centerPct: selectedDomain.masteryPercentage,
+      centerLabel: 'BY TIER',
+      activeCount: domainRoots.length,
+      latentCount: 0,
+      totalPoolCount: domainRoots.length,
+      selectedDomain,
+      nodes,
+      breadcrumbs: [
+        { depth: 0, label: 'All Clusters' },
+        { depth: 1, label: selectedDomain.name },
+      ],
+    };
+  }
+
+  // Determine the final root pool (either direct domainRoots or filtered by drillSubId)
+  let targetRoots = domainRoots;
+  let subLabel = null;
+  let subAccent = selectedDomain.accentColor || '#7BB33B';
+
+  if (drillSubId) {
+    if (primaryLens === PATHWAY_YIELD) {
+      const matchTheme = groupRootsByDomainLens(domainRoots, PATHWAY_THEMATIC).find((g) => g.id === drillSubId);
+      if (matchTheme) {
+        targetRoots = matchTheme.roots;
+        subLabel = matchTheme.name;
+        subAccent = matchTheme.accentColor || subAccent;
+      }
+    } else {
+      const matchTier = groupRootsByDomainLens(domainRoots, PATHWAY_YIELD).find((g) => g.id === drillSubId);
+      if (matchTier) {
+        targetRoots = matchTier.roots;
+        subLabel = matchTier.name;
+        subAccent = matchTier.accentColor || subAccent;
+      }
+    }
+  }
+
+  const sample = takeSampleSlice(targetRoots, sampleLimit, sampleOffset);
+  const agg = computeAggregateFromRoots(sample.active);
+  const { nodes, hasOverflow, totalPages, currentPage } = buildRootOrbs(
+    sample.active,
+    subAccent,
+    overflowPage
+  );
+
+  const breadcrumbs = [
+    { depth: 0, label: primaryLens === PATHWAY_YIELD ? 'All Tiers' : 'All Clusters' },
+    { depth: 1, label: selectedDomain.name },
+  ];
+  if (subLabel) {
+    breadcrumbs.push({ depth: 2, label: subLabel });
+  }
+
+  return {
+    depth: subLabel ? 2 : 1,
+    title: subLabel ? `${selectedDomain.name} · ${subLabel}` : selectedDomain.name,
+    subtitle:
+      sample.latent.length > 0
+        ? `${sample.active.length} drawn into focus · ${sample.latent.length} resting in core`
+        : `${sample.active.length} ${sample.active.length === 1 ? 'root' : 'roots'} in focus`,
+    centerPct: agg.pct,
+    centerLabel: sample.latent.length > 0 ? 'DRAWN' : 'MASTERY',
+    activeCount: sample.active.length,
+    latentCount: sample.latent.length,
+    totalPoolCount: sample.total,
+    selectedDomain,
+    subLabel,
+    hasOverflow,
+    totalPages,
+    currentPage,
+    nodes,
+    breadcrumbs,
+  };
+}
