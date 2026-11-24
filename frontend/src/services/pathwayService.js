@@ -535,6 +535,38 @@ function matchesTierFilter(root, tierFilter) {
   return true;
 }
 
+function matchesThemeFilter(root, themeFilter) {
+  if (!themeFilter || themeFilter === 'ALL') return true;
+  return (root?.thematic_cluster || 'Motion & Travel').toLowerCase() === themeFilter.toLowerCase();
+}
+
+function matchesOriginFilter(root, originFilter) {
+  if (!originFilter || originFilter === 'ALL') return true;
+  const lang = (root?.language || '').toLowerCase();
+  if (originFilter === 'Latin') return lang.startsWith('latin');
+  if (originFilter === 'Greek') return lang.startsWith('greek');
+  if (originFilter === 'Other') return !lang.startsWith('latin') && !lang.startsWith('greek');
+  return true;
+}
+
+function findMatchingWords(root, cleanQuery) {
+  if (!cleanQuery) return [];
+  return (root?.words || [])
+    .map((w) => (typeof w === 'string' ? w : w?.word || ''))
+    .filter((wordText) => wordText.toLowerCase().includes(cleanQuery));
+}
+
+function matchesSearchQuery(root, cleanQuery) {
+  if (!cleanQuery) return true;
+  const m = (root?.morpheme || '').toLowerCase();
+  const cm = (root?.core_meaning || '').toLowerCase();
+  const mn = (root?.mnemonic || '').toLowerCase();
+  if (m.includes(cleanQuery) || cm.includes(cleanQuery) || mn.includes(cleanQuery)) {
+    return true;
+  }
+  return findMatchingWords(root, cleanQuery).length > 0;
+}
+
 function matchesMaturityFilter(root, maturityFilter) {
   if (!maturityFilter || maturityFilter === 'ALL') return true;
   if (maturityFilter === 'RECENTLY_WORKED') return hasBeenWorkedOn(root);
@@ -581,24 +613,27 @@ function computeAggregateFromRoots(roots = []) {
   return { totalWords, masteredWords, pct };
 }
 
-function buildRootOrbs(roots = [], accentColor = '#7BB33B', overflowPage = 0) {
+function buildRootOrbs(roots = [], accentColor = '#7BB33B', overflowPage = 0, cleanQuery = '') {
+  const mapRootNode = (r) => ({
+    id: `root:${r.id}`,
+    kind: 'ROOT',
+    rootId: r.id,
+    label: r.morpheme.toUpperCase(),
+    subtitle: r.core_meaning,
+    tier: r.sat_tier,
+    language: r.language,
+    cluster: r.thematic_cluster,
+    percentage: Math.round(r.mastery_percentage || 0),
+    masteredWords: r.mastered_words || 0,
+    totalWords: r.total_words || 0,
+    accentColor: accentColor || getClusterMeta(r.thematic_cluster).accentColor || '#7BB33B',
+    matchedWords: cleanQuery ? findMatchingWords(r, cleanQuery) : [],
+    root: r,
+  });
+
   if (roots.length <= MAX_WHEEL_PARTITIONS) {
     return {
-      nodes: roots.map((r) => ({
-        id: `root:${r.id}`,
-        kind: 'ROOT',
-        rootId: r.id,
-        label: r.morpheme.toUpperCase(),
-        subtitle: r.core_meaning,
-        tier: r.sat_tier,
-        language: r.language,
-        cluster: r.thematic_cluster,
-        percentage: Math.round(r.mastery_percentage || 0),
-        masteredWords: r.mastered_words || 0,
-        totalWords: r.total_words || 0,
-        accentColor,
-        root: r,
-      })),
+      nodes: roots.map(mapRootNode),
       hasOverflow: false,
       totalPages: 1,
       currentPage: 0,
@@ -615,21 +650,7 @@ function buildRootOrbs(roots = [], accentColor = '#7BB33B', overflowPage = 0) {
   const remainingRoots = [...roots.slice(0, start), ...roots.slice(start + pageSize)];
   const remAgg = computeAggregateFromRoots(remainingRoots);
 
-  const nodes = pageRoots.map((r) => ({
-    id: `root:${r.id}`,
-    kind: 'ROOT',
-    rootId: r.id,
-    label: r.morpheme.toUpperCase(),
-    subtitle: r.core_meaning,
-    tier: r.sat_tier,
-    language: r.language,
-    cluster: r.thematic_cluster,
-    percentage: Math.round(r.mastery_percentage || 0),
-    masteredWords: r.mastered_words || 0,
-    totalWords: r.total_words || 0,
-    accentColor,
-    root: r,
-  }));
+  const nodes = pageRoots.map(mapRootNode);
 
   nodes.push({
     id: `overflow:page:${safePage + 1}`,
@@ -654,13 +675,17 @@ function buildRootOrbs(roots = [], accentColor = '#7BB33B', overflowPage = 0) {
 
 /**
  * Build a progressive-disclosure Harmonic Wheel model guaranteed to have <= 12 partitions.
- * Supports dual-axis filtering (Thematic Cluster × SAT Tier), sample-size scooping, and drill-down.
+ * Supports simultaneous multi-axis filtering (Theme × Tier × Origin × Maturity × Search),
+ * sample-size scooping, and drill-down.
  */
 export function buildHarmonicWheelModel(allRoots = [], options = {}) {
   const {
     primaryLens = PATHWAY_THEMATIC,
     tierFilter = 'ALL',       // 'ALL' | 'TIER_1' | 'TIER_2' | 'TIER_3'
+    themeFilter = 'ALL',      // 'ALL' | thematic cluster name
+    originFilter = 'ALL',     // 'ALL' | 'Latin' | 'Greek' | 'Other'
     maturityFilter = 'ALL',   // 'ALL' | 'FOCUS' | 'DEVELOPING' | 'MASTERED' | 'RECENTLY_WORKED'
+    searchQuery = '',
     drillDomainId = null,
     drillSubId = null,        // Tier id (when drilling Theme -> Tier) or Theme id (when drilling Yield -> Theme)
     sampleLimit = 5,          // 1..12 or 'ALL'
@@ -668,22 +693,84 @@ export function buildHarmonicWheelModel(allRoots = [], options = {}) {
     overflowPage = 0,
   } = options;
 
-  // Apply global orthogonal filters (Test Relevance + Maturity)
+  const cleanQuery = (searchQuery || '').trim().toLowerCase();
+
+  // Apply all orthogonal filters simultaneously
   const filteredRoots = allRoots.filter(
-    (r) => matchesTierFilter(r, tierFilter) && matchesMaturityFilter(r, maturityFilter)
+    (r) =>
+      matchesTierFilter(r, tierFilter) &&
+      matchesThemeFilter(r, themeFilter) &&
+      matchesOriginFilter(r, originFilter) &&
+      matchesMaturityFilter(r, maturityFilter) &&
+      matchesSearchQuery(r, cleanQuery)
   );
+
+  // Direct Search Mode: surface matching root orbs immediately on the wheel
+  if (cleanQuery) {
+    const sortedMatches = sortRootsForSampling(filteredRoots);
+    const agg = computeAggregateFromRoots(sortedMatches);
+    const { nodes, hasOverflow, totalPages, currentPage } = buildRootOrbs(
+      sortedMatches,
+      null,
+      overflowPage,
+      cleanQuery
+    );
+
+    return {
+      depth: 0,
+      isSearchMode: true,
+      searchQuery: searchQuery.trim(),
+      title: `Matches for “${searchQuery.trim()}”`,
+      subtitle:
+        sortedMatches.length === 0
+          ? 'No roots or words match the current search and filters'
+          : `${sortedMatches.length} matching ${sortedMatches.length === 1 ? 'root' : 'roots'} across your active filters`,
+      centerPct: agg.pct,
+      centerLabel: `${sortedMatches.length} FOUND`,
+      activeCount: sortedMatches.length,
+      latentCount: 0,
+      totalPoolCount: sortedMatches.length,
+      hasOverflow,
+      totalPages,
+      currentPage,
+      nodes,
+      breadcrumbs: [{ depth: 0, label: `Search: “${searchQuery.trim()}”` }],
+    };
+  }
 
   // Build base groups for the primary lens
   const rawGroups = groupRootsByDomainLens(filteredRoots, primaryLens);
+  const hasActiveFilter =
+    tierFilter !== 'ALL' ||
+    themeFilter !== 'ALL' ||
+    originFilter !== 'ALL' ||
+    maturityFilter !== 'ALL';
+
+  // Smart shortcut: if user pinned a single domain on the matching primary lens, auto-step into it
+  let effectiveDrillDomainId = drillDomainId;
+  if (!effectiveDrillDomainId) {
+    if (primaryLens === PATHWAY_THEMATIC && themeFilter !== 'ALL') {
+      effectiveDrillDomainId = themeFilter;
+    } else if (primaryLens === PATHWAY_ORIGIN && originFilter !== 'ALL') {
+      effectiveDrillDomainId = originFilter;
+    } else if (primaryLens === PATHWAY_YIELD && tierFilter !== 'ALL') {
+      const tierMap = {
+        TIER_1: 'Tier 1 High-Yield',
+        TIER_2: 'Tier 2 Multipliers',
+        TIER_3: 'Tier 3 Advanced',
+      };
+      effectiveDrillDomainId = tierMap[tierFilter] || null;
+    }
+  }
 
   // Depth 0: Domain Overview (3 to 11 orbs — always <= 12)
-  if (!drillDomainId) {
+  if (!effectiveDrillDomainId) {
     let totalLatentCount = 0;
     let totalActiveCount = 0;
     const sampledAllRoots = [];
 
     const nodes = rawGroups
-      .filter((g) => g.roots.length > 0 || tierFilter === 'ALL')
+      .filter((g) => g.roots.length > 0 || !hasActiveFilter)
       .slice(0, MAX_WHEEL_PARTITIONS)
       .map((group) => {
         const sample = takeSampleSlice(group.roots, sampleLimit, sampleOffset);
@@ -735,7 +822,7 @@ export function buildHarmonicWheelModel(allRoots = [], options = {}) {
   }
 
   // Depth 1+: A domain is selected
-  const selectedDomain = rawGroups.find((g) => g.id === drillDomainId) || rawGroups[0];
+  const selectedDomain = rawGroups.find((g) => g.id === effectiveDrillDomainId) || rawGroups[0];
   if (!selectedDomain) {
     return buildHarmonicWheelModel(allRoots, { ...options, drillDomainId: null, drillSubId: null });
   }

@@ -120,6 +120,19 @@ export default function WheelInspectorPanel({
               {focusNode.subtitle}
             </p>
           )}
+          {focusNode.matchedWords && focusNode.matchedWords.length > 0 && (
+            <div className="flex flex-wrap items-center gap-1.5 mt-2">
+              <span className="text-[11px] text-[#62685E]">Matched words:</span>
+              {focusNode.matchedWords.slice(0, 4).map((mw) => (
+                <span
+                  key={mw}
+                  className="px-2 py-0.5 rounded-full bg-[#EDF5E5] text-[#2F441E] text-[11px] font-medium"
+                >
+                  {mw}
+                </span>
+              ))}
+            </div>
+          )}
         </div>
 
         <div className="grid grid-cols-2 gap-3 pt-2">
@@ -210,10 +223,18 @@ export default function WheelInspectorPanel({
                   {node.icon ? `${node.icon} ` : ''}
                   {node.label}
                 </span>
-                {node.kind === 'ROOT' && node.subtitle && (
-                  <span className="text-xs text-[#62685E] truncate hidden sm:inline">
-                    “{node.subtitle}”
+                {node.kind === 'ROOT' && node.matchedWords && node.matchedWords.length > 0 ? (
+                  <span className="text-[11px] text-[#2F441E] bg-[#EDF5E5] px-2 py-0.5 rounded-full truncate">
+                    {node.matchedWords[0]}
+                    {node.matchedWords.length > 1 ? ` +${node.matchedWords.length - 1}` : ''}
                   </span>
+                ) : (
+                  node.kind === 'ROOT' &&
+                  node.subtitle && (
+                    <span className="text-xs text-[#62685E] truncate hidden sm:inline">
+                      “{node.subtitle}”
+                    </span>
+                  )
                 )}
               </div>
 

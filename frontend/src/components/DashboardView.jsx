@@ -7,8 +7,10 @@ import {
   ChevronRight,
   ChevronUp,
   Clock,
+  RotateCcw,
   Search,
   Shuffle,
+  X,
 } from 'lucide-react';
 import HarmonicWheel from './wheel/HarmonicWheel';
 import WheelInspectorPanel from './wheel/WheelInspectorPanel';
@@ -16,8 +18,12 @@ import CircleMasteryRing from './CircleMasteryRing';
 import WordPipTrack from './WordPipTrack';
 import {
   DOMAIN_LENSES,
+  ORIGIN_DOMAIN_DEFS,
   PATHWAY_CHANGE_EVENT,
+  PATHWAY_ORIGIN,
+  PATHWAY_THEMATIC,
   PATHWAY_YIELD,
+  THEMATIC_CLUSTER_DEFS,
   buildHarmonicWheelModel,
   getStoredPathway,
   groupRootsByDomainLens,
@@ -64,6 +70,8 @@ function formatLastWorked(isoString) {
 export default function DashboardView({ stats, onSelectRoot, onNavigateMode }) {
   const [activeLens, setActiveLens] = useState(getStoredPathway);
   const [tierFilter, setTierFilter] = useState('ALL');
+  const [themeFilter, setThemeFilter] = useState('ALL');
+  const [originFilter, setOriginFilter] = useState('ALL');
   const [maturityFilter, setMaturityFilter] = useState('ALL');
 
   // Drill-down navigation state
@@ -95,9 +103,6 @@ export default function DashboardView({ stats, onSelectRoot, onNavigateMode }) {
   const handleLensChange = (newLens) => {
     setActiveLens(newLens);
     setStoredPathway(newLens);
-    if (newLens === PATHWAY_YIELD) {
-      setTierFilter('ALL');
-    }
     setDrillDomainId(null);
     setDrillSubId(null);
     setOverflowPage(0);
@@ -112,9 +117,49 @@ export default function DashboardView({ stats, onSelectRoot, onNavigateMode }) {
     setSelectedRootNode(null);
   };
 
+  const handleThemeFilterChange = (nextTheme) => {
+    setThemeFilter(nextTheme);
+    setDrillDomainId(null);
+    setDrillSubId(null);
+    setOverflowPage(0);
+    setSelectedRootNode(null);
+  };
+
+  const handleOriginFilterChange = (nextOrigin) => {
+    setOriginFilter(nextOrigin);
+    setDrillDomainId(null);
+    setDrillSubId(null);
+    setOverflowPage(0);
+    setSelectedRootNode(null);
+  };
+
   const handleMaturityChange = (nextMat) => {
     setMaturityFilter(nextMat);
     setOverflowPage(0);
+    setSelectedRootNode(null);
+  };
+
+  const handleSearchChange = (val) => {
+    setSearchQuery(val);
+    setOverflowPage(0);
+    setSelectedRootNode(null);
+  };
+
+  const handleResetFilters = () => {
+    setTierFilter('ALL');
+    setThemeFilter('ALL');
+    setOriginFilter('ALL');
+    setMaturityFilter('ALL');
+    setSearchQuery('');
+    setDrillDomainId(null);
+    setDrillSubId(null);
+    setOverflowPage(0);
+    setSelectedRootNode(null);
+  };
+
+  const handleShuffleSample = () => {
+    const step = sampleLimit === 'ALL' ? 5 : Math.max(1, sampleLimit);
+    setSampleOffset((prev) => prev + step);
     setSelectedRootNode(null);
   };
 
@@ -124,6 +169,9 @@ export default function DashboardView({ stats, onSelectRoot, onNavigateMode }) {
       setDrillSubId(null);
       setOverflowPage(0);
       setSelectedRootNode(null);
+      if (activeLens === PATHWAY_THEMATIC && themeFilter !== 'ALL') setThemeFilter('ALL');
+      if (activeLens === PATHWAY_ORIGIN && originFilter !== 'ALL') setOriginFilter('ALL');
+      if (activeLens === PATHWAY_YIELD && tierFilter !== 'ALL') setTierFilter('ALL');
     } else if (targetDepth === 1) {
       setDrillSubId(null);
       setOverflowPage(0);
@@ -197,12 +245,22 @@ export default function DashboardView({ stats, onSelectRoot, onNavigateMode }) {
   const accuracyPct =
     overall.accuracy_percentage || sections.vocab?.accuracy_percentage || 0;
 
+  const hasAnyFilter =
+    tierFilter !== 'ALL' ||
+    themeFilter !== 'ALL' ||
+    originFilter !== 'ALL' ||
+    maturityFilter !== 'ALL' ||
+    searchQuery.trim().length > 0;
+
   const wheelModel = useMemo(
     () =>
       buildHarmonicWheelModel(root_mastery, {
         primaryLens: activeLens,
         tierFilter,
+        themeFilter,
+        originFilter,
         maturityFilter,
+        searchQuery,
         drillDomainId,
         drillSubId,
         sampleLimit,
@@ -213,7 +271,10 @@ export default function DashboardView({ stats, onSelectRoot, onNavigateMode }) {
       root_mastery,
       activeLens,
       tierFilter,
+      themeFilter,
+      originFilter,
       maturityFilter,
+      searchQuery,
       drillDomainId,
       drillSubId,
       sampleLimit,
@@ -235,8 +296,8 @@ export default function DashboardView({ stats, onSelectRoot, onNavigateMode }) {
 
   return (
     <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-8 space-y-6">
-      {/* 1. Calm Top Bar */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+      {/* 1. Calm Top Bar with Direct Word/Root Search */}
+      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div>
           <h1 className="text-2xl sm:text-3xl font-bold text-[#111410] tracking-tight">
             Progress Constellation
@@ -246,21 +307,46 @@ export default function DashboardView({ stats, onSelectRoot, onNavigateMode }) {
           </p>
         </div>
 
-        {onNavigateMode && (
-          <button
-            type="button"
-            onClick={() => onNavigateMode('vocab')}
-            className="inline-flex items-center gap-2 self-start sm:self-auto px-5 py-2.5 rounded-xl bg-[#7BB33B] hover:bg-[#84C341] text-white text-xs font-semibold shadow-soft-sm transition"
-          >
-            <span>Practice Now</span>
-            <ArrowUpRight className="w-4 h-4" />
-          </button>
-        )}
+        <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2.5">
+          {/* Direct Word / Root Search */}
+          <div className="relative sm:w-64">
+            <Search className="w-4 h-4 text-[#62685E] absolute left-3 top-1/2 -translate-y-1/2 pointer-events-none" />
+            <input
+              type="text"
+              value={searchQuery}
+              onChange={(e) => handleSearchChange(e.target.value)}
+              placeholder="Search word, root, or meaning..."
+              aria-label="Search for a word or root"
+              className="w-full pl-9 pr-8 py-2 rounded-xl bg-white/95 border border-[#111410]/15 text-xs text-[#111410] placeholder:text-[#62685E]/75 shadow-soft-xs focus:outline-none focus:border-[#7BB33B]"
+            />
+            {searchQuery && (
+              <button
+                type="button"
+                onClick={() => handleSearchChange('')}
+                className="p-1 rounded-full text-[#62685E] hover:text-[#111410] absolute right-2 top-1/2 -translate-y-1/2"
+                aria-label="Clear search"
+              >
+                <X className="w-3.5 h-3.5" />
+              </button>
+            )}
+          </div>
+
+          {onNavigateMode && (
+            <button
+              type="button"
+              onClick={() => onNavigateMode('vocab')}
+              className="inline-flex items-center justify-center gap-2 px-5 py-2 rounded-xl bg-[#7BB33B] hover:bg-[#84C341] text-white text-xs font-semibold shadow-soft-sm transition shrink-0"
+            >
+              <span>Practice Now</span>
+              <ArrowUpRight className="w-4 h-4" />
+            </button>
+          )}
+        </div>
       </div>
 
-      {/* 2. Lens & Filter Bar (Compact, Dual-Axis) */}
+      {/* 2. Multi-Axis Grouping, Simultaneous Filters & Sample Slider */}
       <div className="bg-white/90 border border-[#111410]/15 rounded-2xl shadow-soft-sm p-4 space-y-3">
-        <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-3">
+        <div className="flex flex-col xl:flex-row xl:items-center justify-between gap-3">
           {/* Primary Clustering Axis */}
           <div className="flex items-center flex-wrap gap-1.5">
             <span className="text-[11px] font-medium uppercase tracking-wider text-[#62685E] mr-1">
@@ -287,28 +373,79 @@ export default function DashboardView({ stats, onSelectRoot, onNavigateMode }) {
             })}
           </div>
 
-          {/* Orthogonal Test Relevance Filter */}
-          <div className="flex items-center flex-wrap gap-1.5">
-            <span className="text-[11px] font-medium uppercase tracking-wider text-[#62685E] mr-1">
-              Relevance:
+          {/* Simultaneous Filters: Tier + Theme + Origin */}
+          <div className="flex items-center flex-wrap gap-2">
+            <span className="text-[11px] font-medium uppercase tracking-wider text-[#62685E]">
+              Filter:
             </span>
-            {TIER_FILTERS.map((tf) => {
-              const isActive = tierFilter === tf.id;
-              return (
-                <button
-                  key={tf.id}
-                  type="button"
-                  onClick={() => handleTierFilterChange(tf.id)}
-                  className={`px-2.5 py-1 rounded-lg text-xs font-medium transition ${
-                    isActive
-                      ? 'bg-[#EDF5E5] text-[#2F441E] border border-[#7BB33B] font-semibold'
-                      : 'bg-[#FAFBF8] text-[#62685E] hover:text-[#111410] border border-[#111410]/10'
-                  }`}
-                >
+
+            {/* Tier Selector */}
+            <select
+              value={tierFilter}
+              onChange={(e) => handleTierFilterChange(e.target.value)}
+              aria-label="Filter by test tier"
+              className={`px-2.5 py-1.5 rounded-lg text-xs font-medium border transition cursor-pointer focus:outline-none ${
+                tierFilter !== 'ALL'
+                  ? 'bg-[#EDF5E5] text-[#2F441E] border-[#7BB33B] font-semibold'
+                  : 'bg-[#FAFBF8] text-[#111410] border-[#111410]/15'
+              }`}
+            >
+              {TIER_FILTERS.map((tf) => (
+                <option key={tf.id} value={tf.id}>
                   {tf.label}
-                </button>
-              );
-            })}
+                </option>
+              ))}
+            </select>
+
+            {/* Theme Selector */}
+            <select
+              value={themeFilter}
+              onChange={(e) => handleThemeFilterChange(e.target.value)}
+              aria-label="Filter by theme"
+              className={`px-2.5 py-1.5 rounded-lg text-xs font-medium border transition cursor-pointer focus:outline-none max-w-[175px] ${
+                themeFilter !== 'ALL'
+                  ? 'bg-[#EDF5E5] text-[#2F441E] border-[#7BB33B] font-semibold'
+                  : 'bg-[#FAFBF8] text-[#111410] border-[#111410]/15'
+              }`}
+            >
+              <option value="ALL">All Themes</option>
+              {THEMATIC_CLUSTER_DEFS.map((cluster) => (
+                <option key={cluster.id} value={cluster.id}>
+                  {cluster.icon} {cluster.name}
+                </option>
+              ))}
+            </select>
+
+            {/* Origin Selector */}
+            <select
+              value={originFilter}
+              onChange={(e) => handleOriginFilterChange(e.target.value)}
+              aria-label="Filter by linguistic origin"
+              className={`px-2.5 py-1.5 rounded-lg text-xs font-medium border transition cursor-pointer focus:outline-none ${
+                originFilter !== 'ALL'
+                  ? 'bg-[#EDF5E5] text-[#2F441E] border-[#7BB33B] font-semibold'
+                  : 'bg-[#FAFBF8] text-[#111410] border-[#111410]/15'
+              }`}
+            >
+              <option value="ALL">All Origins</option>
+              {ORIGIN_DOMAIN_DEFS.map((orig) => (
+                <option key={orig.id} value={orig.id}>
+                  {orig.icon} {orig.name}
+                </option>
+              ))}
+            </select>
+
+            {hasAnyFilter && (
+              <button
+                type="button"
+                onClick={handleResetFilters}
+                className="inline-flex items-center gap-1 px-2.5 py-1.5 rounded-lg text-xs font-medium text-[#42281D] bg-[#FAF3DD] hover:bg-[#EFE8DF] border border-[#111410]/15 transition"
+                title="Clear all active filters and search"
+              >
+                <RotateCcw className="w-3 h-3" />
+                <span>Reset</span>
+              </button>
+            )}
           </div>
         </div>
 
@@ -349,12 +486,12 @@ export default function DashboardView({ stats, onSelectRoot, onNavigateMode }) {
             {sampleLimit !== 'ALL' && (
               <button
                 type="button"
-                onClick={() => setSampleOffset((prev) => prev + Math.max(1, sampleLimit))}
+                onClick={handleShuffleSample}
                 className="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg text-xs font-medium bg-[#FAFBF8] hover:bg-[#EDF5E5] text-[#2F441E] border border-[#111410]/15 transition"
                 title="Draw a different sample of roots from the latent core"
               >
                 <Shuffle className="w-3 h-3" />
-                <span>Drift</span>
+                <span>Draw fresh</span>
               </button>
             )}
           </div>
@@ -426,6 +563,8 @@ export default function DashboardView({ stats, onSelectRoot, onNavigateMode }) {
               onHoverNode={setHoveredNode}
               onSelectNode={handleSelectNode}
               onZoomOut={handleZoomOut}
+              canShuffle={wheelModel.latentCount > 0}
+              onShuffle={handleShuffleSample}
             />
           </div>
 

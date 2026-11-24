@@ -1,5 +1,5 @@
-import React, { useId } from 'react';
-import { ArrowLeft } from 'lucide-react';
+import React, { useId, useState } from 'react';
+import { ArrowLeft, Shuffle } from 'lucide-react';
 import { useHarmonicWheel } from './useHarmonicWheel';
 
 function polarToXY(cx, cy, r, deg) {
@@ -24,8 +24,12 @@ export default function HarmonicWheel({
   onHoverNode,
   onSelectNode,
   onZoomOut,
+  canShuffle = false,
+  onShuffle,
 }) {
   const uid = useId().replace(/:/g, '');
+  const [isHubHovered, setIsHubHovered] = useState(false);
+  const [pulseCount, setPulseCount] = useState(0);
   const {
     nodes = [],
     latentCount = 0,
@@ -33,6 +37,12 @@ export default function HarmonicWheel({
     centerLabel = 'OVERALL',
     depth = 0,
   } = model || {};
+
+  const triggerShuffle = () => {
+    if (!canShuffle || !onShuffle) return;
+    setPulseCount((c) => c + 1);
+    onShuffle();
+  };
 
   const { renderNodes, motes } = useHarmonicWheel(nodes, latentCount);
 
@@ -267,73 +277,127 @@ export default function HarmonicWheel({
           );
         })}
 
-        {/* Center Hub (Overall Metric / Zoom Out trigger) */}
-        <g
-          onClick={() => depth > 0 && onZoomOut && onZoomOut()}
-          style={{ cursor: depth > 0 ? 'pointer' : 'default' }}
-          role={depth > 0 ? 'button' : undefined}
-          tabIndex={depth > 0 ? 0 : undefined}
-          aria-label={depth > 0 ? 'Zoom out to parent wheel' : `Overall ${centerPct}% mastery`}
-          onKeyDown={(e) => {
-            if (depth > 0 && (e.key === 'Enter' || e.key === ' ')) {
-              e.preventDefault();
-              onZoomOut && onZoomOut();
-            }
-          }}
-        >
-          <circle
-            cx={cx}
-            cy={cy}
-            r={hubRadius}
-            fill="#FFFFFF"
-            fillOpacity="0.94"
-            stroke="#111410"
-            strokeOpacity="0.18"
-            strokeWidth="1.5"
-          />
-          <circle
-            cx={cx}
-            cy={cy}
-            r={Math.max(0, (hubRadius - 4) * Math.sqrt(Math.max(0, Math.min(1, centerPct / 100))))}
-            fill="#7BB33B"
-            fillOpacity="0.18"
-          />
-          <text
-            x={cx}
-            y={depth > 0 ? cy - 2 : cy + 3}
-            textAnchor="middle"
-            fontSize="22"
-            fontWeight="800"
-            fontFamily="ui-monospace, SFMono-Regular, monospace"
-            fill="#111410"
-          >
-            {centerPct}%
-          </text>
-          <text
-            x={cx}
-            y={depth > 0 ? cy + 13 : cy + 18}
-            textAnchor="middle"
-            fontSize="9"
-            fontWeight="700"
-            letterSpacing="0.08em"
-            fill="#62685E"
-          >
-            {centerLabel}
-          </text>
-        </g>
+        {/* Center Hub (Shuffle at Depth 0 when sampling, or Zoom Out when drilled in) */}
+        {(() => {
+          const hubActsAsZoomOut = depth > 0;
+          const hubActsAsShuffle = depth === 0 && canShuffle && Boolean(onShuffle);
+          const isHubInteractive = hubActsAsZoomOut || hubActsAsShuffle;
+
+          const handleHubClick = () => {
+            if (hubActsAsZoomOut) onZoomOut && onZoomOut();
+            else if (hubActsAsShuffle) triggerShuffle();
+          };
+
+          return (
+            <g
+              onClick={handleHubClick}
+              onMouseEnter={() => isHubInteractive && setIsHubHovered(true)}
+              onMouseLeave={() => setIsHubHovered(false)}
+              style={{ cursor: isHubInteractive ? 'pointer' : 'default' }}
+              role={isHubInteractive ? 'button' : undefined}
+              tabIndex={isHubInteractive ? 0 : undefined}
+              aria-label={
+                hubActsAsZoomOut
+                  ? 'Zoom out to parent wheel'
+                  : hubActsAsShuffle
+                    ? 'Draw a new sample from the center'
+                    : `Overall ${centerPct}% mastery`
+              }
+              onKeyDown={(e) => {
+                if (isHubInteractive && (e.key === 'Enter' || e.key === ' ')) {
+                  e.preventDefault();
+                  handleHubClick();
+                }
+              }}
+            >
+              {/* Soft ripple when drawing a fresh sample */}
+              {pulseCount > 0 && (
+                <circle
+                  key={pulseCount}
+                  cx={cx}
+                  cy={cy}
+                  r={hubRadius + 16}
+                  fill="none"
+                  stroke="#7BB33B"
+                  strokeWidth="2"
+                  strokeOpacity="0.45"
+                  className="animate-ping"
+                  style={{ animationDuration: '650ms', animationIterationCount: 1, transformOrigin: `${cx}px ${cy}px` }}
+                />
+              )}
+
+              <circle
+                cx={cx}
+                cy={cy}
+                r={hubRadius}
+                fill="#FFFFFF"
+                fillOpacity="0.95"
+                stroke={isHubHovered && isHubInteractive ? '#7BB33B' : '#111410'}
+                strokeOpacity={isHubHovered && isHubInteractive ? 0.85 : 0.18}
+                strokeWidth={isHubHovered && isHubInteractive ? 2 : 1.5}
+              />
+              <circle
+                cx={cx}
+                cy={cy}
+                r={Math.max(0, (hubRadius - 4) * Math.sqrt(Math.max(0, Math.min(1, centerPct / 100))))}
+                fill="#7BB33B"
+                fillOpacity={isHubHovered && hubActsAsShuffle ? 0.28 : 0.18}
+              />
+              <text
+                x={cx}
+                y={hubActsAsShuffle && isHubHovered ? cy - 3 : cy + 3}
+                textAnchor="middle"
+                fontSize="22"
+                fontWeight="800"
+                fontFamily="ui-monospace, SFMono-Regular, monospace"
+                fill="#111410"
+              >
+                {centerPct}%
+              </text>
+              <text
+                x={cx}
+                y={hubActsAsShuffle && isHubHovered ? cy + 12 : cy + 18}
+                textAnchor="middle"
+                fontSize="9"
+                fontWeight="700"
+                letterSpacing="0.08em"
+                fill={isHubHovered && isHubInteractive ? '#2F441E' : '#62685E'}
+              >
+                {isHubHovered && hubActsAsZoomOut
+                  ? 'ZOOM OUT'
+                  : isHubHovered && hubActsAsShuffle
+                    ? 'DRAW NEW'
+                    : centerLabel}
+              </text>
+            </g>
+          );
+        })()}
       </svg>
 
-      {/* Subtle Zoom-Out Pill below center when drilled in */}
-      {depth > 0 && (
-        <div className="flex justify-center -mt-2">
-          <button
-            type="button"
-            onClick={onZoomOut}
-            className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-white/90 hover:bg-[#EDF5E5] border border-[#111410]/20 text-xs font-medium text-[#2F441E] shadow-soft-xs transition"
-          >
-            <ArrowLeft className="w-3.5 h-3.5" />
-            <span>Zoom out</span>
-          </button>
+      {/* Center Action Pills directly beneath the wheel */}
+      {(depth > 0 || (canShuffle && onShuffle)) && (
+        <div className="flex items-center justify-center gap-2 -mt-2">
+          {depth > 0 && (
+            <button
+              type="button"
+              onClick={onZoomOut}
+              className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-white/95 hover:bg-[#EDF5E5] border border-[#111410]/20 text-xs font-medium text-[#2F441E] shadow-soft-xs transition"
+            >
+              <ArrowLeft className="w-3.5 h-3.5" />
+              <span>Zoom out</span>
+            </button>
+          )}
+          {canShuffle && onShuffle && (
+            <button
+              type="button"
+              onClick={triggerShuffle}
+              className="inline-flex items-center gap-1.5 px-3.5 py-1 rounded-full bg-white/95 hover:bg-[#EDF5E5] border border-[#7BB33B]/50 text-xs font-semibold text-[#2F441E] shadow-soft-xs transition"
+              title="Draw a fresh sample from the resting roots in the center"
+            >
+              <Shuffle className="w-3.5 h-3.5 text-[#7BB33B]" />
+              <span>Draw fresh sample</span>
+            </button>
+          )}
         </div>
       )}
     </div>
