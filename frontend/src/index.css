@@ -174,5 +174,57 @@
   animation: transit-dash 1.6s linear infinite;
 }
 
+/* Word Root Hints: Equation Split / Spring Pop-Out Transition */
+.morpheme-drawer {
+  display: grid;
+  transition:
+    grid-template-rows 400ms cubic-bezier(0.22, 1, 0.36, 1),
+    opacity 260ms ease;
+}
+
+.morpheme-drawer[data-open="true"] {
+  grid-template-rows: 1fr;
+  opacity: 1;
+}
+
+.morpheme-drawer[data-open="false"] {
+  grid-template-rows: 0fr;
+  opacity: 0;
+  pointer-events: none;
+}
+
+.morpheme-chip-spring {
+  transition:
+    transform 440ms cubic-bezier(0.34, 1.56, 0.64, 1),
+    opacity 240ms ease,
+    box-shadow 200ms ease,
+    background-color 200ms ease;
+  will-change: transform, opacity;
+}
+
+.morpheme-chip-spring[data-visible="true"] {
+  opacity: 1;
+  transform: translateY(0) scale(1);
+}
+
+.morpheme-chip-spring[data-visible="false"] {
+  opacity: 0;
+  transform: translateY(-10px) scale(0.84);
+}
+
+.word-hint-focus {
+  transition: transform 460ms cubic-bezier(0.34, 1.56, 0.64, 1);
+  will-change: transform;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .morpheme-drawer,
+  .morpheme-chip-spring,
+  .word-hint-focus {
+    transition-duration: 0.01ms !important;
+    transition-delay: 0ms !important;
+  }
+}
+
 
 

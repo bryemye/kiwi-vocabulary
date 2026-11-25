@@ -14,7 +14,9 @@ import {
   Sparkles,
   ShieldCheck,
   Edit3,
-  Target
+  Target,
+  Eye,
+  EyeOff
 } from 'lucide-react';
 import { getMatchingTargetMorphemes, getWordRoots } from '../services/studySessionService';
 
@@ -44,7 +46,13 @@ export default function StudyDeck({
   isGuestMode = false,
   dailyDateFormatted = '',
   onOpenAuth = null,
+  showRootHints = true,
+  onToggleRootHints = null,
 }) {
+  const [localShowRootHints, setLocalShowRootHints] = useState(true);
+  const rootHintsVisible = onToggleRootHints ? showRootHints : localShowRootHints;
+  const toggleRootHints = onToggleRootHints || (() => setLocalShowRootHints((prev) => !prev));
+
   // Confirmation dialog state for backing out of an active session
   const [showExitConfirm, setShowExitConfirm] = useState(false);
   const [pendingAction, setPendingAction] = useState(null);
@@ -641,6 +649,32 @@ export default function StudyDeck({
                       type="button"
                       onClick={(e) => {
                         e.stopPropagation();
+                        toggleRootHints();
+                      }}
+                      aria-pressed={rootHintsVisible}
+                      className={`px-2.5 py-1.5 rounded-xl border text-xs font-sans font-bold flex items-center space-x-1.5 transition shadow-soft-xs min-h-[36px] ${
+                        rootHintsVisible
+                          ? 'bg-[#EDF5E5] hover:bg-[#DCEDD0] text-[#2F441E] border-[#7BB33B]/40'
+                          : 'bg-stone-100 hover:bg-stone-200/80 text-stone-600 border-stone-200'
+                      }`}
+                      title={
+                        rootHintsVisible
+                          ? 'Hide word root hints globally [H]'
+                          : 'Show word root hints globally [H]'
+                      }
+                    >
+                      {rootHintsVisible ? (
+                        <Eye className="w-3.5 h-3.5 text-[#7BB33B]" />
+                      ) : (
+                        <EyeOff className="w-3.5 h-3.5 text-stone-500" />
+                      )}
+                      <span>{rootHintsVisible ? 'Roots ON' : 'Roots OFF'}</span>
+                      <span className="hidden sm:inline font-mono text-[10px] opacity-60">[H]</span>
+                    </button>
+                    <button
+                      type="button"
+                      onClick={(e) => {
+                        e.stopPropagation();
                         onSpeak(currentWord.word);
                       }}
                       className="p-2 bg-stone-50 hover:bg-[#EDF5E5] text-stone-700 border border-stone-200 rounded-xl transition shadow-soft-xs min-w-[36px] min-h-[36px] flex items-center justify-center"
@@ -653,166 +687,254 @@ export default function StudyDeck({
 
                 {/* Target Word */}
                 <div className="my-3 sm:my-5 text-center px-2 flex-1 flex flex-col justify-center">
-                  <h1 className="text-4xl sm:text-5xl font-extrabold text-stone-900 tracking-tight font-sans break-words hyphens-auto">
-                    {currentWord.word}
-                  </h1>
-                  {currentWord.pronunciation && (
-                    <p className="text-stone-500 text-xs sm:text-sm mt-1 sm:mt-1.5 font-mono font-medium tracking-wide">
-                      {currentWord.pronunciation}
-                    </p>
-                  )}
+                  <div
+                    className={`word-hint-focus ${
+                      rootHintsVisible ? 'scale-100 translate-y-0' : 'scale-[1.06] translate-y-0.5'
+                    }`}
+                  >
+                    <h1 className="text-4xl sm:text-5xl font-extrabold text-stone-900 tracking-tight font-sans break-words hyphens-auto">
+                      {currentWord.word}
+                    </h1>
+                    {currentWord.pronunciation && (
+                      <p className="text-stone-500 text-xs sm:text-sm mt-1 sm:mt-1.5 font-mono font-medium tracking-wide">
+                        {currentWord.pronunciation}
+                      </p>
+                    )}
+                  </div>
                 </div>
 
-                {/* Morpheme Decomposition Tags */}
-                <div className="bg-stone-50/80 border border-stone-200/80 rounded-2xl p-3.5 sm:p-4 shadow-soft-xs shrink-0">
-                  <div className="text-[11px] font-sans font-bold text-stone-500 uppercase tracking-wider mb-2.5 flex items-center justify-between">
-                    <span className="flex items-center space-x-1.5 text-stone-700">
-                      <Layers className="w-3.5 h-3.5 text-[#7BB33B]" />
-                      <span>Morpheme Decomposition</span>
-                    </span>
-                    <span className="text-stone-400 text-[10px] font-mono lowercase hidden sm:inline">[space to flip]</span>
-                  </div>
-                  
-                  <div className="flex flex-wrap items-center gap-2 sm:gap-2.5">
-                    {(currentWord.prefix || currentWord.prefix_root_details) && (
-                      <button
-                        type="button"
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          if (currentWord.prefix_root_details) {
-                            onOpenMorpheme({
-                              type: 'root',
-                              root: currentWord.prefix_root_details,
-                              word: currentWord,
-                            });
-                          } else {
-                            onOpenMorpheme({
-                              type: 'prefix',
-                              raw: currentWord.prefix,
-                              word: currentWord,
-                            });
-                          }
-                        }}
-                        className="px-3 py-1.5 bg-[#EDF5E5] hover:bg-[#DCEDD0] text-[#2F441E] border border-[#7BB33B]/40 rounded-xl shadow-soft-xs hover:shadow-soft-sm transition cursor-pointer text-left group"
-                        title={
-                          currentWord.prefix_root_details
-                            ? `Linked Root [${currentWord.prefix_root_details.morpheme?.toUpperCase()}] — Click to explore`
-                            : 'Click to explore this Prefix Morpheme & practice subset'
-                        }
-                      >
-                        <div className="flex items-center justify-between space-x-1">
-                          <span className="text-[9px] block uppercase font-mono font-bold text-[#2F441E]/70">
-                            {currentWord.prefix_root_details
-                              ? `Prefix · Root [${currentWord.prefix_root_details.morpheme?.toUpperCase()}]`
-                              : 'Prefix'}
-                          </span>
-                          <span className="text-[9px] font-mono font-bold opacity-60 group-hover:opacity-100">↗</span>
-                        </div>
-                        <span className="font-mono font-extrabold text-xs">
-                          {currentWord.prefix || `${currentWord.prefix_root_details?.morpheme}-`}
-                        </span>
-                      </button>
-                    )}
+                {/* Morpheme Decomposition Tags (Equation Split / Spring Pop-Out) */}
+                {(() => {
+                  const hasPrefix = Boolean(currentWord.prefix || currentWord.prefix_root_details);
+                  const hasSuffix = Boolean(currentWord.suffix || currentWord.suffix_root_details);
+                  let eqStep = 0;
+                  const nextDelay = () => {
+                    const ms = 40 + eqStep * 48;
+                    eqStep += 1;
+                    return rootHintsVisible ? `${ms}ms` : '0ms';
+                  };
 
-                    {(currentWord.prefix || currentWord.prefix_root_details) && cardRoots.length > 0 && (
-                      <span className="text-stone-400 font-bold font-mono text-base">+</span>
-                    )}
-
-                    {cardRoots.map((rootObj, rIdx) => (
-                      <React.Fragment key={rootObj.id || `${rootObj.morpheme}-${rIdx}`}>
-                        {rIdx > 0 && <span className="text-stone-400 font-bold font-mono text-base">+</span>}
-                        <button
-                          type="button"
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            onOpenMorpheme({
-                              type: 'root',
-                              root: rootObj,
-                              word: currentWord,
-                            });
-                          }}
-                          className="px-3 py-1.5 bg-[#EFE8DF]/80 hover:bg-[#EFE8DF] text-[#42281D] border border-[#C29B78]/40 rounded-xl shadow-soft-xs hover:shadow-soft-sm transition cursor-pointer text-left group"
-                          title="Click to explore this Root Morpheme & practice subset"
-                        >
-                          <div className="flex items-center justify-between space-x-1.5">
-                            <span className="text-[9px] block uppercase font-mono font-bold text-[#42281D]/70">
-                              Root ({rootObj.language || 'Latin'})
+                  return (
+                    <div
+                      className="morpheme-drawer shrink-0"
+                      data-open={rootHintsVisible ? 'true' : 'false'}
+                      aria-hidden={!rootHintsVisible}
+                    >
+                      <div className="min-h-0 overflow-hidden">
+                        <div className="bg-stone-50/80 border border-stone-200/80 rounded-2xl p-3.5 sm:p-4 shadow-soft-xs">
+                          <div
+                            style={{ transitionDelay: rootHintsVisible ? '20ms' : '0ms' }}
+                            data-visible={rootHintsVisible ? 'true' : 'false'}
+                            className="morpheme-chip-spring text-[11px] font-sans font-bold text-stone-500 uppercase tracking-wider mb-2.5 flex items-center justify-between"
+                          >
+                            <span className="flex items-center space-x-1.5 text-stone-700">
+                              <Layers className="w-3.5 h-3.5 text-[#7BB33B]" />
+                              <span>Morpheme Decomposition</span>
                             </span>
-                            <div className="flex items-center space-x-1">
-                              {rootObj.thematic_cluster && (
-                                <span className="text-[8px] font-mono font-bold px-1.5 py-0.2 bg-white/90 border border-stone-200 rounded">
-                                  🧠 {rootObj.thematic_cluster}
-                                </span>
-                              )}
-                              {rootObj.sat_tier && (
-                                <span className="text-[8px] font-mono font-bold px-1.5 py-0.2 bg-amber-50 text-amber-800 border border-amber-200 rounded">
-                                  ⚡ {rootObj.sat_tier}
-                                </span>
-                              )}
-                              <span className="text-[9px] font-mono font-bold opacity-60 group-hover:opacity-100">↗</span>
-                            </div>
+                            <span className="text-stone-400 text-[10px] font-mono lowercase hidden sm:inline">[h] hide · [space] flip</span>
                           </div>
-                          <span className="font-mono font-bold text-xs text-[#42281D]">
-                            [{rootObj.morpheme?.toUpperCase()}]
-                          </span>
-                          <span className="text-[#42281D] text-xs ml-1.5 font-sans font-medium">
-                            = "{rootObj.core_meaning}"
-                          </span>
-                        </button>
-                      </React.Fragment>
-                    ))}
 
-                    {(currentWord.suffix || currentWord.suffix_root_details) && (
-                      <span className="text-stone-400 font-bold font-mono text-base">+</span>
-                    )}
+                          <div className="flex flex-wrap items-center gap-2 sm:gap-2.5">
+                            {hasPrefix && (
+                              <button
+                                type="button"
+                                tabIndex={rootHintsVisible ? 0 : -1}
+                                style={{ transitionDelay: nextDelay() }}
+                                data-visible={rootHintsVisible ? 'true' : 'false'}
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  if (currentWord.prefix_root_details) {
+                                    onOpenMorpheme({
+                                      type: 'root',
+                                      root: currentWord.prefix_root_details,
+                                      word: currentWord,
+                                    });
+                                  } else {
+                                    onOpenMorpheme({
+                                      type: 'prefix',
+                                      raw: currentWord.prefix,
+                                      word: currentWord,
+                                    });
+                                  }
+                                }}
+                                className="morpheme-chip-spring px-3 py-1.5 bg-[#EDF5E5] hover:bg-[#DCEDD0] text-[#2F441E] border border-[#7BB33B]/40 rounded-xl shadow-soft-xs hover:shadow-soft-sm cursor-pointer text-left group"
+                                title={
+                                  currentWord.prefix_root_details
+                                    ? `Linked Root [${currentWord.prefix_root_details.morpheme?.toUpperCase()}] — Click to explore`
+                                    : 'Click to explore this Prefix Morpheme & practice subset'
+                                }
+                              >
+                                <div className="flex items-center justify-between space-x-1">
+                                  <span className="text-[9px] block uppercase font-mono font-bold text-[#2F441E]/70">
+                                    {currentWord.prefix_root_details
+                                      ? `Prefix · Root [${currentWord.prefix_root_details.morpheme?.toUpperCase()}]`
+                                      : 'Prefix'}
+                                  </span>
+                                  <span className="text-[9px] font-mono font-bold opacity-60 group-hover:opacity-100">↗</span>
+                                </div>
+                                <span className="font-mono font-extrabold text-xs">
+                                  {currentWord.prefix || `${currentWord.prefix_root_details?.morpheme}-`}
+                                </span>
+                              </button>
+                            )}
 
-                    {(currentWord.suffix || currentWord.suffix_root_details) && (
-                      <button
-                        type="button"
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          if (currentWord.suffix_root_details) {
-                            onOpenMorpheme({
-                              type: 'root',
-                              root: currentWord.suffix_root_details,
-                              word: currentWord,
-                            });
-                          } else {
-                            onOpenMorpheme({
-                              type: 'suffix',
-                              raw: currentWord.suffix,
-                              word: currentWord,
-                            });
-                          }
-                        }}
-                        className="px-3 py-1.5 bg-white hover:bg-stone-50 text-stone-800 border border-stone-200 rounded-xl shadow-soft-xs hover:shadow-soft-sm transition cursor-pointer text-left group"
-                        title={
-                          currentWord.suffix_root_details
-                            ? `Linked Root [${currentWord.suffix_root_details.morpheme?.toUpperCase()}] — Click to explore`
-                            : 'Click to explore this Suffix Morpheme & practice subset'
-                        }
-                      >
-                        <div className="flex items-center justify-between space-x-1">
-                          <span className="text-[9px] block uppercase font-mono font-bold text-stone-500">
-                            {currentWord.suffix_root_details
-                              ? `Suffix · Root [${currentWord.suffix_root_details.morpheme?.toUpperCase()}]`
-                              : 'Suffix'}
-                          </span>
-                          <span className="text-[9px] font-mono font-bold opacity-60 group-hover:opacity-100">↗</span>
+                            {hasPrefix && cardRoots.length > 0 && (
+                              <span
+                                style={{ transitionDelay: nextDelay() }}
+                                data-visible={rootHintsVisible ? 'true' : 'false'}
+                                className="morpheme-chip-spring text-stone-400 font-bold font-mono text-base"
+                              >
+                                +
+                              </span>
+                            )}
+
+                            {cardRoots.map((rootObj, rIdx) => (
+                              <React.Fragment key={rootObj.id || `${rootObj.morpheme}-${rIdx}`}>
+                                {rIdx > 0 && (
+                                  <span
+                                    style={{ transitionDelay: nextDelay() }}
+                                    data-visible={rootHintsVisible ? 'true' : 'false'}
+                                    className="morpheme-chip-spring text-stone-400 font-bold font-mono text-base"
+                                  >
+                                    +
+                                  </span>
+                                )}
+                                <button
+                                  type="button"
+                                  tabIndex={rootHintsVisible ? 0 : -1}
+                                  style={{ transitionDelay: nextDelay() }}
+                                  data-visible={rootHintsVisible ? 'true' : 'false'}
+                                  onClick={(e) => {
+                                    e.stopPropagation();
+                                    onOpenMorpheme({
+                                      type: 'root',
+                                      root: rootObj,
+                                      word: currentWord,
+                                    });
+                                  }}
+                                  className="morpheme-chip-spring px-3 py-1.5 bg-[#EFE8DF]/80 hover:bg-[#EFE8DF] text-[#42281D] border border-[#C29B78]/40 rounded-xl shadow-soft-xs hover:shadow-soft-sm cursor-pointer text-left group"
+                                  title="Click to explore this Root Morpheme & practice subset"
+                                >
+                                  <div className="flex items-center justify-between space-x-1.5">
+                                    <span className="text-[9px] block uppercase font-mono font-bold text-[#42281D]/70">
+                                      Root ({rootObj.language || 'Latin'})
+                                    </span>
+                                    <div className="flex items-center space-x-1">
+                                      {rootObj.thematic_cluster && (
+                                        <span className="text-[8px] font-mono font-bold px-1.5 py-0.2 bg-white/90 border border-stone-200 rounded">
+                                          🧠 {rootObj.thematic_cluster}
+                                        </span>
+                                      )}
+                                      {rootObj.sat_tier && (
+                                        <span className="text-[8px] font-mono font-bold px-1.5 py-0.2 bg-amber-50 text-amber-800 border border-amber-200 rounded">
+                                          ⚡ {rootObj.sat_tier}
+                                        </span>
+                                      )}
+                                      <span className="text-[9px] font-mono font-bold opacity-60 group-hover:opacity-100">↗</span>
+                                    </div>
+                                  </div>
+                                  <span className="font-mono font-bold text-xs text-[#42281D]">
+                                    [{rootObj.morpheme?.toUpperCase()}]
+                                  </span>
+                                  <span className="text-[#42281D] text-xs ml-1.5 font-sans font-medium">
+                                    = "{rootObj.core_meaning}"
+                                  </span>
+                                </button>
+                              </React.Fragment>
+                            ))}
+
+                            {hasSuffix && (hasPrefix || cardRoots.length > 0) && (
+                              <span
+                                style={{ transitionDelay: nextDelay() }}
+                                data-visible={rootHintsVisible ? 'true' : 'false'}
+                                className="morpheme-chip-spring text-stone-400 font-bold font-mono text-base"
+                              >
+                                +
+                              </span>
+                            )}
+
+                            {hasSuffix && (
+                              <button
+                                type="button"
+                                tabIndex={rootHintsVisible ? 0 : -1}
+                                style={{ transitionDelay: nextDelay() }}
+                                data-visible={rootHintsVisible ? 'true' : 'false'}
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  if (currentWord.suffix_root_details) {
+                                    onOpenMorpheme({
+                                      type: 'root',
+                                      root: currentWord.suffix_root_details,
+                                      word: currentWord,
+                                    });
+                                  } else {
+                                    onOpenMorpheme({
+                                      type: 'suffix',
+                                      raw: currentWord.suffix,
+                                      word: currentWord,
+                                    });
+                                  }
+                                }}
+                                className="morpheme-chip-spring px-3 py-1.5 bg-white hover:bg-stone-50 text-stone-800 border border-stone-200 rounded-xl shadow-soft-xs hover:shadow-soft-sm cursor-pointer text-left group"
+                                title={
+                                  currentWord.suffix_root_details
+                                    ? `Linked Root [${currentWord.suffix_root_details.morpheme?.toUpperCase()}] — Click to explore`
+                                    : 'Click to explore this Suffix Morpheme & practice subset'
+                                }
+                              >
+                                <div className="flex items-center justify-between space-x-1">
+                                  <span className="text-[9px] block uppercase font-mono font-bold text-stone-500">
+                                    {currentWord.suffix_root_details
+                                      ? `Suffix · Root [${currentWord.suffix_root_details.morpheme?.toUpperCase()}]`
+                                      : 'Suffix'}
+                                  </span>
+                                  <span className="text-[9px] font-mono font-bold opacity-60 group-hover:opacity-100">↗</span>
+                                </div>
+                                <span className="font-mono font-extrabold text-xs">
+                                  {currentWord.suffix || `-${currentWord.suffix_root_details?.morpheme}`}
+                                </span>
+                              </button>
+                            )}
+                          </div>
+
+                          {(currentWord.mnemonic || primaryCardRoot?.mnemonic) && (
+                            <div
+                              style={{ transitionDelay: nextDelay() }}
+                              data-visible={rootHintsVisible ? 'true' : 'false'}
+                              className="morpheme-chip-spring mt-2.5 pt-2 border-t border-stone-200/60 flex items-start space-x-2 text-xs font-sans text-stone-700"
+                            >
+                              <span className="font-bold uppercase text-[10px] text-[#2F441E] bg-[#EDF5E5] px-1.5 py-0.5 rounded border border-[#7BB33B]/30 shrink-0 font-mono">Key:</span>
+                              <span className="italic font-serif">"{currentWord.mnemonic || primaryCardRoot.mnemonic}"</span>
+                            </div>
+                          )}
                         </div>
-                        <span className="font-mono font-extrabold text-xs">
-                          {currentWord.suffix || `-${currentWord.suffix_root_details?.morpheme}`}
-                        </span>
-                      </button>
-                    )}
-                  </div>
-
-                  {(currentWord.mnemonic || primaryCardRoot?.mnemonic) && (
-                    <div className="mt-2.5 pt-2 border-t border-stone-200/60 flex items-start space-x-2 text-xs font-sans text-stone-700">
-                      <span className="font-bold uppercase text-[10px] text-[#2F441E] bg-[#EDF5E5] px-1.5 py-0.5 rounded border border-[#7BB33B]/30 shrink-0 font-mono">Key:</span>
-                      <span className="italic font-serif">"{currentWord.mnemonic || primaryCardRoot.mnemonic}"</span>
+                      </div>
                     </div>
-                  )}
+                  );
+                })()}
+
+                {/* Blind Recall Pill (Appears gently when Root Hints are OFF) */}
+                <div
+                  className="morpheme-drawer shrink-0"
+                  data-open={!rootHintsVisible ? 'true' : 'false'}
+                  aria-hidden={rootHintsVisible}
+                >
+                  <div className="min-h-0 overflow-hidden flex justify-center">
+                    <button
+                      type="button"
+                      tabIndex={!rootHintsVisible ? 0 : -1}
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        toggleRootHints();
+                      }}
+                      className="mt-1 px-4 py-2 bg-stone-50 hover:bg-[#EDF5E5] text-stone-600 hover:text-[#2F441E] border border-stone-200/90 hover:border-[#7BB33B]/40 rounded-2xl shadow-soft-xs transition-all flex items-center space-x-2 text-xs font-sans font-semibold group"
+                      title="Reveal word root hints globally [H]"
+                    >
+                      <Layers className="w-3.5 h-3.5 text-[#7BB33B] transition-transform duration-300 group-hover:scale-110" />
+                      <span>Reveal Root Equation</span>
+                      <span className="hidden sm:inline font-mono text-[10px] text-stone-400 group-hover:text-[#2F441E]/70">[H]</span>
+                    </button>
+                  </div>
                 </div>
 
                 <div className="mt-2.5 sm:mt-3 flex items-center justify-center space-x-1.5 text-xs font-sans font-medium text-stone-400 shrink-0">

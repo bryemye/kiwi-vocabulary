@@ -61,6 +61,8 @@ import {
 } from '../services/studySessionService';
 import { useCelestialTrajectory } from '../context/CelestialTrajectoryContext';
 
+const STORAGE_KEY_ROOT_HINTS = 'kiwi_study_show_root_hints';
+
 export default function VocabView({
   words = [],
   roots = [],
@@ -262,6 +264,26 @@ export default function VocabView({
   const [sessionRound, setSessionRound] = useState(1);
   const [roundStats, setRoundStats] = useState(() => initialGuestSession?.roundStats || { correct: 0, total: 0 });
   const [isSessionComplete, setIsSessionComplete] = useState(() => initialGuestSession?.isSessionComplete || false);
+  const [showRootHints, setShowRootHints] = useState(() => {
+    try {
+      const stored = localStorage.getItem(STORAGE_KEY_ROOT_HINTS);
+      return stored === null ? true : stored === 'true';
+    } catch {
+      return true;
+    }
+  });
+
+  const handleToggleRootHints = useCallback(() => {
+    setShowRootHints((prev) => {
+      const next = !prev;
+      try {
+        localStorage.setItem(STORAGE_KEY_ROOT_HINTS, String(next));
+      } catch {
+        // Ignore storage quota/availability issues
+      }
+      return next;
+    });
+  }, []);
 
   // Sync preloadedDeck when it becomes available or changes
   useEffect(() => {
@@ -1044,12 +1066,15 @@ export default function VocabView({
       } else if (e.key === 'ArrowRight' || e.key === '2') {
         e.preventDefault();
         handleResponse(true);
+      } else if ((e.key === 'h' || e.key === 'H') && !e.ctrlKey && !e.metaKey && !e.altKey) {
+        e.preventDefault();
+        handleToggleRootHints();
       }
     };
 
     window.addEventListener('keydown', handleKeyDown);
     return () => window.removeEventListener('keydown', handleKeyDown);
-  }, [subTab, isSessionComplete, activeMorphemeView, practiceSetupConfig, isCustomModalOpen, showTabConfirm, handleResponse]);
+  }, [subTab, isSessionComplete, activeMorphemeView, practiceSetupConfig, isCustomModalOpen, showTabConfirm, handleResponse, handleToggleRootHints]);
 
   const handleLaunchRootPractice = (rootId) => {
     handleOpenCustomSession([Number(rootId)]);
@@ -1264,6 +1289,8 @@ export default function VocabView({
             setIsFlipped={setIsFlipped}
             submitting={submitting}
             feedback={feedback}
+            showRootHints={showRootHints}
+            onToggleRootHints={handleToggleRootHints}
             onSpeak={handleSpeak}
             onOpenMorpheme={handleOpenMorpheme}
             onResponse={handleResponse}
