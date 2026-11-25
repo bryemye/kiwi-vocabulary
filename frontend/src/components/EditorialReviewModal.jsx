@@ -850,7 +850,7 @@ export default function EditorialReviewModal({
           </div>
 
           {/* RIGHT: Active Entry Inspection, Verification Form & History */}
-          <div className={`flex-1 overflow-y-auto p-4 sm:p-6 space-y-4 sm:space-y-5 bg-white ${
+          <div className={`flex-1 min-w-0 overflow-y-auto p-4 sm:p-6 space-y-4 sm:space-y-5 bg-white ${
             mobileView === 'detail' ? 'block' : 'hidden md:block'
           }`}>
             {activeTabMode === 'HISTORY' ? (
@@ -1165,7 +1165,7 @@ export default function EditorialReviewModal({
                       </span>
 
                       {/* Ordered Multi-Root Manager */}
-                      <div className="bg-white border-2 border-[#111410] p-3 space-y-2.5">
+                      <div className="bg-white border-2 border-[#111410] p-3 space-y-2.5 min-w-0">
                         <div className="flex items-center justify-between gap-2 flex-wrap">
                           <label className="text-[9px] font-mono font-black uppercase text-[#42281D]">
                             Root Families ({attachedRootObjects.length} attached · #1 = Primary)
@@ -1234,35 +1234,37 @@ export default function EditorialReviewModal({
                         </div>
 
                         {/* Add Another Root Picker */}
-                        <div className="flex flex-col sm:flex-row gap-2 pt-1">
+                        <div className="flex flex-col lg:flex-row gap-2 pt-1 min-w-0">
                           <input
                             type="text"
                             value={rootPickerFilter}
                             onChange={(e) => setRootPickerFilter(e.target.value)}
                             placeholder="Filter roots to add..."
-                            className="sm:w-44 text-xs font-mono px-2.5 py-1.5 bg-[#FAFBF8] border border-[#111410] focus:outline-none focus:ring-1 focus:ring-[#7BB33B]"
+                            className="w-full lg:w-44 lg:shrink-0 text-xs font-mono px-2.5 py-1.5 bg-[#FAFBF8] border border-[#111410] focus:outline-none focus:ring-1 focus:ring-[#7BB33B]"
                           />
-                          <select
-                            value={rootToAddId}
-                            onChange={(e) => setRootToAddId(e.target.value)}
-                            className="flex-1 text-xs font-mono px-2 py-1.5 bg-[#FAFBF8] border border-[#111410] focus:outline-none focus:ring-1 focus:ring-[#7BB33B]"
-                          >
-                            <option value="">-- Select another root to add ({availableRootsToAdd.length}) --</option>
-                            {availableRootsToAdd.map((r) => (
-                              <option key={r.id} value={r.id}>
-                                [{r.morpheme.toUpperCase()}] ({r.language} · {r.core_meaning})
-                              </option>
-                            ))}
-                          </select>
-                          <button
-                            type="button"
-                            onClick={() => handleAddRoot(rootToAddId)}
-                            disabled={!rootToAddId}
-                            className="px-3 py-1.5 bg-[#111410] hover:bg-[#2F441E] text-white text-[11px] font-mono font-black uppercase border border-[#111410] disabled:opacity-40 inline-flex items-center justify-center space-x-1 shrink-0"
-                          >
-                            <Plus className="w-3.5 h-3.5" />
-                            <span>Add Root</span>
-                          </button>
+                          <div className="flex flex-col sm:flex-row gap-2 flex-1 min-w-0">
+                            <select
+                              value={rootToAddId}
+                              onChange={(e) => setRootToAddId(e.target.value)}
+                              className="w-full min-w-0 flex-1 text-xs font-mono px-2 py-1.5 bg-[#FAFBF8] border border-[#111410] focus:outline-none focus:ring-1 focus:ring-[#7BB33B]"
+                            >
+                              <option value="">-- Select another root to add ({availableRootsToAdd.length}) --</option>
+                              {availableRootsToAdd.map((r) => (
+                                <option key={r.id} value={r.id}>
+                                  [{r.morpheme.toUpperCase()}] ({r.language} · {r.core_meaning})
+                                </option>
+                              ))}
+                            </select>
+                            <button
+                              type="button"
+                              onClick={() => handleAddRoot(rootToAddId)}
+                              disabled={!rootToAddId}
+                              className="px-3 py-1.5 bg-[#111410] hover:bg-[#2F441E] text-white text-[11px] font-mono font-black uppercase border border-[#111410] disabled:opacity-40 inline-flex items-center justify-center space-x-1 shrink-0"
+                            >
+                              <Plus className="w-3.5 h-3.5" />
+                              <span>Add Root</span>
+                            </button>
+                          </div>
                         </div>
 
                         {/* Inline Quick-Create Root Form */}
@@ -1340,7 +1342,7 @@ export default function EditorialReviewModal({
                       {/* Prefix & Suffix (Custom vs. Belongs to a Root) */}
                       <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                         {/* Prefix Card */}
-                        <div className="bg-white border-2 border-[#111410] p-3 space-y-2">
+                        <div className="bg-white border-2 border-[#111410] p-3 space-y-2 min-w-0">
                           <div className="flex items-center justify-between gap-2">
                             <label className="text-[9px] font-mono font-black uppercase text-[#42281D]">
                               Prefix
@@ -1376,7 +1378,7 @@ export default function EditorialReviewModal({
                             <select
                               value={wordFormData.prefixRoot}
                               onChange={(e) => handleSelectAffixRoot('prefix', e.target.value)}
-                              className="w-full text-xs font-mono px-2 py-1.5 bg-[#EDF5E5]/50 border border-[#111410] focus:outline-none focus:ring-1 focus:ring-[#7BB33B]"
+                              className="w-full min-w-0 text-xs font-mono px-2 py-1.5 bg-[#EDF5E5]/50 border border-[#111410] focus:outline-none focus:ring-1 focus:ring-[#7BB33B]"
                             >
                               <option value="">-- Select linked root --</option>
                               {sortedRoots.map((r) => (
@@ -1401,7 +1403,7 @@ export default function EditorialReviewModal({
                         </div>
 
                         {/* Suffix Card */}
-                        <div className="bg-white border-2 border-[#111410] p-3 space-y-2">
+                        <div className="bg-white border-2 border-[#111410] p-3 space-y-2 min-w-0">
                           <div className="flex items-center justify-between gap-2">
                             <label className="text-[9px] font-mono font-black uppercase text-[#42281D]">
                               Suffix
@@ -1437,7 +1439,7 @@ export default function EditorialReviewModal({
                             <select
                               value={wordFormData.suffixRoot}
                               onChange={(e) => handleSelectAffixRoot('suffix', e.target.value)}
-                              className="w-full text-xs font-mono px-2 py-1.5 bg-[#EDF5E5]/50 border border-[#111410] focus:outline-none focus:ring-1 focus:ring-[#7BB33B]"
+                              className="w-full min-w-0 text-xs font-mono px-2 py-1.5 bg-[#EDF5E5]/50 border border-[#111410] focus:outline-none focus:ring-1 focus:ring-[#7BB33B]"
                             >
                               <option value="">-- Select linked root --</option>
                               {sortedRoots.map((r) => (
